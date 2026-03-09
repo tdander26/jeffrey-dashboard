@@ -6,239 +6,122 @@
   <title>Jeffrey — Mission Control</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --navy: #0D1B2A;
-      --navy2: #142233;
-      --navy3: #1A3350;
-      --gold: #E8A838;
-      --gold2: #c98f28;
-      --white: #ffffff;
-      --light: #D4E5F7;
-      --muted: #6b8aaa;
-      --green: #3ecf8e;
-      --red: #e85858;
-      --yellow: #f5c842;
-      --border: rgba(255,255,255,0.07);
+      --navy: #0D1B2A; --navy2: #142233; --navy3: #1A3350;
+      --gold: #E8A838; --white: #ffffff; --light: #D4E5F7;
+      --muted: #6b8aaa; --green: #3ecf8e; --red: #e85858;
+      --yellow: #f5c842; --border: rgba(255,255,255,0.07);
     }
-
-    body {
-      background: var(--navy);
-      color: var(--white);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      padding: 40px 24px;
-    }
-
+    body { background: var(--navy); color: var(--white); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; padding: 32px 24px; }
     .container { max-width: 1100px; margin: 0 auto; }
-
-    /* Header */
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 40px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-icon {
-      width: 40px; height: 40px;
-      background: var(--gold);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-    }
-    .logo-text h1 { font-size: 20px; font-weight: 700; }
-    .logo-text p { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 38px; height: 38px; background: var(--gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .logo-text h1 { font-size: 18px; font-weight: 700; }
+    .logo-text p { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .last-updated { font-size: 12px; color: var(--muted); }
 
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; margin-bottom: 24px; background: var(--navy2); padding: 4px; border-radius: 10px; width: fit-content; }
+    .tab { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
+    .tab:hover { color: var(--white); }
+    .tab.active { background: var(--navy3); color: var(--white); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     /* Grid */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-bottom: 16px;
-    }
+    .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 16px; }
+    .grid2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; margin-bottom: 16px; }
     .grid-full { margin-bottom: 16px; }
 
     /* Card */
-    .card {
-      background: var(--navy2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .card-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-    }
-    .card-icon { font-size: 16px; }
+    .card { background: var(--navy2); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 
-    /* Stat cards */
-    .stat-value {
-      font-size: 36px;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
+    /* Stats */
+    .stat-value { font-size: 34px; font-weight: 700; line-height: 1; margin-bottom: 6px; color: var(--gold); }
     .stat-label { font-size: 13px; color: var(--muted); }
-    .stat-sub {
-      font-size: 12px;
-      color: var(--gold);
-      margin-top: 8px;
-    }
+    .stat-sub { font-size: 12px; color: var(--gold); margin-top: 8px; }
 
-    /* Status badge */
-    .badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 20px;
-      display: inline-block;
-    }
+    /* Badges */
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; display: inline-block; }
     .badge-green { background: rgba(62,207,142,0.15); color: var(--green); }
     .badge-yellow { background: rgba(245,200,66,0.15); color: var(--yellow); }
     .badge-red { background: rgba(232,88,88,0.15); color: var(--red); }
     .badge-blue { background: rgba(100,160,255,0.15); color: #64a0ff; }
 
-    /* Row items */
-    .row-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .row-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .row-item:first-child { padding-top: 0; }
+    /* Rows */
+    .row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .row:last-child { border-bottom: none; padding-bottom: 0; }
+    .row:first-child { padding-top: 0; }
     .row-left { display: flex; align-items: center; gap: 10px; }
-    .row-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .dot-green { background: var(--green); }
     .dot-yellow { background: var(--yellow); }
-    .dot-red { background: var(--red); }
     .dot-muted { background: var(--muted); }
     .row-name { font-size: 14px; }
     .row-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .row-right { font-size: 12px; color: var(--muted); text-align: right; }
 
-    /* Topic queue */
-    .topic-used {
-      text-decoration: line-through;
-      color: var(--muted);
-      font-size: 13px;
-      padding: 5px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .topic-next {
-      font-size: 13px;
-      color: var(--gold);
-      font-weight: 600;
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .topic-queue {
-      font-size: 13px;
-      color: var(--light);
-      padding: 5px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .topic-queue:last-child { border-bottom: none; }
-
-    /* Stock table */
-    .stock-table { width: 100%; border-collapse: collapse; }
-    .stock-table th {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted);
-      padding: 0 0 10px 0;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-    .stock-table th:not(:first-child) { text-align: right; }
-    .stock-table td {
-      padding: 9px 0;
-      font-size: 13px;
-      border-bottom: 1px solid var(--border);
-    }
-    .stock-table td:not(:first-child) { text-align: right; }
-    .stock-table tr:last-child td { border-bottom: none; }
-    .ticker { font-weight: 700; font-size: 13px; }
-    .up { color: var(--green); }
-    .down { color: var(--red); }
-    .neutral { color: var(--muted); }
-
-    /* Integrations */
-    .integration-row {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .integration-row:last-child { border-bottom: none; }
-    .integration-name {
-      font-size: 14px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .integration-detail { font-size: 12px; color: var(--muted); }
-
     /* Timeline */
-    .timeline-item {
-      display: flex; gap: 14px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .timeline-item:last-child { border-bottom: none; }
-    .timeline-dot-col { display: flex; flex-direction: column; align-items: center; }
-    .tl-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--gold);
-      margin-top: 4px; flex-shrink: 0;
-    }
-    .tl-line { width: 1px; background: var(--border); flex: 1; margin-top: 4px; }
+    .tl { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .tl:last-child { border-bottom: none; }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 5px; flex-shrink: 0; }
     .tl-title { font-size: 13px; font-weight: 500; }
     .tl-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
     .tl-time { font-size: 11px; color: var(--muted); white-space: nowrap; }
 
-    /* Gold accent */
-    .gold { color: var(--gold); }
-    .green { color: var(--green); }
+    /* Stocks */
+    .stock-table { width: 100%; border-collapse: collapse; }
+    .stock-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 0 0 10px 0; text-align: left; border-bottom: 1px solid var(--border); }
+    .stock-table th:not(:first-child) { text-align: right; }
+    .stock-table td { padding: 9px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .stock-table td:not(:first-child) { text-align: right; }
+    .stock-table tr:last-child td { border-bottom: none; }
+    .ticker { font-weight: 700; }
+    .up { color: var(--green); } .down { color: var(--red); }
 
-    @media (max-width: 768px) {
-      .grid { grid-template-columns: 1fr; }
-      .grid-2 { grid-template-columns: 1fr; }
-    }
+    /* Topics */
+    .topic { font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .topic:last-child { border-bottom: none; }
+    .topic-used { text-decoration: line-through; color: var(--muted); }
+    .topic-next { color: var(--gold); font-weight: 600; }
+
+    /* Tasks */
+    .task-input-row { display: flex; gap: 10px; margin-bottom: 16px; }
+    .task-input { flex: 1; background: var(--navy3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--white); font-size: 14px; outline: none; }
+    .task-input:focus { border-color: var(--gold); }
+    .task-btn { background: var(--gold); color: var(--navy); border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .task-btn:hover { background: #c98f28; }
+    .task-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .task-item:last-child { border-bottom: none; }
+    .task-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--muted); flex-shrink: 0; margin-top: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .task-check.done { background: var(--green); border-color: var(--green); }
+    .task-text { font-size: 14px; flex: 1; }
+    .task-text.done { text-decoration: line-through; color: var(--muted); }
+    .task-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .task-del { font-size: 16px; color: var(--muted); cursor: pointer; background: none; border: none; padding: 0 4px; }
+    .task-del:hover { color: var(--red); }
+    .tg-link { display: inline-flex; align-items: center; gap: 6px; background: #0088cc; color: white; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; text-decoration: none; margin-top: 12px; }
+    .tg-link:hover { background: #0077b5; }
+
+    /* Usage */
+    .usage-bar-wrap { margin: 8px 0 4px; background: var(--navy3); border-radius: 4px; height: 6px; overflow: hidden; }
+    .usage-bar { height: 100%; border-radius: 4px; background: var(--gold); }
+    .usage-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+    /* Agents */
+    .agent-card { background: var(--navy3); border-radius: 10px; padding: 16px; margin-bottom: 10px; }
+    .agent-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .agent-desc { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    .code { background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px 14px; font-family: monospace; font-size: 13px; color: var(--light); margin: 8px 0; }
+
+    @media(max-width:768px) { .grid3,.grid2 { grid-template-columns: 1fr; } .tabs { flex-wrap: wrap; } }
   </style>
 </head>
 <body>
 <div class="container">
-
-  <!-- Header -->
   <header>
     <div class="logo">
       <div class="logo-icon">🚀</div>
@@ -247,258 +130,296 @@
         <p>Todd Anderson · Momentum Health & Wellness</p>
       </div>
     </div>
-    <div class="last-updated">Last updated: Mar 9, 2026 · 1:00 PM CT</div>
+    <div class="last-updated">Updated: Mar 9, 2026 · 1:15 PM CT</div>
   </header>
 
-  <!-- Stat row -->
-  <div class="grid">
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Automations Active</span>
-        <span class="card-icon">⚙️</span>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('overview')">Overview</button>
+    <button class="tab" onclick="showTab('tasks')">Tasks</button>
+    <button class="tab" onclick="showTab('usage')">Usage</button>
+    <button class="tab" onclick="showTab('agents')">Agents</button>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div id="tab-overview" class="tab-content active">
+    <div class="grid3">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Automations</span></div>
+        <div class="stat-value">1</div>
+        <div class="stat-label">Cron jobs active</div>
+        <div class="stat-sub">Morning brief · 5am CT daily</div>
       </div>
-      <div class="stat-value gold">1</div>
-      <div class="stat-label">Cron jobs running</div>
-      <div class="stat-sub">↑ Morning brief · 5am CT daily</div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Integrations</span></div>
+        <div class="stat-value">5</div>
+        <div class="stat-label">Services connected</div>
+        <div class="stat-sub">Notion · Calendar · Gmail · Imagen · GitHub</div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Instagram Queue</span></div>
+        <div class="stat-value">23</div>
+        <div class="stat-label">Topics remaining</div>
+        <div class="stat-sub">Next: Five Factors of the IVF</div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Integrations</span>
-        <span class="card-icon">🔗</span>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Automations</span><span class="badge badge-green">1 active</span></div>
+        <div class="row"><div class="row-left"><div class="dot dot-green"></div><div><div class="row-name">Morning Brief</div><div class="row-meta">Weather · News · Health · Markets · Instagram Prompt</div></div></div><div class="row-right">5am CT daily<br><span class="badge badge-green">active</span></div></div>
+        <div class="row"><div class="row-left"><div class="dot dot-muted"></div><div><div class="row-name">Email Monitoring</div><div class="row-meta">Gmail — pending trust</div></div></div><div class="row-right"><span class="badge badge-yellow">pending</span></div></div>
+        <div class="row"><div class="row-left"><div class="dot dot-muted"></div><div><div class="row-name">Stock Alerts</div><div class="row-meta">Price level triggers</div></div></div><div class="row-right"><span class="badge badge-yellow">not set up</span></div></div>
+        <div class="row"><div class="row-left"><div class="dot dot-muted"></div><div><div class="row-name">Facebook Posts</div><div class="row-meta">Dr. Todd Anderson page</div></div></div><div class="row-right"><span class="badge badge-yellow">not set up</span></div></div>
       </div>
-      <div class="stat-value gold">3</div>
-      <div class="stat-label">Services connected</div>
-      <div class="stat-sub">Notion · Google Calendar · Gmail</div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Today's Activity</span></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Onboarding complete</div><div class="tl-desc">Name, persona, user profile saved</div></div><div class="tl-time">1:00 AM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Morning brief cron set up</div><div class="tl-desc">5am CT · fixed timezone bug</div></div><div class="tl-time">1:08 AM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Zapier MCP connected</div><div class="tl-desc">Notion · Google Calendar · Gmail</div></div><div class="tl-time">3:35 AM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Notion training doc built</div><div class="tl-desc">Incoming Doctor Training Path — all sections</div></div><div class="tl-time">4:05 AM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">SHC Manual indexed</div><div class="tl-desc">82MB Gangemi V3.2 · organ-muscle table added</div></div><div class="tl-time">4:10 AM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Morning brief sent</div><div class="tl-desc">Late delivery — cron bug fixed</div></div><div class="tl-time">1:41 PM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Stock watchlist deep analysis</div><div class="tl-desc">All 12 positions analyzed</div></div><div class="tl-time">1:55 PM</div></div>
+        <div class="tl"><div class="tl-dot"></div><div style="flex:1"><div class="tl-title">Dashboard launched</div><div class="tl-desc">GitHub Pages · tdander26.github.io/jeffrey-dashboard</div></div><div class="tl-time">2:15 PM</div></div>
+      </div>
     </div>
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Instagram Topics</span>
-        <span class="card-icon">📸</span>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Integrations</span></div>
+        <div class="row"><div class="row-name">💬 Telegram</div><div><span class="badge badge-green">live</span></div></div>
+        <div class="row"><div class="row-name">📋 Notion</div><div><span class="badge badge-green">connected</span></div></div>
+        <div class="row"><div class="row-name">📅 Google Calendar</div><div><span class="badge badge-green">connected</span></div></div>
+        <div class="row"><div class="row-name">📧 Gmail</div><div><span class="badge badge-yellow">access held</span></div></div>
+        <div class="row"><div class="row-name">🖼️ Imagen 4</div><div><span class="badge badge-green">connected</span></div></div>
+        <div class="row"><div class="row-name">🐙 GitHub</div><div><span class="badge badge-green">connected</span></div></div>
+        <div class="row"><div class="row-name">🌐 Discord</div><div><span class="badge badge-yellow">pending</span></div></div>
       </div>
-      <div class="stat-value gold">23</div>
-      <div class="stat-label">Topics remaining in queue</div>
-      <div class="stat-sub">↑ Next: Five Factors of the IVF</div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Instagram Queue</span></div>
+        <div class="topic topic-used">✓ Triad of Health</div>
+        <div class="topic topic-used">✓ Category I, II, III Pelvic Faults</div>
+        <div class="topic topic-used">✓ Ileocecal Valve Syndrome</div>
+        <div class="topic topic-used">✓ Strain/Counterstrain</div>
+        <div class="topic topic-used">✓ Ocular Lock</div>
+        <div class="topic topic-next">→ Five Factors of the IVF</div>
+        <div class="topic">Muscle-Organ/Gland Associations</div>
+        <div class="topic">Therapy Localization (TL)</div>
+        <div class="topic">Origin/Insertion Technique</div>
+        <div class="topic" style="color:var(--muted)">+ 14 more queued…</div>
+      </div>
+    </div>
+
+    <!-- Watchlist -->
+    <div class="card grid-full">
+      <div class="card-header"><span class="card-title">Watchlist · Mar 9, 2026</span><span class="badge badge-red">risk-off day</span></div>
+      <table class="stock-table">
+        <thead><tr><th>Ticker</th><th>Price</th><th>Day</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="ticker">NVDA</span></td><td>$180.04</td><td class="down">-1.3%</td><td style="font-size:12px;color:var(--muted)">Strongest relative performer. AI thesis intact.</td></tr>
+          <tr><td><span class="ticker">AMZN</span></td><td>$209.82</td><td class="up">+0.7%</td><td style="font-size:12px;color:var(--muted)">Bucking trend. AWS + consumer defensive.</td></tr>
+          <tr><td><span class="ticker">NFLX</span></td><td>$97.53</td><td class="up">+0.5%</td><td style="font-size:12px;color:var(--muted)">Subscription model recession-resistant.</td></tr>
+          <tr><td><span class="ticker">SOFI</span></td><td>$18.36</td><td class="down">-0.2%</td><td style="font-size:12px;color:var(--muted)">Holding well. Watch Fed rate signals.</td></tr>
+          <tr><td><span class="ticker">HOOD</span></td><td>$77.62</td><td class="down">-1.5%</td><td style="font-size:12px;color:var(--muted)">Volatility = volume. Mixed signal.</td></tr>
+          <tr><td><span class="ticker">QQQ</span></td><td>$600.62</td><td class="down">-1.2%</td><td style="font-size:12px;color:var(--muted)">Broad tech ETF. Macro headwinds.</td></tr>
+          <tr><td><span class="ticker">VDE</span></td><td>$159.99</td><td class="down">-0.6%</td><td style="font-size:12px;color:var(--muted)">Energy ETF. Inflation hedge.</td></tr>
+          <tr><td><span class="ticker">TSLA</span></td><td>$392.92</td><td class="down">-2.6%</td><td style="font-size:12px;color:var(--muted)">Tariff + brand headwinds. Watch $380.</td></tr>
+          <tr><td><span class="ticker">MSTR</span></td><td>$135.66</td><td class="down">-1.4%</td><td style="font-size:12px;color:var(--muted)">Leveraged BTC. Risk-off pressure.</td></tr>
+          <tr><td><span class="ticker">SOL</span></td><td>$85.34</td><td class="down">-3.8%</td><td style="font-size:12px;color:var(--muted)">Watch $80 support.</td></tr>
+          <tr><td><span class="ticker">OKLO</span></td><td>$59.85</td><td class="down">-7.5%</td><td style="font-size:12px;color:var(--muted)">Pre-revenue. High volatility.</td></tr>
+          <tr><td><span class="ticker">BE</span></td><td>$147.62</td><td class="down">-11.1%</td><td style="font-size:12px;color:var(--muted)">⚠️ Big move. Investigate before adding.</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Automations + Timeline -->
-  <div class="grid-2">
+  <!-- TASKS TAB -->
+  <div id="tab-tasks" class="tab-content">
+    <div class="card grid-full">
+      <div class="card-header"><span class="card-title">Task List</span></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Add tasks here to track what you need Jeffrey to do. Use the Telegram button to send a task directly.</p>
 
-    <!-- Automations -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Scheduled Automations</span>
-        <span class="badge badge-green">1 active</span>
+      <div class="task-input-row">
+        <input class="task-input" id="taskInput" type="text" placeholder="Add a task for Jeffrey…" onkeydown="if(event.key==='Enter')addTask()" />
+        <button class="task-btn" onclick="addTask()">+ Add</button>
       </div>
 
-      <div class="row-item">
-        <div class="row-left">
-          <div class="row-dot dot-green"></div>
-          <div>
-            <div class="row-name">Morning Brief</div>
-            <div class="row-meta">Weather · News · Health · Markets · Instagram Prompt · Career tip</div>
-          </div>
+      <div id="taskList">
+        <div class="task-item" id="task-1">
+          <div class="task-check done" onclick="toggleTask('task-1')">✓</div>
+          <div style="flex:1"><div class="task-text done">Set up morning brief cron job</div><div class="task-meta">Completed · Mar 9</div></div>
+          <button class="task-del" onclick="deleteTask('task-1')">×</button>
         </div>
-        <div class="row-right">
-          Daily · 5am CT<br>
+        <div class="task-item" id="task-2">
+          <div class="task-check done" onclick="toggleTask('task-2')">✓</div>
+          <div style="flex:1"><div class="task-text done">Connect Zapier MCP (Notion, Calendar, Gmail)</div><div class="task-meta">Completed · Mar 9</div></div>
+          <button class="task-del" onclick="deleteTask('task-2')">×</button>
+        </div>
+        <div class="task-item" id="task-3">
+          <div class="task-check done" onclick="toggleTask('task-3')">✓</div>
+          <div style="flex:1"><div class="task-text done">Build Incoming Doctor Training Path in Notion</div><div class="task-meta">Completed · Mar 9</div></div>
+          <button class="task-del" onclick="deleteTask('task-3')">×</button>
+        </div>
+        <div class="task-item" id="task-4">
+          <div class="task-check" onclick="toggleTask('task-4')"></div>
+          <div style="flex:1"><div class="task-text">Set up Facebook post automation</div><div class="task-meta">Pending</div></div>
+          <button class="task-del" onclick="deleteTask('task-4')">×</button>
+        </div>
+        <div class="task-item" id="task-5">
+          <div class="task-check" onclick="toggleTask('task-5')"></div>
+          <div style="flex:1"><div class="task-text">Set up stock price alerts</div><div class="task-meta">Pending</div></div>
+          <button class="task-del" onclick="deleteTask('task-5')">×</button>
+        </div>
+        <div class="task-item" id="task-6">
+          <div class="task-check" onclick="toggleTask('task-6')"></div>
+          <div style="flex:1"><div class="task-text">Connect Google Calendar directly</div><div class="task-meta">Pending</div></div>
+          <button class="task-del" onclick="deleteTask('task-6')">×</button>
+        </div>
+        <div class="task-item" id="task-7">
+          <div class="task-check" onclick="toggleTask('task-7')"></div>
+          <div style="flex:1"><div class="task-text">Set up Discord integration</div><div class="task-meta">Pending</div></div>
+          <button class="task-del" onclick="deleteTask('task-7')">×</button>
+        </div>
+      </div>
+
+      <a class="tg-link" href="https://t.me/OpenClawBot" target="_blank">✈️ Open Telegram to message Jeffrey</a>
+    </div>
+  </div>
+
+  <!-- USAGE TAB -->
+  <div id="tab-usage" class="tab-content">
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Today's Usage · Mar 9</span></div>
+        <div style="margin-bottom:16px">
+          <div class="usage-label"><span>API Calls</span><span>~47 calls</span></div>
+          <div class="usage-bar-wrap"><div class="usage-bar" style="width:47%"></div></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div class="usage-label"><span>Imagen 4 Images</span><span>6 generated</span></div>
+          <div class="usage-bar-wrap"><div class="usage-bar" style="width:30%"></div></div>
+        </div>
+        <div style="margin-bottom:16px">
+          <div class="usage-label"><span>Notion Writes</span><span>8 operations</span></div>
+          <div class="usage-bar-wrap"><div class="usage-bar" style="width:16%"></div></div>
+        </div>
+        <div>
+          <div class="usage-label"><span>Zapier MCP Calls</span><span>~15 calls</span></div>
+          <div class="usage-bar-wrap"><div class="usage-bar" style="width:15%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">Cost Estimate · Mar 9</span></div>
+        <div class="row"><div class="row-name">Claude Sonnet (AI)</div><div class="row-right" style="color:var(--white)">~$0.80</div></div>
+        <div class="row"><div class="row-name">Imagen 4 (6 images)</div><div class="row-right" style="color:var(--white)">~$0.18</div></div>
+        <div class="row"><div class="row-name">Zapier MCP</div><div class="row-right" style="color:var(--white)">$0.00</div></div>
+        <div class="row"><div class="row-name">GitHub Pages</div><div class="row-right" style="color:var(--white)">$0.00</div></div>
+        <div class="row" style="border-top: 1px solid var(--gold); margin-top:6px"><div class="row-name" style="font-weight:700">Est. Today Total</div><div class="row-right" style="color:var(--gold);font-weight:700">~$0.98</div></div>
+        <div style="margin-top:14px; font-size:12px; color:var(--muted)">Monthly est. at this usage: ~$20-30/mo (setup day is heavier than normal days)</div>
+      </div>
+    </div>
+
+    <div class="card grid-full">
+      <div class="card-header"><span class="card-title">Scheduled Costs (recurring)</span></div>
+      <div class="row"><div class="row-left"><div class="dot dot-green"></div><div><div class="row-name">Morning Brief (daily)</div><div class="row-meta">~1,500 tokens · web searches · 1 Imagen image</div></div></div><div class="row-right">~$0.08/day<br>~$2.40/mo</div></div>
+      <div class="row"><div class="row-left"><div class="dot dot-green"></div><div><div class="row-name">Dashboard update (daily)</div><div class="row-meta">GitHub push · HTML regenerate</div></div></div><div class="row-right">~$0.01/day<br>~$0.30/mo</div></div>
+      <div class="row"><div class="row-left"><div class="dot dot-muted"></div><div><div class="row-name">On-demand requests</div><div class="row-meta">Stock analysis, research, content, tasks</div></div></div><div class="row-right">Variable</div></div>
+    </div>
+  </div>
+
+  <!-- AGENTS TAB -->
+  <div id="tab-agents" class="tab-content">
+    <div class="card grid-full" style="margin-bottom:16px">
+      <div class="card-header"><span class="card-title">Active Agents</span><span class="badge badge-green">1 running</span></div>
+      <div class="agent-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class="agent-name">🚀 Jeffrey (main)</div>
+            <div class="agent-desc">Personal assistant · Telegram · Warm, concise · Your primary agent</div>
+          </div>
           <span class="badge badge-green">active</span>
         </div>
-      </div>
-
-      <div class="row-item">
-        <div class="row-left">
-          <div class="row-dot dot-muted"></div>
-          <div>
-            <div class="row-name">Email Monitoring</div>
-            <div class="row-meta">Gmail inbox · flag urgent messages</div>
-          </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <span class="badge badge-blue">morning brief</span>
+          <span class="badge badge-blue">notion</span>
+          <span class="badge badge-blue">research</span>
+          <span class="badge badge-blue">stocks</span>
+          <span class="badge badge-blue">instagram</span>
         </div>
-        <div class="row-right"><span class="badge badge-yellow">pending trust</span></div>
-      </div>
-
-      <div class="row-item">
-        <div class="row-left">
-          <div class="row-dot dot-muted"></div>
-          <div>
-            <div class="row-name">Stock Alerts</div>
-            <div class="row-meta">Custom price level triggers</div>
-          </div>
-        </div>
-        <div class="row-right"><span class="badge badge-yellow">not set up</span></div>
-      </div>
-
-      <div class="row-item">
-        <div class="row-left">
-          <div class="row-dot dot-muted"></div>
-          <div>
-            <div class="row-name">Facebook Posts</div>
-            <div class="row-meta">Dr. Todd Anderson page drafts</div>
-          </div>
-        </div>
-        <div class="row-right"><span class="badge badge-yellow">not set up</span></div>
       </div>
     </div>
 
-    <!-- Timeline -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">What I've Done Today</span>
-        <span class="card-icon">📋</span>
+    <div class="card grid-full">
+      <div class="card-header"><span class="card-title">Add a Second Agent</span></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">You can run multiple isolated agents — each with their own personality, workspace, and channel. Useful for separating personal vs. practice, or adding a Discord-specific agent.</p>
+
+      <div class="agent-card" style="border:1px dashed rgba(255,255,255,0.15);background:transparent">
+        <div class="agent-name" style="color:var(--muted)">💼 Practice Agent (example)</div>
+        <div class="agent-desc">Dedicated to Momentum Health — monitors reviews, drafts social posts, answers patient FAQs via Discord</div>
+        <div class="code">openclaw agents add practice</div>
+        <p style="font-size:12px;color:var(--muted)">Then bind it to Discord and configure a separate workspace with practice-specific context.</p>
       </div>
 
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">Onboarding complete</div>
-          <div class="tl-desc">Name, persona, user profile, memory all saved</div>
-        </div>
-        <div class="tl-time">1:00 AM</div>
+      <div class="agent-card" style="border:1px dashed rgba(255,255,255,0.15);background:transparent;margin-top:10px">
+        <div class="agent-name" style="color:var(--muted)">📈 Finance Agent (example)</div>
+        <div class="agent-desc">Runs daily market analysis, alerts on watchlist moves, summarizes earnings calls automatically</div>
+        <div class="code">openclaw agents add finance</div>
       </div>
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">Morning brief cron set up</div>
-          <div class="tl-desc">5am CT · weather, news, health, markets, career</div>
+
+      <div style="margin-top:16px;padding:14px;background:var(--navy3);border-radius:8px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--gold)">How to set up a new agent:</div>
+        <div style="font-size:13px;color:var(--light);line-height:1.8">
+          1. SSH into your server<br>
+          2. Run <code style="background:rgba(0,0,0,0.3);padding:1px 6px;border-radius:4px">openclaw agents add &lt;name&gt;</code><br>
+          3. Follow the wizard to set workspace, channel, and persona<br>
+          4. Message Jeffrey on Telegram to configure it further
         </div>
-        <div class="tl-time">1:08 AM</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">Zapier MCP connected</div>
-          <div class="tl-desc">Notion · Google Calendar · Gmail now accessible</div>
-        </div>
-        <div class="tl-time">3:35 AM</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">Notion training doc built</div>
-          <div class="tl-desc">Incoming Doctor Training Path — all 5 AK sections + FM + Office Procedures</div>
-        </div>
-        <div class="tl-time">4:05 AM</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">SHC Manual downloaded & indexed</div>
-          <div class="tl-desc">82MB · Gangemi V3.2 · organ-muscle table added to Notion</div>
-        </div>
-        <div class="tl-time">4:10 AM</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">Morning brief sent (late)</div>
-          <div class="tl-desc">Cron time bug fixed · now correctly 5am CT</div>
-        </div>
-        <div class="tl-time">1:41 PM</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot-col"><div class="tl-dot"></div></div>
-        <div style="flex:1">
-          <div class="tl-title">Stock watchlist deep analysis</div>
-          <div class="tl-desc">Full analysis: SOFI HOOD OKLO NFLX AMZN QQQ VDE TSLA MSTR SOL NVDA BE</div>
-        </div>
-        <div class="tl-time">1:55 PM</div>
       </div>
     </div>
-  </div>
-
-  <!-- Integrations + Instagram Queue -->
-  <div class="grid-2">
-
-    <!-- Integrations -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Integrations</span>
-      </div>
-
-      <div class="integration-row">
-        <div class="integration-name">💬 Telegram</div>
-        <div><div class="integration-detail">Primary channel</div></div>
-        <span class="badge badge-green">live</span>
-      </div>
-      <div class="integration-row">
-        <div class="integration-name">📋 Notion</div>
-        <div><div class="integration-detail">Via Zapier MCP</div></div>
-        <span class="badge badge-green">connected</span>
-      </div>
-      <div class="integration-row">
-        <div class="integration-name">📅 Google Calendar</div>
-        <div><div class="integration-detail">Via Zapier MCP</div></div>
-        <span class="badge badge-green">connected</span>
-      </div>
-      <div class="integration-row">
-        <div class="integration-name">📧 Gmail</div>
-        <div><div class="integration-detail">Via Zapier MCP</div></div>
-        <span class="badge badge-yellow">access held</span>
-      </div>
-      <div class="integration-row">
-        <div class="integration-name">🖼️ Imagen 4</div>
-        <div><div class="integration-detail">Google AI · Tier 1</div></div>
-        <span class="badge badge-green">connected</span>
-      </div>
-      <div class="integration-row">
-        <div class="integration-name">🌐 Discord</div>
-        <div><div class="integration-detail">Not configured</div></div>
-        <span class="badge badge-yellow">pending</span>
-      </div>
-    </div>
-
-    <!-- Instagram Queue -->
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">Instagram Topic Queue</span>
-        <span class="card-icon">📸</span>
-      </div>
-      <div class="topic-used">✓ Triad of Health</div>
-      <div class="topic-used">✓ Category I, II, III Pelvic Faults</div>
-      <div class="topic-used">✓ Ileocecal Valve Syndrome</div>
-      <div class="topic-used">✓ Strain/Counterstrain</div>
-      <div class="topic-used">✓ Ocular Lock</div>
-      <div class="topic-next">→ Five Factors of the IVF (next)</div>
-      <div class="topic-queue">Muscle-Organ/Gland Associations</div>
-      <div class="topic-queue">Therapy Localization (TL)</div>
-      <div class="topic-queue">Origin/Insertion Technique</div>
-      <div class="topic-queue">Neurolymphatic Reflexes (Chapman's)</div>
-      <div class="topic-queue">Neurovascular Reflexes (Bennett's)</div>
-      <div class="topic-queue">+ 17 more topics queued</div>
-    </div>
-  </div>
-
-  <!-- Watchlist -->
-  <div class="card grid-full">
-    <div class="card-header">
-      <span class="card-title">Watchlist · Mar 9, 2026</span>
-      <span class="badge badge-red">risk-off day</span>
-    </div>
-    <table class="stock-table">
-      <thead>
-        <tr>
-          <th>Ticker</th>
-          <th>Price</th>
-          <th>Day</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td><span class="ticker">NVDA</span></td><td>$180.04</td><td class="down">-1.3%</td><td style="font-size:12px;color:var(--muted)">Strongest relative performer. AI thesis intact.</td></tr>
-        <tr><td><span class="ticker">AMZN</span></td><td>$209.82</td><td class="up">+0.7%</td><td style="font-size:12px;color:var(--muted)">Bucking trend. AWS + consumer defensive.</td></tr>
-        <tr><td><span class="ticker">NFLX</span></td><td>$97.53</td><td class="up">+0.5%</td><td style="font-size:12px;color:var(--muted)">Subscription model recession-resistant.</td></tr>
-        <tr><td><span class="ticker">SOFI</span></td><td>$18.36</td><td class="down">-0.2%</td><td style="font-size:12px;color:var(--muted)">Holding well. Watch Fed rate signals.</td></tr>
-        <tr><td><span class="ticker">HOOD</span></td><td>$77.62</td><td class="down">-1.5%</td><td style="font-size:12px;color:var(--muted)">Volatility = volume. Mixed signal.</td></tr>
-        <tr><td><span class="ticker">QQQ</span></td><td>$600.62</td><td class="down">-1.2%</td><td style="font-size:12px;color:var(--muted)">Broad tech ETF. Macro headwinds.</td></tr>
-        <tr><td><span class="ticker">VDE</span></td><td>$159.99</td><td class="down">-0.6%</td><td style="font-size:12px;color:var(--muted)">Energy ETF. Inflation hedge working.</td></tr>
-        <tr><td><span class="ticker">TSLA</span></td><td>$392.92</td><td class="down">-2.6%</td><td style="font-size:12px;color:var(--muted)">Tariff + brand headwinds. Watch $380.</td></tr>
-        <tr><td><span class="ticker">MSTR</span></td><td>$135.66</td><td class="down">-1.4%</td><td style="font-size:12px;color:var(--muted)">Leveraged BTC. Risk-off pressure.</td></tr>
-        <tr><td><span class="ticker">SOL</span></td><td>$85.34</td><td class="down">-3.8%</td><td style="font-size:12px;color:var(--muted)">Crypto risk-off. Watch $80 support.</td></tr>
-        <tr><td><span class="ticker">OKLO</span></td><td>$59.85</td><td class="down">-7.5%</td><td style="font-size:12px;color:var(--muted)">Pre-revenue. High volatility expected.</td></tr>
-        <tr><td><span class="ticker">BE</span></td><td>$147.62</td><td class="down">-11.1%</td><td style="font-size:12px;color:var(--muted)">⚠️ Big move. Investigate before adding.</td></tr>
-      </tbody>
-    </table>
   </div>
 
 </div>
+
+<script>
+  function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  let taskCounter = 10;
+  function addTask() {
+    const input = document.getElementById('taskInput');
+    const text = input.value.trim();
+    if (!text) return;
+    const id = 'task-' + (++taskCounter);
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.id = id;
+    div.innerHTML = `<div class="task-check" onclick="toggleTask('${id}')"></div><div style="flex:1"><div class="task-text">${text}</div><div class="task-meta">Added · just now</div></div><button class="task-del" onclick="deleteTask('${id}')">×</button>`;
+    document.getElementById('taskList').appendChild(div);
+    input.value = '';
+  }
+
+  function toggleTask(id) {
+    const el = document.getElementById(id);
+    const check = el.querySelector('.task-check');
+    const text = el.querySelector('.task-text');
+    check.classList.toggle('done');
+    text.classList.toggle('done');
+    check.textContent = check.classList.contains('done') ? '✓' : '';
+  }
+
+  function deleteTask(id) {
+    const el = document.getElementById(id);
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 200);
+  }
+</script>
 </body>
 </html>
