@@ -155,8 +155,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .msk-cell{width:32px;height:22px;border:2px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none;font-size:11px;font-weight:900}
 .msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
 .msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
-.msk-sec-hdr{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#7c3aed;background:#f5f3ff;border-radius:5px;padding:4px 8px;margin:8px 0 4px;border-left:3px solid #7c3aed}
+.msk-sec-hdr{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c3aed;background:#f5f3ff;border-radius:6px;padding:6px 10px;margin:6px 0 0;border-left:3px solid #7c3aed;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.msk-sec-hdr:hover{background:#ede9fe}
 .msk-org-hdr{color:#be185d;background:#fdf2f8;border-left-color:#be185d}
+.msk-org-hdr:hover{background:#fce7f3}
+.msk-sec-arrow{font-size:10px;transition:transform .18s;display:inline-block}
+.msk-sec-arrow.open{transform:rotate(90deg)}
+.msk-sec-body{display:none;padding:6px 4px 4px}
+.msk-sec-body.open{display:block}
 
 /* TOAST */
 #toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
@@ -805,9 +811,20 @@ function buildVisitCard(vn){
 
   var mskBody=document.createElement("div"); mskBody.className="msk-body"; mskBody.id="msk_body_"+vn;
 
-  // Build muscle sections
+  // Build muscle sections — each collapsible
   MSK_SECTIONS.forEach(function(sect,si){
-    var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.textContent=sect.sec; mskBody.appendChild(sh);
+    var secId="msk_sec_"+vn+"_"+si;
+    var sh=document.createElement("div"); sh.className="msk-sec-hdr";
+    sh.innerHTML='<span>'+sect.sec+'</span><span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
+    sh.addEventListener("click",(function(id){ return function(){
+      var body=document.getElementById(id+"_body");
+      var arr=document.getElementById(id+"_arr");
+      var open=body.classList.toggle("open");
+      arr.classList.toggle("open",open);
+    }; })(secId));
+    mskBody.appendChild(sh);
+
+    var secBody=document.createElement("div"); secBody.className="msk-sec-body"; secBody.id=secId+"_body";
     var grid=document.createElement("div"); grid.className="msk-grid";
     sect.muscles.forEach(function(muscle,mi){
       var rKey="v"+vn+"_msk_"+si+"_"+mi+"_R", lKey="v"+vn+"_msk_"+si+"_"+mi+"_L";
@@ -818,17 +835,29 @@ function buildVisitCard(vn){
         var key=side==="R"?rKey:lKey;
         var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
         var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-        c.addEventListener("click",(function(k){ return function(){ onMskClick(k); }; })(key));
+        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
         var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
         wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
       });
       row.appendChild(lbl); row.appendChild(cells); grid.appendChild(row);
     });
-    mskBody.appendChild(grid);
+    secBody.appendChild(grid);
+    mskBody.appendChild(secBody);
   });
 
-  // Organs section
-  var oh=document.createElement("div"); oh.className="msk-sec-hdr msk-org-hdr"; oh.textContent="🫀 Organ Indicators"; mskBody.appendChild(oh);
+  // Organs section — also collapsible
+  var orgSecId="msk_org_"+vn;
+  var oh=document.createElement("div"); oh.className="msk-sec-hdr msk-org-hdr";
+  oh.innerHTML='<span>🫀 Organ Indicators</span><span class="msk-sec-arrow" id="'+orgSecId+'_arr">▶</span>';
+  oh.addEventListener("click",(function(id){ return function(){
+    var body=document.getElementById(id+"_body");
+    var arr=document.getElementById(id+"_arr");
+    var open=body.classList.toggle("open");
+    arr.classList.toggle("open",open);
+  }; })(orgSecId));
+  mskBody.appendChild(oh);
+
+  var orgSecBody=document.createElement("div"); orgSecBody.className="msk-sec-body"; orgSecBody.id=orgSecId+"_body";
   var orgGrid=document.createElement("div"); orgGrid.className="msk-grid";
   MSK_ORGANS.forEach(function(organ,oi){
     var key="v"+vn+"_org_"+oi;
@@ -837,12 +866,13 @@ function buildVisitCard(vn){
     var cells=document.createElement("div"); cells.className="msk-cells";
     var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
     var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-    c.addEventListener("click",(function(k){ return function(){ onMskClick(k); }; })(key));
+    c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
     var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent="RL";
     wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
     row.appendChild(lbl); row.appendChild(cells); orgGrid.appendChild(row);
   });
-  mskBody.appendChild(orgGrid);
+  orgSecBody.appendChild(orgGrid);
+  mskBody.appendChild(orgSecBody);
   div.appendChild(mskBody);
 
   return div;
