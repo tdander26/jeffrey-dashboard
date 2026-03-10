@@ -1133,17 +1133,26 @@ function buildPrintView(){
     }
   }
 
-  // ── subjective: map to visit columns ──────────────────────
-  var symRows=[];
+  // ── subjective: always gather by week, also map to visit cols if dates available ──
+  var symRowsByWeek=[], maxSymW=0;   // for W-axis fallback
+  var symRows=[];                    // for visit-column mapping
   for(var r=0;r<S.symRows;r++){
-    var colM={},colV={},any=false;
-    for(var v=1;v<=maxV;v++){
-      var wk=hasVisitDates?visitWeekMap[v]:v;
-      if(!wk) continue;
-      var cn=S.symptoms["r"+r+"_c"+wk];
-      if(cn){ colM[v]=cn; colV[v]=!!S.symVisited["r"+r+"_c"+wk]; any=true; }
+    var weekM={},weekV={},anyW=false;
+    for(var w=1;w<=26;w++){
+      var cn=S.symptoms["r"+r+"_c"+w];
+      if(cn){ weekM[w]=cn; weekV[w]=!!S.symVisited["r"+r+"_c"+w]; anyW=true; if(w>maxSymW) maxSymW=w; }
     }
-    if(any) symRows.push({label:S.symLabels["r"+r]||("Complaint "+(r+1)),marks:colM,visited:colV});
+    if(anyW) symRowsByWeek.push({label:S.symLabels["r"+r]||("Complaint "+(r+1)),marks:weekM,visited:weekV});
+
+    if(hasVisitDates){
+      var colM={},colV={},anyC=false;
+      for(var v=1;v<=maxV;v++){
+        var wk=visitWeekMap[v]; if(!wk) continue;
+        var cn2=S.symptoms["r"+r+"_c"+wk];
+        if(cn2){ colM[v]=cn2; colV[v]=!!S.symVisited["r"+r+"_c"+wk]; anyC=true; }
+      }
+      if(anyC) symRows.push({label:S.symLabels["r"+r]||("Complaint "+(r+1)),marks:colM,visited:colV});
+    }
   }
 
   // ── objective ──────────────────────────────────────────────
@@ -1205,6 +1214,22 @@ function buildPrintView(){
     return;
   }
 
+  // ── subjective week-axis table (shown when no visit dates, or as supplement) ──
+  var symPreamble='';
+  if(symRowsByWeek.length&&(!hasVisitDates)){
+    maxSymW=Math.max(maxSymW,1);
+    symPreamble+='<div class="pv-section"><div class="pv-section-title">Subjective Complaints — Weekly Progress</div>';
+    symPreamble+='<table class="tl-table"><thead><tr><th class="row-hdr">Complaint</th>';
+    for(var w=1;w<=maxSymW;w++) symPreamble+='<th>W'+w+'</th>';
+    symPreamble+='</tr></thead><tbody>';
+    symRowsByWeek.forEach(function(row){
+      symPreamble+='<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
+      for(var w=1;w<=maxSymW;w++) symPreamble+='<td>'+colorBlock(row.marks[w],row.visited[w])+'</td>';
+      symPreamble+='</tr>';
+    });
+    symPreamble+='</tbody></table></div>';
+  }
+
   // ── build single visit-aligned table ──────────────────────
   var html='<table class="tl-table"><thead><tr><th class="row-hdr">Visit →</th>';
   for(var v=1;v<=maxV;v++){
@@ -1215,8 +1240,8 @@ function buildPrintView(){
   }
   html+='</tr></thead><tbody>';
 
-  // SUBJECTIVE
-  if(symRows.length){
+  // SUBJECTIVE — visit-mapped when dates available
+  if(hasVisitDates&&symRows.length){
     html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">SUBJECTIVE COMPLAINTS</th></tr>';
     symRows.forEach(function(row){
       html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
@@ -1272,9 +1297,9 @@ function buildPrintView(){
   }
 
   html+='</tbody></table>';
-  if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter case start date + visit dates to show week numbers above each visit column.</p>';
+  if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter case start date + visit dates to map subjective symptoms into the visit columns above.</p>';
 
-  content.innerHTML=html;
+  content.innerHTML=symPreamble+html;
 
   // (no more code below — old branches removed)
   return;
