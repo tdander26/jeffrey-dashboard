@@ -155,6 +155,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .msk-cell{width:32px;height:22px;border:2px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none;font-size:11px;font-weight:900}
 .msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
 .msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
+.msk-sec-hdr{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#7c3aed;background:#f5f3ff;border-radius:5px;padding:4px 8px;margin:8px 0 4px;border-left:3px solid #7c3aed}
+.msk-org-hdr{color:#be185d;background:#fdf2f8;border-left-color:#be185d}
 
 /* TOAST */
 #toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
@@ -710,16 +712,20 @@ function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(
 // ════════════════════════════════════════════════════════════════
 //  MSK MUSCLE LIST
 // ════════════════════════════════════════════════════════════════
-var MSK_MUSCLES=[
-  "Psoas","Iliacus","Sartorius","TFL","Rectus Femoris","Hamstrings",
-  "Glut Max","Glut Med","Piriformis",
-  "Pec Major (Clav)","Pec Major (Sternal)","Pec Minor",
-  "Deltoid Ant","Deltoid Mid","Deltoid Post",
-  "Infraspinatus","Supraspinatus","Subscapularis",
-  "Biceps","Triceps","Brachioradialis",
-  "Upper Trap","Mid Trap","Lower Trap",
-  "Rhomboids","Lat Dorsi","QL","SCM",
-  "Neck Flexors","Neck Extensors"
+var MSK_SECTIONS=[
+  {sec:"Neck / Jaw", muscles:["Deep Neck Flexors","Neck Extensor","Scalenes","SCM","Masseter","Pterygoid (Med/Lat)","Temporalis"]},
+  {sec:"Shoulder / Upper Arm", muscles:["Biceps Long Head","Coracobrachialis","Deltoid Ant","Deltoid Mid","Deltoid Post","Infraspinatus","Lat Dorsi","Levator Scapulae","Lower Trap","Mid Trap","Pec Clavicular","Pec Minor","Pec Sternal","Rhomboid","Serratus Anterior","Subclavicular","Subscapularis","Supraspinatus","Teres Major","Teres Minor","Tricep (Long Head)","Upper Trap"]},
+  {sec:"Elbow / Wrist / Hand", muscles:["Brachialis","Brachioradialis","Pronator Quadratus","Pronator Teres","Supinator","Tricep (Med/Lat)","Wrist Extensor","Wrist Flexor","Finger Extensors","Finger Flexors"]},
+  {sec:"Hip / Pelvis", muscles:["Adductors","Glut Max","Glut Med","Glut Min","Gracilis","Iliacus","Pectineus","Piriformis/Gemellus","Psoas","QL","Rectus Femoris","Sartorius","TFL"]},
+  {sec:"Knee", muscles:["Hamstrings (Med/Lat)","Popliteus","Quads (Med/Lat)"]},
+  {sec:"Ankle / Foot", muscles:["Anterior Tibialis","Gastrocnemius (Med/Lat)","Peroneus Brevis","Peroneus Longus","Peroneus Tertius","Posterior Tibialis","Soleus"]},
+  {sec:"Trunk / Core", muscles:["Abdominals","C/S T/S L/S","Diaphragm","Iliolumbar Lig","Obliques"]}
+];
+var MSK_ORGANS=[
+  "Adrenal (Med/Cort)","Bladder","Brain","Diaphragm","Ears/Eyes","Gallbladder","Heart",
+  "Immune Spleen","Immune Thymus","Kidney","Large Intestine","Liver","Lower Immune",
+  "Lung","Ovary","Pancreas","Parotid","Pineal","Pituitary","Prostate",
+  "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus","EPI","Dysglycemia"
 ];
 
 function onMskClick(key){
@@ -738,7 +744,7 @@ function renderMskCell(key){
   } else { cell.style.borderColor=cell.style.background=cell.style.color=""; }
 }
 function renderAllMskCells(){
-  Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_msk_")>=0) renderMskCell(k); });
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_msk_")>=0||k.indexOf("_org_")>=0) renderMskCell(k); });
 }
 function toggleMsk(vn){
   var body=document.getElementById("msk_body_"+vn);
@@ -797,23 +803,45 @@ function buildVisitCard(vn){
   div.appendChild(mskToggle);
 
   var mskBody=document.createElement("div"); mskBody.className="msk-body"; mskBody.id="msk_body_"+vn;
-  var mskGrid=document.createElement("div"); mskGrid.className="msk-grid";
-  MSK_MUSCLES.forEach(function(muscle,mi){
-    var rKey="v"+vn+"_msk_"+mi+"_R", lKey="v"+vn+"_msk_"+mi+"_L";
-    var row=document.createElement("div"); row.className="msk-row";
-    var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=muscle; lbl.textContent=muscle;
-    var cells=document.createElement("div"); cells.className="msk-cells";
-    ["R","L"].forEach(function(side){
-      var key=side==="R"?rKey:lKey;
-      var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
-      var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-      c.addEventListener("click",(function(k){ return function(){ onMskClick(k); }; })(key));
-      var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
-      wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
+
+  // Build muscle sections
+  MSK_SECTIONS.forEach(function(sect,si){
+    var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.textContent=sect.sec; mskBody.appendChild(sh);
+    var grid=document.createElement("div"); grid.className="msk-grid";
+    sect.muscles.forEach(function(muscle,mi){
+      var rKey="v"+vn+"_msk_"+si+"_"+mi+"_R", lKey="v"+vn+"_msk_"+si+"_"+mi+"_L";
+      var row=document.createElement("div"); row.className="msk-row";
+      var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=muscle; lbl.textContent=muscle;
+      var cells=document.createElement("div"); cells.className="msk-cells";
+      ["R","L"].forEach(function(side){
+        var key=side==="R"?rKey:lKey;
+        var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
+        var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
+        c.addEventListener("click",(function(k){ return function(){ onMskClick(k); }; })(key));
+        var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
+        wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
+      });
+      row.appendChild(lbl); row.appendChild(cells); grid.appendChild(row);
     });
-    row.appendChild(lbl); row.appendChild(cells); mskGrid.appendChild(row);
+    mskBody.appendChild(grid);
   });
-  mskBody.appendChild(mskGrid);
+
+  // Organs section
+  var oh=document.createElement("div"); oh.className="msk-sec-hdr msk-org-hdr"; oh.textContent="🫀 Organ Indicators"; mskBody.appendChild(oh);
+  var orgGrid=document.createElement("div"); orgGrid.className="msk-grid";
+  MSK_ORGANS.forEach(function(organ,oi){
+    var key="v"+vn+"_org_"+oi;
+    var row=document.createElement("div"); row.className="msk-row";
+    var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=organ; lbl.textContent=organ;
+    var cells=document.createElement("div"); cells.className="msk-cells";
+    var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
+    var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
+    c.addEventListener("click",(function(k){ return function(){ onMskClick(k); }; })(key));
+    var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent="RL";
+    wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
+    row.appendChild(lbl); row.appendChild(cells); orgGrid.appendChild(row);
+  });
+  mskBody.appendChild(orgGrid);
   div.appendChild(mskBody);
 
   return div;
