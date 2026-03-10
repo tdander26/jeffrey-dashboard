@@ -140,6 +140,22 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .visit-notes textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:48px;outline:none;font-family:inherit}
 .visit-notes textarea:focus{border-color:#3b82f6}
 
+/* MSK SECTION */
+.msk-toggle{margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.msk-toggle-label{font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.1em}
+.msk-toggle-arrow{font-size:11px;color:#7c3aed;transition:transform .2s;display:inline-block}
+.msk-toggle-arrow.open{transform:rotate(90deg)}
+.msk-body{display:none;margin-top:10px}
+.msk-body.open{display:block}
+.msk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 10px}
+.msk-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.msk-label{font-size:11px;color:#374151;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msk-cells{display:flex;gap:4px;flex-shrink:0}
+.msk-cell-wrap{display:flex;flex-direction:column;align-items:center;gap:1px}
+.msk-cell{width:32px;height:22px;border:2px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none;font-size:11px;font-weight:900}
+.msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
+.msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
+
 /* TOAST */
 #toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
 
@@ -641,6 +657,9 @@ function clearAllCells() {
   document.querySelectorAll(".sym-cell").forEach(function(c){
     c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
   });
+  document.querySelectorAll(".msk-cell").forEach(function(c){
+    c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -689,6 +708,47 @@ function renderMark(key){
 function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
 
 // ════════════════════════════════════════════════════════════════
+//  MSK MUSCLE LIST
+// ════════════════════════════════════════════════════════════════
+var MSK_MUSCLES=[
+  "Psoas","Iliacus","Sartorius","TFL","Rectus Femoris","Hamstrings",
+  "Glut Max","Glut Med","Piriformis",
+  "Pec Major (Clav)","Pec Major (Sternal)","Pec Minor",
+  "Deltoid Ant","Deltoid Mid","Deltoid Post",
+  "Infraspinatus","Supraspinatus","Subscapularis",
+  "Biceps","Triceps","Brachioradialis",
+  "Upper Trap","Mid Trap","Lower Trap",
+  "Rhomboids","Lat Dorsi","QL","SCM",
+  "Neck Flexors","Neck Extensors"
+];
+
+function onMskClick(key){
+  if(activeColor===null){ delete S.marks[key]; }
+  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor; }
+  renderMskCell(key); autoSave();
+}
+function renderMskCell(key){
+  var cell=document.getElementById("mc_"+key); if(!cell) return;
+  var cn=S.marks[key];
+  cell.textContent="";
+  if(cn&&COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex;
+    cell.style.borderColor=h; cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕";
+  } else { cell.style.borderColor=cell.style.background=cell.style.color=""; }
+}
+function renderAllMskCells(){
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_msk_")>=0) renderMskCell(k); });
+}
+function toggleMsk(vn){
+  var body=document.getElementById("msk_body_"+vn);
+  var arrow=document.getElementById("msk_arrow_"+vn);
+  if(!body||!arrow) return;
+  var open=body.classList.toggle("open");
+  arrow.classList.toggle("open",open);
+}
+
+// ════════════════════════════════════════════════════════════════
 //  VISIT CARDS
 // ════════════════════════════════════════════════════════════════
 function buildVisitCard(vn){
@@ -729,6 +789,33 @@ function buildVisitCard(vn){
   var no=document.createElement("div"); no.className="visit-notes";
   no.innerHTML='<label>Visit Notes</label><textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>';
   div.appendChild(no);
+
+  // MSK section
+  var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle";
+  mskToggle.innerHTML='<span class="msk-toggle-label">💪 MSK — Muscle Testing</span><span class="msk-toggle-arrow" id="msk_arrow_'+vn+'">▶</span>';
+  mskToggle.addEventListener("click",(function(v){ return function(){ toggleMsk(v); }; })(vn));
+  div.appendChild(mskToggle);
+
+  var mskBody=document.createElement("div"); mskBody.className="msk-body"; mskBody.id="msk_body_"+vn;
+  var mskGrid=document.createElement("div"); mskGrid.className="msk-grid";
+  MSK_MUSCLES.forEach(function(muscle,mi){
+    var rKey="v"+vn+"_msk_"+mi+"_R", lKey="v"+vn+"_msk_"+mi+"_L";
+    var row=document.createElement("div"); row.className="msk-row";
+    var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=muscle; lbl.textContent=muscle;
+    var cells=document.createElement("div"); cells.className="msk-cells";
+    ["R","L"].forEach(function(side){
+      var key=side==="R"?rKey:lKey;
+      var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
+      var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
+      c.addEventListener("click",(function(k){ return function(){ onMskClick(k); }; })(key));
+      var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
+      wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
+    });
+    row.appendChild(lbl); row.appendChild(cells); mskGrid.appendChild(row);
+  });
+  mskBody.appendChild(mskGrid);
+  div.appendChild(mskBody);
+
   return div;
 }
 
@@ -842,7 +929,7 @@ function saveAll(){
 }
 
 function renderAll(){
-  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks();
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
