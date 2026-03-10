@@ -65,11 +65,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .sym-table{border-collapse:collapse;width:100%;min-width:1100px;font-size:12px}
 .sym-table th{background:#1a1a2e;color:white;padding:7px 8px;text-align:center;white-space:nowrap;font-size:11px}
 .sym-table th:first-child{text-align:left;min-width:160px;padding-left:12px}
-.sym-table td{border:1px solid #e2e8f0;padding:4px 6px}
-.sym-table td:first-child{background:#f8fafc}
+.sym-table td{border:1px solid #e2e8f0;padding:3px 4px}
+.sym-table td:first-child{background:#f8fafc;padding:4px 6px}
 .sym-table tr:nth-child(even) td:not(:first-child){background:#fafbfc}
 .sym-table input[type=text]{width:100%;border:none;outline:none;font-size:12px;background:transparent;padding:2px 4px}
-.sym-table input[type=number]{width:100%;border:none;outline:none;font-size:12px;text-align:center;background:transparent;padding:2px}
+.sym-cell{width:34px;height:26px;border:1.5px solid #d1d5db;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:13px;font-weight:900;transition:all .15s;user-select:none}
+.sym-cell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.08)}
 .sym-add{margin-top:10px;font-size:12px;color:#3b82f6;cursor:pointer;font-weight:600;display:inline-block}
 .sym-add:hover{text-decoration:underline}
 
@@ -203,8 +204,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
   <!-- Symptom Tracking -->
   <div class="card">
-    <div class="card-title">📊 Subjective Symptom Tracking <span style="font-size:12px;font-weight:400;color:#94a3b8;margin-left:8px">Scale 1–10 per week</span></div>
-    <div class="sym-hint">Enter complaint in the left column, then score each week. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
+    <div class="card-title">📊 Subjective Symptom Tracking</div>
+    <div class="sym-hint">Enter complaint in the left column. Select a color above, then click any week cell to mark it. Gaps between visits auto-fill with the new color. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
     <div class="sym-scroll">
       <table class="sym-table">
         <thead>
@@ -521,12 +522,78 @@ function addSymRow() {
   autoSave();
 }
 
+// Click a symptom week cell:
+// - If already marked with active color → clear it
+// - If unmarked (or different color) → mark it with active color
+//   AND auto-fill the gap (weeks after last marked week, up to this week-1)
+//   with active color (preserving any already-marked weeks before the gap)
+function onSymCellClick(row, week) {
+  var key = "r" + row + "_c" + week;
+  if (activeColor === null) {
+    delete S.symptoms[key];
+    renderSymCell(row, week);
+    autoSave();
+    return;
+  }
+  // toggle off if same color
+  if (S.symptoms[key] === activeColor) {
+    delete S.symptoms[key];
+    renderSymCell(row, week);
+    autoSave();
+    return;
+  }
+  // find last marked week before this one
+  var lastMarked = 0;
+  for (var w = week - 1; w >= 1; w--) {
+    if (S.symptoms["r" + row + "_c" + w]) { lastMarked = w; break; }
+  }
+  // auto-fill gap: weeks (lastMarked+1) to (week-1) with active color
+  for (var fw = lastMarked + 1; fw < week; fw++) {
+    var fkey = "r" + row + "_c" + fw;
+    if (!S.symptoms[fkey]) {   // don't overwrite already-marked weeks
+      S.symptoms[fkey] = activeColor;
+      renderSymCell(row, fw);
+    }
+  }
+  // mark the clicked week
+  S.symptoms[key] = activeColor;
+  renderSymCell(row, week);
+  autoSave();
+}
+
+function renderSymCell(row, week) {
+  var cell = document.getElementById("sc_r" + row + "_c" + week);
+  if (!cell) return;
+  var colorName = S.symptoms["r" + row + "_c" + week];
+  if (colorName && COLOR_MAP[colorName]) {
+    var hex = COLOR_MAP[colorName].hex;
+    cell.style.borderColor = hex;
+    cell.style.background  = hex + "22";
+    cell.style.color       = hex;
+    cell.textContent       = "✕";
+  } else {
+    cell.style.borderColor = "";
+    cell.style.background  = "";
+    cell.style.color       = "";
+    cell.textContent       = "";
+  }
+}
+
+function renderAllSymCells() {
+  for (var r = 0; r < S.symRows; r++) {
+    for (var w = 1; w <= 26; w++) {
+      renderSymCell(r, w);
+    }
+  }
+}
+
 function renderSymTable() {
   const tbody = document.getElementById("symBody");
   tbody.innerHTML = "";
   for (var r = 0; r < S.symRows; r++) {
     (function(row) {
       const tr  = document.createElement("tr");
+      // label cell
       const tdL = document.createElement("td");
       const inp = document.createElement("input");
       inp.type = "text";
@@ -535,21 +602,24 @@ function renderSymTable() {
       inp.addEventListener("input", function() { S.symLabels["r" + row] = inp.value; autoSave(); });
       tdL.appendChild(inp);
       tr.appendChild(tdL);
+      // week cells — clickable boxes
       for (var w = 1; w <= 26; w++) {
         (function(wk) {
-          const td = document.createElement("td");
-          const ni = document.createElement("input");
-          ni.type = "number"; ni.min = 0; ni.max = 10; ni.step = 1;
-          ni.placeholder = "—";
-          ni.value = S.symptoms["r" + row + "_c" + wk] || "";
-          ni.addEventListener("input", function() { S.symptoms["r" + row + "_c" + wk] = ni.value; autoSave(); });
-          td.appendChild(ni);
+          const td   = document.createElement("td");
+          td.style.padding = "2px";
+          const cell = document.createElement("div");
+          cell.className = "sym-cell";
+          cell.id = "sc_r" + row + "_c" + wk;
+          cell.addEventListener("click", function() { onSymCellClick(row, wk); });
+          td.appendChild(cell);
           tr.appendChild(td);
         })(w);
       }
       tbody.appendChild(tr);
     })(r);
   }
+  // re-render marks after rebuild
+  renderAllSymCells();
 }
 
 // ─── PATIENT INFO ────────────────────────────────────────────────────────────
@@ -605,7 +675,7 @@ function loadState() {
 
 function renderAll() {
   loadPatientInfo();
-  renderSymTable();
+  renderSymTable();       // also calls renderAllSymCells internally
   loadVisitDates();
   renderAllMarks();
 }
