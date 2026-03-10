@@ -155,6 +155,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .msk-cell{width:32px;height:22px;border:2px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none;font-size:11px;font-weight:900}
 .msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
 .msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
+/* SUPPLEMENTS SECTION */
+.supp-toggle{margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.supp-toggle-label{font-size:10px;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.1em}
+.supp-toggle-arrow{font-size:11px;color:#0369a1;transition:transform .2s;display:inline-block}
+.supp-toggle-arrow.open{transform:rotate(90deg)}
+.supp-body{display:none;margin-top:8px}
+.supp-body.open{display:block}
+.supp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 10px}
+.supp-row{display:flex;align-items:center;gap:8px;padding:3px 0}
+.supp-label{font-size:11px;color:#374151;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.supp-cell{width:32px;height:22px;border:2px solid #bae6fd;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#f0f9ff;user-select:none;font-size:11px;font-weight:900;color:#0369a1}
+.supp-cell:hover{border-color:#0369a1;background:#e0f2fe;transform:scale(1.08)}
+
 .msk-sec-hdr{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c3aed;background:#f5f3ff;border-radius:6px;padding:6px 10px;margin:6px 0 0;border-left:3px solid #7c3aed;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
 .msk-sec-hdr:hover{background:#ede9fe}
 .msk-org-hdr{color:#be185d;background:#fdf2f8;border-left-color:#be185d}
@@ -668,6 +681,9 @@ function clearAllCells() {
   document.querySelectorAll(".msk-cell").forEach(function(c){
     c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
   });
+  document.querySelectorAll(".supp-cell").forEach(function(c){
+    c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -718,6 +734,12 @@ function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(
 // ════════════════════════════════════════════════════════════════
 //  MSK MUSCLE LIST
 // ════════════════════════════════════════════════════════════════
+var SUPPLEMENTS=[
+  "Catalyn","Min-Tran","Drenamin","Zymex II","HCl w/ Betaine",
+  "Magnesium Lactate","Omega-3","Vitamin D3/K2","Probiotics",
+  "B Complex","Zinc Liver Chelate","Adrenal Support","Liver Support","Digestive Enzymes"
+];
+
 var MSK_SECTIONS=[
   {sec:"Neck", muscles:["Deep Neck Flexors","Masseter","Neck Extensor","Pterygoid (Med/Lat)","Scalenes","SCM","Temporalis"]},
   {sec:"Shoulder", muscles:["Biceps Long Head","Coracobrachialis","Deltoid - Anterior","Deltoid - Middle","Deltoid - Posterior","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Lower Trapezius","Middle Trapezius","Pec Clavicular","Pec Minor","Pec Sternal","Rhomboid","Serratus Anterior","Subclavicular","Subscapularis","Supraspinatus","Teres Major","Teres Minor","Tricep (Long Head)","Upper Trapezius"]},
@@ -752,6 +774,28 @@ function renderMskCell(key){
 }
 function renderAllMskCells(){
   Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_msk_")>=0||k.indexOf("_org_")>=0) renderMskCell(k); });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  SUPPLEMENTS
+// ────────────────────────────────────────────────────────────────
+function onSuppClick(key){
+  if(activeColor===null){ delete S.marks[key]; }
+  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor; }
+  renderSuppCell(key); autoSave();
+}
+function renderSuppCell(key){
+  var cell=document.getElementById("sc2_"+key); if(!cell) return;
+  var cn=S.marks[key];
+  cell.textContent="";
+  if(cn&&COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex;
+    cell.style.borderColor=h; cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕";
+  } else { cell.style.borderColor="#bae6fd"; cell.style.background="#f0f9ff"; cell.style.color="#0369a1"; }
+}
+function renderAllSuppCells(){
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_supp_")>=0) renderSuppCell(k); });
 }
 function toggleMsk(vn){
   var body=document.getElementById("msk_body_"+vn);
@@ -875,6 +919,30 @@ function buildVisitCard(vn){
   mskBody.appendChild(orgSecBody);
   div.appendChild(mskBody);
 
+  // ── Supplements section ──────────────────────────────────────
+  var suppToggle=document.createElement("div"); suppToggle.className="supp-toggle";
+  suppToggle.innerHTML='<span class="supp-toggle-label">💊 Supplements</span><span class="supp-toggle-arrow" id="supp_arrow_'+vn+'">▶</span>';
+  suppToggle.addEventListener("click",(function(v){ return function(){
+    var body=document.getElementById("supp_body_"+v);
+    var arr=document.getElementById("supp_arrow_"+v);
+    var open=body.classList.toggle("open");
+    arr.classList.toggle("open",open);
+  }; })(vn));
+  div.appendChild(suppToggle);
+
+  var suppBody=document.createElement("div"); suppBody.className="supp-body"; suppBody.id="supp_body_"+vn;
+  var suppGrid=document.createElement("div"); suppGrid.className="supp-grid";
+  SUPPLEMENTS.forEach(function(supp,si){
+    var key="v"+vn+"_supp_"+si;
+    var row=document.createElement("div"); row.className="supp-row";
+    var lbl=document.createElement("span"); lbl.className="supp-label"; lbl.title=supp; lbl.textContent=supp;
+    var c=document.createElement("div"); c.className="supp-cell"; c.id="sc2_"+key;
+    c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onSuppClick(k); }; })(key));
+    row.appendChild(lbl); row.appendChild(c); suppGrid.appendChild(row);
+  });
+  suppBody.appendChild(suppGrid);
+  div.appendChild(suppBody);
+
   return div;
 }
 
@@ -988,7 +1056,7 @@ function saveAll(){
 }
 
 function renderAll(){
-  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells();
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -1115,6 +1183,14 @@ function buildPrintView(){
     if(any) orgRows.push({label:organ,marks:rm});
   });
 
+  // Gather Supplement data
+  var suppRows=[];
+  SUPPLEMENTS.forEach(function(supp,si){
+    var rm={},any=false;
+    for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_supp_"+si]; if(cn){ rm[v]=cn; any=true; if(v>maxV) maxV=v; } }
+    if(any) suppRows.push({label:supp,marks:rm});
+  });
+
   var content = document.getElementById("pv-content");
 
   if (canUnify) {
@@ -1189,6 +1265,20 @@ function buildPrintView(){
       if(orgRows.length){
         html += '<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'" style="background:#9d174d!important">ORGAN INDICATORS</th></tr>';
         orgRows.forEach(function(row){
+          html += '<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+          for(var w=1;w<=maxWeek;w++){
+            var cellColor=null;
+            for(var v in row.marks){ if(row.marks.hasOwnProperty(v)&&visitWeekMap[v]===w){ cellColor=row.marks[v]; break; } }
+            html += '<td>'+colorBlock(cellColor,true)+'</td>';
+          }
+          html += '</tr>';
+        });
+      }
+
+      // SUPPLEMENTS in unified timeline
+      if(suppRows.length){
+        html += '<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'" style="background:#0369a1!important">SUPPLEMENTS PRESCRIBED</th></tr>';
+        suppRows.forEach(function(row){
           html += '<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
           for(var w=1;w<=maxWeek;w++){
             var cellColor=null;
@@ -1282,6 +1372,23 @@ function buildPrintView(){
       orgRows.forEach(function(row){
         html += '<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
         for(var v=1;v<=orgMaxV;v++) html += '<td>'+colorBlock(row.marks[v],true)+'</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
+
+    // Supplements in fallback layout
+    if(suppRows.length){
+      var suppMaxV=0;
+      suppRows.forEach(function(row){ Object.keys(row.marks).forEach(function(v){ if(parseInt(v)>suppMaxV) suppMaxV=parseInt(v); }); });
+      suppMaxV=Math.max(suppMaxV,1);
+      html += '<div class="pv-section"><div class="pv-section-title">Supplements Prescribed</div>';
+      html += '<table class="tl-table"><thead><tr><th class="row-hdr">Supplement</th>';
+      for(var v=1;v<=suppMaxV;v++) html += '<th>V'+v+'</th>';
+      html += '</tr></thead><tbody>';
+      suppRows.forEach(function(row){
+        html += '<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
+        for(var v=1;v<=suppMaxV;v++) html += '<td>'+colorBlock(row.marks[v],true)+'</td>';
         html += '</tr>';
       });
       html += '</tbody></table></div>';
