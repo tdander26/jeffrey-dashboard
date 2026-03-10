@@ -1143,10 +1143,24 @@ function buildPrintView(){
   // ── effective start: Case Start date, or V1 date as fallback ─
   var effectiveStart=pi.start||S.visitDates[1]||null;
 
+  // ── find all directly-visited (X-marked) symptom weeks in order ──
+  var visitedSymWeekSet={};
+  for(var r=0;r<S.symRows;r++){
+    for(var w=1;w<=26;w++){
+      if(S.symVisited["r"+r+"_c"+w]) visitedSymWeekSet[w]=true;
+    }
+  }
+  var visitedSymWeeks=Object.keys(visitedSymWeekSet).map(Number).sort(function(a,b){return a-b;});
+
   // ── visit → week map ───────────────────────────────────────
+  // Primary: order-based (V1→1st X week, V2→2nd X week, V3→3rd X week, ...)
+  // Fallback: calendar date if we run out of marked weeks
   var visitWeekMap={}, hasVisitDates=false;
   for(var v=1;v<=18;v++){
-    if(S.visitDates[v]&&effectiveStart){
+    var idx=v-1;
+    if(idx<visitedSymWeeks.length){
+      visitWeekMap[v]=visitedSymWeeks[idx]; hasVisitDates=true;
+    } else if(S.visitDates[v]&&effectiveStart){
       var wk=calcWeekNum(effectiveStart,S.visitDates[v]);
       if(wk){ visitWeekMap[v]=wk; hasVisitDates=true; }
     }
