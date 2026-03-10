@@ -1249,6 +1249,38 @@ function buildPrintView(){
     symPreamble+='</tbody></table></div>';
   }
 
+  // ── extra week cols: symptom weeks beyond the last visit ──
+  var maxVisitWk=0;
+  for(var v=1;v<=maxV;v++){ if(visitWeekMap[v]&&visitWeekMap[v]>maxVisitWk) maxVisitWk=visitWeekMap[v]; }
+  var extraWeeks=[];
+  if(hasVisitDates){
+    for(var w=maxVisitWk+1;w<=maxSymW;w++){
+      var hasSymHere=false;
+      for(var r2=0;r2<S.symRows;r2++){ if(S.symptoms["r"+r2+"_c"+w]){ hasSymHere=true; break; } }
+      if(hasSymHere) extraWeeks.push(w);
+    }
+  }
+  var totalCols=maxV+extraWeeks.length;
+
+  // Build a lookup from symRowsByWeek by label for extra week data
+  var symByLabel={};
+  symRowsByWeek.forEach(function(row){ symByLabel[row.label]={marks:row.marks,visited:row.visited}; });
+
+  // Helper: extra-week cells for a row (empty for objective/MSK/organs/supplements)
+  function extraCells(symLabel){
+    var s='';
+    for(var ei=0;ei<extraWeeks.length;ei++){
+      var ew=extraWeeks[ei];
+      if(symLabel!==null){
+        var wd=symByLabel[symLabel]||{marks:{},visited:{}};
+        s+='<td>'+colorBlock(wd.marks[ew],wd.visited[ew])+'</td>';
+      } else {
+        s+='<td></td>';
+      }
+    }
+    return s;
+  }
+
   // ── build single visit-aligned table ──────────────────────
   var html='<table class="tl-table"><thead><tr><th class="row-hdr">Visit →</th>';
   for(var v=1;v<=maxV;v++){
@@ -1257,26 +1289,31 @@ function buildPrintView(){
     if(hasVisitDates&&visitWeekMap[v]) html+='<br><span style="font-size:7px;opacity:.55">Wk'+visitWeekMap[v]+'</span>';
     html+='</th>';
   }
+  for(var ei=0;ei<extraWeeks.length;ei++){
+    html+='<th style="background:#374151!important;font-style:italic;opacity:.85">W'+extraWeeks[ei]+'<br><span style="font-size:7px;opacity:.6">pending</span></th>';
+  }
   html+='</tr></thead><tbody>';
 
-  // SUBJECTIVE — visit-mapped when dates available
-  if(hasVisitDates&&symRows.length){
-    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">SUBJECTIVE COMPLAINTS</th></tr>';
+  // SUBJECTIVE — visit-mapped + extra weeks
+  if(hasVisitDates&&(symRows.length||extraWeeks.length)){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'">SUBJECTIVE COMPLAINTS</th></tr>';
     symRows.forEach(function(row){
       html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
       for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],row.visited[v])+'</td>';
+      html+=extraCells(row.label);
       html+='</tr>';
     });
   }
 
   // OBJECTIVE
   if(Object.keys(secData).length){
-    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">OBJECTIVE FINDINGS</th></tr>';
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'">OBJECTIVE FINDINGS</th></tr>';
     Object.keys(secData).forEach(function(sn){
-      html+='<tr><td class="row-lbl" colspan="'+(maxV+1)+'" style="background:#f1f5f9!important;font-size:9px;font-weight:800;color:#374151;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
+      html+='<tr><td class="row-lbl" colspan="'+(totalCols+1)+'" style="background:#f1f5f9!important;font-size:9px;font-weight:800;color:#374151;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
       secData[sn].forEach(function(row){
         html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
         for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+        html+=extraCells(null);
         html+='</tr>';
       });
     });
@@ -1284,12 +1321,13 @@ function buildPrintView(){
 
   // MSK
   if(Object.keys(mskSecData).length){
-    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#5b21b6!important">MSK — MUSCLE TESTING</th></tr>';
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#5b21b6!important">MSK — MUSCLE TESTING</th></tr>';
     Object.keys(mskSecData).forEach(function(sn){
-      html+='<tr><td class="row-lbl" colspan="'+(maxV+1)+'" style="background:#ede9fe!important;font-size:9px;font-weight:800;color:#5b21b6;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
+      html+='<tr><td class="row-lbl" colspan="'+(totalCols+1)+'" style="background:#ede9fe!important;font-size:9px;font-weight:800;color:#5b21b6;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
       mskSecData[sn].forEach(function(row){
         html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
         for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+        html+=extraCells(null);
         html+='</tr>';
       });
     });
@@ -1297,20 +1335,22 @@ function buildPrintView(){
 
   // ORGANS
   if(orgRows.length){
-    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#9d174d!important">ORGAN INDICATORS</th></tr>';
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#9d174d!important">ORGAN INDICATORS</th></tr>';
     orgRows.forEach(function(row){
       html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
       for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+=extraCells(null);
       html+='</tr>';
     });
   }
 
   // SUPPLEMENTS
   if(suppRows.length){
-    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#0369a1!important">SUPPLEMENTS PRESCRIBED</th></tr>';
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#0369a1!important">SUPPLEMENTS PRESCRIBED</th></tr>';
     suppRows.forEach(function(row){
       html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
       for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+=extraCells(null);
       html+='</tr>';
     });
   }
