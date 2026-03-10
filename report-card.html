@@ -554,13 +554,13 @@ function openCp(key, e) {
     s.classList.toggle("sel", !!(cur && cur.color === hex));
   });
 
-  // position
+  // position — use viewport coords (position:fixed, no scroll offset)
   const rect = e.target.getBoundingClientRect();
-  const mw = 240, mh = 130;
-  let left = rect.left + window.scrollX;
-  let top  = rect.bottom + window.scrollY + 8;
+  const mw = 240, mh = 140;
+  let left = rect.left;
+  let top  = rect.bottom + 8;
   if (left + mw > window.innerWidth - 10) left = window.innerWidth - mw - 10;
-  if (top + mh > window.scrollY + window.innerHeight - 10) top = rect.top + window.scrollY - mh - 8;
+  if (top + mh > window.innerHeight - 10) top  = rect.top - mh - 8;
   modal.style.left = Math.max(8, left) + "px";
   modal.style.top  = Math.max(8, top)  + "px";
 }
@@ -573,7 +573,7 @@ function pickColor(hex) {
     s.classList.toggle("sel", "#"+s.id.replace("sw_","") === hex);
   });
   autoSave();
-  // don't auto-close so user can change color easily
+  closeCp();
 }
 
 function clearMark() {
