@@ -613,7 +613,7 @@ function importData(){
   inp.onchange=function(e){
     var f=e.target.files[0]; if(!f) return;
     var r=new FileReader();
-    r.onload=function(ev){ try{ S=JSON.parse(ev.target.result); localStorage.setItem(STORAGE_KEY,JSON.stringify(S)); renderAll(); }catch(){ alert("Invalid file."); } };
+    r.onload=function(ev){ try{ S=JSON.parse(ev.target.result); localStorage.setItem(STORAGE_KEY,JSON.stringify(S)); renderAll(); }catch(err){ alert("Invalid file."); } };
     r.readAsText(f);
   };
   inp.click();
