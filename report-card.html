@@ -1036,7 +1036,18 @@ function loadVisitDates(){
   for(var v=1;v<=18;v++){
     (function(vn){
       var el=document.getElementById("vd"+vn);
-      if(el){ el.value=S.visitDates[vn]||""; el.addEventListener("input",(function(n){ return function(){ S.visitDates[n]=el.value; autoSave(); }; })(vn)); }
+      if(el){
+        el.value=S.visitDates[vn]||"";
+        el.addEventListener("input",(function(n){ return function(){
+          S.visitDates[n]=el.value;
+          // Auto-fill Case Start from V1 date if still blank
+          if(n===1 && el.value && !S.patientInfo.start){
+            S.patientInfo.start=el.value;
+            var se=document.getElementById("fi_start"); if(se) se.value=el.value;
+          }
+          autoSave();
+        }; })(vn));
+      }
       var ne=document.getElementById("vn"+vn);
       if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; autoSave(); }; })(vn)); }
     })(v);
@@ -1129,11 +1140,14 @@ function buildPrintView(){
   }
   maxV=Math.max(maxV,1);
 
+  // ── effective start: Case Start date, or V1 date as fallback ─
+  var effectiveStart=pi.start||S.visitDates[1]||null;
+
   // ── visit → week map ───────────────────────────────────────
   var visitWeekMap={}, hasVisitDates=false;
   for(var v=1;v<=18;v++){
-    if(S.visitDates[v]&&pi.start){
-      var wk=calcWeekNum(pi.start,S.visitDates[v]);
+    if(S.visitDates[v]&&effectiveStart){
+      var wk=calcWeekNum(effectiveStart,S.visitDates[v]);
       if(wk){ visitWeekMap[v]=wk; hasVisitDates=true; }
     }
   }
@@ -1302,7 +1316,8 @@ function buildPrintView(){
   }
 
   html+='</tbody></table>';
-  if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter case start date + visit dates to map subjective symptoms into the visit columns above.</p>';
+  if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter Visit 1 date to align subjective symptoms with visit columns (V1 date = Week 1 anchor).</p>';
+  else if(!pi.start&&S.visitDates[1]) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">ℹ️ Week 1 anchored to Visit 1 date ('+S.visitDates[1]+').</p>';
 
   content.innerHTML=symPreamble+html;
 
