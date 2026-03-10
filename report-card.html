@@ -369,7 +369,8 @@ var FIELDS = [
 // ─── STATE ───────────────────────────────────────────────────────────────────
 var S = {
   patientInfo:{}, symptoms:{}, symLabels:{}, symRows:8,
-  visitDates:{}, visitNotes:{}, marks:{}
+  visitDates:{}, visitNotes:{}, marks:{},
+  symVisited:{}  // keys where patient actually came in (direct click, not backfill)
 };
 
 // ─── PASSWORD ────────────────────────────────────────────────────────────────
@@ -507,9 +508,20 @@ function addSymRow(){ S.symRows++; renderSymTable(); autoSave(); }
 
 function onSymCellClick(row,week) {
   var key="r"+row+"_c"+week;
-  if(activeColor===null){ delete S.symptoms[key]; renderSymCell(row,week); autoSave(); return; }
-  // toggle off if same
-  if(S.symptoms[key]===activeColor){ delete S.symptoms[key]; renderSymCell(row,week); autoSave(); return; }
+
+  // Clear mode — remove color AND visited flag
+  if(activeColor===null){
+    delete S.symptoms[key];
+    delete S.symVisited[key];
+    renderSymCell(row,week); autoSave(); return;
+  }
+
+  // Toggle off if same color and was a visited cell
+  if(S.symptoms[key]===activeColor && S.symVisited[key]){
+    delete S.symptoms[key];
+    delete S.symVisited[key];
+    renderSymCell(row,week); autoSave(); return;
+  }
 
   // Find last marked week before this one and its color
   var lastMarked=0, prevColor=null;
@@ -518,17 +530,21 @@ function onSymCellClick(row,week) {
     if(S.symptoms[pk]){ lastMarked=w; prevColor=S.symptoms[pk]; break; }
   }
 
-  // Auto-fill gap weeks (lastMarked+1) to (week-1) with PREVIOUS color
-  // This fills the weeks the patient wasn't seen with their last known status
+  // Auto-fill gap weeks with PREVIOUS color — no X (not visited weeks)
   if(prevColor){
     for(var fw=lastMarked+1;fw<week;fw++){
       var fk="r"+row+"_c"+fw;
-      if(!S.symptoms[fk]){ S.symptoms[fk]=prevColor; renderSymCell(row,fw); }
+      if(!S.symptoms[fk]){
+        S.symptoms[fk]=prevColor;
+        // do NOT set symVisited — backfill only, no X
+        renderSymCell(row,fw);
+      }
     }
   }
 
-  // Mark clicked week with active color
+  // Mark the directly-clicked week as visited (shows X)
   S.symptoms[key]=activeColor;
+  S.symVisited[key]=true;
   renderSymCell(row,week);
   autoSave();
 }
@@ -536,10 +552,23 @@ function onSymCellClick(row,week) {
 function renderSymCell(row,week) {
   var cell=document.getElementById("sc_r"+row+"_c"+week);
   if(!cell) return;
-  var cn=S.symptoms["r"+row+"_c"+week];
+  var key="r"+row+"_c"+week;
+  var cn=S.symptoms[key];
+  var visited=S.symVisited[key];
   if(cn && COLOR_MAP[cn]){
     var h=COLOR_MAP[cn].hex;
-    cell.style.borderColor=h; cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕";
+    cell.style.borderColor=h;
+    if(visited){
+      // Actual visit — show X
+      cell.style.background=h+"25";
+      cell.style.color=h;
+      cell.textContent="✕";
+    } else {
+      // Backfilled — solid color block, no X
+      cell.style.background=h+"55";
+      cell.style.color="transparent";
+      cell.textContent="·"; // invisible spacer to keep height
+    }
   } else {
     cell.style.borderColor=cell.style.background=cell.style.color=""; cell.textContent="";
   }
@@ -639,9 +668,16 @@ function importData(){
 }
 
 // ─── PRINT TIMELINE BUILDER ──────────────────────────────────────────────────
-function colorBlock(colorName) {
+function colorBlock(colorName, visited) {
   if(!colorName || !COLOR_MAP[colorName]) return '<span class="tl-empty"></span>';
-  return '<span class="tl-block" style="background:'+COLOR_MAP[colorName].hex+'"></span>';
+  var h = COLOR_MAP[colorName].hex;
+  if(visited){
+    // Actual visit — colored block with X
+    return '<span class="tl-block" style="background:'+h+';color:white;font-size:10px;font-weight:900;line-height:16px;text-align:center;display:inline-block">✕</span>';
+  } else {
+    // Backfill — plain colored block, no X
+    return '<span class="tl-block" style="background:'+h+'55;border:1px solid '+h+'"></span>';
+  }
 }
 
 function buildPrintView() {
@@ -660,12 +696,12 @@ function buildPrintView() {
   // Find rows with at least one mark, find max week used
   var symRows = []; var maxW = 0;
   for(var r=0;r<S.symRows;r++){
-    var rowMarks={}, hasAny=false;
+    var rowMarks={}, rowVisited={}, hasAny=false;
     for(var w=1;w<=26;w++){
       var v=S.symptoms["r"+r+"_c"+w];
-      if(v){ rowMarks[w]=v; hasAny=true; if(w>maxW) maxW=w; }
+      if(v){ rowMarks[w]=v; rowVisited[w]=!!S.symVisited["r"+r+"_c"+w]; hasAny=true; if(w>maxW) maxW=w; }
     }
-    if(hasAny) symRows.push({r:r, label:S.symLabels["r"+r]||("Complaint "+(r+1)), marks:rowMarks});
+    if(hasAny) symRows.push({r:r, label:S.symLabels["r"+r]||("Complaint "+(r+1)), marks:rowMarks, visited:rowVisited});
   }
   maxW = Math.max(maxW, 1);
 
@@ -678,7 +714,7 @@ function buildPrintView() {
     symHtml+='</tr></thead><tbody>';
     symRows.forEach(function(row){
       symHtml+='<tr><td class="row-lbl">'+row.label+'</td>';
-      for(var w=1;w<=maxW;w++) symHtml+='<td>'+colorBlock(row.marks[w])+'</td>';
+      for(var w=1;w<=maxW;w++) symHtml+='<td>'+colorBlock(row.marks[w], row.visited[w])+'</td>';
       symHtml+='</tr>';
     });
     symHtml+='</tbody></table>';
