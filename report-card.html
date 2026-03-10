@@ -48,17 +48,13 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .pt-name{font-size:16px;font-weight:800;color:#1a1a2e;margin-bottom:6px}
 .pt-meta{font-size:12px;color:#64748b;line-height:1.8}
 .pt-meta span{display:block}
-.pt-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
-.pt-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd}
-.pt-status-active{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
-.pt-status-discharged{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
-.pt-status-on-hold{background:#fefce8;color:#854d0e;border:1px solid #fde68a}
-.pt-visits{background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe}
+.pt-badge{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd}
+.pt-status-badge{display:inline-block;margin-left:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.pt-status-active{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.pt-status-discharged{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
+.pt-status-on-hold{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.pt-visits-badge{display:inline-block;margin-left:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd}
 .pt-modified{font-size:10px;color:#94a3b8;margin-top:8px}
-/* backup bar */
-#backupBar{border-radius:10px;padding:8px 16px;margin-bottom:14px;font-size:12px;font-weight:600;display:none;align-items:center;gap:8px}
-.fg select{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s;background:white}
-.fg select:focus{border-color:#3b82f6}
 .pt-del{position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:50%;background:#fee2e2;color:#ef4444;border:none;cursor:pointer;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
 .pt-card:hover .pt-del{opacity:1}
 .pt-del:hover{background:#ef4444;color:white}
@@ -72,6 +68,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
    PATIENT RECORD (main app)
 ══════════════════════════════════════ */
 #app{max-width:1300px;margin:0 auto;padding:20px;display:none}
+
+/* ── BACKUP STATUS ── */
+.backup-status{font-size:11px;margin-top:4px;padding:4px 10px;border-radius:6px;display:inline-block}
+.backup-green{background:#dcfce7;color:#166534}
+.backup-amber{background:#fef3c7;color:#92400e}
+.backup-red{background:#fee2e2;color:#dc2626}
 
 /* ── COLOR BAR ── */
 #colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:12px 18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -91,8 +93,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .field-row{display:flex;gap:14px;flex-wrap:wrap}
 .fg{flex:1;min-width:170px}
 .fg label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
-.fg input{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
-.fg input:focus{border-color:#3b82f6}
+.fg input,.fg select{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:#3b82f6}
 
 /* SYM TABLE */
 .sym-scroll{overflow-x:auto;margin-top:8px}
@@ -157,6 +159,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   .pv-leg-dot{width:14px;height:14px;border-radius:3px}
   .pv-section{margin-bottom:20px}
   .pv-section-title{font-size:13px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 0;border-bottom:2px solid #e2e8f0}
+  .pv-note{font-size:10px;color:#64748b;font-style:italic;margin-bottom:8px}
   .tl-table{border-collapse:collapse;width:100%;font-size:9px}
   .tl-table th{background:#1a1a2e!important;color:white!important;padding:4px 3px;text-align:center;font-size:9px;white-space:nowrap;font-weight:700}
   .tl-table th.row-hdr{text-align:left;min-width:160px;padding-left:6px;font-size:10px}
@@ -207,8 +210,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#1a1a2e"></div>✕ = Actual Visit &nbsp; □ = Continued Status</div>
     </div>
   </div>
-  <div class="pv-section"><div class="pv-section-title">Subjective Symptom Timeline</div><div id="pv-sym"></div></div>
-  <div class="pv-section"><div class="pv-section-title">Objective Clinical Findings Timeline</div><div id="pv-obj"></div></div>
+  <div id="pv-content"></div>
   <div class="pv-footer">
     <span>Momentum Health &amp; Wellness | Applied Kinesiology Clinical Documentation</span>
     <span id="pv-date"></span>
@@ -247,6 +249,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <div>
       <h1 id="appPatientName">🏥 Patient Record</h1>
       <div class="sub">Applied Kinesiology Progress Report Card</div>
+      <div id="backupStatus"></div>
     </div>
     <div class="hbtns">
       <button class="btn btn-light" onclick="backToDash()">← Patients</button>
@@ -256,8 +259,6 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
-
-  <div id="backupBar"></div>
 
   <div id="colorBar">
     <span class="cb-label">Active Color</span>
@@ -282,11 +283,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave()"></div>
       <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
-      <div class="fg"><label>Case Status</label>
+      <div class="fg"><label>Status</label>
         <select id="fi_status" onchange="autoSave()">
-          <option value="active">🟢 Active</option>
-          <option value="discharged">🔵 Discharged</option>
-          <option value="on-hold">🟡 On Hold</option>
+          <option value="active">Active</option>
+          <option value="discharged">Discharged</option>
+          <option value="on-hold">On Hold</option>
         </select>
       </div>
     </div>
@@ -325,7 +326,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 //  CONFIG
 // ════════════════════════════════════════════════════════════════
 var DEFAULT_PW   = "Momentum1!";
-var INDEX_KEY    = "mhw_index";   // [{id,name,dob,mrn,modified}]
+var INDEX_KEY    = "mhw_index";   // [{id,name,dob,mrn,modified,status,visitCount}]
 var PT_PREFIX    = "mhw_pt_";     // + patientId = full record
 
 var COLOR_MAP = {
@@ -392,7 +393,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{},symptoms:{},symLabels:{},symRows:8,visitDates:{},visitNotes:{},marks:{},symVisited:{}};
+  return {patientInfo:{status:"active"},symptoms:{},symLabels:{},symRows:8,visitDates:{},visitNotes:{},marks:{},symVisited:{}};
 }
 var S = blankState();
 
@@ -440,23 +441,39 @@ function loadIndex() {
 function saveIndex(idx) {
   localStorage.setItem(INDEX_KEY,JSON.stringify(idx));
 }
-function updateIndex(id, info, visitCount) {
-  var idx=loadIndex();
-  var i=idx.findIndex(function(p){ return p.id===id; });
-  var entry={id:id,name:info.name||"Unnamed Patient",dob:info.dob||"",mrn:info.mrn||"",start:info.start||"",status:info.status||"active",visitCount:visitCount||0,modified:new Date().toISOString()};
-  if(i>=0) idx[i]=entry; else idx.unshift(entry);
-  saveIndex(idx);
-}
 
 function countVisits() {
-  var count=0;
-  for(var v=1;v<=18;v++){
-    if(S.visitDates[v]) { count++; continue; }
-    var prefix="v"+v+"_";
-    var keys=Object.keys(S.marks);
-    for(var k=0;k<keys.length;k++){ if(keys[k].indexOf(prefix)===0){ count++; break; } }
+  var count = 0;
+  for (var v = 1; v <= 18; v++) {
+    var hasDate = S.visitDates[v] && S.visitDates[v].trim() !== "";
+    var hasMark = false;
+    var prefix = "v" + v + "_";
+    for (var key in S.marks) {
+      if (S.marks.hasOwnProperty(key) && key.indexOf(prefix) === 0) {
+        hasMark = true;
+        break;
+      }
+    }
+    if (hasDate || hasMark) count++;
   }
   return count;
+}
+
+function updateIndex(id, info) {
+  var idx=loadIndex();
+  var i=idx.findIndex(function(p){ return p.id===id; });
+  var entry={
+    id:id,
+    name:info.name||"Unnamed Patient",
+    dob:info.dob||"",
+    mrn:info.mrn||"",
+    start:info.start||"",
+    status:info.status||"active",
+    visitCount:countVisits(),
+    modified:new Date().toISOString()
+  };
+  if(i>=0) idx[i]=entry; else idx.unshift(entry);
+  saveIndex(idx);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -469,6 +486,19 @@ function showDash() {
   document.getElementById("dash").style.display="block";
   document.getElementById("dashSearch").value="";
   renderDash();
+}
+
+function getStatusBadgeHtml(status) {
+  var statusClass = "pt-status-active";
+  var statusLabel = "Active";
+  if (status === "discharged") {
+    statusClass = "pt-status-discharged";
+    statusLabel = "Discharged";
+  } else if (status === "on-hold") {
+    statusClass = "pt-status-on-hold";
+    statusLabel = "On Hold";
+  }
+  return '<span class="pt-status-badge ' + statusClass + '">' + statusLabel + '</span>';
 }
 
 function renderDash() {
@@ -495,9 +525,7 @@ function renderDash() {
     var card=document.createElement("div");
     card.className="pt-card";
     var mod=pt.modified?new Date(pt.modified).toLocaleDateString():"";
-    var statusClass=pt.status==="discharged"?"pt-status-discharged":pt.status==="on-hold"?"pt-status-on-hold":"pt-status-active";
-    var statusLabel=pt.status==="discharged"?"🔵 Discharged":pt.status==="on-hold"?"🟡 On Hold":"🟢 Active";
-    var vcLabel=pt.visitCount?pt.visitCount+" visit"+(pt.visitCount===1?"":"s"):"No visits yet";
+    var visitBadge = pt.visitCount ? '<span class="pt-visits-badge">' + pt.visitCount + ' visit' + (pt.visitCount === 1 ? '' : 's') + '</span>' : '';
     card.innerHTML=
       '<div class="pt-name">'+escHtml(pt.name||"Unnamed Patient")+'</div>'+
       '<div class="pt-meta">'+
@@ -505,10 +533,9 @@ function renderDash() {
         (pt.mrn?'<span>MRN: '+escHtml(pt.mrn)+'</span>':'')+
         (pt.start?'<span>Case Start: '+escHtml(pt.start)+'</span>':'')+
       '</div>'+
-      '<div class="pt-badges">'+
-        '<span class="pt-badge '+statusClass+'">'+statusLabel+'</span>'+
-        '<span class="pt-badge pt-visits">'+vcLabel+'</span>'+
-      '</div>'+
+      '<span class="pt-badge">Applied Kinesiology</span>'+
+      getStatusBadgeHtml(pt.status)+
+      visitBadge+
       (mod?'<div class="pt-modified">Last updated: '+mod+'</div>':'')+
       '<button class="pt-del" title="Delete patient" onclick="deletePatient(event,\''+pt.id+'\')">✕</button>';
     card.addEventListener("click",function(){ openPatient(pt.id); });
@@ -521,6 +548,7 @@ function newPatient() {
   currentPatientId=id;
   S=blankState();
   S.patientInfo.provider="Dr. Todd Anderson";
+  S.patientInfo.status="active";
   // Save empty record so it appears in index
   updateIndex(id,S.patientInfo);
   localStorage.setItem(PT_PREFIX+id,JSON.stringify(S));
@@ -546,6 +574,7 @@ function deletePatient(e,id) {
   idx=idx.filter(function(p){ return p.id!==id; });
   saveIndex(idx);
   localStorage.removeItem(PT_PREFIX+id);
+  localStorage.removeItem("mhw_export_"+id);
   renderDash();
 }
 
@@ -555,6 +584,34 @@ function backToDash() {
 }
 
 function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ════════════════════════════════════════════════════════════════
+//  BACKUP STATUS
+// ════════════════════════════════════════════════════════════════
+function updateBackupStatus() {
+  var el = document.getElementById("backupStatus");
+  if (!el || !currentPatientId) return;
+  var exportKey = "mhw_export_" + currentPatientId;
+  var lastExport = localStorage.getItem(exportKey);
+  var html = "";
+  if (!lastExport) {
+    html = '<span class="backup-status backup-red">⚠️ Never exported — backup recommended</span>';
+  } else {
+    var exportDate = new Date(lastExport);
+    var now = new Date();
+    var diffMs = now - exportDate;
+    var diffDays = diffMs / (1000 * 60 * 60 * 24);
+    var dateStr = exportDate.toLocaleDateString();
+    if (diffDays < 1) {
+      html = '<span class="backup-status backup-green">✓ Last exported: ' + dateStr + '</span>';
+    } else if (diffDays <= 7) {
+      html = '<span class="backup-status backup-amber">📁 Last exported: ' + dateStr + '</span>';
+    } else {
+      html = '<span class="backup-status backup-red">⚠️ Last exported: ' + dateStr + ' — backup recommended</span>';
+    }
+  }
+  el.innerHTML = html;
+}
 
 // ════════════════════════════════════════════════════════════════
 //  SHOW PATIENT RECORD
@@ -571,6 +628,7 @@ function showApp() {
   clearAllCells();
   // Render
   renderAll();
+  updateBackupStatus();
   window.scrollTo(0,0);
 }
 
@@ -745,17 +803,11 @@ var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",
 function loadPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
-    if(!el) return;
-    var val=S.patientInfo[PI_MAP[id]]||"";
-    if(el.tagName==="SELECT"){
-      el.value=val||"active";
-    } else {
-      el.value=val;
-    }
+    if(el) el.value=S.patientInfo[PI_MAP[id]]||"";
   });
+  // Update header name
   var n=S.patientInfo.name;
   document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
-  updateBackupBar();
 }
 function collectPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
@@ -764,29 +816,6 @@ function collectPatientInfo(){
   });
   var n=S.patientInfo.name;
   document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
-}
-
-function updateBackupBar(){
-  var bar=document.getElementById("backupBar"); if(!bar||!currentPatientId) return;
-  var raw=localStorage.getItem("mhw_export_"+currentPatientId);
-  var msg,bg,color,border;
-  if(!raw){
-    msg="⚠️ Never exported — use ⬇ Export to back up this patient's data";
-    bg="#fef2f2"; color="#991b1b"; border="1px solid #fca5a5";
-  } else {
-    var days=Math.floor((Date.now()-new Date(raw).getTime())/(1000*60*60*24));
-    if(days<1){
-      msg="✓ Backed up today"; bg="#f0fdf4"; color="#166534"; border="1px solid #bbf7d0";
-    } else if(days<=7){
-      msg="⚠️ Last exported "+days+" day"+(days>1?"s":"")+" ago";
-      bg="#fffbeb"; color="#854d0e"; border="1px solid #fde68a";
-    } else {
-      msg="🔴 Last exported "+days+" days ago — please export soon";
-      bg="#fef2f2"; color="#991b1b"; border="1px solid #fca5a5";
-    }
-  }
-  bar.style.cssText="display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 16px;margin-bottom:14px;font-size:12px;font-weight:600;background:"+bg+";color:"+color+";border:"+border;
-  bar.textContent=msg;
 }
 
 function loadVisitDates(){
@@ -807,7 +836,7 @@ function saveAll(){
   if(!currentPatientId) return;
   collectPatientInfo();
   localStorage.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
-  updateIndex(currentPatientId,S.patientInfo,countVisits());
+  updateIndex(currentPatientId,S.patientInfo);
   var t=document.getElementById("toast"); t.style.opacity="1";
   setTimeout(function(){ t.style.opacity="0"; },1600);
 }
@@ -834,11 +863,15 @@ function exportData(){
   var blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
   var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
   a.download="momentum_"+name+"_"+date+".json"; a.click();
-  if(currentPatientId){ localStorage.setItem("mhw_export_"+currentPatientId,new Date().toISOString()); updateBackupBar(); }
+  // Save export timestamp
+  if(currentPatientId){
+    localStorage.setItem("mhw_export_"+currentPatientId, new Date().toISOString());
+    updateBackupStatus();
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
-//  PRINT TIMELINE
+//  PRINT TIMELINE — UNIFIED
 // ════════════════════════════════════════════════════════════════
 function colorBlock(colorName,visited){
   if(!colorName||!COLOR_MAP[colorName]) return '<span class="tl-empty"></span>';
@@ -847,12 +880,14 @@ function colorBlock(colorName,visited){
   return '<span class="tl-block" style="background:'+h+'55;border:1px solid '+h+'"></span>';
 }
 
-// Map visit number to week number using case start date + visit date
-function visitToWeek(visitNum) {
-  var startStr=S.patientInfo.start, visitStr=S.visitDates[visitNum];
-  if(!startStr||!visitStr) return null;
-  var wk=Math.floor((new Date(visitStr)-new Date(startStr))/(7*24*60*60*1000))+1;
-  return Math.max(1,Math.min(26,wk));
+function calcWeekNum(startDate, visitDate) {
+  if (!startDate || !visitDate) return null;
+  var start = new Date(startDate);
+  var visit = new Date(visitDate);
+  if (isNaN(start.getTime()) || isNaN(visit.getTime())) return null;
+  var diffMs = visit - start;
+  var weekNum = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
+  return Math.max(1, Math.min(26, weekNum));
 }
 
 function buildPrintView(){
@@ -862,155 +897,158 @@ function buildPrintView(){
   if(pi.start)    meta.push("<strong>Case Start:</strong> "+pi.start);
   if(pi.provider) meta.push("<strong>Provider:</strong> "+escHtml(pi.provider));
   if(pi.mrn)      meta.push("<strong>MRN:</strong> "+escHtml(pi.mrn));
+  if(pi.status)   meta.push("<strong>Status:</strong> "+escHtml(pi.status.charAt(0).toUpperCase()+pi.status.slice(1)));
   document.getElementById("pv-meta").innerHTML=meta.join(" &nbsp;|&nbsp; ");
   document.getElementById("pv-date").textContent="Printed: "+new Date().toLocaleDateString();
 
-  // Build visit→week map
-  var visitWeekMap={}, hasAnyDates=false;
-  for(var v=1;v<=18;v++){
-    var wk=visitToWeek(v);
-    if(wk){ visitWeekMap[v]=wk; hasAnyDates=true; }
+  var startDate = pi.start;
+  var canUnify = !!startDate;
+  
+  // Check if we have visit dates to map to weeks
+  var visitWeekMap = {};
+  for (var v = 1; v <= 18; v++) {
+    if (S.visitDates[v] && startDate) {
+      var wk = calcWeekNum(startDate, S.visitDates[v]);
+      if (wk) visitWeekMap[v] = wk;
+    }
   }
+  var hasVisitDates = Object.keys(visitWeekMap).length > 0;
+  canUnify = canUnify && hasVisitDates;
 
-  // ── SUBJECTIVE rows ──────────────────────────────────────────
-  var symRows=[],maxW=0;
+  // Gather subjective data
+  var symRows=[],maxSymW=0;
   for(var r=0;r<S.symRows;r++){
     var rm={},rv={},any=false;
     for(var w=1;w<=26;w++){
-      var sv=S.symptoms["r"+r+"_c"+w];
-      if(sv){ rm[w]=sv; rv[w]=!!S.symVisited["r"+r+"_c"+w]; any=true; if(w>maxW) maxW=w; }
+      var v=S.symptoms["r"+r+"_c"+w];
+      if(v){ rm[w]=v; rv[w]=!!S.symVisited["r"+r+"_c"+w]; any=true; if(w>maxSymW) maxSymW=w; }
     }
     if(any) symRows.push({label:S.symLabels["r"+r]||("Complaint "+(r+1)),marks:rm,visited:rv});
   }
 
-  // ── OBJECTIVE rows mapped to weeks ───────────────────────────
-  var secData={}, maxObjW=0;
+  // Gather objective data
+  var secData={},maxV=0;
   FIELDS.forEach(function(sec,si){
     sec.items.forEach(function(item,ii){
       if(item.opts){
         item.opts.forEach(function(opt,oi){
           var rm={},any=false;
-          for(var v=1;v<=18;v++){
-            var cn=S.marks[mkKey(v,si,ii,oi)];
-            if(cn){
-              any=true;
-              if(hasAnyDates && visitWeekMap[v]){
-                var wk=visitWeekMap[v];
-                rm[wk]=cn; if(wk>maxObjW) maxObjW=wk;
-              } else {
-                rm["V"+v]=cn; // fallback key
-              }
-            }
-          }
+          for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii,oi)]; if(cn){ rm[v]=cn; any=true; if(v>maxV) maxV=v; } }
           if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl+" ("+opt+")",marks:rm}); }
         });
       } else {
         var rm={},any=false;
-        for(var v=1;v<=18;v++){
-          var cn=S.marks[mkKey(v,si,ii)];
-          if(cn){
-            any=true;
-            if(hasAnyDates && visitWeekMap[v]){
-              var wk=visitWeekMap[v];
-              rm[wk]=cn; if(wk>maxObjW) maxObjW=wk;
-            } else {
-              rm["V"+v]=cn;
-            }
-          }
-        }
+        for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii)]; if(cn){ rm[v]=cn; any=true; if(v>maxV) maxV=v; } }
         if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl,marks:rm}); }
       }
     });
   });
-  var hasObj=Object.keys(secData).length>0;
 
-  // ── UNIFIED TIMELINE (when dates available) ──────────────────
-  if(hasAnyDates && (symRows.length||hasObj)){
-    var maxWeek=Math.max(maxW,maxObjW,1);
-    var html='<table class="tl-table"><thead><tr><th class="row-hdr">Finding / Complaint</th>';
-    for(var w=1;w<=maxWeek;w++) html+='<th>W'+w+'</th>';
-    html+='</tr></thead><tbody>';
+  var content = document.getElementById("pv-content");
 
-    // Subjective section
-    if(symRows.length){
-      html+='<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'">▸ SUBJECTIVE SYMPTOMS</th></tr>';
-      symRows.forEach(function(row){
-        html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
-        for(var w=1;w<=maxWeek;w++) html+='<td>'+colorBlock(row.marks[w],row.visited[w])+'</td>';
-        html+='</tr>';
-      });
+  if (canUnify) {
+    // UNIFIED TIMELINE
+    var maxWeek = maxSymW;
+    // Also find max week from objective findings
+    for (var v = 1; v <= maxV; v++) {
+      if (visitWeekMap[v] && visitWeekMap[v] > maxWeek) maxWeek = visitWeekMap[v];
     }
+    maxWeek = Math.max(maxWeek, 1);
 
-    // Visit marker row (shows which weeks had visits)
-    html+='<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'">▸ OBJECTIVE CLINICAL FINDINGS</th></tr>';
-    // Visit tick row
-    html+='<tr><td class="row-lbl" style="font-style:italic;color:#6b7280">Visit markers</td>';
-    for(var w=1;w<=maxWeek;w++){
-      var visitAtWeek='';
-      Object.keys(visitWeekMap).forEach(function(v){ if(visitWeekMap[v]===w) visitAtWeek+='V'+v+' '; });
-      html+='<td style="font-size:8px;color:#6b7280;text-align:center;vertical-align:middle">'+visitAtWeek+'</td>';
-    }
-    html+='</tr>';
-
-    // Objective findings grouped by section
-    if(hasObj){
-      Object.keys(secData).forEach(function(sn){
-        html+='<tr><td class="row-lbl" colspan="'+(maxWeek+1)+'" style="background:#f3f4f6!important;font-size:9px;color:#374151;letter-spacing:.06em;text-transform:uppercase;font-weight:800">'+sn+'</td></tr>';
-        secData[sn].forEach(function(row){
-          html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
-          for(var w=1;w<=maxWeek;w++) html+='<td>'+colorBlock(row.marks[w],true)+'</td>';
-          html+='</tr>';
-        });
-      });
+    var html = '<div class="pv-section"><div class="pv-section-title">Unified Progress Timeline (by Week)</div>';
+    
+    if (!symRows.length && !Object.keys(secData).length) {
+      html += '<p style="font-size:11px;color:#94a3b8;font-style:italic">No data recorded.</p>';
     } else {
-      html+='<tr><td class="row-lbl" colspan="'+(maxWeek+1)+'" style="font-style:italic;color:#94a3b8;font-size:10px">No objective findings recorded.</td></tr>';
-    }
+      html += '<table class="tl-table"><thead><tr><th class="row-hdr">Finding / Complaint</th>';
+      for (var w = 1; w <= maxWeek; w++) html += '<th>W' + w + '</th>';
+      html += '</tr></thead><tbody>';
 
-    html+='</tbody></table>';
-    document.getElementById("pv-sym").innerHTML=html;
-    document.getElementById("pv-obj").innerHTML='';
-    document.querySelector("#printView .pv-section:last-of-type").style.display="none";
+      // SUBJECTIVE section header
+      if (symRows.length) {
+        html += '<tr><th class="sec-hdr" colspan="' + (maxWeek + 1) + '">SUBJECTIVE — Patient Complaints</th></tr>';
+        symRows.forEach(function(row) {
+          html += '<tr><td class="row-lbl sub-lbl">' + escHtml(row.label) + '</td>';
+          for (var w = 1; w <= maxWeek; w++) html += '<td>' + colorBlock(row.marks[w], row.visited[w]) + '</td>';
+          html += '</tr>';
+        });
+      }
+
+      // OBJECTIVE section header and rows
+      if (Object.keys(secData).length) {
+        html += '<tr><th class="sec-hdr" colspan="' + (maxWeek + 1) + '">OBJECTIVE — Clinical Findings</th></tr>';
+        Object.keys(secData).forEach(function(sn) {
+          html += '<tr><th class="sec-hdr" colspan="' + (maxWeek + 1) + '" style="background:#64748b!important;font-size:8px">' + sn + '</th></tr>';
+          secData[sn].forEach(function(row) {
+            html += '<tr><td class="row-lbl sub-lbl">' + escHtml(row.label) + '</td>';
+            for (var w = 1; w <= maxWeek; w++) {
+              // Find if any visit maps to this week
+              var cellColor = null;
+              for (var v in row.marks) {
+                if (row.marks.hasOwnProperty(v) && visitWeekMap[v] === w) {
+                  cellColor = row.marks[v];
+                  break;
+                }
+              }
+              html += '<td>' + colorBlock(cellColor, true) + '</td>';
+            }
+            html += '</tr>';
+          });
+        });
+      }
+
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+    content.innerHTML = html;
 
   } else {
-    // ── FALLBACK: two separate tables ─────────────────────────
-    document.querySelector("#printView .pv-section:last-of-type").style.display="block";
-    var maxW2=Math.max(maxW,1);
-    var sh='';
-    if(!symRows.length){ sh='<p style="font-size:11px;color:#94a3b8;font-style:italic">No symptom data recorded.</p>'; }
-    else {
-      sh='<table class="tl-table"><thead><tr><th class="row-hdr">Complaint</th>';
-      for(var w=1;w<=maxW2;w++) sh+='<th>W'+w+'</th>';
-      sh+='</tr></thead><tbody>';
+    // FALLBACK: Two separate tables
+    var html = '<div class="pv-note">⚠️ Case start date or visit dates not set — showing separate subjective/objective tables.</div>';
+    
+    // Subjective
+    html += '<div class="pv-section"><div class="pv-section-title">Subjective Symptom Timeline</div>';
+    if(!symRows.length){ 
+      html += '<p style="font-size:11px;color:#94a3b8;font-style:italic">No symptom data recorded.</p>'; 
+    } else {
+      maxSymW = Math.max(maxSymW, 1);
+      html += '<table class="tl-table"><thead><tr><th class="row-hdr">Complaint</th>';
+      for(var w=1;w<=maxSymW;w++) html += '<th>W'+w+'</th>';
+      html += '</tr></thead><tbody>';
       symRows.forEach(function(row){
-        sh+='<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
-        for(var w=1;w<=maxW2;w++) sh+='<td>'+colorBlock(row.marks[w],row.visited[w])+'</td>';
-        sh+='</tr>';
+        html += '<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
+        for(var w=1;w<=maxSymW;w++) html += '<td>'+colorBlock(row.marks[w],row.visited[w])+'</td>';
+        html += '</tr>';
       });
-      sh+='</tbody></table>';
-      if(!hasAnyDates) sh+='<p style="font-size:10px;color:#94a3b8;margin-top:6px;font-style:italic">💡 Enter visit dates to enable unified timeline view.</p>';
+      html += '</tbody></table>';
     }
-    document.getElementById("pv-sym").innerHTML=sh;
+    html += '</div>';
 
-    var oh='';
-    if(!hasObj){ oh='<p style="font-size:11px;color:#94a3b8;font-style:italic">No objective findings recorded.</p>'; }
-    else {
-      var maxV=0;
-      Object.keys(secData).forEach(function(sn){ secData[sn].forEach(function(row){ Object.keys(row.marks).forEach(function(k){ var n=parseInt(k.replace("V","")); if(n>maxV) maxV=n; }); }); });
-      maxV=Math.max(maxV,1);
-      oh='<table class="tl-table"><thead><tr><th class="row-hdr">Finding</th>';
-      for(var v=1;v<=maxV;v++) oh+='<th>V'+v+(S.visitDates[v]?"<br><span style='font-size:8px;opacity:.7'>"+S.visitDates[v]+"</span>":"")+'</th>';
-      oh+='</tr></thead><tbody>';
+    // Objective
+    html += '<div class="pv-section"><div class="pv-section-title">Objective Clinical Findings Timeline</div>';
+    if(!Object.keys(secData).length){ 
+      html += '<p style="font-size:11px;color:#94a3b8;font-style:italic">No objective findings recorded.</p>'; 
+    } else {
+      maxV = Math.max(maxV, 1);
+      html += '<table class="tl-table"><thead><tr><th class="row-hdr">Finding</th>';
+      for(var v=1;v<=maxV;v++){
+        var dt=S.visitDates[v]?"<br><span style='font-size:8px;opacity:.7'>"+S.visitDates[v]+"</span>":"";
+        html += '<th>V'+v+dt+'</th>';
+      }
+      html += '</tr></thead><tbody>';
       Object.keys(secData).forEach(function(sn){
-        oh+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">'+sn+'</th></tr>';
+        html += '<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">'+sn+'</th></tr>';
         secData[sn].forEach(function(row){
-          oh+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
-          for(var v=1;v<=maxV;v++) oh+='<td>'+colorBlock(row.marks["V"+v],true)+'</td>';
-          oh+='</tr>';
+          html += '<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+          for(var v=1;v<=maxV;v++) html += '<td>'+colorBlock(row.marks[v],true)+'</td>';
+          html += '</tr>';
         });
       });
-      oh+='</tbody></table>';
+      html += '</tbody></table>';
     }
-    document.getElementById("pv-obj").innerHTML=oh;
+    html += '</div>';
+
+    content.innerHTML = html;
   }
 }
 
