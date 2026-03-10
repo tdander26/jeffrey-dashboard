@@ -713,19 +713,20 @@ function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(
 //  MSK MUSCLE LIST
 // ════════════════════════════════════════════════════════════════
 var MSK_SECTIONS=[
-  {sec:"Neck / Jaw", muscles:["Deep Neck Flexors","Neck Extensor","Scalenes","SCM","Masseter","Pterygoid (Med/Lat)","Temporalis"]},
-  {sec:"Shoulder / Upper Arm", muscles:["Biceps Long Head","Coracobrachialis","Deltoid Ant","Deltoid Mid","Deltoid Post","Infraspinatus","Lat Dorsi","Levator Scapulae","Lower Trap","Mid Trap","Pec Clavicular","Pec Minor","Pec Sternal","Rhomboid","Serratus Anterior","Subclavicular","Subscapularis","Supraspinatus","Teres Major","Teres Minor","Tricep (Long Head)","Upper Trap"]},
-  {sec:"Elbow / Wrist / Hand", muscles:["Brachialis","Brachioradialis","Pronator Quadratus","Pronator Teres","Supinator","Tricep (Med/Lat)","Wrist Extensor","Wrist Flexor","Finger Extensors","Finger Flexors"]},
-  {sec:"Hip / Pelvis", muscles:["Adductors","Glut Max","Glut Med","Glut Min","Gracilis","Iliacus","Pectineus","Piriformis/Gemellus","Psoas","QL","Rectus Femoris","Sartorius","TFL"]},
-  {sec:"Knee", muscles:["Hamstrings (Med/Lat)","Popliteus","Quads (Med/Lat)"]},
-  {sec:"Ankle / Foot", muscles:["Anterior Tibialis","Gastrocnemius (Med/Lat)","Peroneus Brevis","Peroneus Longus","Peroneus Tertius","Posterior Tibialis","Soleus"]},
-  {sec:"Trunk / Core", muscles:["Abdominals","C/S T/S L/S","Diaphragm","Iliolumbar Lig","Obliques"]}
+  {sec:"Neck", muscles:["Deep Neck Flexors","Masseter","Neck Extensor","Pterygoid (Med/Lat)","Scalenes","SCM","Temporalis"]},
+  {sec:"Shoulder", muscles:["Biceps Long Head","Coracobrachialis","Deltoid - Anterior","Deltoid - Middle","Deltoid - Posterior","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Lower Trapezius","Middle Trapezius","Pec Clavicular","Pec Minor","Pec Sternal","Rhomboid","Serratus Anterior","Subclavicular","Subscapularis","Supraspinatus","Teres Major","Teres Minor","Tricep (Long Head)","Upper Trapezius"]},
+  {sec:"Wrist", muscles:["Finger Extensors","Finger Flexors","Pronator Quadratus","Wrist Extensor","Wrist Flexor"]},
+  {sec:"Elbow", muscles:["Brachialis","Brachioradialis","Pronator Teres","Supinator","Tricep (Med/Lat)"]},
+  {sec:"Hip", muscles:["Adductors","Gluteus Maximus","Gluteus Medius","Gluteus Minimus","Gracilis","Iliacus","Pectineus","Piriformis/Gemellus","Psoas","Quadratus Lumborum","Rectus Femoris","Sartorius","TFL"]},
+  {sec:"Knee", muscles:["Gastrocnemius (Med/Lat)","Hamstring (Med/Lat)","Popliteus","Quads (Med/Lat)"]},
+  {sec:"Ankle", muscles:["Anterior Tibialis","Peroneus Brevis","Peroneus Longus","Peroneus Tertius","Posterior Tibialis","Soleus"]},
+  {sec:"Trunk", muscles:["Abdominals","C/S, T/S, L/S","Diaphragm","Iliolumbar Ligament","Obliques"]}
 ];
 var MSK_ORGANS=[
-  "Adrenal (Med/Cort)","Bladder","Brain","Diaphragm","Ears/Eyes","Gallbladder","Heart",
-  "Immune Spleen","Immune Thymus","Kidney","Large Intestine","Liver","Lower Immune",
+  "Adrenal (Medulla/Cortex)","Bladder","Brain","Diaphragm","Ears/Eyes","Gallbladder","Heart",
+  "Immune - Spleen","Immune - Thymus","Kidney","Large Intestine","Liver","Lower Immune",
   "Lung","Ovary","Pancreas","Parotid","Pineal","Pituitary","Prostate",
-  "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus","EPI","Dysglycemia"
+  "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus"
 ];
 
 function onMskClick(key){
@@ -1059,6 +1060,31 @@ function buildPrintView(){
     });
   });
 
+  // Gather MSK muscle data (keyed by visit number)
+  var mskSecData={};
+  MSK_SECTIONS.forEach(function(sect,si){
+    sect.muscles.forEach(function(muscle,mi){
+      var rmR={},rmL={},anyR=false,anyL=false;
+      for(var v=1;v<=18;v++){
+        var kr=S.marks["v"+v+"_msk_"+si+"_"+mi+"_R"]; if(kr){ rmR[v]=kr; anyR=true; if(v>maxV) maxV=v; }
+        var kl=S.marks["v"+v+"_msk_"+si+"_"+mi+"_L"]; if(kl){ rmL[v]=kl; anyL=true; if(v>maxV) maxV=v; }
+      }
+      if(anyR||anyL){
+        if(!mskSecData[sect.sec]) mskSecData[sect.sec]=[];
+        if(anyR) mskSecData[sect.sec].push({label:muscle+" (R)",marks:rmR});
+        if(anyL) mskSecData[sect.sec].push({label:muscle+" (L)",marks:rmL});
+      }
+    });
+  });
+
+  // Gather Organ data
+  var orgRows=[];
+  MSK_ORGANS.forEach(function(organ,oi){
+    var rm={},any=false;
+    for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_org_"+oi]; if(cn){ rm[v]=cn; any=true; if(v>maxV) maxV=v; } }
+    if(any) orgRows.push({label:organ,marks:rm});
+  });
+
   var content = document.getElementById("pv-content");
 
   if (canUnify) {
@@ -1112,6 +1138,37 @@ function buildPrintView(){
         });
       }
 
+      // MSK SECTION in unified timeline
+      if(Object.keys(mskSecData).length){
+        html += '<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'">MSK — MUSCLE TESTING</th></tr>';
+        Object.keys(mskSecData).forEach(function(sn){
+          html += '<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'" style="background:#5b21b6!important;font-size:8px">'+sn+'</th></tr>';
+          mskSecData[sn].forEach(function(row){
+            html += '<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+            for(var w=1;w<=maxWeek;w++){
+              var cellColor=null;
+              for(var v in row.marks){ if(row.marks.hasOwnProperty(v)&&visitWeekMap[v]===w){ cellColor=row.marks[v]; break; } }
+              html += '<td>'+colorBlock(cellColor,true)+'</td>';
+            }
+            html += '</tr>';
+          });
+        });
+      }
+
+      // ORGAN SECTION in unified timeline
+      if(orgRows.length){
+        html += '<tr><th class="sec-hdr" colspan="'+(maxWeek+1)+'" style="background:#9d174d!important">ORGAN INDICATORS</th></tr>';
+        orgRows.forEach(function(row){
+          html += '<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+          for(var w=1;w<=maxWeek;w++){
+            var cellColor=null;
+            for(var v in row.marks){ if(row.marks.hasOwnProperty(v)&&visitWeekMap[v]===w){ cellColor=row.marks[v]; break; } }
+            html += '<td>'+colorBlock(cellColor,true)+'</td>';
+          }
+          html += '</tr>';
+        });
+      }
+
       html += '</tbody></table>';
     }
     html += '</div>';
@@ -1162,6 +1219,43 @@ function buildPrintView(){
       html += '</tbody></table>';
     }
     html += '</div>';
+
+    // MSK in fallback layout
+    if(Object.keys(mskSecData).length){
+      var mskMaxV=0;
+      Object.keys(mskSecData).forEach(function(sn){ mskSecData[sn].forEach(function(row){ Object.keys(row.marks).forEach(function(v){ if(parseInt(v)>mskMaxV) mskMaxV=parseInt(v); }); }); });
+      mskMaxV=Math.max(mskMaxV,1);
+      html += '<div class="pv-section"><div class="pv-section-title">MSK — Muscle Testing</div>';
+      html += '<table class="tl-table"><thead><tr><th class="row-hdr">Muscle</th>';
+      for(var v=1;v<=mskMaxV;v++) html += '<th>V'+v+'</th>';
+      html += '</tr></thead><tbody>';
+      Object.keys(mskSecData).forEach(function(sn){
+        html += '<tr><th class="sec-hdr" colspan="'+(mskMaxV+1)+'" style="background:#5b21b6!important">'+sn+'</th></tr>';
+        mskSecData[sn].forEach(function(row){
+          html += '<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+          for(var v=1;v<=mskMaxV;v++) html += '<td>'+colorBlock(row.marks[v],true)+'</td>';
+          html += '</tr>';
+        });
+      });
+      html += '</tbody></table></div>';
+    }
+
+    // Organs in fallback layout
+    if(orgRows.length){
+      var orgMaxV=0;
+      orgRows.forEach(function(row){ Object.keys(row.marks).forEach(function(v){ if(parseInt(v)>orgMaxV) orgMaxV=parseInt(v); }); });
+      orgMaxV=Math.max(orgMaxV,1);
+      html += '<div class="pv-section"><div class="pv-section-title">Organ Indicators</div>';
+      html += '<table class="tl-table"><thead><tr><th class="row-hdr">Organ</th>';
+      for(var v=1;v<=orgMaxV;v++) html += '<th>V'+v+'</th>';
+      html += '</tr></thead><tbody>';
+      orgRows.forEach(function(row){
+        html += '<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
+        for(var v=1;v<=orgMaxV;v++) html += '<td>'+colorBlock(row.marks[v],true)+'</td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+    }
 
     content.innerHTML = html;
   }
