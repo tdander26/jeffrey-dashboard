@@ -16,29 +16,43 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .pw-sub{color:#94a3b8;font-size:13px;margin:6px 0 28px}
 .pw-box input[type=password]{width:100%;padding:13px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;margin-bottom:12px;outline:none;transition:border-color .2s}
 .pw-box input[type=password]:focus{border-color:#3b82f6}
-.pw-box .pw-btn{width:100%;padding:13px;background:#1a1a2e;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;letter-spacing:.3px;transition:background .2s}
+.pw-box .pw-btn{width:100%;padding:13px;background:#1a1a2e;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;transition:background .2s}
 .pw-box .pw-btn:hover{background:#2d3748}
 .pw-error{color:#ef4444;font-size:13px;margin-top:10px;display:none;padding:8px;background:#fef2f2;border-radius:6px}
 .pw-hipaa{margin-top:20px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;line-height:1.5}
 
-/* ── APP SHELL ── */
+/* ── APP ── */
 #app{max-width:1300px;margin:0 auto;padding:20px}
+
+/* ── HEADER ── */
 .app-header{background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border-radius:14px;padding:22px 28px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 .app-header h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
 .app-header .subtitle{font-size:12px;opacity:.65;margin-top:3px}
 .header-btns{display:flex;gap:8px;flex-wrap:wrap}
 .btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;white-space:nowrap}
-.btn-primary{background:#3b82f6;color:white}.btn-primary:hover{background:#2563eb}
 .btn-light{background:rgba(255,255,255,.15);color:white}.btn-light:hover{background:rgba(255,255,255,.25)}
 .btn-danger{background:#ef4444;color:white}.btn-danger:hover{background:#dc2626}
 .btn-green{background:#22c55e;color:white}.btn-green:hover{background:#16a34a}
 
-.hipaa-bar{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#92400e;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
-.hipaa-bar strong{color:#78350f}
+/* ── STICKY COLOR SELECTOR ── */
+#colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:14px 20px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.12);border:2px solid #e2e8f0;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cb-label{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.cb-colors{display:flex;gap:10px;flex-wrap:wrap}
+.cb-btn{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:3px solid transparent;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;background:#f8fafc;color:#374151;user-select:none}
+.cb-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.cb-btn.active{border-color:#1a1a2e;box-shadow:0 4px 14px rgba(0,0,0,.18);transform:translateY(-2px)}
+.cb-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.1)}
+.cb-clear{margin-left:auto;padding:7px 14px;border-radius:8px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;transition:all .2s}
+.cb-clear:hover{background:#f1f5f9;border-color:#cbd5e1}
+.cb-active-label{font-size:12px;color:#94a3b8;white-space:nowrap}
+.cb-active-label span{font-weight:700;color:#1a1a2e}
 
-/* ── PATIENT INFO ── */
+/* ── HIPAA BAR ── */
+.hipaa-bar{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#92400e;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+
+/* ── CARDS ── */
 .card{background:white;border-radius:14px;padding:24px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:16px}
 .field-row{display:flex;gap:16px;flex-wrap:wrap}
 .fg{flex:1;min-width:180px}
 .fg label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
@@ -70,71 +84,54 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .visits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px}
 
 /* ── VISIT CARD ── */
-.visit-card{background:white;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid transparent;transition:border-color .2s}
-.visit-card:hover{border-color:#3b82f680}
+.visit-card{background:white;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9}
 .visit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #f1f5f9}
 .visit-num{font-size:17px;font-weight:800;color:#1a1a2e}
 .visit-date-input{padding:6px 10px;border:2px solid #e2e8f0;border-radius:7px;font-size:12px;outline:none;width:136px}
 .visit-date-input:focus{border-color:#3b82f6}
 
-/* ── SECTION + FIELDS ── */
+/* ── FIELD SECTIONS ── */
 .vsec{margin-bottom:12px}
 .vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
 .vfield{display:flex;align-items:center;justify-content:space-between;padding:3px 0;min-height:32px}
 .vfield-label{font-size:12px;color:#374151;flex:1;padding-right:8px;line-height:1.3}
-.vfield-opts{display:flex;gap:7px;flex-shrink:0}
-.mwrap{position:relative;padding-bottom:16px}
-.mwrap.no-label{padding-bottom:0}
-.mcell{width:46px;height:28px;border:1.5px solid #d1d5db;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fafafa;user-select:none;position:relative}
-.mcell:hover{border-color:#3b82f6;background:#eff6ff}
-.mcell.marked{background:#fafafa;border-width:2px}
+.vfield-opts{display:flex;gap:8px;flex-shrink:0}
+.mwrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.mcell{width:46px;height:28px;border:2px solid #d1d5db;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fafafa;user-select:none}
+.mcell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.05)}
+.mcell.marked{border-width:2px}
 .mcell .x-mark{font-weight:900;font-size:15px;line-height:1;pointer-events:none}
-.mcell .opt-lbl{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:#9ca3af;font-weight:600;white-space:nowrap;pointer-events:none}
+.opt-lbl{font-size:9px;color:#9ca3af;font-weight:600;white-space:nowrap;pointer-events:none}
 
-/* visit notes */
+/* ── VISIT NOTES ── */
 .visit-notes{margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9}
 .visit-notes label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:5px}
 .visit-notes textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:12px;resize:vertical;min-height:52px;outline:none;font-family:inherit;color:#374151}
 .visit-notes textarea:focus{border-color:#3b82f6}
-
-/* ── COLOR PICKER ── */
-#cpModal{position:fixed;background:white;border-radius:12px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.22);z-index:10000;display:none;border:1px solid #e2e8f0;min-width:220px}
-.cp-title{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-.cp-swatches{display:flex;gap:7px;flex-wrap:wrap;max-width:210px;margin-bottom:10px}
-.cp-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s,border-color .15s;position:relative}
-.cp-swatch:hover{transform:scale(1.2)}
-.cp-swatch.sel{border-color:#1a1a2e;transform:scale(1.15)}
-.cp-swatch.sel::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:white;text-shadow:0 1px 3px rgba(0,0,0,.4)}
-.cp-row{display:flex;gap:8px;margin-top:4px}
-.cp-btn{padding:6px 12px;border-radius:6px;border:none;font-size:12px;cursor:pointer;font-weight:700;transition:all .15s}
-.cp-clear{background:#fee2e2;color:#ef4444}.cp-clear:hover{background:#fca5a5}
-.cp-done{background:#f1f5f9;color:#374151}.cp-done:hover{background:#e2e8f0}
 
 /* ── TOAST ── */
 #toast{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:white;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 
 /* ── PRINT ── */
 @media print{
-  #pwOverlay,#cpModal,#toast,.header-btns,.phase-tabs,.hipaa-bar,.visit-notes textarea+label{display:none!important}
+  #pwOverlay,#colorBar,#toast,.header-btns,.phase-tabs,.hipaa-bar{display:none!important}
   .phase-content{display:block!important}
   .visit-card{break-inside:avoid;border:1px solid #ccc;margin-bottom:12px}
   #app{max-width:100%;padding:10px}
   body{background:white}
   .app-header{background:#1a1a2e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .mcell.marked{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
-
-/* ── RESPONSIVE ── */
 @media(max-width:600px){
   .visits-grid{grid-template-columns:1fr}
   .app-header{padding:16px}
+  .cb-btn{padding:7px 12px;font-size:12px}
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════
-     PASSWORD OVERLAY
-══════════════════════════════════════════════ -->
+<!-- PASSWORD OVERLAY -->
 <div id="pwOverlay">
   <div class="pw-box">
     <div class="pw-logo">🏥</div>
@@ -143,41 +140,24 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <input type="password" id="pwInput" placeholder="Enter access password" autocomplete="current-password">
     <button class="pw-btn" onclick="checkPw()">Unlock Records</button>
     <div class="pw-error" id="pwError">⚠️ Incorrect password. Please try again.</div>
-    <div class="pw-hipaa">
-      🔒 <strong>Local Storage Only.</strong> No patient data is transmitted or stored externally. All records remain on this device. Ensure your device uses full-disk encryption and is access-controlled.
-    </div>
+    <div class="pw-hipaa">🔒 <strong>Local Storage Only.</strong> No patient data is transmitted or stored externally. All records remain on this device only.</div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════
-     COLOR PICKER MODAL
-══════════════════════════════════════════════ -->
-<div id="cpModal">
-  <div class="cp-title">Select Mark Color</div>
-  <div class="cp-swatches" id="cpSwatches"></div>
-  <div class="cp-row">
-    <button class="cp-btn cp-clear" onclick="clearMark()">✕ Clear Mark</button>
-    <button class="cp-btn cp-done" onclick="closeCp()">Done</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════
-     SAVE TOAST
-══════════════════════════════════════════════ -->
+<!-- TOAST -->
 <div id="toast">✓ Saved</div>
 
-<!-- ══════════════════════════════════════════════
-     MAIN APP
-══════════════════════════════════════════════ -->
+<!-- MAIN APP -->
 <div id="app" style="display:none">
 
+  <!-- Header -->
   <div class="app-header">
     <div>
       <h1>🏥 Momentum Health &amp; Wellness</h1>
       <div class="subtitle">Patient Progress Report Card — Applied Kinesiology Clinical Documentation</div>
     </div>
     <div class="header-btns">
-      <button class="btn btn-light" onclick="exportData()">⬇ Export JSON</button>
+      <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
       <button class="btn btn-light" onclick="importData()">⬆ Import</button>
       <button class="btn btn-light" onclick="window.print()">🖨 Print</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
@@ -185,43 +165,48 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     </div>
   </div>
 
+  <!-- STICKY COLOR SELECTOR -->
+  <div id="colorBar">
+    <span class="cb-label">Active Color</span>
+    <div class="cb-colors">
+      <div class="cb-btn active" id="cb_red"    onclick="setColor('red')"   >
+        <div class="cb-dot" style="background:#ef4444"></div> Red — No Progress
+      </div>
+      <div class="cb-btn" id="cb_yellow" onclick="setColor('yellow')">
+        <div class="cb-dot" style="background:#eab308"></div> Yellow — Any Progress
+      </div>
+      <div class="cb-btn" id="cb_blue"   onclick="setColor('blue')"  >
+        <div class="cb-dot" style="background:#3b82f6"></div> Blue — 80% Better
+      </div>
+      <div class="cb-btn" id="cb_green"  onclick="setColor('green')" >
+        <div class="cb-dot" style="background:#22c55e"></div> Green — 100% Resolution
+      </div>
+    </div>
+    <button class="cb-clear" onclick="clearMode()">✕ Clear Mode</button>
+  </div>
+
   <div class="hipaa-bar">
-    🔒 <span><strong>HIPAA Notice:</strong> This tool stores all data locally in your browser only — no internet connection used, no external servers. For full HIPAA compliance: (1) use on an encrypted device, (2) restrict physical and account access, (3) back up exported files in encrypted storage. This is a clinical documentation aid, not a substitute for a certified EHR.</span>
+    🔒 <span><strong>HIPAA Notice:</strong> Data is stored locally in your browser only — no external servers. For full compliance: use on an encrypted device, restrict access, and back up exports to encrypted storage.</span>
   </div>
 
   <!-- Patient Info -->
   <div class="card">
     <div class="card-title">👤 Patient Information</div>
     <div class="field-row">
-      <div class="fg">
-        <label>Patient Name</label>
-        <input type="text" id="fi_name" placeholder="Full legal name" oninput="autoSave()">
-      </div>
-      <div class="fg">
-        <label>Date of Birth</label>
-        <input type="date" id="fi_dob" oninput="autoSave()">
-      </div>
-      <div class="fg">
-        <label>Case Start Date</label>
-        <input type="date" id="fi_start" oninput="autoSave()">
-      </div>
-      <div class="fg">
-        <label>Provider</label>
-        <input type="text" id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()">
-      </div>
-      <div class="fg">
-        <label>Chart / MRN</label>
-        <input type="text" id="fi_mrn" placeholder="Chart number" oninput="autoSave()">
-      </div>
+      <div class="fg"><label>Patient Name</label><input type="text" id="fi_name" placeholder="Full legal name" oninput="autoSave()"></div>
+      <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob" oninput="autoSave()"></div>
+      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start" oninput="autoSave()"></div>
+      <div class="fg"><label>Provider</label><input type="text" id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
+      <div class="fg"><label>Chart / MRN</label><input type="text" id="fi_mrn" placeholder="Chart number" oninput="autoSave()"></div>
     </div>
   </div>
 
   <!-- Symptom Tracking -->
   <div class="card">
     <div class="card-title">📊 Subjective Symptom Tracking <span style="font-size:12px;font-weight:400;color:#94a3b8;margin-left:8px">Scale 1–10 per week</span></div>
-    <div class="sym-hint">Enter complaint in the left column, then score each week (1 = minimal, 10 = severe). <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
+    <div class="sym-hint">Enter complaint in the left column, then score each week. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
     <div class="sym-scroll">
-      <table class="sym-table" id="symTable">
+      <table class="sym-table">
         <thead>
           <tr>
             <th>Patient Complaint</th>
@@ -247,132 +232,128 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   <div id="phase2" class="phase-content"><div class="visits-grid" id="pg2"></div></div>
   <div id="phase3" class="phase-content"><div class="visits-grid" id="pg3"></div></div>
 
-</div><!-- /app -->
+</div>
 
 <script>
-// ════════════════════════════════════════════════
-//  CONFIG — change DEFAULT_PW to your password
-// ════════════════════════════════════════════════
-const DEFAULT_PW   = "Momentum1!";
-const STORAGE_KEY  = "mhw_report_v2";
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const DEFAULT_PW  = "Momentum1!";
+const STORAGE_KEY = "mhw_report_v3";
 
-// ════════════════════════════════════════════════
-//  COLOR PALETTE
-// ════════════════════════════════════════════════
-const COLORS = [
-  {name:"Black",  hex:"#1a1a2e"},
-  {name:"Red",    hex:"#ef4444"},
-  {name:"Green",  hex:"#22c55e"},
-  {name:"Blue",   hex:"#3b82f6"},
-  {name:"Orange", hex:"#f97316"},
-  {name:"Purple", hex:"#a855f7"},
-  {name:"Teal",   hex:"#14b8a6"},
-  {name:"Pink",   hex:"#ec4899"},
-  {name:"Yellow", hex:"#eab308"},
-  {name:"Brown",  hex:"#92400e"},
-];
+// ─── COLOR DEFINITIONS ───────────────────────────────────────────────────────
+const COLOR_MAP = {
+  red:    { hex: "#ef4444", label: "No Progress" },
+  yellow: { hex: "#eab308", label: "Any Progress" },
+  blue:   { hex: "#3b82f6", label: "80% Better" },
+  green:  { hex: "#22c55e", label: "100% Resolution" },
+};
 
-// ════════════════════════════════════════════════
-//  FIELD DEFINITIONS
-// ════════════════════════════════════════════════
+// ─── ACTIVE COLOR STATE ──────────────────────────────────────────────────────
+// null = "clear mode" (clicks erase marks)
+let activeColor = "red";
+
+function setColor(name) {
+  activeColor = name;
+  document.querySelectorAll(".cb-btn").forEach(b => b.classList.remove("active"));
+  const btn = document.getElementById("cb_" + name);
+  if (btn) btn.classList.add("active");
+}
+
+function clearMode() {
+  activeColor = null;
+  document.querySelectorAll(".cb-btn").forEach(b => b.classList.remove("active"));
+}
+
+// ─── FIELD DEFINITIONS ───────────────────────────────────────────────────────
 const FIELDS = [
   {sec:"GUT — INTESTINE", items:[
-    {lbl:"ICV",                              opts:["Open","Closed"]},
-    {lbl:"HV",                               opts:["Open","Closed"]},
-    {lbl:"Splenic Flexure",                  opts:["Fwd","Rev"]},
-    {lbl:"Hepatic Flexure",                  opts:["Fwd","Rev"]},
-    {lbl:"Ascending",                        opts:["Fwd","Rev"]},
-    {lbl:"Descending",                       opts:["Fwd","Rev"]},
-    {lbl:"Gastrocolic Reflex",               opts:null},
-    {lbl:"Sigmoid",                          opts:null},
+    {lbl:"ICV",                                opts:["Open","Closed"]},
+    {lbl:"HV",                                 opts:["Open","Closed"]},
+    {lbl:"Splenic Flexure",                    opts:["Fwd","Rev"]},
+    {lbl:"Hepatic Flexure",                    opts:["Fwd","Rev"]},
+    {lbl:"Ascending",                          opts:["Fwd","Rev"]},
+    {lbl:"Descending",                         opts:["Fwd","Rev"]},
+    {lbl:"Gastrocolic Reflex",                 opts:null},
+    {lbl:"Sigmoid",                            opts:null},
   ]},
   {sec:"GUT — UPPER GI", items:[
-    {lbl:"Hiatal Hernia",                    opts:null},
-    {lbl:"GB Pump",                          opts:null},
-    {lbl:"Pyloric",                          opts:["Open","Closed"]},
+    {lbl:"Hiatal Hernia",                      opts:null},
+    {lbl:"GB Pump",                            opts:null},
+    {lbl:"Pyloric",                            opts:["Open","Closed"]},
   ]},
   {sec:"GUT — OFFENDER CHALLENGES", items:[
-    {lbl:"Ammonia",                          opts:null},
-    {lbl:"Aldehydes",                        opts:null},
-    {lbl:"Histamine",                        opts:null},
-    {lbl:"B2 / Cysteine",                   opts:null},
-    {lbl:"Infections",                       opts:null},
+    {lbl:"Ammonia",                            opts:null},
+    {lbl:"Aldehydes",                          opts:null},
+    {lbl:"Histamine",                          opts:null},
+    {lbl:"B2 / Cysteine",                     opts:null},
+    {lbl:"Infections",                         opts:null},
   ]},
   {sec:"GUT — OTHER CHALLENGES", items:[
-    {lbl:"Lig. Stretch Test (Type 3 LSASS)", opts:null},
-    {lbl:"Valve Combinations",               opts:null},
+    {lbl:"Lig. Stretch Test (Type 3 LSASS)",  opts:null},
+    {lbl:"Valve Combinations",                 opts:null},
   ]},
   {sec:"AUTONOMIC CHALLENGES", items:[
-    {lbl:"Vagus Challenge",                  opts:null},
-    {lbl:"Bilat. Closed Valves — SYM DOM",  opts:null},
-    {lbl:"LASS",                             opts:null},
-    {lbl:"HRV",                              opts:null},
+    {lbl:"Vagus Challenge",                    opts:null},
+    {lbl:"Bilat. Closed Valves — SYM DOM",    opts:null},
+    {lbl:"LASS",                               opts:null},
+    {lbl:"HRV",                                opts:null},
   ]},
   {sec:"HORMONAL CHALLENGES", items:[
     {lbl:"Pituitary: TL Glabella + endo org.", opts:null},
-    {lbl:"Uterine/Prostate Lift (BDOFG)",    opts:null},
+    {lbl:"Uterine/Prostate Lift (BDOFG)",      opts:null},
   ]},
   {sec:"TMJ — C2 HYOID", items:[
-    {lbl:"w/ Offenders",                     opts:null},
-    {lbl:"w/ TL mental protub. & pubic sym.", opts:null},
-    {lbl:"w/ Inferior Traction",             opts:null},
+    {lbl:"w/ Offenders",                       opts:null},
+    {lbl:"w/ TL mental protub. & pubic sym.",  opts:null},
+    {lbl:"w/ Inferior Traction",               opts:null},
   ]},
   {sec:"TMJ — OTHER", items:[
-    {lbl:"Vertical Dimension",               opts:null},
-    {lbl:"ICR (Estrogen + TMJ challenges)",  opts:null},
-    {lbl:"Bruxism (SSRI + TMJ challenges)",  opts:null},
+    {lbl:"Vertical Dimension",                 opts:null},
+    {lbl:"ICR (Estrogen + TMJ challenges)",    opts:null},
+    {lbl:"Bruxism (SSRI + TMJ challenges)",    opts:null},
   ]},
   {sec:"SLEEP — REM", items:[
-    {lbl:"Cortisol, Epinephrine, Emotions",  opts:null},
-    {lbl:"Foods, Sugar, Caffeine, Phys Stress", opts:null},
-    {lbl:"Medications, Suppl., Hormones",    opts:null},
+    {lbl:"Cortisol, Epinephrine, Emotions",    opts:null},
+    {lbl:"Foods, Sugar, Caffeine, Phys Stress",opts:null},
+    {lbl:"Medications, Suppl., Hormones",      opts:null},
   ]},
   {sec:"SLEEP — OTHER", items:[
-    {lbl:"Then / Now",                       opts:null},
-    {lbl:"Pineal — Dark Room Weakness",      opts:null},
+    {lbl:"Then / Now",                         opts:null},
+    {lbl:"Pineal — Dark Room Weakness",        opts:null},
   ]},
   {sec:"BLOOD SUGAR", items:[
-    {lbl:"Dysglycemia Pattern",              opts:null},
+    {lbl:"Dysglycemia Pattern",                opts:null},
     {lbl:"Pancreas CR weakens bicep (hyper.)", opts:null},
   ]},
   {sec:"RECURRENT INJURY PATTERNS", items:[
-    {lbl:"Two Organ",                        opts:null},
-    {lbl:"Anaerobic / Aerobic / O₂ Starv.", opts:null},
-    {lbl:"Bone Bend",                        opts:null},
-    {lbl:"Joint Jam",                        opts:null},
-    {lbl:"Inter. Membrane",                  opts:null},
-    {lbl:"Fascial Flush",                    opts:null},
-    {lbl:"Temporal Tap",                     opts:null},
+    {lbl:"Two Organ",                          opts:null},
+    {lbl:"Anaerobic / Aerobic / O2 Starv.",   opts:null},
+    {lbl:"Bone Bend",                          opts:null},
+    {lbl:"Joint Jam",                          opts:null},
+    {lbl:"Inter. Membrane",                    opts:null},
+    {lbl:"Fascial Flush",                      opts:null},
+    {lbl:"Temporal Tap",                       opts:null},
   ]},
   {sec:"BRAIN", items:[
-    {lbl:"Overfiring Supraspinatus",         opts:null},
+    {lbl:"Overfiring Supraspinatus",           opts:null},
     {lbl:"CR Stim. Induces Overfiring Supra.", opts:null},
   ]},
 ];
 
-// ════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let S = {
   patientInfo: {},
-  symptoms: {},  // "r{row}_c{col}": value
-  symLabels: {}, // "r{row}": label
-  symRows: 8,
-  visitDates: {},
-  marks: {},     // key -> {color}
-  visitNotes: {}
+  symptoms:    {},
+  symLabels:   {},
+  symRows:     8,
+  visitDates:  {},
+  visitNotes:  {},
+  marks:       {},  // key -> colorName (e.g. "red")
 };
 
-let cpKey    = null;
-let cpActive = null; // swatch hex being previewed
-
-// ════════════════════════════════════════════════
-//  PASSWORD
-// ════════════════════════════════════════════════
+// ─── PASSWORD ────────────────────────────────────────────────────────────────
 function checkPw() {
   const pw = localStorage.getItem("mhw_pw") || DEFAULT_PW;
-  const v  = document.getElementById("pwInput").value;
-  if (v === pw) {
+  if (document.getElementById("pwInput").value === pw) {
     document.getElementById("pwOverlay").style.display = "none";
     document.getElementById("app").style.display = "block";
     loadState();
@@ -393,17 +374,147 @@ function logout() {
   document.getElementById("pwInput").value = "";
 }
 
-// ════════════════════════════════════════════════
-//  PHASE TABS
-// ════════════════════════════════════════════════
+// ─── PHASE TABS ──────────────────────────────────────────────────────────────
 function switchPhase(n) {
   document.querySelectorAll(".phase-tab").forEach((t,i) => t.classList.toggle("active", i===n-1));
   document.querySelectorAll(".phase-content").forEach((c,i) => c.classList.toggle("active", i===n-1));
 }
 
-// ════════════════════════════════════════════════
-//  SYMPTOM TABLE
-// ════════════════════════════════════════════════
+// ─── MARK CELLS ──────────────────────────────────────────────────────────────
+function onCellClick(key) {
+  if (activeColor === null) {
+    // clear mode
+    delete S.marks[key];
+  } else {
+    // if same color already, toggle off; otherwise apply new color
+    if (S.marks[key] === activeColor) {
+      delete S.marks[key];
+    } else {
+      S.marks[key] = activeColor;
+    }
+  }
+  renderMark(key);
+  autoSave();
+}
+
+function renderMark(key) {
+  const cell = document.getElementById("mc_" + key);
+  if (!cell) return;
+  const colorName = S.marks[key];
+  const old = cell.querySelector(".x-mark");
+  if (old) old.remove();
+  if (colorName && COLOR_MAP[colorName]) {
+    const hex = COLOR_MAP[colorName].hex;
+    cell.classList.add("marked");
+    cell.style.borderColor  = hex;
+    cell.style.background   = hex + "18";
+    const x = document.createElement("span");
+    x.className   = "x-mark";
+    x.textContent = "✕";
+    x.style.color = hex;
+    cell.appendChild(x);
+  } else {
+    cell.classList.remove("marked");
+    cell.style.borderColor = "";
+    cell.style.background  = "";
+  }
+}
+
+function renderAllMarks() {
+  Object.keys(S.marks).forEach(k => renderMark(k));
+}
+
+// ─── VISIT CARD BUILDER ──────────────────────────────────────────────────────
+function mkKey(v, si, ii, oi) {
+  return "v" + v + "_" + si + "_" + ii + (oi !== undefined ? "_" + oi : "");
+}
+
+function buildVisitCard(vn) {
+  const div = document.createElement("div");
+  div.className = "visit-card";
+  div.id = "vc" + vn;
+
+  div.innerHTML =
+    '<div class="visit-header">' +
+      '<div class="visit-num">Visit ' + vn + '</div>' +
+      '<div><span style="font-size:11px;color:#94a3b8;margin-right:5px">Date</span>' +
+      '<input type="date" class="visit-date-input" id="vd' + vn + '"></div>' +
+    '</div>';
+
+  FIELDS.forEach(function(sec, si) {
+    const sd = document.createElement("div");
+    sd.className = "vsec";
+    const title = document.createElement("div");
+    title.className = "vsec-title";
+    title.textContent = sec.sec;
+    sd.appendChild(title);
+
+    sec.items.forEach(function(item, ii) {
+      const row = document.createElement("div");
+      row.className = "vfield";
+
+      const lbl = document.createElement("span");
+      lbl.className = "vfield-label";
+      lbl.textContent = item.lbl;
+      row.appendChild(lbl);
+
+      const optsDiv = document.createElement("div");
+      optsDiv.className = "vfield-opts";
+
+      if (item.opts) {
+        item.opts.forEach(function(opt, oi) {
+          const key  = mkKey(vn, si, ii, oi);
+          const wrap = document.createElement("div");
+          wrap.className = "mwrap";
+
+          const cell = document.createElement("div");
+          cell.className = "mcell";
+          cell.id = "mc_" + key;
+          cell.addEventListener("click", function() { onCellClick(key); });
+
+          const optL = document.createElement("span");
+          optL.className = "opt-lbl";
+          optL.textContent = opt;
+
+          wrap.appendChild(cell);
+          wrap.appendChild(optL);
+          optsDiv.appendChild(wrap);
+        });
+      } else {
+        const key  = mkKey(vn, si, ii);
+        const wrap = document.createElement("div");
+        wrap.className = "mwrap";
+        const cell = document.createElement("div");
+        cell.className = "mcell";
+        cell.id = "mc_" + key;
+        cell.addEventListener("click", function() { onCellClick(key); });
+        wrap.appendChild(cell);
+        optsDiv.appendChild(wrap);
+      }
+
+      row.appendChild(optsDiv);
+      sd.appendChild(row);
+    });
+
+    div.appendChild(sd);
+  });
+
+  const notes = document.createElement("div");
+  notes.className = "visit-notes";
+  notes.innerHTML = '<label>Visit Notes</label><textarea id="vn' + vn + '" placeholder="Clinical notes, observations, treatment..."></textarea>';
+  div.appendChild(notes);
+
+  return div;
+}
+
+function buildAllVisits() {
+  [[1,6,"pg1"],[7,12,"pg2"],[13,18,"pg3"]].forEach(function(p) {
+    const grid = document.getElementById(p[2]);
+    for (var v = p[0]; v <= p[1]; v++) grid.appendChild(buildVisitCard(v));
+  });
+}
+
+// ─── SYMPTOM TABLE ───────────────────────────────────────────────────────────
 function addSymRow() {
   S.symRows++;
   renderSymTable();
@@ -413,281 +524,83 @@ function addSymRow() {
 function renderSymTable() {
   const tbody = document.getElementById("symBody");
   tbody.innerHTML = "";
-  for (let r = 0; r < S.symRows; r++) {
-    const tr = document.createElement("tr");
-    // label cell
-    const tdL = document.createElement("td");
-    const inp = document.createElement("input");
-    inp.type = "text";
-    inp.placeholder = `Complaint ${r+1}`;
-    inp.value = S.symLabels[`r${r}`] || "";
-    inp.addEventListener("input", () => { S.symLabels[`r${r}`] = inp.value; autoSave(); });
-    tdL.appendChild(inp);
-    tr.appendChild(tdL);
-    // week cells
-    for (let w = 1; w <= 26; w++) {
-      const td = document.createElement("td");
-      const ni = document.createElement("input");
-      ni.type = "number"; ni.min = 0; ni.max = 10; ni.step = 1;
-      ni.placeholder = "—";
-      ni.value = S.symptoms[`r${r}_c${w}`] || "";
-      ni.addEventListener("input", () => { S.symptoms[`r${r}_c${w}`] = ni.value; autoSave(); });
-      td.appendChild(ni);
-      tr.appendChild(td);
-    }
-    tbody.appendChild(tr);
-  }
-}
-
-// ════════════════════════════════════════════════
-//  VISIT CARDS
-// ════════════════════════════════════════════════
-function mkKey(v, si, ii, oi) {
-  return `v${v}_${si}_${ii}` + (oi !== undefined ? `_${oi}` : "");
-}
-
-function buildVisitCard(vn) {
-  const div = document.createElement("div");
-  div.className = "visit-card";
-  div.id = `vc${vn}`;
-
-  // header
-  div.innerHTML = `
-    <div class="visit-header">
-      <div class="visit-num">Visit ${vn}</div>
-      <div>
-        <span style="font-size:11px;color:#94a3b8;margin-right:5px">Date</span>
-        <input type="date" class="visit-date-input" id="vd${vn}">
-      </div>
-    </div>`;
-
-  // field sections
-  FIELDS.forEach((sec, si) => {
-    const sd = document.createElement("div");
-    sd.className = "vsec";
-    sd.innerHTML = `<div class="vsec-title">${sec.sec}</div>`;
-
-    sec.items.forEach((item, ii) => {
-      const row = document.createElement("div");
-      row.className = "vfield";
-      const lbl = document.createElement("span");
-      lbl.className = "vfield-label";
-      lbl.textContent = item.lbl;
-      row.appendChild(lbl);
-
-      const opts = document.createElement("div");
-      opts.className = "vfield-opts";
-
-      if (item.opts) {
-        item.opts.forEach((opt, oi) => {
-          const key = mkKey(vn, si, ii, oi);
-          const wrap = document.createElement("div");
-          wrap.className = "mwrap";
-          const cell = document.createElement("div");
-          cell.className = "mcell";
-          cell.id = `mc_${key}`;
-          cell.title = opt;
-          cell.addEventListener("click", e => openCp(key, e));
-          const optLbl = document.createElement("span");
-          optLbl.className = "opt-lbl";
-          optLbl.textContent = opt;
-          cell.appendChild(optLbl);
-          wrap.appendChild(cell);
-          opts.appendChild(wrap);
-        });
-      } else {
-        const key = mkKey(vn, si, ii);
-        const wrap = document.createElement("div");
-        wrap.className = "mwrap no-label";
-        const cell = document.createElement("div");
-        cell.className = "mcell";
-        cell.id = `mc_${key}`;
-        cell.addEventListener("click", e => openCp(key, e));
-        wrap.appendChild(cell);
-        opts.appendChild(wrap);
+  for (var r = 0; r < S.symRows; r++) {
+    (function(row) {
+      const tr  = document.createElement("tr");
+      const tdL = document.createElement("td");
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = "Complaint " + (row + 1);
+      inp.value = S.symLabels["r" + row] || "";
+      inp.addEventListener("input", function() { S.symLabels["r" + row] = inp.value; autoSave(); });
+      tdL.appendChild(inp);
+      tr.appendChild(tdL);
+      for (var w = 1; w <= 26; w++) {
+        (function(wk) {
+          const td = document.createElement("td");
+          const ni = document.createElement("input");
+          ni.type = "number"; ni.min = 0; ni.max = 10; ni.step = 1;
+          ni.placeholder = "—";
+          ni.value = S.symptoms["r" + row + "_c" + wk] || "";
+          ni.addEventListener("input", function() { S.symptoms["r" + row + "_c" + wk] = ni.value; autoSave(); });
+          td.appendChild(ni);
+          tr.appendChild(td);
+        })(w);
       }
-
-      row.appendChild(opts);
-      sd.appendChild(row);
-    });
-
-    div.appendChild(sd);
-  });
-
-  // notes
-  const notes = document.createElement("div");
-  notes.className = "visit-notes";
-  notes.innerHTML = `<label>Visit Notes</label>
-    <textarea id="vn${vn}" placeholder="Clinical notes, observations, treatment details..." oninput="autoSave()"></textarea>`;
-  div.appendChild(notes);
-
-  return div;
-}
-
-function buildAllVisits() {
-  [[1,6,"pg1"],[7,12,"pg2"],[13,18,"pg3"]].forEach(([s,e,id]) => {
-    const grid = document.getElementById(id);
-    for (let v = s; v <= e; v++) grid.appendChild(buildVisitCard(v));
-  });
-}
-
-// ════════════════════════════════════════════════
-//  COLOR PICKER
-// ════════════════════════════════════════════════
-function buildCpSwatches() {
-  const c = document.getElementById("cpSwatches");
-  c.innerHTML = COLORS.map(col =>
-    `<div class="cp-swatch" id="sw_${col.hex.replace('#','')}" style="background:${col.hex}" title="${col.name}" onclick="pickColor('${col.hex}')"></div>`
-  ).join("");
-}
-
-function openCp(key, e) {
-  e.stopPropagation();
-  cpKey = key;
-  const modal = document.getElementById("cpModal");
-  modal.style.display = "block";
-
-  // highlight current color if marked
-  const cur = S.marks[key];
-  document.querySelectorAll(".cp-swatch").forEach(s => {
-    const hex = "#" + s.id.replace("sw_","");
-    s.classList.toggle("sel", !!(cur && cur.color === hex));
-  });
-
-  // position — use viewport coords (position:fixed, no scroll offset)
-  const rect = e.target.getBoundingClientRect();
-  const mw = 240, mh = 140;
-  let left = rect.left;
-  let top  = rect.bottom + 8;
-  if (left + mw > window.innerWidth - 10) left = window.innerWidth - mw - 10;
-  if (top + mh > window.innerHeight - 10) top  = rect.top - mh - 8;
-  modal.style.left = Math.max(8, left) + "px";
-  modal.style.top  = Math.max(8, top)  + "px";
-}
-
-function pickColor(hex) {
-  if (!cpKey) return;
-  S.marks[cpKey] = {color: hex};
-  renderMark(cpKey);
-  document.querySelectorAll(".cp-swatch").forEach(s => {
-    s.classList.toggle("sel", "#"+s.id.replace("sw_","") === hex);
-  });
-  autoSave();
-  closeCp();
-}
-
-function clearMark() {
-  if (!cpKey) return;
-  delete S.marks[cpKey];
-  renderMark(cpKey);
-  autoSave();
-  closeCp();
-}
-
-function closeCp() {
-  document.getElementById("cpModal").style.display = "none";
-  cpKey = null;
-}
-
-document.addEventListener("click", e => {
-  const m = document.getElementById("cpModal");
-  if (m.style.display === "block" && !m.contains(e.target)) closeCp();
-});
-
-function renderMark(key) {
-  const cell = document.getElementById("mc_" + key);
-  if (!cell) return;
-  const mark = S.marks[key];
-  // remove existing x-mark
-  const old = cell.querySelector(".x-mark");
-  if (old) old.remove();
-  if (mark && mark.color) {
-    cell.classList.add("marked");
-    cell.style.borderColor = mark.color;
-    const x = document.createElement("span");
-    x.className = "x-mark";
-    x.textContent = "✕";
-    x.style.color = mark.color;
-    // insert before opt-lbl if present
-    const lbl = cell.querySelector(".opt-lbl");
-    if (lbl) cell.insertBefore(x, lbl);
-    else cell.appendChild(x);
-  } else {
-    cell.classList.remove("marked");
-    cell.style.borderColor = "";
+      tbody.appendChild(tr);
+    })(r);
   }
 }
 
-function renderAllMarks() {
-  Object.keys(S.marks).forEach(k => renderMark(k));
-}
-
-// ════════════════════════════════════════════════
-//  PATIENT INFO FIELDS
-// ════════════════════════════════════════════════
+// ─── PATIENT INFO ────────────────────────────────────────────────────────────
 const PI_MAP = {fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",fi_mrn:"mrn"};
 
 function loadPatientInfo() {
-  Object.entries(PI_MAP).forEach(([id, key]) => {
+  Object.keys(PI_MAP).forEach(function(id) {
     const el = document.getElementById(id);
-    if (el && S.patientInfo[key]) el.value = S.patientInfo[key];
+    if (el && S.patientInfo[PI_MAP[id]]) el.value = S.patientInfo[PI_MAP[id]];
+    if (el) el.addEventListener("input", autoSave);
   });
 }
 
 function collectPatientInfo() {
-  Object.entries(PI_MAP).forEach(([id, key]) => {
+  Object.keys(PI_MAP).forEach(function(id) {
     const el = document.getElementById(id);
-    if (el) S.patientInfo[key] = el.value;
+    if (el) S.patientInfo[PI_MAP[id]] = el.value;
   });
-  // add oninput if not set
 }
 
-// ════════════════════════════════════════════════
-//  VISIT DATES + NOTES
-// ════════════════════════════════════════════════
+// ─── VISIT DATES + NOTES ─────────────────────────────────────────────────────
 function loadVisitDates() {
-  for (let v = 1; v <= 18; v++) {
-    const el = document.getElementById(`vd${v}`);
-    if (el) {
-      el.value = S.visitDates[v] || "";
-      el.addEventListener("input", () => { S.visitDates[v] = el.value; autoSave(); });
-    }
-    const ne = document.getElementById(`vn${v}`);
-    if (ne) {
-      ne.value = S.visitNotes[v] || "";
-    }
+  for (var v = 1; v <= 18; v++) {
+    (function(vn) {
+      const el = document.getElementById("vd" + vn);
+      if (el) {
+        el.value = S.visitDates[vn] || "";
+        el.addEventListener("input", function() { S.visitDates[vn] = el.value; autoSave(); });
+      }
+      const ne = document.getElementById("vn" + vn);
+      if (ne) {
+        ne.value = S.visitNotes[vn] || "";
+        ne.addEventListener("input", function() { S.visitNotes[vn] = ne.value; autoSave(); });
+      }
+    })(v);
   }
 }
 
-function collectVisitData() {
-  for (let v = 1; v <= 18; v++) {
-    const el = document.getElementById(`vd${v}`);
-    if (el) S.visitDates[v] = el.value;
-    const ne = document.getElementById(`vn${v}`);
-    if (ne) S.visitNotes[v] = ne.value;
-  }
-}
-
-// ════════════════════════════════════════════════
-//  SAVE / LOAD
-// ════════════════════════════════════════════════
+// ─── SAVE / LOAD ─────────────────────────────────────────────────────────────
 function saveAll() {
   collectPatientInfo();
-  collectVisitData();
-  // symptoms/symLabels already live in S
   localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
   const t = document.getElementById("toast");
   t.style.opacity = "1";
-  setTimeout(() => t.style.opacity = "0", 1600);
+  setTimeout(function() { t.style.opacity = "0"; }, 1600);
 }
 
 function loadState() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return;
-  try {
-    const loaded = JSON.parse(raw);
-    S = {...S, ...loaded};
-  } catch(e) { console.warn("Load failed", e); }
+  try { S = Object.assign(S, JSON.parse(raw)); } catch(e) {}
 }
 
 function renderAll() {
@@ -695,31 +608,23 @@ function renderAll() {
   renderSymTable();
   loadVisitDates();
   renderAllMarks();
-  // hook up patient info inputs
-  Object.keys(PI_MAP).forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("input", autoSave);
-  });
 }
 
-let _aSaveT;
+var _aSaveT;
 function autoSave() {
   clearTimeout(_aSaveT);
   _aSaveT = setTimeout(saveAll, 1200);
 }
 
-// ════════════════════════════════════════════════
-//  EXPORT / IMPORT
-// ════════════════════════════════════════════════
+// ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
 function exportData() {
   collectPatientInfo();
-  collectVisitData();
   const name = (S.patientInfo.name || "patient").replace(/\s+/g,"_");
   const date = new Date().toISOString().split("T")[0];
   const blob = new Blob([JSON.stringify(S, null, 2)], {type:"application/json"});
-  const a    = document.createElement("a");
-  a.href     = URL.createObjectURL(blob);
-  a.download = `momentum_${name}_${date}.json`;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "momentum_" + name + "_" + date + ".json";
   a.click();
 }
 
@@ -727,29 +632,24 @@ function importData() {
   const inp = document.createElement("input");
   inp.type = "file";
   inp.accept = ".json";
-  inp.onchange = e => {
+  inp.onchange = function(e) {
     const f = e.target.files[0];
     if (!f) return;
     const r = new FileReader();
-    r.onload = ev => {
+    r.onload = function(ev) {
       try {
         S = JSON.parse(ev.target.result);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
         renderAll();
-        renderAllMarks();
-      } catch { alert("⚠️ Invalid file format. Please select a valid export file."); }
+      } catch(err) { alert("Invalid file format."); }
     };
     r.readAsText(f);
   };
   inp.click();
 }
 
-// ════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════
-buildCpSwatches();
+// ─── INIT ────────────────────────────────────────────────────────────────────
 buildAllVisits();
-renderSymTable(); // initial empty rows visible even before login
 </script>
 </body>
 </html>
