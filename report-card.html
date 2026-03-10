@@ -82,6 +82,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .visit-num{font-size:16px;font-weight:800;color:#1a1a2e}
 .vdi{padding:5px 9px;border:2px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;width:130px}
 .vdi:focus{border-color:#3b82f6}
+.today-btn{padding:4px 9px;border:2px solid #3b82f6;border-radius:6px;background:white;color:#3b82f6;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.today-btn:hover{background:#3b82f6;color:white}
 .vsec{margin-bottom:10px}
 .vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid #f1f5f9}
 .vfield{display:flex;align-items:center;justify-content:space-between;padding:2px 0;min-height:30px}
@@ -434,8 +436,11 @@ function buildVisitCard(vn) {
   var div = document.createElement("div");
   div.className="visit-card"; div.id="vc"+vn;
   div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
-    '<div><span style="font-size:10px;color:#94a3b8;margin-right:4px">Date</span>'+
-    '<input type="date" class="vdi" id="vd'+vn+'"></div></div>';
+    '<div style="display:flex;align-items:center;gap:6px">'+
+    '<span style="font-size:10px;color:#94a3b8">Date</span>'+
+    '<input type="date" class="vdi" id="vd'+vn+'">'+
+    '<button class="today-btn" onclick="setToday(\'vd'+vn+'\')">Today</button>'+
+    '</div></div>';
   FIELDS.forEach(function(sec,si){
     var sd=document.createElement("div"); sd.className="vsec";
     var t=document.createElement("div"); t.className="vsec-title"; t.textContent=sec.sec;
@@ -725,6 +730,21 @@ function buildPrintView() {
 function doPrint(){
   buildPrintView();
   window.print();
+}
+
+// ─── TODAY BUTTON ────────────────────────────────────────────────────────────
+function setToday(inputId) {
+  var el = document.getElementById(inputId);
+  if(!el) return;
+  var today = new Date();
+  var y = today.getFullYear();
+  var m = String(today.getMonth()+1).padStart(2,"0");
+  var d = String(today.getDate()).padStart(2,"0");
+  el.value = y+"-"+m+"-"+d;
+  // find visit number from id and save
+  var vn = parseInt(inputId.replace("vd",""));
+  if(vn) S.visitDates[vn] = el.value;
+  autoSave();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
