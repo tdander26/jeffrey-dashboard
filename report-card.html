@@ -8,215 +8,243 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;min-height:100vh}
 
-/* ── PASSWORD OVERLAY ── */
-#pwOverlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);display:flex;align-items:center;justify-content:center;z-index:9999}
-.pw-box{background:white;border-radius:16px;padding:44px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.5)}
+/* ── PASSWORD ── */
+#pwOverlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:flex;align-items:center;justify-content:center;z-index:9999}
+.pw-box{background:white;border-radius:16px;padding:44px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.5)}
 .pw-logo{font-size:40px;margin-bottom:10px}
-.pw-brand{font-size:22px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px}
+.pw-brand{font-size:22px;font-weight:800;color:#1a1a2e}
 .pw-sub{color:#94a3b8;font-size:13px;margin:6px 0 28px}
-.pw-box input[type=password]{width:100%;padding:13px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;margin-bottom:12px;outline:none;transition:border-color .2s}
-.pw-box input[type=password]:focus{border-color:#3b82f6}
-.pw-box .pw-btn{width:100%;padding:13px;background:#1a1a2e;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;transition:background .2s}
-.pw-box .pw-btn:hover{background:#2d3748}
+.pw-box input{width:100%;padding:13px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;margin-bottom:12px;outline:none;transition:border-color .2s}
+.pw-box input:focus{border-color:#3b82f6}
+.pw-box button{width:100%;padding:13px;background:#1a1a2e;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;transition:background .2s}
+.pw-box button:hover{background:#2d3748}
 .pw-error{color:#ef4444;font-size:13px;margin-top:10px;display:none;padding:8px;background:#fef2f2;border-radius:6px}
 .pw-hipaa{margin-top:20px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;line-height:1.5}
 
 /* ── APP ── */
 #app{max-width:1300px;margin:0 auto;padding:20px}
-
-/* ── HEADER ── */
 .app-header{background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border-radius:14px;padding:22px 28px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.app-header h1{font-size:20px;font-weight:800;letter-spacing:-.3px}
-.app-header .subtitle{font-size:12px;opacity:.65;margin-top:3px}
-.header-btns{display:flex;gap:8px;flex-wrap:wrap}
+.app-header h1{font-size:20px;font-weight:800}
+.app-header .sub{font-size:12px;opacity:.65;margin-top:3px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
 .btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;white-space:nowrap}
 .btn-light{background:rgba(255,255,255,.15);color:white}.btn-light:hover{background:rgba(255,255,255,.25)}
 .btn-danger{background:#ef4444;color:white}.btn-danger:hover{background:#dc2626}
 .btn-green{background:#22c55e;color:white}.btn-green:hover{background:#16a34a}
 
-/* ── STICKY COLOR SELECTOR ── */
-#colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:14px 20px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.12);border:2px solid #e2e8f0;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+/* ── COLOR BAR ── */
+#colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:12px 18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .cb-label{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
-.cb-colors{display:flex;gap:10px;flex-wrap:wrap}
-.cb-btn{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;border:3px solid transparent;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;background:#f8fafc;color:#374151;user-select:none}
-.cb-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.cb-btn.active{border-color:#1a1a2e;box-shadow:0 4px 14px rgba(0,0,0,.18);transform:translateY(-2px)}
-.cb-dot{width:18px;height:18px;border-radius:50%;flex-shrink:0;border:2px solid rgba(0,0,0,.1)}
-.cb-clear{margin-left:auto;padding:7px 14px;border-radius:8px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;transition:all .2s}
-.cb-clear:hover{background:#f1f5f9;border-color:#cbd5e1}
-.cb-active-label{font-size:12px;color:#94a3b8;white-space:nowrap}
-.cb-active-label span{font-weight:700;color:#1a1a2e}
+.cb-colors{display:flex;gap:8px;flex-wrap:wrap}
+.cb-btn{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:9px;border:3px solid transparent;cursor:pointer;font-size:12px;font-weight:700;transition:all .18s;background:#f8fafc;color:#374151;user-select:none}
+.cb-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.cb-btn.active{border-color:#1a1a2e;box-shadow:0 4px 14px rgba(0,0,0,.15);transform:translateY(-2px)}
+.cb-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+.cb-clr{margin-left:auto;padding:6px 12px;border-radius:7px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;transition:all .2s}
+.cb-clr:hover{background:#f1f5f9}
 
-/* ── HIPAA BAR ── */
-.hipaa-bar{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#92400e;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+/* ── HIPAA ── */
+.hipaa-bar{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#92400e;line-height:1.5}
 
 /* ── CARDS ── */
 .card{background:white;border-radius:14px;padding:24px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:16px}
-.field-row{display:flex;gap:16px;flex-wrap:wrap}
-.fg{flex:1;min-width:180px}
-.fg label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
-.fg input{width:100%;padding:10px 13px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:14px}
+.field-row{display:flex;gap:14px;flex-wrap:wrap}
+.fg{flex:1;min-width:170px}
+.fg label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.fg input{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
 .fg input:focus{border-color:#3b82f6}
 
-/* ── SYMPTOM TABLE ── */
+/* ── SYM TABLE ── */
 .sym-scroll{overflow-x:auto;margin-top:8px}
 .sym-hint{font-size:12px;color:#94a3b8;margin-bottom:10px}
 .sym-table{border-collapse:collapse;width:100%;min-width:1100px;font-size:12px}
-.sym-table th{background:#1a1a2e;color:white;padding:7px 8px;text-align:center;white-space:nowrap;font-size:11px}
-.sym-table th:first-child{text-align:left;min-width:160px;padding-left:12px}
-.sym-table td{border:1px solid #e2e8f0;padding:3px 4px}
-.sym-table td:first-child{background:#f8fafc;padding:4px 6px}
-.sym-table tr:nth-child(even) td:not(:first-child){background:#fafbfc}
-.sym-table input[type=text]{width:100%;border:none;outline:none;font-size:12px;background:transparent;padding:2px 4px}
-.sym-cell{width:34px;height:26px;border:1.5px solid #d1d5db;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:13px;font-weight:900;transition:all .15s;user-select:none}
-.sym-cell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.08)}
-.sym-add{margin-top:10px;font-size:12px;color:#3b82f6;cursor:pointer;font-weight:600;display:inline-block}
+.sym-table th{background:#1a1a2e;color:white;padding:6px 5px;text-align:center;white-space:nowrap;font-size:10px}
+.sym-table th:first-child{text-align:left;min-width:150px;padding-left:10px}
+.sym-table td{border:1px solid #e2e8f0;padding:2px 3px}
+.sym-table td:first-child{background:#f8fafc;padding:3px 6px}
+.sym-table input[type=text]{width:100%;border:none;outline:none;font-size:12px;background:transparent;padding:2px 3px}
+.sym-cell{width:32px;height:24px;border:1.5px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:12px;font-weight:900;transition:all .12s;user-select:none}
+.sym-cell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.1)}
+.sym-add{margin-top:8px;font-size:12px;color:#3b82f6;cursor:pointer;font-weight:600;display:inline-block}
 .sym-add:hover{text-decoration:underline}
 
 /* ── PHASE TABS ── */
-.phase-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-.phase-tab{padding:9px 20px;border-radius:9px;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;background:white;color:#64748b}
+.phase-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.phase-tab{padding:8px 18px;border-radius:9px;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;background:white;color:#64748b}
 .phase-tab.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
-.phase-content{display:none}
-.phase-content.active{display:block}
-
-/* ── VISITS GRID ── */
-.visits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:16px}
+.phase-content{display:none}.phase-content.active{display:block}
+.visits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:14px}
 
 /* ── VISIT CARD ── */
-.visit-card{background:white;border-radius:14px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9}
-.visit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #f1f5f9}
-.visit-num{font-size:17px;font-weight:800;color:#1a1a2e}
-.visit-date-input{padding:6px 10px;border:2px solid #e2e8f0;border-radius:7px;font-size:12px;outline:none;width:136px}
-.visit-date-input:focus{border-color:#3b82f6}
-
-/* ── FIELD SECTIONS ── */
-.vsec{margin-bottom:12px}
-.vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
-.vfield{display:flex;align-items:center;justify-content:space-between;padding:3px 0;min-height:32px}
-.vfield-label{font-size:12px;color:#374151;flex:1;padding-right:8px;line-height:1.3}
-.vfield-opts{display:flex;gap:8px;flex-shrink:0}
-.mwrap{display:flex;flex-direction:column;align-items:center;gap:3px}
-.mcell{width:46px;height:28px;border:2px solid #d1d5db;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fafafa;user-select:none}
-.mcell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.05)}
-.mcell.marked{border-width:2px}
-.mcell .x-mark{font-weight:900;font-size:15px;line-height:1;pointer-events:none}
+.visit-card{background:white;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9}
+.visit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f1f5f9}
+.visit-num{font-size:16px;font-weight:800;color:#1a1a2e}
+.vdi{padding:5px 9px;border:2px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;width:130px}
+.vdi:focus{border-color:#3b82f6}
+.vsec{margin-bottom:10px}
+.vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid #f1f5f9}
+.vfield{display:flex;align-items:center;justify-content:space-between;padding:2px 0;min-height:30px}
+.vfield-label{font-size:11px;color:#374151;flex:1;padding-right:6px;line-height:1.3}
+.vfield-opts{display:flex;gap:7px;flex-shrink:0}
+.mwrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.mcell{width:42px;height:26px;border:2px solid #d1d5db;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none}
+.mcell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.06)}
+.mcell .xm{font-weight:900;font-size:14px;pointer-events:none}
 .opt-lbl{font-size:9px;color:#9ca3af;font-weight:600;white-space:nowrap;pointer-events:none}
-
-/* ── VISIT NOTES ── */
-.visit-notes{margin-top:14px;padding-top:12px;border-top:1px solid #f1f5f9}
-.visit-notes label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:5px}
-.visit-notes textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:12px;resize:vertical;min-height:52px;outline:none;font-family:inherit;color:#374151}
+.visit-notes{margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9}
+.visit-notes label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px}
+.visit-notes textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:48px;outline:none;font-family:inherit}
 .visit-notes textarea:focus{border-color:#3b82f6}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:24px;right:24px;background:#1a1a2e;color:white;padding:11px 22px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
 
-/* ── PRINT ── */
+/* ══════════════════════════════════════
+   PRINT TIMELINE VIEW
+══════════════════════════════════════ */
+#printView{display:none}
+
 @media print{
-  #pwOverlay,#colorBar,#toast,.header-btns,.phase-tabs,.hipaa-bar{display:none!important}
-  .phase-content{display:block!important}
-  .visit-card{break-inside:avoid;border:1px solid #ccc;margin-bottom:12px}
-  #app{max-width:100%;padding:10px}
-  body{background:white}
-  .app-header{background:#1a1a2e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .mcell.marked{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:landscape;margin:12mm}
+  body{background:white!important;font-size:11px}
+  #pwOverlay,#app,#toast{display:none!important}
+  #printView{display:block!important}
+
+  /* force color printing */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+
+  .pv-header{margin-bottom:16px;border-bottom:3px solid #1a1a2e;padding-bottom:10px}
+  .pv-title{font-size:18px;font-weight:900;color:#1a1a2e;letter-spacing:-.3px}
+  .pv-meta{font-size:11px;color:#374151;margin-top:4px}
+  .pv-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+  .pv-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700}
+  .pv-leg-dot{width:14px;height:14px;border-radius:3px}
+
+  .pv-section{margin-bottom:20px}
+  .pv-section-title{font-size:13px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 0;border-bottom:2px solid #e2e8f0}
+
+  .tl-table{border-collapse:collapse;width:100%;font-size:9px}
+  .tl-table th{background:#1a1a2e!important;color:white!important;padding:4px 3px;text-align:center;font-size:9px;white-space:nowrap;font-weight:700}
+  .tl-table th.row-hdr{text-align:left;min-width:160px;padding-left:6px;font-size:10px}
+  .tl-table th.sec-hdr{background:#374151!important;text-align:left;padding-left:6px;font-size:9px;letter-spacing:.04em}
+  .tl-table td{border:1px solid #e5e7eb;padding:1px 2px;text-align:center;vertical-align:middle}
+  .tl-table td.row-lbl{text-align:left;padding:3px 6px;font-size:9px;color:#1a1a2e;white-space:nowrap;background:#f9fafb!important;font-weight:600}
+  .tl-table td.row-lbl.sub-lbl{padding-left:12px;font-weight:500}
+  .tl-block{width:28px;height:16px;border-radius:2px;display:inline-block;margin:1px auto}
+  .tl-empty{width:28px;height:16px;display:inline-block}
+
+  .pv-footer{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between}
 }
+
 @media(max-width:600px){
   .visits-grid{grid-template-columns:1fr}
-  .app-header{padding:16px}
-  .cb-btn{padding:7px 12px;font-size:12px}
+  .cb-btn{padding:6px 11px;font-size:11px}
 }
 </style>
 </head>
 <body>
 
-<!-- PASSWORD OVERLAY -->
+<!-- PASSWORD -->
 <div id="pwOverlay">
   <div class="pw-box">
     <div class="pw-logo">🏥</div>
     <div class="pw-brand">Momentum Health & Wellness</div>
     <div class="pw-sub">Secure Patient Progress Records — Applied Kinesiology</div>
     <input type="password" id="pwInput" placeholder="Enter access password" autocomplete="current-password">
-    <button class="pw-btn" onclick="checkPw()">Unlock Records</button>
+    <button onclick="checkPw()">Unlock Records</button>
     <div class="pw-error" id="pwError">⚠️ Incorrect password. Please try again.</div>
-    <div class="pw-hipaa">🔒 <strong>Local Storage Only.</strong> No patient data is transmitted or stored externally. All records remain on this device only.</div>
+    <div class="pw-hipaa">🔒 <strong>Local only.</strong> No data transmitted. Stays on this device.</div>
   </div>
 </div>
 
 <!-- TOAST -->
 <div id="toast">✓ Saved</div>
 
+<!-- PRINT VIEW (shown only when printing) -->
+<div id="printView">
+  <div class="pv-header">
+    <div class="pv-title">🏥 Momentum Health &amp; Wellness — Patient Progress Report</div>
+    <div class="pv-meta" id="pv-meta"></div>
+    <div class="pv-legend">
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#ef4444"></div> Red — No Progress</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#eab308"></div> Yellow — Any Progress</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#3b82f6"></div> Blue — 80% Better</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#22c55e"></div> Green — 100% Resolution</div>
+    </div>
+  </div>
+  <div class="pv-section">
+    <div class="pv-section-title">Subjective Symptom Timeline</div>
+    <div id="pv-sym"></div>
+  </div>
+  <div class="pv-section">
+    <div class="pv-section-title">Objective Clinical Findings Timeline</div>
+    <div id="pv-obj"></div>
+  </div>
+  <div class="pv-footer">
+    <span>Momentum Health &amp; Wellness | Applied Kinesiology Clinical Documentation</span>
+    <span id="pv-date"></span>
+  </div>
+</div>
+
 <!-- MAIN APP -->
 <div id="app" style="display:none">
 
-  <!-- Header -->
   <div class="app-header">
     <div>
       <h1>🏥 Momentum Health &amp; Wellness</h1>
-      <div class="subtitle">Patient Progress Report Card — Applied Kinesiology Clinical Documentation</div>
+      <div class="sub">Patient Progress Report Card — Applied Kinesiology</div>
     </div>
-    <div class="header-btns">
+    <div class="hbtns">
       <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
       <button class="btn btn-light" onclick="importData()">⬆ Import</button>
-      <button class="btn btn-light" onclick="window.print()">🖨 Print</button>
+      <button class="btn btn-light" onclick="doPrint()">🖨 Print Timeline</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
 
-  <!-- STICKY COLOR SELECTOR -->
+  <!-- COLOR BAR -->
   <div id="colorBar">
     <span class="cb-label">Active Color</span>
     <div class="cb-colors">
-      <div class="cb-btn active" id="cb_red"    onclick="setColor('red')"   >
-        <div class="cb-dot" style="background:#ef4444"></div> Red — No Progress
-      </div>
-      <div class="cb-btn" id="cb_yellow" onclick="setColor('yellow')">
-        <div class="cb-dot" style="background:#eab308"></div> Yellow — Any Progress
-      </div>
-      <div class="cb-btn" id="cb_blue"   onclick="setColor('blue')"  >
-        <div class="cb-dot" style="background:#3b82f6"></div> Blue — 80% Better
-      </div>
-      <div class="cb-btn" id="cb_green"  onclick="setColor('green')" >
-        <div class="cb-dot" style="background:#22c55e"></div> Green — 100% Resolution
-      </div>
+      <div class="cb-btn active" id="cb_red"    onclick="setColor('red')">   <div class="cb-dot" style="background:#ef4444"></div>Red — No Progress</div>
+      <div class="cb-btn"        id="cb_yellow" onclick="setColor('yellow')"><div class="cb-dot" style="background:#eab308"></div>Yellow — Any Progress</div>
+      <div class="cb-btn"        id="cb_blue"   onclick="setColor('blue')">  <div class="cb-dot" style="background:#3b82f6"></div>Blue — 80% Better</div>
+      <div class="cb-btn"        id="cb_green"  onclick="setColor('green')"> <div class="cb-dot" style="background:#22c55e"></div>Green — 100% Resolution</div>
     </div>
-    <button class="cb-clear" onclick="clearMode()">✕ Clear Mode</button>
+    <button class="cb-clr" onclick="clearMode()">✕ Clear Mode</button>
   </div>
 
   <div class="hipaa-bar">
-    🔒 <span><strong>HIPAA Notice:</strong> Data is stored locally in your browser only — no external servers. For full compliance: use on an encrypted device, restrict access, and back up exports to encrypted storage.</span>
+    🔒 <strong>HIPAA Notice:</strong> Data stored locally in your browser only. No external servers. Use on an encrypted device and restrict access.
   </div>
 
   <!-- Patient Info -->
   <div class="card">
     <div class="card-title">👤 Patient Information</div>
     <div class="field-row">
-      <div class="fg"><label>Patient Name</label><input type="text" id="fi_name" placeholder="Full legal name" oninput="autoSave()"></div>
-      <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob" oninput="autoSave()"></div>
-      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start" oninput="autoSave()"></div>
-      <div class="fg"><label>Provider</label><input type="text" id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
-      <div class="fg"><label>Chart / MRN</label><input type="text" id="fi_mrn" placeholder="Chart number" oninput="autoSave()"></div>
+      <div class="fg"><label>Patient Name</label><input type="text"  id="fi_name"     placeholder="Full legal name"    oninput="autoSave()"></div>
+      <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob"      oninput="autoSave()"></div>
+      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave()"></div>
+      <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
+      <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
     </div>
   </div>
 
   <!-- Symptom Tracking -->
   <div class="card">
     <div class="card-title">📊 Subjective Symptom Tracking</div>
-    <div class="sym-hint">Enter complaint in the left column. Select a color above, then click any week cell to mark it. Gaps between visits auto-fill with the new color. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
+    <div class="sym-hint">Enter complaint label. Select a color above, then click week cells. Gap weeks auto-fill with the previous visit's color. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
     <div class="sym-scroll">
       <table class="sym-table">
-        <thead>
-          <tr>
-            <th>Patient Complaint</th>
-            <th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>W6</th><th>W7</th>
-            <th>W8</th><th>W9</th><th>W10</th><th>W11</th><th>W12</th><th>W13</th><th>W14</th>
-            <th>W15</th><th>W16</th><th>W17</th><th>W18</th><th>W19</th><th>W20</th><th>W21</th>
-            <th>W22</th><th>W23</th><th>W24</th><th>W25</th><th>W26</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>Patient Complaint</th>
+          <th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>W6</th><th>W7</th>
+          <th>W8</th><th>W9</th><th>W10</th><th>W11</th><th>W12</th><th>W13</th><th>W14</th>
+          <th>W15</th><th>W16</th><th>W17</th><th>W18</th><th>W19</th><th>W20</th><th>W21</th>
+          <th>W22</th><th>W23</th><th>W24</th><th>W25</th><th>W26</th>
+        </tr></thead>
         <tbody id="symBody"></tbody>
       </table>
     </div>
@@ -225,497 +253,478 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   <!-- Phase Tabs -->
   <div class="phase-tabs">
     <div class="phase-tab active" onclick="switchPhase(1)">Phase 1 — Visits 1–6</div>
-    <div class="phase-tab" onclick="switchPhase(2)">Phase 2 — Visits 7–12</div>
-    <div class="phase-tab" onclick="switchPhase(3)">Phase 3 — Visits 13–18</div>
+    <div class="phase-tab"        onclick="switchPhase(2)">Phase 2 — Visits 7–12</div>
+    <div class="phase-tab"        onclick="switchPhase(3)">Phase 3 — Visits 13–18</div>
   </div>
-
   <div id="phase1" class="phase-content active"><div class="visits-grid" id="pg1"></div></div>
-  <div id="phase2" class="phase-content"><div class="visits-grid" id="pg2"></div></div>
-  <div id="phase3" class="phase-content"><div class="visits-grid" id="pg3"></div></div>
+  <div id="phase2" class="phase-content">       <div class="visits-grid" id="pg2"></div></div>
+  <div id="phase3" class="phase-content">       <div class="visits-grid" id="pg3"></div></div>
 
-</div>
+</div><!-- /app -->
 
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
-const DEFAULT_PW  = "Momentum1!";
-const STORAGE_KEY = "mhw_report_v3";
+var DEFAULT_PW  = "Momentum1!";
+var STORAGE_KEY = "mhw_report_v4";
 
-// ─── COLOR DEFINITIONS ───────────────────────────────────────────────────────
-const COLOR_MAP = {
-  red:    { hex: "#ef4444", label: "No Progress" },
-  yellow: { hex: "#eab308", label: "Any Progress" },
-  blue:   { hex: "#3b82f6", label: "80% Better" },
-  green:  { hex: "#22c55e", label: "100% Resolution" },
+var COLOR_MAP = {
+  red:    {hex:"#ef4444", label:"No Progress"},
+  yellow: {hex:"#eab308", label:"Any Progress"},
+  blue:   {hex:"#3b82f6", label:"80% Better"},
+  green:  {hex:"#22c55e", label:"100% Resolution"},
 };
 
-// ─── ACTIVE COLOR STATE ──────────────────────────────────────────────────────
-// null = "clear mode" (clicks erase marks)
-let activeColor = "red";
+var activeColor = "red";
 
-function setColor(name) {
-  activeColor = name;
-  document.querySelectorAll(".cb-btn").forEach(b => b.classList.remove("active"));
-  const btn = document.getElementById("cb_" + name);
-  if (btn) btn.classList.add("active");
+function setColor(n) {
+  activeColor = n;
+  document.querySelectorAll(".cb-btn").forEach(function(b){ b.classList.remove("active"); });
+  var btn = document.getElementById("cb_"+n);
+  if(btn) btn.classList.add("active");
 }
-
 function clearMode() {
   activeColor = null;
-  document.querySelectorAll(".cb-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".cb-btn").forEach(function(b){ b.classList.remove("active"); });
 }
 
 // ─── FIELD DEFINITIONS ───────────────────────────────────────────────────────
-const FIELDS = [
+var FIELDS = [
   {sec:"GUT — INTESTINE", items:[
-    {lbl:"ICV",                                opts:["Open","Closed"]},
-    {lbl:"HV",                                 opts:["Open","Closed"]},
-    {lbl:"Splenic Flexure",                    opts:["Fwd","Rev"]},
-    {lbl:"Hepatic Flexure",                    opts:["Fwd","Rev"]},
-    {lbl:"Ascending",                          opts:["Fwd","Rev"]},
-    {lbl:"Descending",                         opts:["Fwd","Rev"]},
-    {lbl:"Gastrocolic Reflex",                 opts:null},
-    {lbl:"Sigmoid",                            opts:null},
+    {lbl:"ICV",                               opts:["Open","Closed"]},
+    {lbl:"HV",                                opts:["Open","Closed"]},
+    {lbl:"Splenic Flexure",                   opts:["Fwd","Rev"]},
+    {lbl:"Hepatic Flexure",                   opts:["Fwd","Rev"]},
+    {lbl:"Ascending",                         opts:["Fwd","Rev"]},
+    {lbl:"Descending",                        opts:["Fwd","Rev"]},
+    {lbl:"Gastrocolic Reflex",                opts:null},
+    {lbl:"Sigmoid",                           opts:null},
   ]},
   {sec:"GUT — UPPER GI", items:[
-    {lbl:"Hiatal Hernia",                      opts:null},
-    {lbl:"GB Pump",                            opts:null},
-    {lbl:"Pyloric",                            opts:["Open","Closed"]},
+    {lbl:"Hiatal Hernia",                     opts:null},
+    {lbl:"GB Pump",                           opts:null},
+    {lbl:"Pyloric",                           opts:["Open","Closed"]},
   ]},
   {sec:"GUT — OFFENDER CHALLENGES", items:[
-    {lbl:"Ammonia",                            opts:null},
-    {lbl:"Aldehydes",                          opts:null},
-    {lbl:"Histamine",                          opts:null},
-    {lbl:"B2 / Cysteine",                     opts:null},
-    {lbl:"Infections",                         opts:null},
+    {lbl:"Ammonia",                           opts:null},
+    {lbl:"Aldehydes",                         opts:null},
+    {lbl:"Histamine",                         opts:null},
+    {lbl:"B2 / Cysteine",                    opts:null},
+    {lbl:"Infections",                        opts:null},
   ]},
   {sec:"GUT — OTHER CHALLENGES", items:[
-    {lbl:"Lig. Stretch Test (Type 3 LSASS)",  opts:null},
-    {lbl:"Valve Combinations",                 opts:null},
+    {lbl:"Lig. Stretch Test (Type 3 LSASS)", opts:null},
+    {lbl:"Valve Combinations",                opts:null},
   ]},
   {sec:"AUTONOMIC CHALLENGES", items:[
-    {lbl:"Vagus Challenge",                    opts:null},
-    {lbl:"Bilat. Closed Valves — SYM DOM",    opts:null},
-    {lbl:"LASS",                               opts:null},
-    {lbl:"HRV",                                opts:null},
+    {lbl:"Vagus Challenge",                   opts:null},
+    {lbl:"Bilat. Closed Valves — SYM DOM",   opts:null},
+    {lbl:"LASS",                              opts:null},
+    {lbl:"HRV",                               opts:null},
   ]},
   {sec:"HORMONAL CHALLENGES", items:[
-    {lbl:"Pituitary: TL Glabella + endo org.", opts:null},
-    {lbl:"Uterine/Prostate Lift (BDOFG)",      opts:null},
+    {lbl:"Pituitary: TL Glabella + endo org.",opts:null},
+    {lbl:"Uterine/Prostate Lift (BDOFG)",     opts:null},
   ]},
   {sec:"TMJ — C2 HYOID", items:[
-    {lbl:"w/ Offenders",                       opts:null},
-    {lbl:"w/ TL mental protub. & pubic sym.",  opts:null},
-    {lbl:"w/ Inferior Traction",               opts:null},
+    {lbl:"w/ Offenders",                      opts:null},
+    {lbl:"w/ TL mental protub. & pubic sym.", opts:null},
+    {lbl:"w/ Inferior Traction",              opts:null},
   ]},
   {sec:"TMJ — OTHER", items:[
-    {lbl:"Vertical Dimension",                 opts:null},
-    {lbl:"ICR (Estrogen + TMJ challenges)",    opts:null},
-    {lbl:"Bruxism (SSRI + TMJ challenges)",    opts:null},
+    {lbl:"Vertical Dimension",                opts:null},
+    {lbl:"ICR (Estrogen + TMJ challenges)",   opts:null},
+    {lbl:"Bruxism (SSRI + TMJ challenges)",   opts:null},
   ]},
   {sec:"SLEEP — REM", items:[
-    {lbl:"Cortisol, Epinephrine, Emotions",    opts:null},
+    {lbl:"Cortisol, Epinephrine, Emotions",   opts:null},
     {lbl:"Foods, Sugar, Caffeine, Phys Stress",opts:null},
-    {lbl:"Medications, Suppl., Hormones",      opts:null},
+    {lbl:"Medications, Suppl., Hormones",     opts:null},
   ]},
   {sec:"SLEEP — OTHER", items:[
-    {lbl:"Then / Now",                         opts:null},
-    {lbl:"Pineal — Dark Room Weakness",        opts:null},
+    {lbl:"Then / Now",                        opts:null},
+    {lbl:"Pineal — Dark Room Weakness",       opts:null},
   ]},
   {sec:"BLOOD SUGAR", items:[
-    {lbl:"Dysglycemia Pattern",                opts:null},
-    {lbl:"Pancreas CR weakens bicep (hyper.)", opts:null},
+    {lbl:"Dysglycemia Pattern",               opts:null},
+    {lbl:"Pancreas CR weakens bicep (hyper.)",opts:null},
   ]},
   {sec:"RECURRENT INJURY PATTERNS", items:[
-    {lbl:"Two Organ",                          opts:null},
-    {lbl:"Anaerobic / Aerobic / O2 Starv.",   opts:null},
-    {lbl:"Bone Bend",                          opts:null},
-    {lbl:"Joint Jam",                          opts:null},
-    {lbl:"Inter. Membrane",                    opts:null},
-    {lbl:"Fascial Flush",                      opts:null},
-    {lbl:"Temporal Tap",                       opts:null},
+    {lbl:"Two Organ",                         opts:null},
+    {lbl:"Anaerobic / Aerobic / O2 Starv.",  opts:null},
+    {lbl:"Bone Bend",                         opts:null},
+    {lbl:"Joint Jam",                         opts:null},
+    {lbl:"Inter. Membrane",                   opts:null},
+    {lbl:"Fascial Flush",                     opts:null},
+    {lbl:"Temporal Tap",                      opts:null},
   ]},
   {sec:"BRAIN", items:[
-    {lbl:"Overfiring Supraspinatus",           opts:null},
-    {lbl:"CR Stim. Induces Overfiring Supra.", opts:null},
+    {lbl:"Overfiring Supraspinatus",          opts:null},
+    {lbl:"CR Stim. Induces Overfiring Supra.",opts:null},
   ]},
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
-let S = {
-  patientInfo: {},
-  symptoms:    {},
-  symLabels:   {},
-  symRows:     8,
-  visitDates:  {},
-  visitNotes:  {},
-  marks:       {},  // key -> colorName (e.g. "red")
+var S = {
+  patientInfo:{}, symptoms:{}, symLabels:{}, symRows:8,
+  visitDates:{}, visitNotes:{}, marks:{}
 };
 
 // ─── PASSWORD ────────────────────────────────────────────────────────────────
 function checkPw() {
-  const pw = localStorage.getItem("mhw_pw") || DEFAULT_PW;
-  if (document.getElementById("pwInput").value === pw) {
+  var pw = localStorage.getItem("mhw_pw") || DEFAULT_PW;
+  if(document.getElementById("pwInput").value === pw) {
     document.getElementById("pwOverlay").style.display = "none";
     document.getElementById("app").style.display = "block";
-    loadState();
-    renderAll();
+    loadState(); renderAll();
   } else {
-    const e = document.getElementById("pwError");
+    var e = document.getElementById("pwError");
     e.style.display = "block";
     document.getElementById("pwInput").value = "";
-    setTimeout(() => e.style.display = "none", 3500);
+    setTimeout(function(){ e.style.display="none"; }, 3500);
   }
 }
-document.getElementById("pwInput").addEventListener("keydown", e => { if(e.key==="Enter") checkPw(); });
+document.getElementById("pwInput").addEventListener("keydown",function(e){ if(e.key==="Enter") checkPw(); });
 
 function logout() {
   saveAll();
-  document.getElementById("app").style.display = "none";
-  document.getElementById("pwOverlay").style.display = "flex";
-  document.getElementById("pwInput").value = "";
+  document.getElementById("app").style.display="none";
+  document.getElementById("pwOverlay").style.display="flex";
+  document.getElementById("pwInput").value="";
 }
 
 // ─── PHASE TABS ──────────────────────────────────────────────────────────────
 function switchPhase(n) {
-  document.querySelectorAll(".phase-tab").forEach((t,i) => t.classList.toggle("active", i===n-1));
-  document.querySelectorAll(".phase-content").forEach((c,i) => c.classList.toggle("active", i===n-1));
+  document.querySelectorAll(".phase-tab").forEach(function(t,i){ t.classList.toggle("active",i===n-1); });
+  document.querySelectorAll(".phase-content").forEach(function(c,i){ c.classList.toggle("active",i===n-1); });
 }
 
-// ─── MARK CELLS ──────────────────────────────────────────────────────────────
+// ─── VISIT MARK CELLS ────────────────────────────────────────────────────────
+function mkKey(v,si,ii,oi){ return "v"+v+"_"+si+"_"+ii+(oi!==undefined?"_"+oi:""); }
+
 function onCellClick(key) {
-  if (activeColor === null) {
-    // clear mode
-    delete S.marks[key];
-  } else {
-    // if same color already, toggle off; otherwise apply new color
-    if (S.marks[key] === activeColor) {
-      delete S.marks[key];
-    } else {
-      S.marks[key] = activeColor;
-    }
-  }
-  renderMark(key);
-  autoSave();
+  if(activeColor===null){ delete S.marks[key]; }
+  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor; }
+  renderMark(key); autoSave();
 }
 
 function renderMark(key) {
-  const cell = document.getElementById("mc_" + key);
-  if (!cell) return;
-  const colorName = S.marks[key];
-  const old = cell.querySelector(".x-mark");
-  if (old) old.remove();
-  if (colorName && COLOR_MAP[colorName]) {
-    const hex = COLOR_MAP[colorName].hex;
+  var cell = document.getElementById("mc_"+key);
+  if(!cell) return;
+  var cn = S.marks[key];
+  var old = cell.querySelector(".xm");
+  if(old) old.remove();
+  if(cn && COLOR_MAP[cn]) {
+    var h = COLOR_MAP[cn].hex;
     cell.classList.add("marked");
-    cell.style.borderColor  = hex;
-    cell.style.background   = hex + "18";
-    const x = document.createElement("span");
-    x.className   = "x-mark";
-    x.textContent = "✕";
-    x.style.color = hex;
+    cell.style.borderColor = h;
+    cell.style.background  = h+"18";
+    var x = document.createElement("span");
+    x.className="xm"; x.textContent="✕"; x.style.color=h;
     cell.appendChild(x);
   } else {
     cell.classList.remove("marked");
-    cell.style.borderColor = "";
-    cell.style.background  = "";
+    cell.style.borderColor=cell.style.background="";
   }
 }
+function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
 
-function renderAllMarks() {
-  Object.keys(S.marks).forEach(k => renderMark(k));
-}
-
-// ─── VISIT CARD BUILDER ──────────────────────────────────────────────────────
-function mkKey(v, si, ii, oi) {
-  return "v" + v + "_" + si + "_" + ii + (oi !== undefined ? "_" + oi : "");
-}
-
+// ─── VISIT CARDS ─────────────────────────────────────────────────────────────
 function buildVisitCard(vn) {
-  const div = document.createElement("div");
-  div.className = "visit-card";
-  div.id = "vc" + vn;
-
-  div.innerHTML =
-    '<div class="visit-header">' +
-      '<div class="visit-num">Visit ' + vn + '</div>' +
-      '<div><span style="font-size:11px;color:#94a3b8;margin-right:5px">Date</span>' +
-      '<input type="date" class="visit-date-input" id="vd' + vn + '"></div>' +
-    '</div>';
-
-  FIELDS.forEach(function(sec, si) {
-    const sd = document.createElement("div");
-    sd.className = "vsec";
-    const title = document.createElement("div");
-    title.className = "vsec-title";
-    title.textContent = sec.sec;
-    sd.appendChild(title);
-
-    sec.items.forEach(function(item, ii) {
-      const row = document.createElement("div");
-      row.className = "vfield";
-
-      const lbl = document.createElement("span");
-      lbl.className = "vfield-label";
-      lbl.textContent = item.lbl;
+  var div = document.createElement("div");
+  div.className="visit-card"; div.id="vc"+vn;
+  div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
+    '<div><span style="font-size:10px;color:#94a3b8;margin-right:4px">Date</span>'+
+    '<input type="date" class="vdi" id="vd'+vn+'"></div></div>';
+  FIELDS.forEach(function(sec,si){
+    var sd=document.createElement("div"); sd.className="vsec";
+    var t=document.createElement("div"); t.className="vsec-title"; t.textContent=sec.sec;
+    sd.appendChild(t);
+    sec.items.forEach(function(item,ii){
+      var row=document.createElement("div"); row.className="vfield";
+      var lbl=document.createElement("span"); lbl.className="vfield-label"; lbl.textContent=item.lbl;
       row.appendChild(lbl);
-
-      const optsDiv = document.createElement("div");
-      optsDiv.className = "vfield-opts";
-
-      if (item.opts) {
-        item.opts.forEach(function(opt, oi) {
-          const key  = mkKey(vn, si, ii, oi);
-          const wrap = document.createElement("div");
-          wrap.className = "mwrap";
-
-          const cell = document.createElement("div");
-          cell.className = "mcell";
-          cell.id = "mc_" + key;
-          cell.addEventListener("click", function() { onCellClick(key); });
-
-          const optL = document.createElement("span");
-          optL.className = "opt-lbl";
-          optL.textContent = opt;
-
-          wrap.appendChild(cell);
-          wrap.appendChild(optL);
-          optsDiv.appendChild(wrap);
+      var od=document.createElement("div"); od.className="vfield-opts";
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var key=mkKey(vn,si,ii,oi);
+          var w=document.createElement("div"); w.className="mwrap";
+          var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
+          c.addEventListener("click",(function(k){ return function(){ onCellClick(k); }; })(key));
+          var ol=document.createElement("span"); ol.className="opt-lbl"; ol.textContent=opt;
+          w.appendChild(c); w.appendChild(ol); od.appendChild(w);
         });
       } else {
-        const key  = mkKey(vn, si, ii);
-        const wrap = document.createElement("div");
-        wrap.className = "mwrap";
-        const cell = document.createElement("div");
-        cell.className = "mcell";
-        cell.id = "mc_" + key;
-        cell.addEventListener("click", function() { onCellClick(key); });
-        wrap.appendChild(cell);
-        optsDiv.appendChild(wrap);
+        var key=mkKey(vn,si,ii);
+        var w=document.createElement("div"); w.className="mwrap";
+        var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
+        c.addEventListener("click",(function(k){ return function(){ onCellClick(k); }; })(key));
+        w.appendChild(c); od.appendChild(w);
       }
-
-      row.appendChild(optsDiv);
-      sd.appendChild(row);
+      row.appendChild(od); sd.appendChild(row);
     });
-
     div.appendChild(sd);
   });
-
-  const notes = document.createElement("div");
-  notes.className = "visit-notes";
-  notes.innerHTML = '<label>Visit Notes</label><textarea id="vn' + vn + '" placeholder="Clinical notes, observations, treatment..."></textarea>';
-  div.appendChild(notes);
-
+  var no=document.createElement("div"); no.className="visit-notes";
+  no.innerHTML='<label>Visit Notes</label><textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>';
+  div.appendChild(no);
   return div;
 }
 
-function buildAllVisits() {
-  [[1,6,"pg1"],[7,12,"pg2"],[13,18,"pg3"]].forEach(function(p) {
-    const grid = document.getElementById(p[2]);
-    for (var v = p[0]; v <= p[1]; v++) grid.appendChild(buildVisitCard(v));
+function buildAllVisits(){
+  [[1,6,"pg1"],[7,12,"pg2"],[13,18,"pg3"]].forEach(function(p){
+    var g=document.getElementById(p[2]);
+    for(var v=p[0];v<=p[1];v++) g.appendChild(buildVisitCard(v));
   });
 }
 
 // ─── SYMPTOM TABLE ───────────────────────────────────────────────────────────
-function addSymRow() {
-  S.symRows++;
-  renderSymTable();
-  autoSave();
-}
+function addSymRow(){ S.symRows++; renderSymTable(); autoSave(); }
 
-// Click a symptom week cell:
-// - If already marked with active color → clear it
-// - If unmarked (or different color) → mark it with active color
-//   AND auto-fill the gap (weeks after last marked week, up to this week-1)
-//   with active color (preserving any already-marked weeks before the gap)
-function onSymCellClick(row, week) {
-  var key = "r" + row + "_c" + week;
-  if (activeColor === null) {
-    delete S.symptoms[key];
-    renderSymCell(row, week);
-    autoSave();
-    return;
+function onSymCellClick(row,week) {
+  var key="r"+row+"_c"+week;
+  if(activeColor===null){ delete S.symptoms[key]; renderSymCell(row,week); autoSave(); return; }
+  // toggle off if same
+  if(S.symptoms[key]===activeColor){ delete S.symptoms[key]; renderSymCell(row,week); autoSave(); return; }
+
+  // Find last marked week before this one and its color
+  var lastMarked=0, prevColor=null;
+  for(var w=week-1;w>=1;w--){
+    var pk="r"+row+"_c"+w;
+    if(S.symptoms[pk]){ lastMarked=w; prevColor=S.symptoms[pk]; break; }
   }
-  // toggle off if same color
-  if (S.symptoms[key] === activeColor) {
-    delete S.symptoms[key];
-    renderSymCell(row, week);
-    autoSave();
-    return;
-  }
-  // find last marked week before this one
-  var lastMarked = 0;
-  for (var w = week - 1; w >= 1; w--) {
-    if (S.symptoms["r" + row + "_c" + w]) { lastMarked = w; break; }
-  }
-  // auto-fill gap: weeks (lastMarked+1) to (week-1) with active color
-  for (var fw = lastMarked + 1; fw < week; fw++) {
-    var fkey = "r" + row + "_c" + fw;
-    if (!S.symptoms[fkey]) {   // don't overwrite already-marked weeks
-      S.symptoms[fkey] = activeColor;
-      renderSymCell(row, fw);
+
+  // Auto-fill gap weeks (lastMarked+1) to (week-1) with PREVIOUS color
+  // This fills the weeks the patient wasn't seen with their last known status
+  if(prevColor){
+    for(var fw=lastMarked+1;fw<week;fw++){
+      var fk="r"+row+"_c"+fw;
+      if(!S.symptoms[fk]){ S.symptoms[fk]=prevColor; renderSymCell(row,fw); }
     }
   }
-  // mark the clicked week
-  S.symptoms[key] = activeColor;
-  renderSymCell(row, week);
+
+  // Mark clicked week with active color
+  S.symptoms[key]=activeColor;
+  renderSymCell(row,week);
   autoSave();
 }
 
-function renderSymCell(row, week) {
-  var cell = document.getElementById("sc_r" + row + "_c" + week);
-  if (!cell) return;
-  var colorName = S.symptoms["r" + row + "_c" + week];
-  if (colorName && COLOR_MAP[colorName]) {
-    var hex = COLOR_MAP[colorName].hex;
-    cell.style.borderColor = hex;
-    cell.style.background  = hex + "22";
-    cell.style.color       = hex;
-    cell.textContent       = "✕";
+function renderSymCell(row,week) {
+  var cell=document.getElementById("sc_r"+row+"_c"+week);
+  if(!cell) return;
+  var cn=S.symptoms["r"+row+"_c"+week];
+  if(cn && COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex;
+    cell.style.borderColor=h; cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕";
   } else {
-    cell.style.borderColor = "";
-    cell.style.background  = "";
-    cell.style.color       = "";
-    cell.textContent       = "";
+    cell.style.borderColor=cell.style.background=cell.style.color=""; cell.textContent="";
   }
 }
-
-function renderAllSymCells() {
-  for (var r = 0; r < S.symRows; r++) {
-    for (var w = 1; w <= 26; w++) {
-      renderSymCell(r, w);
-    }
-  }
-}
+function renderAllSymCells(){ for(var r=0;r<S.symRows;r++) for(var w=1;w<=26;w++) renderSymCell(r,w); }
 
 function renderSymTable() {
-  const tbody = document.getElementById("symBody");
-  tbody.innerHTML = "";
-  for (var r = 0; r < S.symRows; r++) {
-    (function(row) {
-      const tr  = document.createElement("tr");
-      // label cell
-      const tdL = document.createElement("td");
-      const inp = document.createElement("input");
-      inp.type = "text";
-      inp.placeholder = "Complaint " + (row + 1);
-      inp.value = S.symLabels["r" + row] || "";
-      inp.addEventListener("input", function() { S.symLabels["r" + row] = inp.value; autoSave(); });
-      tdL.appendChild(inp);
-      tr.appendChild(tdL);
-      // week cells — clickable boxes
-      for (var w = 1; w <= 26; w++) {
-        (function(wk) {
-          const td   = document.createElement("td");
-          td.style.padding = "2px";
-          const cell = document.createElement("div");
-          cell.className = "sym-cell";
-          cell.id = "sc_r" + row + "_c" + wk;
-          cell.addEventListener("click", function() { onSymCellClick(row, wk); });
-          td.appendChild(cell);
-          tr.appendChild(td);
+  var tbody=document.getElementById("symBody"); tbody.innerHTML="";
+  for(var r=0;r<S.symRows;r++){
+    (function(row){
+      var tr=document.createElement("tr");
+      var tdL=document.createElement("td");
+      var inp=document.createElement("input"); inp.type="text";
+      inp.placeholder="Complaint "+(row+1);
+      inp.value=S.symLabels["r"+row]||"";
+      inp.addEventListener("input",(function(rr){ return function(){ S.symLabels["r"+rr]=inp.value; autoSave(); }; })(row));
+      tdL.appendChild(inp); tr.appendChild(tdL);
+      for(var w=1;w<=26;w++){
+        (function(wk){
+          var td=document.createElement("td"); td.style.padding="2px";
+          var cell=document.createElement("div"); cell.className="sym-cell"; cell.id="sc_r"+row+"_c"+wk;
+          cell.addEventListener("click",(function(rr,ww){ return function(){ onSymCellClick(rr,ww); }; })(row,wk));
+          td.appendChild(cell); tr.appendChild(td);
         })(w);
       }
       tbody.appendChild(tr);
     })(r);
   }
-  // re-render marks after rebuild
   renderAllSymCells();
 }
 
 // ─── PATIENT INFO ────────────────────────────────────────────────────────────
-const PI_MAP = {fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",fi_mrn:"mrn"};
+var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",fi_mrn:"mrn"};
 
-function loadPatientInfo() {
-  Object.keys(PI_MAP).forEach(function(id) {
-    const el = document.getElementById(id);
-    if (el && S.patientInfo[PI_MAP[id]]) el.value = S.patientInfo[PI_MAP[id]];
-    if (el) el.addEventListener("input", autoSave);
+function loadPatientInfo(){
+  Object.keys(PI_MAP).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el && S.patientInfo[PI_MAP[id]]) el.value=S.patientInfo[PI_MAP[id]];
+    if(el) el.addEventListener("input",autoSave);
   });
 }
-
-function collectPatientInfo() {
-  Object.keys(PI_MAP).forEach(function(id) {
-    const el = document.getElementById(id);
-    if (el) S.patientInfo[PI_MAP[id]] = el.value;
+function collectPatientInfo(){
+  Object.keys(PI_MAP).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) S.patientInfo[PI_MAP[id]]=el.value;
   });
 }
 
 // ─── VISIT DATES + NOTES ─────────────────────────────────────────────────────
-function loadVisitDates() {
-  for (var v = 1; v <= 18; v++) {
-    (function(vn) {
-      const el = document.getElementById("vd" + vn);
-      if (el) {
-        el.value = S.visitDates[vn] || "";
-        el.addEventListener("input", function() { S.visitDates[vn] = el.value; autoSave(); });
-      }
-      const ne = document.getElementById("vn" + vn);
-      if (ne) {
-        ne.value = S.visitNotes[vn] || "";
-        ne.addEventListener("input", function() { S.visitNotes[vn] = ne.value; autoSave(); });
-      }
+function loadVisitDates(){
+  for(var v=1;v<=18;v++){
+    (function(vn){
+      var el=document.getElementById("vd"+vn);
+      if(el){ el.value=S.visitDates[vn]||""; el.addEventListener("input",(function(n){ return function(){ S.visitDates[n]=el.value; autoSave(); }; })(vn)); }
+      var ne=document.getElementById("vn"+vn);
+      if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; autoSave(); }; })(vn)); }
     })(v);
   }
 }
 
 // ─── SAVE / LOAD ─────────────────────────────────────────────────────────────
-function saveAll() {
+function saveAll(){
   collectPatientInfo();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
-  const t = document.getElementById("toast");
-  t.style.opacity = "1";
-  setTimeout(function() { t.style.opacity = "0"; }, 1600);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(S));
+  var t=document.getElementById("toast"); t.style.opacity="1";
+  setTimeout(function(){ t.style.opacity="0"; },1600);
 }
-
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  try { S = Object.assign(S, JSON.parse(raw)); } catch(e) {}
+function loadState(){
+  var raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw) return;
+  try{ S=Object.assign(S,JSON.parse(raw)); }catch(e){}
 }
-
-function renderAll() {
-  loadPatientInfo();
-  renderSymTable();       // also calls renderAllSymCells internally
-  loadVisitDates();
-  renderAllMarks();
+function renderAll(){
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks();
 }
-
-var _aSaveT;
-function autoSave() {
-  clearTimeout(_aSaveT);
-  _aSaveT = setTimeout(saveAll, 1200);
-}
+var _aT;
+function autoSave(){ clearTimeout(_aT); _aT=setTimeout(saveAll,1200); }
 
 // ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
-function exportData() {
+function exportData(){
   collectPatientInfo();
-  const name = (S.patientInfo.name || "patient").replace(/\s+/g,"_");
-  const date = new Date().toISOString().split("T")[0];
-  const blob = new Blob([JSON.stringify(S, null, 2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "momentum_" + name + "_" + date + ".json";
-  a.click();
+  var name=(S.patientInfo.name||"patient").replace(/\s+/g,"_");
+  var date=new Date().toISOString().split("T")[0];
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="momentum_"+name+"_"+date+".json"; a.click();
 }
-
-function importData() {
-  const inp = document.createElement("input");
-  inp.type = "file";
-  inp.accept = ".json";
-  inp.onchange = function(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = function(ev) {
-      try {
-        S = JSON.parse(ev.target.result);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(S));
-        renderAll();
-      } catch(err) { alert("Invalid file format."); }
-    };
+function importData(){
+  var inp=document.createElement("input"); inp.type="file"; inp.accept=".json";
+  inp.onchange=function(e){
+    var f=e.target.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(ev){ try{ S=JSON.parse(ev.target.result); localStorage.setItem(STORAGE_KEY,JSON.stringify(S)); renderAll(); }catch(){ alert("Invalid file."); } };
     r.readAsText(f);
   };
   inp.click();
+}
+
+// ─── PRINT TIMELINE BUILDER ──────────────────────────────────────────────────
+function colorBlock(colorName) {
+  if(!colorName || !COLOR_MAP[colorName]) return '<span class="tl-empty"></span>';
+  return '<span class="tl-block" style="background:'+COLOR_MAP[colorName].hex+'"></span>';
+}
+
+function buildPrintView() {
+  // Patient meta
+  var pi = S.patientInfo;
+  var meta = [];
+  if(pi.name)     meta.push("<strong>Patient:</strong> "+pi.name);
+  if(pi.dob)      meta.push("<strong>DOB:</strong> "+pi.dob);
+  if(pi.start)    meta.push("<strong>Case Start:</strong> "+pi.start);
+  if(pi.provider) meta.push("<strong>Provider:</strong> "+pi.provider);
+  if(pi.mrn)      meta.push("<strong>MRN:</strong> "+pi.mrn);
+  document.getElementById("pv-meta").innerHTML = meta.join(" &nbsp;|&nbsp; ");
+  document.getElementById("pv-date").textContent = "Printed: "+new Date().toLocaleDateString();
+
+  // ── SUBJECTIVE TIMELINE ──────────────────────────────────────────────────
+  // Find rows with at least one mark, find max week used
+  var symRows = []; var maxW = 0;
+  for(var r=0;r<S.symRows;r++){
+    var rowMarks={}, hasAny=false;
+    for(var w=1;w<=26;w++){
+      var v=S.symptoms["r"+r+"_c"+w];
+      if(v){ rowMarks[w]=v; hasAny=true; if(w>maxW) maxW=w; }
+    }
+    if(hasAny) symRows.push({r:r, label:S.symLabels["r"+r]||("Complaint "+(r+1)), marks:rowMarks});
+  }
+  maxW = Math.max(maxW, 1);
+
+  var symHtml = '';
+  if(symRows.length===0){
+    symHtml = '<p style="font-size:11px;color:#94a3b8;font-style:italic">No symptom data recorded.</p>';
+  } else {
+    symHtml = '<table class="tl-table"><thead><tr><th class="row-hdr">Complaint</th>';
+    for(var w=1;w<=maxW;w++) symHtml+='<th>W'+w+'</th>';
+    symHtml+='</tr></thead><tbody>';
+    symRows.forEach(function(row){
+      symHtml+='<tr><td class="row-lbl">'+row.label+'</td>';
+      for(var w=1;w<=maxW;w++) symHtml+='<td>'+colorBlock(row.marks[w])+'</td>';
+      symHtml+='</tr>';
+    });
+    symHtml+='</tbody></table>';
+  }
+  document.getElementById("pv-sym").innerHTML = symHtml;
+
+  // ── OBJECTIVE TIMELINE ───────────────────────────────────────────────────
+  // Collect all visit marks, find which findings have at least one mark
+  // Structure: {secName -> [{label, optLabel, marks:{v->color}}]}
+  var secData = {};
+  var maxV = 0;
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var rowMarks={}, hasAny=false;
+          for(var v=1;v<=18;v++){
+            var key=mkKey(v,si,ii,oi);
+            var cn=S.marks[key];
+            if(cn){ rowMarks[v]=cn; hasAny=true; if(v>maxV) maxV=v; }
+          }
+          if(hasAny){
+            if(!secData[sec.sec]) secData[sec.sec]=[];
+            secData[sec.sec].push({label:item.lbl+" ("+opt+")", marks:rowMarks});
+          }
+        });
+      } else {
+        var rowMarks={}, hasAny=false;
+        for(var v=1;v<=18;v++){
+          var key=mkKey(v,si,ii);
+          var cn=S.marks[key];
+          if(cn){ rowMarks[v]=cn; hasAny=true; if(v>maxV) maxV=v; }
+        }
+        if(hasAny){
+          if(!secData[sec.sec]) secData[sec.sec]=[];
+          secData[sec.sec].push({label:item.lbl, marks:rowMarks});
+        }
+      }
+    });
+  });
+  maxV = Math.max(maxV,1);
+
+  var objHtml = '';
+  var secs = Object.keys(secData);
+  if(secs.length===0){
+    objHtml='<p style="font-size:11px;color:#94a3b8;font-style:italic">No objective findings recorded.</p>';
+  } else {
+    objHtml='<table class="tl-table"><thead><tr><th class="row-hdr">Finding</th>';
+    for(var v=1;v<=maxV;v++){
+      var dt=S.visitDates[v]?"<br><span style='font-size:8px;opacity:.7'>"+S.visitDates[v]+"</span>":"";
+      objHtml+='<th>V'+v+dt+'</th>';
+    }
+    objHtml+='</tr></thead><tbody>';
+    secs.forEach(function(secName){
+      // section header row
+      objHtml+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">'+secName+'</th></tr>';
+      secData[secName].forEach(function(row){
+        objHtml+='<tr><td class="row-lbl sub-lbl">'+row.label+'</td>';
+        for(var v=1;v<=maxV;v++) objHtml+='<td>'+colorBlock(row.marks[v])+'</td>';
+        objHtml+='</tr>';
+      });
+    });
+    objHtml+='</tbody></table>';
+  }
+  document.getElementById("pv-obj").innerHTML = objHtml;
+}
+
+function doPrint(){
+  buildPrintView();
+  window.print();
 }
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
