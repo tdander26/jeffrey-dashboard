@@ -809,7 +809,7 @@ function renderStats() {
         var dot = colorDot[p.currentColor] || "\u26AA";
         var statusLbl = p.ptStatus === "discharged" ? " · Discharged" : p.ptStatus === "on-hold" ? " · On Hold" : "";
         var timing = p.hasG ? "✓ Resolved" : p.hasB ? (p.wB !== null ? p.wB+"w · V"+p.vB : "80% better") : p.hasY ? (p.wY !== null ? p.wY+"w · V"+p.vY : "Progress") : "In progress";
-        html += '<div class="sym-pt-row" onclick="event.stopPropagation();openPatient(''+p.ptId+'')">';
+        html += '<div class="sym-pt-row" onclick="event.stopPropagation();openPatient(\'' + p.ptId + '\')">';
         html += '<span>'+dot+'</span>';
         html += '<span class="sym-pt-name">'+escHtml(p.ptName+statusLbl)+'</span>';
         html += '<span class="sym-pt-timing">'+escHtml(timing)+'</span>';
