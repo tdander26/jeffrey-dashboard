@@ -1431,11 +1431,7 @@ function toggleTagPanel(safeKey) {
 // ════════════════════════════════════════════════════════════════
 //  MSK MUSCLE LIST
 // ════════════════════════════════════════════════════════════════
-var SUPPLEMENTS=[
-  "Catalyn","Min-Tran","Drenamin","Zymex II","HCl w/ Betaine",
-  "Magnesium Lactate","Omega-3","Vitamin D3/K2","Probiotics",
-  "B Complex","Zinc Liver Chelate","Adrenal Support","Liver Support","Digestive Enzymes"
-];
+var SUPPLEMENTS=["5 HTP (Hydroxytryptophan)", "5 MTHF (1mg)", "5 MTHF (5mg)", "A.D.P.", "Acetyl-L-Carnitine", "Adrenal Desiccated", "Alaria Supreme 90 caps", "Albaplex", "Albizia", "Allerplex", "Aloe", "Alpha Lipoic Acid 200mg (60c)", "Alpha Lipoic Acid 600mg (60c)", "American Ginseng", "Andrographis 1 oz", "Andrographis 2oz", "Antronex (180)", "Antronex (330 Tablets)", "Aqueous Zinc", "Arctic Cod Liver Oil Large", "Arginex", "Artemisia", "Artemisia Annua Full (Ancient Ways)", "Artic Omega", "Artichoke Extract (AMG)", "Ashwaganda", "Astragalus - Supreme", "Astragulus Root (Weed)", "B COMPLEX #12", "B COMPLEX #6", "BASIC B COMPLEX", "BFB-1, 11ml", "BFB-2, 11ml", "Basic Nutrients 2/Day", "Basic Prenatal", "Berberine (500mg) - 60caps", "Betacol", "Betafood (180 Tablets)", "Betafood (90 Tablets)", "Betafood- 90 Count", "Betaine HCL & Pepsin (225 cap)", "Betaine Hydrochloride - 180T", "Bidens 2oz", "Bio-Ae (Forte)", "Bio-Ae (Regular)", "Bio-D-Mulsion (Forte)", "Bio-D-Mulsion (Regular)", "Bio-Dent", "Biost", "Biotin-8", "Black Cohosh", "Black Walnut - Weed", "Bladderwack", "Blue Cohosh", "Body Guard", "Bone Broth Protein (Chocolate)", "Bone Broth Protein (Unflavored)", "Bone Broth Protein (Vanilla)", "Bone Guard", "Broccoprotect", "C3 Complex Curcumin", "Cal-Amo", "Cal-Ma Plus (180 Tablets)", "Cal-Ma Plus (90 Tablets)", "Calcium Lactate (180 count)", "Calcium Lactate (360 Tablets)", "Calcium Lactate (90 Tablets)", "Calcium-Magnesium Malate", "Camu Supreme", "Cardio Plus GF (330T)", "Cardiotrophin PMG", "Cat's Claw - Weed", "Cataplex B (360 Tablets) GF", "Cataplex B Normal (360)", "Cataplex B2/ G (360 Count)", "Cataplex C (360 Tablets)", "Cataplex C (90 Tablets)", "Cataplex E (360 Count)", "Cataplex E (90 Tablets)", "Cataplex E2 (360 Count)", "Cataplex E2 (90 Count)", "Chaste Tree - 60 Caps", "Cholacol", "Choleast-900", "Choline", "Chromium Complex/ Cataplex GTF (180)", "Chromium Picolinate", "Cissus", "Clove Bud", "Clove Bud - Weed", "CoQ10 (120mg) - 60 caps", "Congaplex", "Cordyceps", "Cr-Zyme", "Creatine", "Cu-Zyme", "CurcumaSorb", "Curcumin (120 Cap)", "Curcumin (60 caps)", "Curcumin Phytosome (Meriva 500 SF) 60 Caps", "Curcumin Phytosome 1000mg (NSF)- 120 Caps", "Cyruta Plus (360 tablets)", "Cyruta Plus (90 tablets)", "Cysteine - Metabolics", "D-10,000", "D-1000", "D-5000", "D-Hist (120 ct)", "D-Hist Jr. (60 ct)", "D-Mannose", "D-Mannose w/ Cranberry", "DHA Gummies Kids", "DHEA 5mg (Pure)", "Daily Immune Builder", "Dan Shen", "Dermatropin PMG", "Digestzyme-V (90 Ct)", "Dismuzyme (SOD) Plus (180 tablets)", "Disodium Phosphate", "Dong Quai", "Drenamin (90 Tablets)", "Drenatrophin PMG (90 tabs)", "E-Mulsion", "Echinacea", "Elderberry - Weed", "Eleuthero", "Endo Supreme", "Enzycore", "FIT 132", "FIT 176", "FIT 22", "Ferritin", "Ferrofood (150 Tablets)", "Ferrofood (40 Tablets)", "FloraMend", "Folic Acid", "GABA", "GABA + L-Theanine", "Garlic Plus", "Gentian", "Ginger Extract", "Ginger Root - Weed", "Glucosamine & Chondrotin", "Glucosamine Synergy 90C", "Glycine - 180 Caps", "Glypho-X Supreme", "Goldenseal (Weed)", "Goldenseal - Ancient Ways", "Goldenthread Supreme", "Green Tea Extract", "Gud Multivitamin", "Gud Prenatal", "Hemo Guard Supreme 120", "Herbal Blend - Flower Essence", "Hormone Advantage (DIM)", "Houttuynia", "Houttuynia - liquid", "Hydroxy-B12 Liquid", "Illicium Supreme", "Immuplex (150 ct)", "Inositol Powder", "Iodine (IOSOL) Drops", "Iodine (IOSOL) Roll-on", "Ionic Molybdenum", "Iron Bisglycinate", "Juniper Berry", "L-Arginine (Perfusia SR)", "L-Carnitine (Pure)", "L-Carnitine 120c", "L-Carnitine Powder", "L-Glutamine Powder", "L-Lysine", "L-Tyrosine Pure", "Lavender Vitality", "Lectin Protect", "Lemon Vitality", "Licorice Root", "Liposomal Glutathione", "Liquid Olive Leaf", "Lomatium Root", "Lurong", "MT Supreme", "Magnesium Citramate", "Magnesium Citrate (Pure)", "Magnesium Glycinate (90 Caps)", "Manjistha Supreme 90 ct", "Marshmallow Root", "Melia Supreme", "Men's Multi 50+", "Metal Free and Chemical Cleanse", "Methycobalamin", "Methyl Guard Plus", "Methyl-Guard", "Methyltetrahydrofolate (Liquid 5 MTHF)", "Mg-Zyme Magnesium", "Milk Thistle Seed - Weed", "Mimosa Supreme", "Min-Chex", "Min-Tran", "Min-Tran (360)", "Mn-Zyme", "Mo-Zyme Forte", "Molybdenum Glycinate", "Morinda", "Mucuna Supreme", "Myrrh", "NAC (N-Acetylcysteine) 90 count", "NAC 180 count", "Natural Calm (Large (16 oz))", "Natural Calm (Small (8 oz))", "Natural Calm Gummies", "Niacinimide", "OPC - 100 (Grape Seed Extract)", "OSHA Root", "OSHA Root 2oz (ELK)", "Okra Pepsin", "Olive Leaf Supreme", "Oral Defense - 1 oz bottle", "Orchex (150c)", "Orchex (90c)", "Orchic PMG", "Oregon Grape - Weed", "Organic Pure Pea Powder", "Organically Bound Minerals", "Ovatrophin P PMG (90 Tablets)", "Ovex", "Ovex P", "Oxicell SE", "P5P 50", "PRO DHA (120)", "PRO EPA - 120ct", "PRO EYES - 60 Count", "PRO-OMEGA", "Pancreatrophin PMG", "Pantethine - Discontinued", "Pantethine 60c", "Pantethinine", "Paraplex (90 Tablets)", "Parotid PMG", "Passion Flower", "Passion Flower - Weed", "Pau D' Arco", "Peppermint", "Peppermint Vitality", "Pepti-Guard Discontinued", "Peptic-Care Zinc L Carnosine", "Phosfood Liquid", "Pituitrophin PMG", "Pneumotrophin PMG 90T", "Potassium Citrate", "Pro EPA- 180 COUNT", "Pro Eyes - 120 Count", "Progon B XL", "Prolamine Iodine (90 Tablets)", "Prolamine Iodine 180 Tablets", "Prolamine Iodine Plus", "Prost-X", "Prostate PMG", "Pteridin-4 / BH4", "Purified Chondroitin Sulfates", "Pyridoxal 5' Phosphate", "Quercetin Pure 120", "Quercetine 60 Caps", "R-Lipoic Acid", "RNA (180t)", "Reishi Supreme", "Resveratrol", "Resveratrol Extra (120 Cap)", "Resveratrol Extra (60 Cap)", "Rhodiola Root", "Riboflavin 5'- Phosphate", "Rosemary Supreme", "Rosemary- WEED", "SOD Powder (Dismuzyme Plus Granules) (17.9 oz)", "Saccharomyces Boulardii", "Saw Palmetto 320", "Saw Palmetto Plus", "Schisandra Supreme", "Scutellaria", "Selenium (Se-Zyme Forte) - Biotics", "Selenium (Selenomethionine)- Thorne", "Selenomethionine - Biotics", "Self Adhesive Tape", "Sesame Oil Capsules", "Shatavari Supreme", "Silymarin", "Skullcap", "Smilax Supreme", "Spleen PMG", "St. John's Wort (Supreme)", "St. Johns Wort - Weed", "St. John’s Wort - 2oz. Elk Mountain", "TCPS Iodine Roller", "THERASUPREME", "TMG Powder", "Takesumi Supreme", "Taurine 1000", "Theives Dentarome", "Thiamin 50", "Thieves Fruit & Veggie Spray", "Thieves Hand Soap", "Thieves House Hold Cleaner", "Thieves Spray 1fl Oz", "Thieves Vitality Oil", "Thieves hand sanitizer/small", "Thyme - Weed", "Thyme - liquid", "Thymex", "Thymus PMG 90CT", "Thyroid", "Thytrophin PMG (90 Tablets)", "Trace Minerals-B12", "Tulsi Supreme", "Ultimate E", "Undecylenic Acid", "Usnea", "Utrophin PMG", "Uva Ursi - Weed", "Valerian Root - Weed", "Vidanga", "Vit D", "Vital Guard", "Vitamin A", "Vitamin B12 (Methylcobalamin)", "Vitamin C w/ Flavanoids", "Vitamin D Gummy", "Vitamin E (UNIQUE E Mixed Tocopherols)", "Vitex", "WOAD", "Wheat Germ Oil Fortified", "Whey Cool (Chocolate)", "Whey Cool (Unflavored)", "Whey Cool (Vanilla)", "Wild Greens", "Zinc Chelate", "Zinc Picolinate - 30mg (180 Large)", "Zinc Taste Test", "Zn-Zyme", "Zn-Zyme (Forte 100ct)", "Zypan (90T)", "Zypan 330 T"];
 
 var MSK_SECTIONS=[
   {sec:"Neck", muscles:["Deep Neck Flexors","Masseter","Neck Extensor","Pterygoid (Med/Lat)","Scalenes","SCM","Temporalis"]},
@@ -1479,6 +1475,47 @@ function renderAllMskCells(){
 // ────────────────────────────────────────────────────────────────
 //  SUPPLEMENTS
 // ────────────────────────────────────────────────────────────────
+function filterSupps(vn, query) {
+  var grid = document.getElementById("supp_grid_"+vn); if(!grid) return;
+  var q = query.trim().toLowerCase();
+  var rows = grid.querySelectorAll(".supp-row");
+  var shown = 0;
+  rows.forEach(function(row) {
+    var name = row.dataset.name || "";
+    var si = parseInt(row.dataset.si);
+    var key = "v"+vn+"_supp_"+si;
+    var marked = !!S.marks[key];
+    var match = q ? name.indexOf(q) >= 0 : false;
+    // Show if: matches search, or no search and marked
+    var visible = match || (!q && marked);
+    row.style.display = visible ? "" : "none";
+    if(visible) shown++;
+  });
+}
+
+function renderSuppMarked(vn) {
+  var div = document.getElementById("supp_marked_"+vn); if(!div) return;
+  var pills = [];
+  SUPPLEMENTS.forEach(function(supp,si){
+    var key = "v"+vn+"_supp_"+si;
+    var color = S.marks[key];
+    if(color) {
+      var hex = COLOR_MAP[color]||"#94a3b8";
+      pills.push('<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:'+hex+'22;border:1px solid '+hex+'55;font-size:11px;font-weight:600;color:'+hex+';margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+hex+';display:inline-block"></span>'+escHtml(supp)+'</span>');
+    }
+  });
+  div.innerHTML = pills.length
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Prescribed this visit</div>'+pills.join('')+'<div style="border-top:1px solid #f1f5f9;margin:8px 0 4px"></div>'
+    : '';
+  // Also refresh grid visibility
+  filterSupps(vn, (document.querySelector("#supp_body_"+vn+" input")||{}).value||"");
+}
+
+function renderAllSuppMarked() {
+  for(var v=1; v<=18; v++) renderSuppMarked(v);
+}
+
 function onSuppClick(key){
   if(activeColor===null){ delete S.marks[key]; }
   else if(S.marks[key]===activeColor){ delete S.marks[key]; }
@@ -1670,14 +1707,29 @@ function buildVisitCard(vn){
   div.appendChild(suppToggle);
 
   var suppBody=document.createElement("div"); suppBody.className="supp-body"; suppBody.id="supp_body_"+vn;
-  var suppGrid=document.createElement("div"); suppGrid.className="supp-grid";
+
+  // Search bar
+  var suppSearch=document.createElement("input"); suppSearch.type="text";
+  suppSearch.placeholder="Search supplements... ("+SUPPLEMENTS.length+" available)";
+  suppSearch.style.cssText="width:100%;padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:20px;font-size:12px;outline:none;margin-bottom:8px;box-sizing:border-box";
+  suppSearch.addEventListener("input",(function(v2){ return function(){ filterSupps(v2, suppSearch.value); }; })(vn));
+  suppBody.appendChild(suppSearch);
+
+  // Marked summary (always visible at top)
+  var suppMarked=document.createElement("div"); suppMarked.className="supp-marked"; suppMarked.id="supp_marked_"+vn;
+  suppBody.appendChild(suppMarked);
+
+  // Full list (filtered)
+  var suppGrid=document.createElement("div"); suppGrid.className="supp-grid"; suppGrid.id="supp_grid_"+vn;
   SUPPLEMENTS.forEach(function(supp,si){
     var key="v"+vn+"_supp_"+si;
-    var row=document.createElement("div"); row.className="supp-row";
+    var row=document.createElement("div"); row.className="supp-row"; row.dataset.name=supp.toLowerCase(); row.dataset.si=si;
     var lbl=document.createElement("span"); lbl.className="supp-label"; lbl.title=supp; lbl.textContent=supp;
     var c=document.createElement("div"); c.className="supp-cell"; c.id="sc2_"+key;
-    c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onSuppClick(k); }; })(key));
+    c.addEventListener("click",(function(k,vn2,si2){ return function(e){ e.stopPropagation(); onSuppClick(k); renderSuppMarked(vn2); }; })(key,vn,si));
     row.appendChild(lbl); row.appendChild(c); suppGrid.appendChild(row);
+    // Start hidden — show on search or if marked
+    row.style.display="none";
   });
   suppBody.appendChild(suppGrid);
   div.appendChild(suppBody);
@@ -1806,7 +1858,7 @@ function saveAll(){
 }
 
 function renderAll(){
-  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllOffenderTags(); updateAllHL();
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
