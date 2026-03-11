@@ -199,6 +199,48 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 /* TOAST */
 #toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
 
+/* ── DASH TABS ── */
+.dash-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #e2e8f0}
+.dash-tab{padding:10px 22px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:700;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:0}
+.dash-tab.active{color:#1a1a2e;border-bottom-color:#3b82f6}
+.dash-tab:hover:not(.active){color:#374151;background:#f8fafc;border-radius:8px 8px 0 0}
+
+/* ── STAT CARDS ── */
+.stat-cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.stat-card{flex:1;min-width:150px;background:white;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9;text-align:center}
+.stat-card .stat-emoji{font-size:28px;margin-bottom:6px}
+.stat-card .stat-value{font-size:28px;font-weight:900;color:#1a1a2e}
+.stat-card .stat-label{font-size:12px;color:#64748b;font-weight:600;margin-top:4px}
+
+/* ── STATS SECTION ── */
+.stats-section{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
+.stats-section-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:14px}
+.stats-table{width:100%;border-collapse:collapse;font-size:12px}
+.stats-table th{background:#1a1a2e;color:white;padding:8px 10px;text-align:center;font-size:11px;white-space:nowrap}
+.stats-table th:first-child{text-align:left;min-width:140px}
+.stats-table td{border:1px solid #e2e8f0;padding:6px 8px;text-align:center}
+.stats-table td:first-child{text-align:left;font-weight:700;color:#374151;background:#f8fafc}
+.stats-table tr:hover td{background:#f0f9ff}
+.stats-table tr:hover td:first-child{background:#e0f2fe}
+
+/* ── STATUS BAR ── */
+.status-bar-wrap{height:28px;border-radius:8px;overflow:hidden;display:flex;margin-top:10px}
+.status-bar-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;transition:all .3s;white-space:nowrap;overflow:hidden}
+
+/* ── FINDING BARS ── */
+.finding-bar-wrap{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f8fafc}
+.finding-bar-wrap:last-child{border-bottom:none}
+.finding-label{font-size:12px;color:#374151;flex:1;min-width:0}
+.finding-count{font-size:11px;font-weight:700;color:#7c3aed;white-space:nowrap;width:50px;text-align:right}
+.finding-bar{height:10px;border-radius:5px;background:#ede9fe;overflow:hidden;flex:0 0 120px}
+.finding-bar-fill{height:100%;background:#7c3aed;border-radius:5px}
+
+/* ── RECENT ACTIVITY ── */
+.recent-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;flex-wrap:wrap}
+.recent-row:last-child{border-bottom:none}
+.recent-name{font-weight:700;font-size:14px;color:#1a1a2e;flex:1;min-width:120px}
+.recent-meta{font-size:11px;color:#64748b}
+
 /* PRINT */
 #printView{display:none}
 @media print{
@@ -295,12 +337,20 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     </div>
   </div>
 
-  <div class="dash-toolbar">
-    <input type="text" class="dash-search" id="dashSearch" placeholder="Search patients by name, DOB, or MRN…" oninput="renderDash()">
-    <span class="dash-count" id="dashCount"></span>
+  <div class="dash-tabs">
+    <button class="dash-tab active" id="tab-stats" onclick="showStatsTab()">📊 Stats</button>
+    <button class="dash-tab" id="tab-patients" onclick="showPatientsTab()">👥 Patients</button>
   </div>
 
-  <div class="pt-grid" id="ptGrid"></div>
+  <div id="statsContent"></div>
+
+  <div id="ptContent" style="display:none">
+    <div class="dash-toolbar">
+      <input type="text" class="dash-search" id="dashSearch" placeholder="Search patients by name, DOB, or MRN…" oninput="renderDash()">
+      <span class="dash-count" id="dashCount"></span>
+    </div>
+    <div class="pt-grid" id="ptGrid"></div>
+  </div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -541,6 +591,251 @@ function updateIndex(id, info) {
 }
 
 // ════════════════════════════════════════════════════════════════
+//  DASHBOARD TABS
+// ════════════════════════════════════════════════════════════════
+function showStatsTab() {
+  var ts = document.getElementById("tab-stats");
+  var tp = document.getElementById("tab-patients");
+  var sc = document.getElementById("statsContent");
+  var pc = document.getElementById("ptContent");
+  if (ts) ts.classList.add("active");
+  if (tp) tp.classList.remove("active");
+  if (sc) sc.style.display = "block";
+  if (pc) pc.style.display = "none";
+  renderStats();
+}
+
+function showPatientsTab() {
+  var ts = document.getElementById("tab-stats");
+  var tp = document.getElementById("tab-patients");
+  var sc = document.getElementById("statsContent");
+  var pc = document.getElementById("ptContent");
+  if (tp) tp.classList.add("active");
+  if (ts) ts.classList.remove("active");
+  if (pc) pc.style.display = "block";
+  if (sc) sc.style.display = "none";
+  var ds = document.getElementById("dashSearch");
+  if (ds) ds.value = "";
+  renderDash();
+}
+
+function renderStats() {
+  var el = document.getElementById("statsContent");
+  if (!el) return;
+
+  var idx = loadIndex();
+  var totalPts = idx.length;
+  var activeCount = 0, dischargedCount = 0, onHoldCount = 0, totalVisits = 0;
+
+  // symAgg: lowercase-label -> {label, patients:[{weeksTo,visitsTo}]}
+  var symAgg = {};
+  // findingCounts: "si_ii[_oi]" -> {count, section, label, pts:{}}
+  var findingCounts = {};
+
+  idx.forEach(function(pt) {
+    if (pt.status === "active") activeCount++;
+    else if (pt.status === "discharged") dischargedCount++;
+    else if (pt.status === "on-hold") onHoldCount++;
+    totalVisits += (pt.visitCount || 0);
+
+    var raw = null;
+    try { raw = localStorage.getItem(PT_PREFIX + pt.id); } catch(e) {}
+    if (!raw) return;
+    var data = null;
+    try { data = JSON.parse(raw); } catch(e) { return; }
+    if (!data) return;
+
+    // ── Symptom response times ──────────────────────────────
+    var symLabels = data.symLabels || {};
+    var symptoms = data.symptoms || {};
+    var symVisited = data.symVisited || {};
+    var symRows = data.symRows || 4;
+
+    for (var r = 0; r < symRows; r++) {
+      var lbl = (symLabels["r" + r] || "").trim();
+      if (!lbl || lbl === ("Complaint " + (r + 1))) continue;
+
+      var firstWeek = {yellow: null, blue: null, green: null};
+      var visitedWeeks = [];
+
+      for (var w = 1; w <= 26; w++) {
+        var skey = "r" + r + "_c" + w;
+        var cn = symptoms[skey];
+        if (cn === "yellow" && firstWeek.yellow === null) firstWeek.yellow = w;
+        if (cn === "blue"   && firstWeek.blue   === null) firstWeek.blue   = w;
+        if (cn === "green"  && firstWeek.green  === null) firstWeek.green  = w;
+        if (symVisited[skey]) visitedWeeks.push(w);
+      }
+      visitedWeeks.sort(function(a, b) { return a - b; });
+
+      var weeksTo = {
+        yellow: firstWeek.yellow !== null ? firstWeek.yellow - 1 : null,
+        blue:   firstWeek.blue   !== null ? firstWeek.blue   - 1 : null,
+        green:  firstWeek.green  !== null ? firstWeek.green  - 1 : null
+      };
+
+      var findIdx = function(wk) {
+        if (wk === null) return null;
+        var pos = visitedWeeks.indexOf(wk);
+        return pos >= 0 ? pos : null;
+      };
+      var visitsTo = {
+        yellow: findIdx(firstWeek.yellow),
+        blue:   findIdx(firstWeek.blue),
+        green:  findIdx(firstWeek.green)
+      };
+
+      var lkey = lbl.toLowerCase();
+      if (!symAgg[lkey]) symAgg[lkey] = {label: lbl, patients: []};
+      symAgg[lkey].patients.push({weeksTo: weeksTo, visitsTo: visitsTo});
+    }
+
+    // ── Top objective findings ──────────────────────────────
+    var marks = data.marks || {};
+    Object.keys(marks).forEach(function(mkey) {
+      var m = mkey.match(/^v(\d+)_(\d+)_(\d+)(?:_(\d+))?$/);
+      if (!m) return;
+      var si = parseInt(m[2]);
+      var ii = parseInt(m[3]);
+      var oi = m[4] !== undefined ? parseInt(m[4]) : null;
+      if (si >= FIELDS.length) return;
+      var sec = FIELDS[si];
+      if (!sec || ii >= sec.items.length) return;
+      var item = sec.items[ii];
+      var flbl = item.lbl;
+      if (oi !== null && item.opts && oi < item.opts.length) flbl += " (" + item.opts[oi] + ")";
+      var fkey = si + "_" + ii + (oi !== null ? "_" + oi : "");
+      if (!findingCounts[fkey]) findingCounts[fkey] = {count: 0, section: sec.sec, label: flbl, pts: {}};
+      findingCounts[fkey].pts[pt.id] = true;
+    });
+  });
+
+  // Finalize finding counts
+  Object.keys(findingCounts).forEach(function(k) {
+    findingCounts[k].count = Object.keys(findingCounts[k].pts).length;
+  });
+
+  var html = "";
+
+  // ── Row 1: Summary Cards ────────────────────────────────────
+  html += '<div class="stat-cards">';
+  html += '<div class="stat-card"><div class="stat-emoji">👥</div><div class="stat-value">' + totalPts + '</div><div class="stat-label">Total Patients</div></div>';
+  html += '<div class="stat-card"><div class="stat-emoji">🟢</div><div class="stat-value">' + activeCount + '</div><div class="stat-label">Active</div></div>';
+  html += '<div class="stat-card"><div class="stat-emoji">🔵</div><div class="stat-value">' + dischargedCount + '</div><div class="stat-label">Discharged</div></div>';
+  html += '<div class="stat-card"><div class="stat-emoji">🟡</div><div class="stat-value">' + onHoldCount + '</div><div class="stat-label">On Hold</div></div>';
+  html += '<div class="stat-card"><div class="stat-emoji">📅</div><div class="stat-value">' + totalVisits + '</div><div class="stat-label">Total Visits Logged</div></div>';
+  html += '</div>';
+
+  // ── Row 2: Symptom Response Times ───────────────────────────
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">📈 Symptom Response Times</div>';
+  var symKeys = Object.keys(symAgg);
+  if (symKeys.length === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No named symptom data yet. Label patient complaints in the symptom tracker to see aggregated response times.</p>';
+  } else {
+    html += '<div style="overflow-x:auto"><table class="stats-table"><thead>';
+    html += '<tr><th rowspan="2">Symptom</th><th rowspan="2">Cases</th>';
+    html += '<th colspan="3">🟡 Any Progress</th>';
+    html += '<th colspan="3">🔵 80% Better</th>';
+    html += '<th colspan="3">🟢 100% Resolution</th></tr>';
+    html += '<tr><th>Avg Wks</th><th>Avg V#</th><th>%</th>';
+    html += '<th>Avg Wks</th><th>Avg V#</th><th>%</th>';
+    html += '<th>Avg Wks</th><th>Avg V#</th><th>%</th></tr>';
+    html += '</thead><tbody>';
+
+    symKeys.sort().forEach(function(lkey) {
+      var agg = symAgg[lkey];
+      var n = agg.patients.length;
+      var colors = ["yellow", "blue", "green"];
+      var stats = {};
+      colors.forEach(function(c) {
+        var wksArr = [], visArr = [], reached = 0;
+        agg.patients.forEach(function(p) {
+          if (p.weeksTo[c] !== null) { wksArr.push(p.weeksTo[c]); reached++; }
+          if (p.visitsTo[c] !== null) visArr.push(p.visitsTo[c]);
+        });
+        stats[c] = {
+          avgWks: wksArr.length ? (wksArr.reduce(function(a,b){return a+b;},0)/wksArr.length).toFixed(1) : "—",
+          avgVis: visArr.length ? (visArr.reduce(function(a,b){return a+b;},0)/visArr.length).toFixed(1) : "—",
+          pct: n ? Math.round(reached/n*100) + "%" : "—"
+        };
+      });
+      html += '<tr><td>' + escHtml(agg.label) + '</td><td>' + n + '</td>';
+      ["yellow","blue","green"].forEach(function(c) {
+        html += '<td>' + stats[c].avgWks + '</td><td>' + stats[c].avgVis + '</td><td>' + stats[c].pct + '</td>';
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '</div>';
+
+  // ── Row 3: Case Status Breakdown ────────────────────────────
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">📊 Case Status Breakdown</div>';
+  if (totalPts === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No patients yet.</p>';
+  } else {
+    var activeP    = Math.round(activeCount    / totalPts * 100);
+    var dischP     = Math.round(dischargedCount / totalPts * 100);
+    var onHoldP    = 100 - activeP - dischP;
+    html += '<div style="margin-bottom:8px;font-size:13px;display:flex;gap:20px;flex-wrap:wrap">';
+    html += '<span><span style="color:#22c55e;font-weight:700">● Active:</span> ' + activeCount + ' (' + activeP + '%)</span>';
+    html += '<span><span style="color:#3b82f6;font-weight:700">● Discharged:</span> ' + dischargedCount + ' (' + dischP + '%)</span>';
+    html += '<span><span style="color:#eab308;font-weight:700">● On Hold:</span> ' + onHoldCount + ' (' + onHoldP + '%)</span>';
+    html += '</div>';
+    html += '<div class="status-bar-wrap">';
+    if (activeCount    > 0) html += '<div class="status-bar-seg" style="background:#22c55e;width:' + activeP + '%">'  + (activeP  > 12 ? activeCount    + ' Active'     : '') + '</div>';
+    if (dischargedCount> 0) html += '<div class="status-bar-seg" style="background:#3b82f6;width:' + dischP  + '%">'  + (dischP   > 12 ? dischargedCount + ' Discharged'  : '') + '</div>';
+    if (onHoldCount    > 0) html += '<div class="status-bar-seg" style="background:#eab308;width:' + onHoldP + '%">'  + (onHoldP  > 12 ? onHoldCount    + ' On Hold'    : '') + '</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // ── Row 4: Top Findings ─────────────────────────────────────
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">🔍 Top Objective Findings</div>';
+  var findingsList = Object.keys(findingCounts).map(function(k) { return findingCounts[k]; });
+  findingsList.sort(function(a, b) { return b.count - a.count; });
+  var topFindings = findingsList.slice(0, 8);
+  if (topFindings.length === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No objective findings recorded yet. Mark findings in patient visits to see aggregates here.</p>';
+  } else {
+    var maxCount = topFindings[0].count || 1;
+    topFindings.forEach(function(f) {
+      var pct = Math.round(f.count / maxCount * 100);
+      html += '<div class="finding-bar-wrap">';
+      html += '<div class="finding-label"><span style="font-size:10px;color:#94a3b8">' + escHtml(f.section) + '</span><br>' + escHtml(f.label) + '</div>';
+      html += '<div class="finding-bar"><div class="finding-bar-fill" style="width:' + pct + '%"></div></div>';
+      html += '<div class="finding-count">' + f.count + ' pt' + (f.count !== 1 ? 's' : '') + '</div>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+
+  // ── Row 5: Recent Activity ──────────────────────────────────
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">🕐 Recent Activity</div>';
+  var recent = idx.slice().sort(function(a,b){ return (b.modified||"").localeCompare(a.modified||""); }).slice(0,5);
+  if (recent.length === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No patients yet.</p>';
+  } else {
+    recent.forEach(function(pt) {
+      var mod = pt.modified ? new Date(pt.modified).toLocaleDateString() : "—";
+      html += '<div class="recent-row">';
+      html += '<div class="recent-name">' + escHtml(pt.name || "Unnamed Patient") + '</div>';
+      html += getStatusBadgeHtml(pt.status);
+      html += '<div class="recent-meta">Modified: ' + escHtml(mod) + '</div>';
+      html += '<div class="recent-meta">' + (pt.visitCount || 0) + ' visit' + ((pt.visitCount || 0) !== 1 ? 's' : '') + '</div>';
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════════
 //  DASHBOARD
 // ════════════════════════════════════════════════════════════════
 function showDash() {
@@ -548,8 +843,7 @@ function showDash() {
   S=blankState();
   document.getElementById("app").style.display="none";
   document.getElementById("dash").style.display="block";
-  document.getElementById("dashSearch").value="";
-  renderDash();
+  showStatsTab();
 }
 
 function getStatusBadgeHtml(status) {
