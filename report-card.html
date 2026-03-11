@@ -333,6 +333,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     </div>
     <div class="hbtns">
       <button class="btn btn-blue" onclick="newPatient()">+ New Patient</button>
+      <button class="btn btn-light" onclick="bulkExport()">⬇ Backup All</button>
+      <button class="btn btn-light" onclick="document.getElementById('bulkImportFile').click()">⬆ Restore</button>
+      <input type="file" id="bulkImportFile" accept=".json" style="display:none" onchange="bulkImport(this)">
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
@@ -1539,6 +1542,73 @@ function autoSave(){ clearTimeout(_aT); _aT=setTimeout(saveAll,1200); }
 // ════════════════════════════════════════════════════════════════
 //  EXPORT
 // ════════════════════════════════════════════════════════════════
+// ── BULK EXPORT ────────────────────────────────────────────────
+function bulkExport(){
+  var idx=loadIndex();
+  var patients={};
+  idx.forEach(function(pt){
+    var raw=localStorage.getItem(PT_PREFIX+pt.id);
+    if(raw){ try{ patients[pt.id]=JSON.parse(raw); }catch(e){} }
+  });
+  var payload={
+    version:1,
+    exportedAt:new Date().toISOString(),
+    practice:"Momentum Health & Wellness",
+    index:idx,
+    patients:patients
+  };
+  var date=new Date().toISOString().split("T")[0];
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="momentum_backup_"+date+".json"; a.click();
+  showToast("✓ Backup downloaded — "+idx.length+" patient"+(idx.length===1?"":"s"));
+}
+
+// ── BULK IMPORT ────────────────────────────────────────────────
+function bulkImport(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var payload=JSON.parse(e.target.result);
+      if(!payload.version||!payload.index||!payload.patients){
+        alert("❌ Not a valid Momentum backup file."); return;
+      }
+      var incoming=payload.index.length;
+      var existing=loadIndex().length;
+      var msg="Import "+incoming+" patient record"+(incoming===1?"":"s")+" from backup dated "+
+        (payload.exportedAt?payload.exportedAt.split("T")[0]:"unknown")+"?\n\n"+
+        "Choose:\n• OK = Merge (keeps existing, adds/updates from backup)\n• Cancel = Abort";
+      if(!confirm(msg)){ input.value=""; return; }
+
+      // Merge: build a map of existing IDs
+      var existingIdx=loadIndex();
+      var existingMap={};
+      existingIdx.forEach(function(pt){ existingMap[pt.id]=pt; });
+
+      // Write all patient data from backup
+      payload.index.forEach(function(pt){
+        existingMap[pt.id]=pt; // upsert into index
+        if(payload.patients[pt.id]){
+          localStorage.setItem(PT_PREFIX+pt.id, JSON.stringify(payload.patients[pt.id]));
+        }
+      });
+
+      // Save merged index
+      var mergedIdx=Object.values(existingMap);
+      localStorage.setItem(INDEX_KEY, JSON.stringify(mergedIdx));
+
+      input.value="";
+      renderDash(); renderStats();
+      showToast("✓ Imported "+incoming+" patient"+(incoming===1?"":"s"));
+    }catch(err){
+      alert("❌ Failed to read backup file: "+err.message);
+      input.value="";
+    }
+  };
+  reader.readAsText(file);
+}
+
 function exportData(){
   collectPatientInfo();
   var name=(S.patientInfo.name||"patient").replace(/\s+/g,"_");
