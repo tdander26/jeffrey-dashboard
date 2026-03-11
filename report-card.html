@@ -782,8 +782,12 @@ function renderStats() {
       function pctOf(field) { return Math.round(agg.patients.filter(function(p){return p[field];}).length/n*100); }
       var pY = pctOf("hasY"), pB = pctOf("hasB"), pG = pctOf("hasG");
       var pRed = 100 - pY;
+      var safeKey = lkey.replace(/[^a-z0-9]/gi,"_");
       html += '<div class="sym-card">';
-      html += '<div class="sym-card-header"><span class="sym-card-name">' + escHtml(agg.label) + '</span><span class="sym-card-n">' + n + ' case' + (n===1?"":"s") + '</span></div>';
+      html += '<div class="sym-card-header" onclick="toggleSymPatients(''+safeKey+'')" style="cursor:pointer">';
+      html += '<span class="sym-card-name">' + escHtml(agg.label) + '</span>';
+      html += '<span style="display:flex;align-items:center;gap:6px"><span class="sym-card-n">' + n + ' case' + (n===1?"":"s") + '</span><span id="sca_'+safeKey+'" style="font-size:10px;color:#94a3b8;transition:transform .18s;display:inline-block">&#9654;</span></span>';
+      html += '</div>';
       html += '<div class="sym-funnel-bar">';
       if (pRed > 0)       html += '<div style="width:'+pRed+'%;background:#ef4444;height:100%;display:inline-block;vertical-align:top"></div>';
       if (pY-pB-pG > 0)  html += '<div style="width:'+(pY-pB-pG)+'%;background:#eab308;height:100%;display:inline-block;vertical-align:top"></div>';
@@ -794,7 +798,25 @@ function renderStats() {
       html += symMilestone("\u{1F7E1}","Any Progress", pY, avgOf("wY"), avgOf("vY"));
       html += symMilestone("\u{1F535}","80% Better",   pB, avgOf("wB"), avgOf("vB"));
       html += symMilestone("\u{1F7E2}","100% Resolved",pG, avgOf("wG"), avgOf("vG"));
-      html += '</div></div>';
+      html += '</div>';
+      html += '<div class="sym-pt-list" id="spl_'+safeKey+'" style="display:none">';
+      html += '<div class="sym-pt-list-title">Patients</div>';
+      agg.patients.slice().sort(function(a,b){
+        var o={green:0,blue:1,yellow:2,red:3};
+        return (o[a.currentColor]||3)-(o[b.currentColor]||3);
+      }).forEach(function(p) {
+        var colorDot = {"red":"\u{1F534}","yellow":"\u{1F7E1}","blue":"\u{1F535}","green":"\u{1F7E2}"};
+        var dot = colorDot[p.currentColor] || "\u26AA";
+        var statusLbl = p.ptStatus === "discharged" ? " · Discharged" : p.ptStatus === "on-hold" ? " · On Hold" : "";
+        var timing = p.hasG ? "✓ Resolved" : p.hasB ? (p.wB !== null ? p.wB+"w · V"+p.vB : "80% better") : p.hasY ? (p.wY !== null ? p.wY+"w · V"+p.vY : "Progress") : "In progress";
+        html += '<div class="sym-pt-row" onclick="event.stopPropagation();openPatient(''+p.ptId+'')">';
+        html += '<span>'+dot+'</span>';
+        html += '<span class="sym-pt-name">'+escHtml(p.ptName+statusLbl)+'</span>';
+        html += '<span class="sym-pt-timing">'+escHtml(timing)+'</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+      html += '</div>';
     });
     html += '</div>';
   }
