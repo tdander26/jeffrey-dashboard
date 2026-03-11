@@ -457,7 +457,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active"},symptoms:{},symLabels:{},symRows:8,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
+  return {patientInfo:{status:"active"},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
 }
 var S = blankState();
 
@@ -1368,12 +1368,12 @@ function buildPrintView(){
         item.opts.forEach(function(opt,oi){
           var rm={},any=false;
           for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii,oi)]; if(cn){ rm[v]=cn; any=true; } }
-          if(any||Object.keys(offByVisit).length){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl+" ("+opt+")",marks:rm,offByVisit:offByVisit}); }
+          if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl+" ("+opt+")",marks:rm,offByVisit:offByVisit}); }
         });
       } else {
         var rm={},any=false;
         for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii)]; if(cn){ rm[v]=cn; any=true; } }
-        if(any||Object.keys(offByVisit).length){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl,marks:rm,offByVisit:offByVisit}); }
+        if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl,marks:rm,offByVisit:offByVisit}); }
       }
     });
   });
