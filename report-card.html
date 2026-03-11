@@ -176,18 +176,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .offender-btn:hover{background:#e2e8f0;color:#374151}
 .offender-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
 /* TAG PILL PANELS */
-.tag-panel{display:none;flex-wrap:wrap;gap:8px;margin-top:8px;padding:10px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
+.tag-panel{display:none;flex-wrap:wrap;gap:5px;margin-top:6px;padding:8px 10px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:8px;border:1px solid #e9edf2}
 .tag-panel.open{display:flex}
-.tag-pill{padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;transition:all .18s;white-space:nowrap;user-select:none}
-.tag-pill:hover{border-color:#94a3b8;background:#f1f5f9}
-.tag-pill.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
-.tag-pill.active:hover{background:#374151}
-.tag-pill:disabled{opacity:.35;cursor:default}
-.tag-panel-input{display:flex;width:100%;gap:8px;margin-top:4px;align-items:center}
-.tag-panel-input input{flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:16px;font-size:13px;outline:none;background:white}
-.tag-panel-input input:focus{border-color:#94a3b8}
+.tag-pill{padding:4px 11px;border-radius:20px;border:1px solid #dde3ea;background:white;font-size:11px;font-weight:600;cursor:pointer;color:#64748b;transition:all .15s;white-space:nowrap;user-select:none;letter-spacing:.01em;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tag-pill:hover{border-color:#94a3b8;background:#f8fafc;color:#374151}
+.tag-pill.active{background:#1a1a2e;color:white;border-color:#1a1a2e;box-shadow:0 1px 4px rgba(26,26,46,.25)}
+.tag-pill.active:hover{background:#2d2d4e}
+.tag-pill:disabled{opacity:.3;cursor:default;box-shadow:none}
+.tag-panel-input{display:flex;width:100%;gap:6px;margin-top:4px;padding-top:5px;border-top:1px solid #e9edf2;align-items:center}
+.tag-panel-input input{flex:1;padding:4px 10px;border:1px solid #dde3ea;border-radius:14px;font-size:11px;outline:none;background:white;color:#374151}
+.tag-panel-input input:focus{border-color:#94a3b8;box-shadow:0 0 0 2px rgba(148,163,184,.15)}
 .vfield-tappable{cursor:pointer;color:#374151}
-.vfield-tappable:hover{color:#1a1a2e;text-decoration:underline dotted}
+.vfield-tappable:hover{color:#1a1a2e}
+.vfield-tappable::after{content:" ▾";font-size:9px;color:#94a3b8;vertical-align:middle}
 .offender-tag{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
 #offenderPopup{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:9500;min-width:190px;display:none}
 .opp-title{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
