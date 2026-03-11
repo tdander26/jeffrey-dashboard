@@ -450,6 +450,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div class="fg"><label>Patient Name</label><input type="text"  id="fi_name"     placeholder="Full legal name"    oninput="autoSave()"></div>
       <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob"      oninput="autoSave()"></div>
       <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave()"></div>
+      <div class="fg"><label>Date of Collection</label><input type="date" id="fi_collection" oninput="autoSave()"></div>
       <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
       <div class="fg"><label>Status</label>
@@ -572,7 +573,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active"},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
 }
 var S = blankState();
 
@@ -1845,7 +1846,7 @@ function renderSymTable(){
 // ════════════════════════════════════════════════════════════════
 //  PATIENT INFO
 // ════════════════════════════════════════════════════════════════
-var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",fi_mrn:"mrn",fi_status:"status"};
+var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_status:"status"};
 
 function loadPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
@@ -2293,7 +2294,28 @@ function buildPrintView(){
   return;
 }
 
-function doPrint(){ buildPrintView(); window.print(); }
+function doPrint(){
+  buildPrintView();
+  var pi=S.patientInfo;
+  var rawName=(pi.name||"").trim();
+  var lastName="", firstName="";
+  if(rawName.indexOf(",")>-1){
+    var parts=rawName.split(",");
+    lastName=(parts[0]||"").trim();
+    firstName=(parts[1]||"").trim();
+  } else {
+    var words=rawName.split(/\s+/);
+    lastName=words.length>1?words[words.length-1]:"";
+    firstName=words.length>1?words.slice(0,words.length-1).join(" "):words[0]||"";
+  }
+  var colDate=(pi.collection||"").trim();
+  var namePart=lastName&&firstName?(lastName+", "+firstName):(rawName||"Patient");
+  var titleStr=colDate?(namePart+" "+colDate):namePart;
+  var origTitle=document.title;
+  document.title=titleStr;
+  window.print();
+  document.title=origTitle;
+}
 
 // ════════════════════════════════════════════════════════════════
 //  TODAY BUTTON
