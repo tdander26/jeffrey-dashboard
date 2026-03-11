@@ -163,8 +163,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
 .msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
 /* OFFENDER TAGS */
-.offender-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:0 2px;line-height:1;opacity:.6;transition:opacity .15s;flex-shrink:0}
-.offender-btn:hover{opacity:1}
+.offender-btn{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;font-size:11px;font-weight:800;color:#64748b;padding:1px 6px;line-height:1.4;transition:all .15s;flex-shrink:0}
+.offender-btn:hover{background:#e2e8f0;color:#374151}
 .offender-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
 .offender-tag{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
 #offenderPopup{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:9500;min-width:190px;display:none}
@@ -494,25 +494,34 @@ var FIELDS = [
     {lbl:"Hiatal Hernia",opts:null},{lbl:"GB Pump",opts:null},{lbl:"Pyloric",opts:["Open","Closed"]},
   ]},
   {sec:"GUT — OTHER CHALLENGES",items:[
-    {lbl:"Lig. Stretch Test (Type 3 LSASS)",opts:null},{lbl:"Valve Combinations",opts:null},
+    {lbl:"Lig. Stretch Test (Type 3 LSASS)",opts:null},
+    {lbl:"Valve Combinations",opts:null,tagPopup:{options:["ICV + HV Open","ICV + HV Closed","ICV Open + HV Closed","ICV Closed + HV Open","Ammonia","Aldehydes","Histamine","B2 / Cysteine","Bacteria","Fungus","Virus","Parasite"],hasCustom:false}},
   ]},
   {sec:"AUTONOMIC CHALLENGES",items:[
-    {lbl:"Vagus Challenge",opts:null},{lbl:"Bilat. Closed Valves — SYM DOM",opts:null},
+    {lbl:"Vagus Challenge",opts:null,tagPopup:{options:["Cortisol","Epinephrine","Norepinephrine"],hasCustom:true}},
+    {lbl:"Bilat. Closed Valves — SYM DOM",opts:null},
     {lbl:"LASS",opts:null},{lbl:"HRV",opts:null},
   ]},
   {sec:"HORMONAL CHALLENGES",items:[
-    {lbl:"Pituitary: TL Glabella + endo org.",opts:null},{lbl:"Uterine/Prostate Lift (BDOFG)",opts:null},
+    {lbl:"Pituitary: TL Glabella + endo org.",opts:null},
+    {lbl:"Uterine Lift (BDOFG)",opts:null},
+    {lbl:"Prostate Lift (BDOFG)",opts:null},
   ]},
   {sec:"TMJ — C2 HYOID",items:[
-    {lbl:"w/ Offenders",opts:null},{lbl:"w/ TL mental protub. & pubic sym.",opts:null},{lbl:"w/ Inferior Traction",opts:null},
+    {lbl:"w/ Offenders",opts:null,tagPopup:{options:["Cortisol","Epinephrine","Norepinephrine"],hasCustom:true}},
+    {lbl:"w/ TL mental protub. & pubic sym.",opts:null},{lbl:"w/ Inferior Traction",opts:null},
   ]},
   {sec:"TMJ — OTHER",items:[
     {lbl:"Vertical Dimension",opts:null},{lbl:"ICR (Estrogen + TMJ challenges)",opts:null},{lbl:"Bruxism (SSRI + TMJ challenges)",opts:null},
   ]},
   {sec:"SLEEP — REM",items:[
-    {lbl:"Cortisol, Epinephrine, Emotions",opts:null},{lbl:"Foods, Sugar, Caffeine, Phys Stress",opts:null},{lbl:"Medications, Suppl., Hormones",opts:null},
+    {lbl:"Cortisol",opts:null},{lbl:"Epinephrine",opts:null},{lbl:"Emotions",opts:null},
+    {lbl:"Foods",opts:null},{lbl:"Sugar",opts:null},{lbl:"Caffeine",opts:null},{lbl:"Physical Stress",opts:null},
+    {lbl:"Medications",opts:null},
+    {lbl:"Supplement",opts:null,tagPopup:{options:[],hasCustom:true}},
+    {lbl:"Hormones",opts:null},
   ]},
-  {sec:"SLEEP — OTHER",items:[{lbl:"Then / Now",opts:null},{lbl:"Pineal — Dark Room Weakness",opts:null}]},
+  {sec:"SLEEP — OTHER",items:[{lbl:"Then / Now",opts:null,thenNow:true},{lbl:"Pineal — Dark Room Weakness",opts:null}]},
   {sec:"BLOOD SUGAR",items:[
     {lbl:"Dysglycemia Pattern",opts:null},{lbl:"Pancreas CR weakens bicep (hyper.)",opts:null},
   ]},
@@ -1123,9 +1132,9 @@ function applyHL(el,on){
 }
 function updateVsecHL(vn,si){
   var el=document.getElementById("vsec_hdr_"+vn+"_"+si); if(!el) return;
-  var on=false, p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_";
+  var on=false, p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_", p3="v"+vn+"_tag_"+si+"_";
   for(var k in S.marks){ if(k.indexOf(p1)===0){on=true;break;} }
-  if(!on&&S.offenderTags){ for(var k in S.offenderTags){ if(k.indexOf(p2)===0&&S.offenderTags[k].length){on=true;break;} } }
+  if(!on&&S.offenderTags){ for(var k in S.offenderTags){ if((k.indexOf(p2)===0||k.indexOf(p3)===0)&&S.offenderTags[k].length){on=true;break;} } }
   applyHL(el,on);
 }
 function updateMskSecHL(vn,si){
@@ -1159,6 +1168,98 @@ function updateAllHL(){
 // ════════════════════════════════════════════════════════════════
 var _oppKey=null;
 
+// Generic tag popup — used for items with tagPopup or thenNow flags
+// Storage key: v{vn}_tag_{si}_{ii} (in S.offenderTags)
+function openTagPopup(btn, key, title, options, hasCustom, isThenNow) {
+  _oppKey = key;
+  var popup = document.getElementById("offenderPopup");
+  document.getElementById("oppTitle").textContent = title;
+  var div = document.getElementById("oppItems"); div.innerHTML = "";
+  if (!S.offenderTags) S.offenderTags = {};
+  var selected = S.offenderTags[key] || [];
+
+  var optList = isThenNow ? MSK_ORGANS : options;
+
+  if (isThenNow) {
+    var hint = document.createElement("div");
+    hint.style.cssText = "font-size:10px;color:#94a3b8;margin-bottom:8px";
+    hint.textContent = "Select 2 organs";
+    div.appendChild(hint);
+  }
+
+  optList.forEach(function(opt) {
+    var lbl = document.createElement("label"); lbl.className = "opp-item";
+    var cb = document.createElement("input"); cb.type = "checkbox";
+    cb.checked = selected.indexOf(opt) >= 0;
+    if (isThenNow && selected.length >= 2 && !cb.checked) cb.disabled = true;
+    cb.addEventListener("change", function() {
+      var sel = (S.offenderTags[key] || []).slice();
+      if (cb.checked) {
+        if (isThenNow && sel.length >= 2) { cb.checked = false; return; }
+        if (sel.indexOf(opt) < 0) sel.push(opt);
+      } else {
+        sel = sel.filter(function(x){return x!==opt;});
+      }
+      S.offenderTags[key] = sel;
+      renderOffenderTags(key); autoSave();
+      // Re-open to refresh disabled states for thenNow
+      if (isThenNow) openTagPopup(btn, key, title, options, hasCustom, isThenNow);
+    });
+    lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt));
+    div.appendChild(lbl);
+  });
+
+  if (hasCustom && !isThenNow) {
+    var sep = document.createElement("div");
+    sep.style.cssText = "border-top:1px solid #f1f5f9;margin-top:8px;padding-top:8px";
+    var customWrap = document.createElement("div");
+    customWrap.style.cssText = "display:flex;gap:6px";
+    var inp = document.createElement("input"); inp.type = "text";
+    inp.placeholder = "Custom tag...";
+    inp.style.cssText = "flex:1;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none";
+    var addBtn2 = document.createElement("button"); addBtn2.textContent = "Add";
+    addBtn2.style.cssText = "padding:4px 10px;border:1.5px solid #e2e8f0;border-radius:6px;background:#f8fafc;font-size:11px;font-weight:700;cursor:pointer";
+    addBtn2.addEventListener("click", function() {
+      var val = inp.value.trim(); if (!val) return;
+      var sel = (S.offenderTags[key] || []).slice();
+      if (sel.indexOf(val) < 0) sel.push(val);
+      S.offenderTags[key] = sel; inp.value = "";
+      renderOffenderTags(key); autoSave();
+      openTagPopup(btn, key, title, options, hasCustom, isThenNow);
+    });
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter") addBtn2.click(); });
+    customWrap.appendChild(inp); customWrap.appendChild(addBtn2);
+    sep.appendChild(customWrap);
+    // Show removable custom tags (not in predefined list)
+    var customs = selected.filter(function(s){ return options.indexOf(s) < 0; });
+    if (customs.length) {
+      var ctags = document.createElement("div"); ctags.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-top:6px";
+      customs.forEach(function(ct) {
+        var t = document.createElement("span");
+        t.style.cssText = "background:#fef9c3;color:#92400e;border:1px solid #fde68a;border-radius:10px;font-size:10px;padding:2px 8px;cursor:pointer";
+        t.title = "Click to remove";
+        t.textContent = ct + " ×";
+        t.addEventListener("click", function() {
+          var sel = (S.offenderTags[key]||[]).filter(function(x){return x!==ct;});
+          S.offenderTags[key] = sel;
+          renderOffenderTags(key); autoSave();
+          openTagPopup(btn, key, title, options, hasCustom, isThenNow);
+        });
+        ctags.appendChild(t);
+      });
+      sep.appendChild(ctags);
+    }
+    div.appendChild(sep);
+  }
+
+  var rect = btn.getBoundingClientRect();
+  popup.style.left = Math.min(rect.left, window.innerWidth-220) + "px";
+  popup.style.top = (rect.bottom+6) + "px";
+  popup.style.maxHeight = "60vh";
+  popup.style.overflowY = "auto";
+  popup.style.display = "block";
+}
+
 function openOffenderPopup(btn,key,itemLabel){
   _oppKey=key;
   var popup=document.getElementById("offenderPopup");
@@ -1175,7 +1276,7 @@ function openOffenderPopup(btn,key,itemLabel){
       else { sel=sel.filter(function(x){return x!==opt;}); }
       S.offenderTags[_oppKey]=sel;
       renderOffenderTags(_oppKey);
-      var mo=_oppKey.match(/^v(\d+)_of_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+      var mo=_oppKey.match(/^v(\d+)_(?:of|tag)_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
       autoSave();
     });
     lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt));
@@ -1338,20 +1439,41 @@ function buildVisitCard(vn){
         c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
         w.appendChild(c); od.appendChild(w);
       }
-      // Offender tag button for offenderable sections
+      // + button: offender sections
       if(sec.hasOffenders){
         var ofKey="v"+vn+"_of_"+si+"_"+ii;
-        var ofBtn=document.createElement("button"); ofBtn.className="offender-btn"; ofBtn.title="Tag offender challenges"; ofBtn.textContent="⚠️";
+        var ofBtn=document.createElement("button"); ofBtn.className="offender-btn"; ofBtn.title="Tag offender challenges"; ofBtn.textContent="+";
         ofBtn.addEventListener("click",(function(k,lbl2,b){ return function(e){ e.stopPropagation(); openOffenderPopup(b,k,lbl2+" — Offenders"); }; })(ofKey,item.lbl,ofBtn));
         od.appendChild(ofBtn);
       }
+      // + button: generic tag popup items
+      if(item.tagPopup){
+        var tpKey="v"+vn+"_tag_"+si+"_"+ii;
+        var tp=item.tagPopup;
+        var tpBtn=document.createElement("button"); tpBtn.className="offender-btn"; tpBtn.title="Add tags"; tpBtn.textContent="+";
+        tpBtn.addEventListener("click",(function(k,lbl2,b,opts,hc){ return function(e){ e.stopPropagation(); openTagPopup(b,k,lbl2,opts,hc,false); }; })(tpKey,item.lbl,tpBtn,tp.options,tp.hasCustom));
+        od.appendChild(tpBtn);
+      }
+      // + button: Then/Now organ selector
+      if(item.thenNow){
+        var tnKey="v"+vn+"_tag_"+si+"_"+ii;
+        var tnBtn=document.createElement("button"); tnBtn.className="offender-btn"; tnBtn.title="Select organs"; tnBtn.textContent="+";
+        tnBtn.addEventListener("click",(function(k,b){ return function(e){ e.stopPropagation(); openTagPopup(b,k,"Then / Now — Select 2 Organs",[],false,true); }; })(tnKey,tnBtn));
+        od.appendChild(tnBtn);
+      }
       row.appendChild(od); itemWrap.appendChild(row);
-      // Offender tags display row
+      // Tags display row
       if(sec.hasOffenders){
         var ofKey2="v"+vn+"_of_"+si+"_"+ii;
         var safe=ofKey2.replace(/[^a-z0-9]/gi,"_");
         var tagsDiv=document.createElement("div"); tagsDiv.className="offender-tags"; tagsDiv.id="otags_"+safe;
         itemWrap.appendChild(tagsDiv);
+      }
+      if(item.tagPopup||item.thenNow){
+        var tpKey2="v"+vn+"_tag_"+si+"_"+ii;
+        var safe2=tpKey2.replace(/[^a-z0-9]/gi,"_");
+        var tagsDiv2=document.createElement("div"); tagsDiv2.className="offender-tags"; tagsDiv2.id="otags_"+safe2;
+        itemWrap.appendChild(tagsDiv2);
       }
       body.appendChild(itemWrap);
     });
