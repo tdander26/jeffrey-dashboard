@@ -743,7 +743,10 @@ function onCellClick(key){
   if(activeColor===null){ delete S.marks[key]; }
   else if(S.marks[key]===activeColor){ delete S.marks[key]; }
   else{ S.marks[key]=activeColor; }
-  renderMark(key); autoSave();
+  renderMark(key);
+  // parse vn and si from key "v{vn}_{si}_{ii}..."
+  var m=key.match(/^v(\d+)_(\d+)_/); if(m) updateVsecHL(parseInt(m[1]),parseInt(m[2]));
+  autoSave();
 }
 function renderMark(key){
   var cell=document.getElementById("mc_"+key); if(!cell) return;
@@ -757,6 +760,48 @@ function renderMark(key){
   } else { cell.classList.remove("marked"); cell.style.borderColor=cell.style.background=""; }
 }
 function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
+
+// ════════════════════════════════════════════════════════════════
+//  SECTION HIGHLIGHTS
+// ════════════════════════════════════════════════════════════════
+function applyHL(el,on){
+  if(!el) return;
+  el.style.background=on?"#fef9c3":"";
+  el.style.color=on?"#713f12":"";
+  el.style.borderColor=on?"#fde68a":"";
+}
+function updateVsecHL(vn,si){
+  var el=document.getElementById("vsec_hdr_"+vn+"_"+si); if(!el) return;
+  var on=false, p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_";
+  for(var k in S.marks){ if(k.indexOf(p1)===0){on=true;break;} }
+  if(!on&&S.offenderTags){ for(var k in S.offenderTags){ if(k.indexOf(p2)===0&&S.offenderTags[k].length){on=true;break;} } }
+  applyHL(el,on);
+}
+function updateMskSecHL(vn,si){
+  var el=document.getElementById("msk_sec_hdr_"+vn+"_"+si); if(!el) return;
+  var on=false, p="v"+vn+"_msk_"+si+"_";
+  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
+  applyHL(el,on);
+}
+function updateMskMainHL(vn){
+  var el=document.getElementById("msk_main_"+vn); if(!el) return;
+  var on=false;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_msk_")===0||k.indexOf("v"+vn+"_org_")===0){on=true;break;} }
+  applyHL(el,on);
+}
+function updateSuppHL(vn){
+  var el=document.getElementById("supp_hdr_"+vn); if(!el) return;
+  var on=false, p="v"+vn+"_supp_";
+  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
+  applyHL(el,on);
+}
+function updateAllHL(){
+  for(var v=1;v<=18;v++){
+    FIELDS.forEach(function(sec,si){ updateVsecHL(v,si); });
+    MSK_SECTIONS.forEach(function(sect,si){ updateMskSecHL(v,si); });
+    updateMskMainHL(v); updateSuppHL(v);
+  }
+}
 
 // ════════════════════════════════════════════════════════════════
 //  OFFENDER TAGS
@@ -778,7 +823,9 @@ function openOffenderPopup(btn,key,itemLabel){
       if(cb.checked){ if(sel.indexOf(opt)<0) sel.push(opt); }
       else { sel=sel.filter(function(x){return x!==opt;}); }
       S.offenderTags[_oppKey]=sel;
-      renderOffenderTags(_oppKey); autoSave();
+      renderOffenderTags(_oppKey);
+      var mo=_oppKey.match(/^v(\d+)_of_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+      autoSave();
     });
     lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt));
     div.appendChild(lbl);
@@ -842,7 +889,10 @@ function onMskClick(key){
   if(activeColor===null){ delete S.marks[key]; }
   else if(S.marks[key]===activeColor){ delete S.marks[key]; }
   else { S.marks[key]=activeColor; }
-  renderMskCell(key); autoSave();
+  renderMskCell(key);
+  var m=key.match(/^v(\d+)_msk_(\d+)_/); if(m){ updateMskSecHL(parseInt(m[1]),parseInt(m[2])); updateMskMainHL(parseInt(m[1])); }
+  var m2=key.match(/^v(\d+)_org_/); if(m2) updateMskMainHL(parseInt(m2[1]));
+  autoSave();
 }
 function renderMskCell(key){
   var cell=document.getElementById("mc_"+key); if(!cell) return;
@@ -864,7 +914,9 @@ function onSuppClick(key){
   if(activeColor===null){ delete S.marks[key]; }
   else if(S.marks[key]===activeColor){ delete S.marks[key]; }
   else { S.marks[key]=activeColor; }
-  renderSuppCell(key); autoSave();
+  renderSuppCell(key);
+  var m=key.match(/^v(\d+)_supp_/); if(m) updateSuppHL(parseInt(m[1]));
+  autoSave();
 }
 function renderSuppCell(key){
   var cell=document.getElementById("sc2_"+key); if(!cell) return;
@@ -902,7 +954,7 @@ function buildVisitCard(vn){
     var sd=document.createElement("div"); sd.className="vsec";
 
     // Collapsible section header
-    var t=document.createElement("div"); t.className="vsec-title vsec-toggle";
+    var t=document.createElement("div"); t.className="vsec-title vsec-toggle"; t.id="vsec_hdr_"+vn+"_"+si;
     t.innerHTML=sec.sec+'<span class="vsec-arrow" id="'+secId+'_arr">▶</span>';
     t.addEventListener("click",(function(id){ return function(){
       var body=document.getElementById(id+"_body");
@@ -960,7 +1012,7 @@ function buildVisitCard(vn){
   div.appendChild(no);
 
   // MSK section
-  var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle";
+  var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle"; mskToggle.id="msk_main_"+vn;
   mskToggle.innerHTML='<span class="msk-toggle-label">💪 MSK — Muscle Testing</span><span class="msk-toggle-arrow" id="msk_arrow_'+vn+'">▶</span>';
   mskToggle.addEventListener("click",(function(v){ return function(){ toggleMsk(v); }; })(vn));
   div.appendChild(mskToggle);
@@ -970,7 +1022,7 @@ function buildVisitCard(vn){
   // Build muscle sections — each collapsible
   MSK_SECTIONS.forEach(function(sect,si){
     var secId="msk_sec_"+vn+"_"+si;
-    var sh=document.createElement("div"); sh.className="msk-sec-hdr";
+    var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.id="msk_sec_hdr_"+vn+"_"+si;
     sh.innerHTML='<span>'+sect.sec+'</span><span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
     sh.addEventListener("click",(function(id){ return function(){
       var body=document.getElementById(id+"_body");
@@ -1032,7 +1084,7 @@ function buildVisitCard(vn){
   div.appendChild(mskBody);
 
   // ── Supplements section ──────────────────────────────────────
-  var suppToggle=document.createElement("div"); suppToggle.className="supp-toggle";
+  var suppToggle=document.createElement("div"); suppToggle.className="supp-toggle"; suppToggle.id="supp_hdr_"+vn;
   suppToggle.innerHTML='<span class="supp-toggle-label">💊 Supplements</span><span class="supp-toggle-arrow" id="supp_arrow_'+vn+'">▶</span>';
   suppToggle.addEventListener("click",(function(v){ return function(){
     var body=document.getElementById("supp_body_"+v);
@@ -1179,7 +1231,7 @@ function saveAll(){
 }
 
 function renderAll(){
-  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllOffenderTags();
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllOffenderTags(); updateAllHL();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
