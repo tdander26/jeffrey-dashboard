@@ -1499,9 +1499,10 @@ function buildPrintView(){
       secData[sn].forEach(function(row){
         html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
         for(var v=1;v<=maxV;v++){
-          var tags=row.offByVisit&&row.offByVisit[v]?row.offByVisit[v]:null;
           var cell=colorBlock(row.marks[v],true);
-          if(tags&&tags.length) cell+='<br><span style="font-size:6px;color:#92400e;display:block;text-align:center;line-height:1.3">'+escHtml(tags.join(", "))+'</span>';
+          // Only show offender tags if this option actually has a mark at this visit
+          if(row.marks[v]&&row.offByVisit&&row.offByVisit[v]&&row.offByVisit[v].length)
+            cell+='<br><span style="font-size:6px;color:#92400e;display:block;text-align:center;line-height:1.3">'+escHtml(row.offByVisit[v].join(", "))+'</span>';
           html+='<td>'+cell+'</td>';
         }
         html+=extraCells(null);
