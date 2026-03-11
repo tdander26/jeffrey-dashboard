@@ -175,6 +175,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .offender-btn{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;font-size:11px;font-weight:800;color:#64748b;padding:1px 6px;line-height:1.4;transition:all .15s;flex-shrink:0}
 .offender-btn:hover{background:#e2e8f0;color:#374151}
 .offender-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
+/* TAG PILL PANELS */
+.tag-panel{display:none;flex-wrap:wrap;gap:8px;margin-top:8px;padding:10px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
+.tag-panel.open{display:flex}
+.tag-pill{padding:8px 14px;border-radius:20px;border:1.5px solid #e2e8f0;background:white;font-size:13px;font-weight:600;cursor:pointer;color:#64748b;transition:all .18s;white-space:nowrap;user-select:none}
+.tag-pill:hover{border-color:#94a3b8;background:#f1f5f9}
+.tag-pill.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
+.tag-pill.active:hover{background:#374151}
+.tag-pill:disabled{opacity:.35;cursor:default}
+.tag-panel-input{display:flex;width:100%;gap:8px;margin-top:4px;align-items:center}
+.tag-panel-input input{flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:16px;font-size:13px;outline:none;background:white}
+.tag-panel-input input:focus{border-color:#94a3b8}
+.vfield-tappable{cursor:pointer;color:#374151}
+.vfield-tappable:hover{color:#1a1a2e;text-decoration:underline dotted}
 .offender-tag{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
 #offenderPopup{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:9500;min-width:190px;display:none}
 .opp-title{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
@@ -1319,6 +1332,99 @@ function renderOffenderTags(key){
 function renderAllOffenderTags(){
   if(!S.offenderTags) return;
   Object.keys(S.offenderTags).forEach(function(k){ renderOffenderTags(k); });
+  // Also refresh all open tag panels
+  document.querySelectorAll(".tag-panel").forEach(function(p){ if(p._renderPanel) p._renderPanel(); });
+}
+
+// ── Inline tag pill panel ─────────────────────────────────────
+function buildTagPanel(container, key, options, hasCustom, isThenNow) {
+  var safe = key.replace(/[^a-z0-9]/gi,"_");
+  var panel = document.createElement("div");
+  panel.className = "tag-panel";
+  panel.id = "tbp_"+safe;
+
+  function renderPanel() {
+    panel.innerHTML = "";
+    if(!S.offenderTags) S.offenderTags={};
+    var selected = S.offenderTags[key] || [];
+    var optList = isThenNow ? MSK_ORGANS : options;
+
+    if(isThenNow){
+      var hint=document.createElement("div");
+      hint.style.cssText="width:100%;font-size:11px;color:#94a3b8;margin-bottom:2px";
+      hint.textContent="Select 2 organs (Then / Now)";
+      panel.appendChild(hint);
+    }
+
+    // Custom tags not in predefined list (show first as active pills)
+    if(hasCustom){
+      var customs=selected.filter(function(s){ return options.indexOf(s)<0; });
+      customs.forEach(function(ct){
+        var btn=document.createElement("button"); btn.className="tag-pill active";
+        btn.textContent=ct+" \u00d7";
+        btn.addEventListener("click",function(e){
+          e.stopPropagation();
+          S.offenderTags[key]=(S.offenderTags[key]||[]).filter(function(x){return x!==ct;});
+          renderOffenderTags(key);
+          var mo=key.match(/^v(\d+)_(?:of|tag)_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+          autoSave(); renderPanel();
+        });
+        panel.appendChild(btn);
+      });
+    }
+
+    // Predefined option pills
+    optList.forEach(function(opt){
+      var isActive = selected.indexOf(opt)>=0;
+      var btn=document.createElement("button"); btn.className="tag-pill"+(isActive?" active":"");
+      btn.textContent=opt;
+      if(isThenNow && selected.length>=2 && !isActive) btn.disabled=true;
+      btn.addEventListener("click",function(e){
+        e.stopPropagation();
+        if(!S.offenderTags) S.offenderTags={};
+        var sel=(S.offenderTags[key]||[]).slice();
+        if(isActive){ sel=sel.filter(function(x){return x!==opt;}); }
+        else {
+          if(isThenNow && sel.length>=2) return;
+          sel.push(opt);
+        }
+        S.offenderTags[key]=sel;
+        renderOffenderTags(key);
+        var mo=key.match(/^v(\d+)_(?:of|tag)_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+        autoSave(); renderPanel();
+      });
+      panel.appendChild(btn);
+    });
+
+    // Custom text input
+    if(hasCustom && !isThenNow){
+      var wrap=document.createElement("div"); wrap.className="tag-panel-input";
+      var inp=document.createElement("input"); inp.type="text"; inp.placeholder="Custom tag...";
+      var addBtn=document.createElement("button"); addBtn.className="tag-pill"; addBtn.textContent="+ Add";
+      addBtn.addEventListener("click",function(){
+        var val=inp.value.trim(); if(!val) return;
+        if(!S.offenderTags) S.offenderTags={};
+        var sel=(S.offenderTags[key]||[]).slice();
+        if(sel.indexOf(val)<0) sel.push(val);
+        S.offenderTags[key]=sel; inp.value="";
+        renderOffenderTags(key); autoSave(); renderPanel();
+      });
+      inp.addEventListener("keydown",function(e){ if(e.key==="Enter") addBtn.click(); });
+      wrap.appendChild(inp); wrap.appendChild(addBtn);
+      panel.appendChild(wrap);
+    }
+  }
+
+  renderPanel();
+  panel._renderPanel = renderPanel;
+  container.appendChild(panel);
+  return panel;
+}
+
+function toggleTagPanel(safeKey) {
+  var panel=document.getElementById("tbp_"+safeKey); if(!panel) return;
+  var open=panel.classList.toggle("open");
+  if(open && panel._renderPanel) panel._renderPanel();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1431,7 +1537,14 @@ function buildVisitCard(vn){
     sec.items.forEach(function(item,ii){
       var itemWrap=document.createElement("div"); itemWrap.style.marginBottom="2px";
       var row=document.createElement("div"); row.className="vfield";
-      var lbl=document.createElement("span"); lbl.className="vfield-label"; lbl.textContent=item.lbl; row.appendChild(lbl);
+      var hasPanel=(sec.hasOffenders||item.tagPopup||item.thenNow);
+      var lbl=document.createElement("span"); lbl.className="vfield-label"+(hasPanel?" vfield-tappable":""); lbl.textContent=item.lbl+(hasPanel?" +":"");
+      if(hasPanel){
+        var panelKey=(sec.hasOffenders?"v"+vn+"_of_"+si+"_"+ii:"v"+vn+"_tag_"+si+"_"+ii);
+        var panelSafe=panelKey.replace(/[^a-z0-9]/gi,"_");
+        lbl.addEventListener("click",(function(sk){ return function(e){ e.stopPropagation(); toggleTagPanel(sk); }; })(panelSafe));
+      }
+      row.appendChild(lbl);
       var od=document.createElement("div"); od.className="vfield-opts";
       if(item.opts){
         item.opts.forEach(function(opt,oi){
@@ -1449,41 +1562,19 @@ function buildVisitCard(vn){
         c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
         w.appendChild(c); od.appendChild(w);
       }
-      // + button: offender sections
+      row.appendChild(od); itemWrap.appendChild(row);
+      // Inline tag pill panels (iPad-friendly, no popup)
       if(sec.hasOffenders){
         var ofKey="v"+vn+"_of_"+si+"_"+ii;
-        var ofBtn=document.createElement("button"); ofBtn.className="offender-btn"; ofBtn.title="Tag offender challenges"; ofBtn.textContent="+";
-        ofBtn.addEventListener("click",(function(k,lbl2,b){ return function(e){ e.stopPropagation(); openOffenderPopup(b,k,lbl2+" — Offenders"); }; })(ofKey,item.lbl,ofBtn));
-        od.appendChild(ofBtn);
+        buildTagPanel(itemWrap, ofKey, OFFENDER_OPTIONS, false, false);
       }
-      // + button: generic tag popup items
       if(item.tagPopup){
         var tpKey="v"+vn+"_tag_"+si+"_"+ii;
-        var tp=item.tagPopup;
-        var tpBtn=document.createElement("button"); tpBtn.className="offender-btn"; tpBtn.title="Add tags"; tpBtn.textContent="+";
-        tpBtn.addEventListener("click",(function(k,lbl2,b,opts,hc){ return function(e){ e.stopPropagation(); openTagPopup(b,k,lbl2,opts,hc,false); }; })(tpKey,item.lbl,tpBtn,tp.options,tp.hasCustom));
-        od.appendChild(tpBtn);
+        buildTagPanel(itemWrap, tpKey, item.tagPopup.options, item.tagPopup.hasCustom, false);
       }
-      // + button: Then/Now organ selector
       if(item.thenNow){
         var tnKey="v"+vn+"_tag_"+si+"_"+ii;
-        var tnBtn=document.createElement("button"); tnBtn.className="offender-btn"; tnBtn.title="Select organs"; tnBtn.textContent="+";
-        tnBtn.addEventListener("click",(function(k,b){ return function(e){ e.stopPropagation(); openTagPopup(b,k,"Then / Now — Select 2 Organs",[],false,true); }; })(tnKey,tnBtn));
-        od.appendChild(tnBtn);
-      }
-      row.appendChild(od); itemWrap.appendChild(row);
-      // Tags display row
-      if(sec.hasOffenders){
-        var ofKey2="v"+vn+"_of_"+si+"_"+ii;
-        var safe=ofKey2.replace(/[^a-z0-9]/gi,"_");
-        var tagsDiv=document.createElement("div"); tagsDiv.className="offender-tags"; tagsDiv.id="otags_"+safe;
-        itemWrap.appendChild(tagsDiv);
-      }
-      if(item.tagPopup||item.thenNow){
-        var tpKey2="v"+vn+"_tag_"+si+"_"+ii;
-        var safe2=tpKey2.replace(/[^a-z0-9]/gi,"_");
-        var tagsDiv2=document.createElement("div"); tagsDiv2.className="offender-tags"; tagsDiv2.id="otags_"+safe2;
-        itemWrap.appendChild(tagsDiv2);
+        buildTagPanel(itemWrap, tnKey, [], false, true);
       }
       body.appendChild(itemWrap);
     });
