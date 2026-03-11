@@ -161,6 +161,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .msk-cell{width:32px;height:22px;border:2px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none;font-size:11px;font-weight:900}
 .msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
 .msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
+/* OFFENDER TAGS */
+.offender-btn{background:none;border:none;cursor:pointer;font-size:14px;padding:0 2px;line-height:1;opacity:.6;transition:opacity .15s;flex-shrink:0}
+.offender-btn:hover{opacity:1}
+.offender-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
+.offender-tag{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+#offenderPopup{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:9500;min-width:190px;display:none}
+.opp-title{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.opp-item{display:flex;align-items:center;gap:8px;padding:4px 2px;cursor:pointer;font-size:12px;color:#374151;border-radius:4px}
+.opp-item:hover{background:#f8fafc}
+.opp-item input{cursor:pointer;accent-color:#f59e0b;width:14px;height:14px}
+.opp-done{margin-top:10px;width:100%;padding:5px;border:1.5px solid #e2e8f0;border-radius:7px;background:#f8fafc;font-size:12px;font-weight:700;cursor:pointer;color:#374151}
+.opp-done:hover{background:#f1f5f9}
+
 /* SUPPLEMENTS SECTION */
 .supp-toggle{margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
 .supp-toggle-label{font-size:10px;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.1em}
@@ -239,6 +252,13 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
 <!-- TOAST -->
 <div id="toast">✓ Saved</div>
+
+<!-- OFFENDER POPUP -->
+<div id="offenderPopup">
+  <div class="opp-title" id="oppTitle">Offender Challenges</div>
+  <div id="oppItems"></div>
+  <button class="opp-done" onclick="closeOffenderPopup()">✓ Done</button>
+</div>
 
 <!-- PRINT VIEW -->
 <div id="printView">
@@ -385,19 +405,20 @@ var currentPatientId = null;
 // ════════════════════════════════════════════════════════════════
 //  FIELD DEFINITIONS
 // ════════════════════════════════════════════════════════════════
+var OFFENDER_OPTIONS=[
+  "Ammonia","Aldehydes","Histamine","B2 / Cysteine",
+  "Bacteria","Fungus","Virus","Parasite"
+];
+
 var FIELDS = [
-  {sec:"GUT — INTESTINE",items:[
+  {sec:"GUT — INTESTINE",hasOffenders:true,items:[
     {lbl:"ICV",opts:["Open","Closed"]},{lbl:"HV",opts:["Open","Closed"]},
     {lbl:"Splenic Flexure",opts:["Fwd","Rev"]},{lbl:"Hepatic Flexure",opts:["Fwd","Rev"]},
     {lbl:"Ascending",opts:["Fwd","Rev"]},{lbl:"Descending",opts:["Fwd","Rev"]},
     {lbl:"Gastrocolic Reflex",opts:null},{lbl:"Sigmoid",opts:null},
   ]},
-  {sec:"GUT — UPPER GI",items:[
+  {sec:"GUT — UPPER GI",hasOffenders:true,items:[
     {lbl:"Hiatal Hernia",opts:null},{lbl:"GB Pump",opts:null},{lbl:"Pyloric",opts:["Open","Closed"]},
-  ]},
-  {sec:"GUT — OFFENDER CHALLENGES",items:[
-    {lbl:"Ammonia",opts:null},{lbl:"Aldehydes",opts:null},{lbl:"Histamine",opts:null},
-    {lbl:"B2 / Cysteine",opts:null},{lbl:"Infections",opts:null},
   ]},
   {sec:"GUT — OTHER CHALLENGES",items:[
     {lbl:"Lig. Stretch Test (Type 3 LSASS)",opts:null},{lbl:"Valve Combinations",opts:null},
@@ -436,7 +457,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active"},symptoms:{},symLabels:{},symRows:8,visitDates:{},visitNotes:{},marks:{},symVisited:{}};
+  return {patientInfo:{status:"active"},symptoms:{},symLabels:{},symRows:8,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
 }
 var S = blankState();
 
@@ -738,6 +759,60 @@ function renderMark(key){
 function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
 
 // ════════════════════════════════════════════════════════════════
+//  OFFENDER TAGS
+// ════════════════════════════════════════════════════════════════
+var _oppKey=null;
+
+function openOffenderPopup(btn,key,itemLabel){
+  _oppKey=key;
+  var popup=document.getElementById("offenderPopup");
+  document.getElementById("oppTitle").textContent=itemLabel;
+  var selected=(S.offenderTags&&S.offenderTags[key])||[];
+  var div=document.getElementById("oppItems"); div.innerHTML="";
+  OFFENDER_OPTIONS.forEach(function(opt){
+    var lbl=document.createElement("label"); lbl.className="opp-item";
+    var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=selected.indexOf(opt)>=0;
+    cb.addEventListener("change",function(){
+      if(!S.offenderTags) S.offenderTags={};
+      var sel=S.offenderTags[_oppKey]||[];
+      if(cb.checked){ if(sel.indexOf(opt)<0) sel.push(opt); }
+      else { sel=sel.filter(function(x){return x!==opt;}); }
+      S.offenderTags[_oppKey]=sel;
+      renderOffenderTags(_oppKey); autoSave();
+    });
+    lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt));
+    div.appendChild(lbl);
+  });
+  // Position popup near button
+  var rect=btn.getBoundingClientRect();
+  popup.style.left=Math.min(rect.left,window.innerWidth-210)+"px";
+  popup.style.top=(rect.bottom+6)+"px";
+  popup.style.display="block";
+}
+function closeOffenderPopup(){
+  document.getElementById("offenderPopup").style.display="none"; _oppKey=null;
+}
+document.addEventListener("click",function(e){
+  var popup=document.getElementById("offenderPopup");
+  if(popup&&popup.style.display!=="none"&&!popup.contains(e.target)&&!e.target.classList.contains("offender-btn"))
+    closeOffenderPopup();
+});
+function renderOffenderTags(key){
+  if(!key) return;
+  var safe=key.replace(/[^a-z0-9]/gi,"_");
+  var div=document.getElementById("otags_"+safe); if(!div) return;
+  var sel=(S.offenderTags&&S.offenderTags[key])||[];
+  div.innerHTML="";
+  sel.forEach(function(opt){
+    var t=document.createElement("span"); t.className="offender-tag"; t.textContent=opt; div.appendChild(t);
+  });
+}
+function renderAllOffenderTags(){
+  if(!S.offenderTags) return;
+  Object.keys(S.offenderTags).forEach(function(k){ renderOffenderTags(k); });
+}
+
+// ════════════════════════════════════════════════════════════════
 //  MSK MUSCLE LIST
 // ════════════════════════════════════════════════════════════════
 var SUPPLEMENTS=[
@@ -840,6 +915,7 @@ function buildVisitCard(vn){
     // Collapsible body
     var body=document.createElement("div"); body.className="vsec-body"; body.id=secId+"_body";
     sec.items.forEach(function(item,ii){
+      var itemWrap=document.createElement("div"); itemWrap.style.marginBottom="2px";
       var row=document.createElement("div"); row.className="vfield";
       var lbl=document.createElement("span"); lbl.className="vfield-label"; lbl.textContent=item.lbl; row.appendChild(lbl);
       var od=document.createElement("div"); od.className="vfield-opts";
@@ -859,7 +935,22 @@ function buildVisitCard(vn){
         c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
         w.appendChild(c); od.appendChild(w);
       }
-      row.appendChild(od); body.appendChild(row);
+      // Offender tag button for offenderable sections
+      if(sec.hasOffenders){
+        var ofKey="v"+vn+"_of_"+si+"_"+ii;
+        var ofBtn=document.createElement("button"); ofBtn.className="offender-btn"; ofBtn.title="Tag offender challenges"; ofBtn.textContent="⚠️";
+        ofBtn.addEventListener("click",(function(k,lbl2,b){ return function(e){ e.stopPropagation(); openOffenderPopup(b,k,lbl2+" — Offenders"); }; })(ofKey,item.lbl,ofBtn));
+        od.appendChild(ofBtn);
+      }
+      row.appendChild(od); itemWrap.appendChild(row);
+      // Offender tags display row
+      if(sec.hasOffenders){
+        var ofKey2="v"+vn+"_of_"+si+"_"+ii;
+        var safe=ofKey2.replace(/[^a-z0-9]/gi,"_");
+        var tagsDiv=document.createElement("div"); tagsDiv.className="offender-tags"; tagsDiv.id="otags_"+safe;
+        itemWrap.appendChild(tagsDiv);
+      }
+      body.appendChild(itemWrap);
     });
     sd.appendChild(body);
     div.appendChild(sd);
@@ -1088,7 +1179,7 @@ function saveAll(){
 }
 
 function renderAll(){
-  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells();
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllOffenderTags();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -1213,16 +1304,24 @@ function buildPrintView(){
   var secData={};
   FIELDS.forEach(function(sec,si){
     sec.items.forEach(function(item,ii){
+      // Gather offender tags per visit for offenderable sections
+      var offByVisit={};
+      if(sec.hasOffenders&&S.offenderTags){
+        for(var v=1;v<=18;v++){
+          var tags=(S.offenderTags["v"+v+"_of_"+si+"_"+ii])||[];
+          if(tags.length) offByVisit[v]=tags;
+        }
+      }
       if(item.opts){
         item.opts.forEach(function(opt,oi){
           var rm={},any=false;
           for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii,oi)]; if(cn){ rm[v]=cn; any=true; } }
-          if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl+" ("+opt+")",marks:rm}); }
+          if(any||Object.keys(offByVisit).length){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl+" ("+opt+")",marks:rm,offByVisit:offByVisit}); }
         });
       } else {
         var rm={},any=false;
         for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii)]; if(cn){ rm[v]=cn; any=true; } }
-        if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl,marks:rm}); }
+        if(any||Object.keys(offByVisit).length){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl,marks:rm,offByVisit:offByVisit}); }
       }
     });
   });
@@ -1347,7 +1446,12 @@ function buildPrintView(){
       html+='<tr><td class="row-lbl" colspan="'+(totalCols+1)+'" style="background:#f1f5f9!important;font-size:9px;font-weight:800;color:#374151;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
       secData[sn].forEach(function(row){
         html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
-        for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+        for(var v=1;v<=maxV;v++){
+          var tags=row.offByVisit&&row.offByVisit[v]?row.offByVisit[v]:null;
+          var cell=colorBlock(row.marks[v],true);
+          if(tags&&tags.length) cell+='<br><span style="font-size:6px;color:#92400e;display:block;text-align:center;line-height:1.3">'+escHtml(tags.join(", "))+'</span>';
+          html+='<td>'+cell+'</td>';
+        }
         html+=extraCells(null);
         html+='</tr>';
       });
