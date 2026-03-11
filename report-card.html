@@ -125,8 +125,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .vdi:focus{border-color:#3b82f6}
 .today-btn{padding:4px 9px;border:2px solid #3b82f6;border-radius:6px;background:white;color:#3b82f6;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
 .today-btn:hover{background:#3b82f6;color:white}
-.vsec{margin-bottom:10px}
-.vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid #f1f5f9}
+.vsec{margin-bottom:6px}
+.vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#64748b;padding:6px 8px;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0}
+.vsec-toggle{cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.vsec-toggle:hover{background:#f1f5f9;color:#374151}
+.vsec-arrow{font-size:10px;color:#94a3b8;transition:transform .18s;display:inline-block}
+.vsec-arrow.open{transform:rotate(90deg)}
+.vsec-body{display:none;padding:6px 4px 2px}
+.vsec-body.open{display:block}
 .vfield{display:flex;align-items:center;justify-content:space-between;padding:2px 0;min-height:30px}
 .vfield-label{font-size:11px;color:#374151;flex:1;padding-right:6px;line-height:1.3}
 .vfield-opts{display:flex;gap:7px;flex-shrink:0}
@@ -817,8 +823,22 @@ function buildVisitCard(vn){
     '<button class="today-btn" onclick="setToday(\'vd'+vn+'\')">Today</button>'+
     '</div></div>';
   FIELDS.forEach(function(sec,si){
+    var secId="vsec_"+vn+"_"+si;
     var sd=document.createElement("div"); sd.className="vsec";
-    var t=document.createElement("div"); t.className="vsec-title"; t.textContent=sec.sec; sd.appendChild(t);
+
+    // Collapsible section header
+    var t=document.createElement("div"); t.className="vsec-title vsec-toggle";
+    t.innerHTML=sec.sec+'<span class="vsec-arrow" id="'+secId+'_arr">▶</span>';
+    t.addEventListener("click",(function(id){ return function(){
+      var body=document.getElementById(id+"_body");
+      var arr=document.getElementById(id+"_arr");
+      var open=body.classList.toggle("open");
+      arr.classList.toggle("open",open);
+    }; })(secId));
+    sd.appendChild(t);
+
+    // Collapsible body
+    var body=document.createElement("div"); body.className="vsec-body"; body.id=secId+"_body";
     sec.items.forEach(function(item,ii){
       var row=document.createElement("div"); row.className="vfield";
       var lbl=document.createElement("span"); lbl.className="vfield-label"; lbl.textContent=item.lbl; row.appendChild(lbl);
@@ -828,7 +848,7 @@ function buildVisitCard(vn){
           var key=mkKey(vn,si,ii,oi);
           var w=document.createElement("div"); w.className="mwrap";
           var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
-          c.addEventListener("click",(function(k){ return function(){ onCellClick(k); }; })(key));
+          c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
           var ol=document.createElement("span"); ol.className="opt-lbl"; ol.textContent=opt;
           w.appendChild(c); w.appendChild(ol); od.appendChild(w);
         });
@@ -836,11 +856,12 @@ function buildVisitCard(vn){
         var key=mkKey(vn,si,ii);
         var w=document.createElement("div"); w.className="mwrap";
         var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
-        c.addEventListener("click",(function(k){ return function(){ onCellClick(k); }; })(key));
+        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
         w.appendChild(c); od.appendChild(w);
       }
-      row.appendChild(od); sd.appendChild(row);
+      row.appendChild(od); body.appendChild(row);
     });
+    sd.appendChild(body);
     div.appendChild(sd);
   });
   var no=document.createElement("div"); no.className="visit-notes";
