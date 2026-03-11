@@ -235,6 +235,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .sym-ml-label{color:#64748b;flex:1;font-weight:600}
 .sym-ml-pct{font-weight:900;color:#1a1a2e;min-width:36px;text-align:right}
 .sym-ml-timing{color:#94a3b8;font-size:11px;min-width:90px;text-align:right}
+.sym-pt-list{margin-top:12px;border-top:1px solid #f1f5f9;padding-top:10px}
+.sym-pt-list-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:6px}
+.sym-pt-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12px;transition:background .12s}
+.sym-pt-row:hover{background:#f0f9ff}
+.sym-pt-name{flex:1;font-weight:600;color:#374151}
+.sym-pt-timing{font-size:11px;color:#64748b;white-space:nowrap}
 
 /* ── STATUS BAR ── */
 .status-bar-wrap{height:28px;border-radius:8px;overflow:hidden;display:flex;margin-top:10px}
@@ -715,7 +721,9 @@ function renderStats() {
         wB: wB !== null ? wB-1 : null,
         wG: wG !== null ? wG-1 : null,
         vY: wkToV(wY), vB: wkToV(wB), vG: wkToV(wG),
-        hasY: wY !== null, hasB: wB !== null, hasG: wG !== null
+        hasY: wY !== null, hasB: wB !== null, hasG: wG !== null,
+        ptId: pt.id, ptName: pt.name || "Unnamed", ptStatus: pt.status,
+        currentColor: currentColor || "red"
       });
     }
 
@@ -838,6 +846,15 @@ function symStageCard(emoji, count, label, color, total) {
     '<div class="stat-label">' + label + '</div>' +
     (total > 0 ? '<div style="font-size:11px;color:#94a3b8;margin-top:2px">' + pct + '% of symptoms</div>' : '') +
     '</div>';
+}
+
+function toggleSymPatients(safeKey) {
+  var list = document.getElementById("spl_"+safeKey);
+  var arrow = document.getElementById("sca_"+safeKey);
+  if (!list) return;
+  var open = list.style.display === "none";
+  list.style.display = open ? "block" : "none";
+  if (arrow) arrow.style.transform = open ? "rotate(90deg)" : "";
 }
 
 function symMilestone(emoji, label, pct, avgWks, avgVis) {
