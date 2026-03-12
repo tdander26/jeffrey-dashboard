@@ -1,0 +1,2342 @@
+<!DOCTYPE html>
+<!-- cache-bust: 20260311015148 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Momentum">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<title>Momentum Health & Wellness — Patient Records</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;min-height:100vh}
+
+/* ── PASSWORD ── */
+#pwOverlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:flex;align-items:center;justify-content:center;z-index:9999}
+.pw-box{background:white;border-radius:16px;padding:44px 40px;text-align:center;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.pw-logo{font-size:40px;margin-bottom:10px}
+.pw-brand{font-size:22px;font-weight:800;color:#1a1a2e}
+.pw-sub{color:#94a3b8;font-size:13px;margin:6px 0 28px}
+.pw-box input{width:100%;padding:13px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;margin-bottom:12px;outline:none;transition:border-color .2s}
+.pw-box input:focus{border-color:#3b82f6}
+.pw-box button{width:100%;padding:13px;background:#1a1a2e;color:white;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:700;transition:background .2s}
+.pw-box button:hover{background:#2d3748}
+.pw-error{color:#ef4444;font-size:13px;margin-top:10px;display:none;padding:8px;background:#fef2f2;border-radius:6px}
+.pw-hipaa{margin-top:20px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;line-height:1.5}
+
+/* ── SHARED HEADER ── */
+.page-header{background:linear-gradient(135deg,#1a1a2e,#0f3460);color:white;border-radius:14px;padding:20px 26px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.page-header h1{font-size:20px;font-weight:800}
+.page-header .sub{font-size:12px;opacity:.65;margin-top:3px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all .2s;white-space:nowrap}
+.btn-light{background:rgba(255,255,255,.15);color:white}.btn-light:hover{background:rgba(255,255,255,.25)}
+.btn-danger{background:#ef4444;color:white}.btn-danger:hover{background:#dc2626}
+.btn-green{background:#22c55e;color:white}.btn-green:hover{background:#16a34a}
+.btn-blue{background:#3b82f6;color:white}.btn-blue:hover{background:#2563eb}
+
+/* ══════════════════════════════════════
+   PATIENT DASHBOARD
+══════════════════════════════════════ */
+#dash{max-width:1100px;margin:0 auto;padding:20px;display:none}
+
+.dash-toolbar{display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
+.dash-search{flex:1;min-width:200px;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;transition:border-color .2s}
+.dash-search:focus{border-color:#3b82f6}
+.dash-count{font-size:13px;color:#94a3b8;white-space:nowrap}
+
+.pt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.pt-card{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9;cursor:pointer;transition:all .18s;position:relative}
+.pt-card:hover{border-color:#3b82f6;box-shadow:0 4px 16px rgba(59,130,246,.15);transform:translateY(-2px)}
+.pt-name{font-size:16px;font-weight:800;color:#1a1a2e;margin-bottom:6px}
+.pt-meta{font-size:12px;color:#64748b;line-height:1.8}
+.pt-meta span{display:block}
+.pt-badge{display:inline-block;margin-top:10px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd}
+.pt-status-badge{display:inline-block;margin-left:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.pt-status-active{background:#dcfce7;color:#166534;border:1px solid #86efac}
+.pt-status-discharged{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
+.pt-status-on-hold{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.pt-visits-badge{display:inline-block;margin-left:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f3e8ff;color:#7c3aed;border:1px solid #c4b5fd}
+.pt-modified{font-size:10px;color:#94a3b8;margin-top:8px}
+.pt-del{position:absolute;top:12px;right:12px;width:26px;height:26px;border-radius:50%;background:#fee2e2;color:#ef4444;border:none;cursor:pointer;font-size:14px;font-weight:900;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.pt-card:hover .pt-del{opacity:1}
+.pt-del:hover{background:#ef4444;color:white}
+
+.empty-state{text-align:center;padding:60px 20px;color:#94a3b8}
+.empty-state .emoji{font-size:48px;margin-bottom:16px}
+.empty-state h3{font-size:18px;font-weight:700;color:#64748b;margin-bottom:8px}
+.empty-state p{font-size:14px}
+
+/* ══════════════════════════════════════
+   PATIENT RECORD (main app)
+══════════════════════════════════════ */
+#app{max-width:1300px;margin:0 auto;padding:20px;display:none}
+
+/* ── BACKUP STATUS ── */
+.backup-status{font-size:11px;margin-top:4px;padding:4px 10px;border-radius:6px;display:inline-block}
+.backup-green{background:#dcfce7;color:#166534}
+.backup-amber{background:#fef3c7;color:#92400e}
+.backup-red{background:#fee2e2;color:#dc2626}
+
+/* ── COLOR BAR ── */
+#colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:12px 18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cb-label{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.cb-colors{display:flex;gap:8px;flex-wrap:wrap}
+.cb-btn{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:9px;border:3px solid transparent;cursor:pointer;font-size:12px;font-weight:700;transition:all .18s;background:#f8fafc;color:#374151;user-select:none}
+.cb-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.cb-btn.active{border-color:#1a1a2e;box-shadow:0 4px 14px rgba(0,0,0,.15);transform:translateY(-2px)}
+.cb-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+.cb-clr{margin-left:auto;padding:6px 12px;border-radius:7px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;transition:all .2s}
+.cb-clr:hover{background:#f1f5f9}
+
+.hipaa-bar{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:10px 16px;margin-bottom:16px;font-size:12px;color:#92400e;line-height:1.5}
+
+.card{background:white;border-radius:14px;padding:24px;margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:14px}
+.field-row{display:flex;gap:14px;flex-wrap:wrap}
+.fg{flex:1;min-width:170px}
+.fg label{display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.fg input,.fg select{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s}
+.fg input:focus,.fg select:focus{border-color:#3b82f6}
+
+/* SYM TABLE */
+.sym-scroll{overflow-x:auto;margin-top:8px}
+.sym-hint{font-size:12px;color:#94a3b8;margin-bottom:10px}
+.sym-table{border-collapse:collapse;width:100%;min-width:1100px;font-size:12px}
+.sym-table th{background:#1a1a2e;color:white;padding:6px 5px;text-align:center;white-space:nowrap;font-size:10px}
+.sym-table th:first-child{text-align:left;min-width:150px;padding-left:10px}
+.sym-table td{border:1px solid #e2e8f0;padding:2px 3px}
+.sym-table td:first-child{background:#f8fafc;padding:3px 6px}
+.sym-table input[type=text]{width:100%;border:none;outline:none;font-size:12px;background:transparent;padding:2px 3px}
+.sym-cell{width:32px;height:24px;border:1.5px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:12px;font-weight:900;transition:all .12s;user-select:none}
+.sym-cell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.1)}
+.sym-add{margin-top:8px;font-size:12px;color:#3b82f6;cursor:pointer;font-weight:600;display:inline-block}
+.sym-add:hover{text-decoration:underline}
+
+/* PHASE TABS */
+.phase-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.phase-tab{padding:8px 18px;border-radius:9px;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;background:white;color:#64748b}
+.phase-tab.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
+.phase-content{display:none}.phase-content.active{display:block}
+.visits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:14px}
+
+/* VISIT CARD */
+.visit-card{background:white;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9}
+.visit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f1f5f9}
+.visit-num{font-size:16px;font-weight:800;color:#1a1a2e}
+.vdi{padding:5px 9px;border:2px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;width:130px}
+.vdi:focus{border-color:#3b82f6}
+.today-btn{padding:4px 9px;border:2px solid #3b82f6;border-radius:6px;background:white;color:#3b82f6;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.today-btn:hover{background:#3b82f6;color:white}
+.vsec{margin-bottom:6px}
+.vsec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#64748b;padding:6px 8px;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0}
+.vsec-toggle{cursor:pointer;user-select:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.vsec-toggle:hover{background:#f1f5f9;color:#374151}
+.vsec-arrow{font-size:10px;color:#94a3b8;transition:transform .18s;display:inline-block}
+.vsec-arrow.open{transform:rotate(90deg)}
+.vsec-body{display:none;padding:6px 4px 2px}
+.vsec-body.open{display:block}
+.vfield{display:flex;align-items:center;justify-content:space-between;padding:2px 0;min-height:30px}
+.vfield-label{font-size:11px;color:#374151;flex:1;padding-right:6px;line-height:1.3}
+.vfield-opts{display:flex;gap:7px;flex-shrink:0}
+.mwrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.mcell{width:42px;height:26px;border:2px solid #d1d5db;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none}
+.mcell:hover{border-color:#94a3b8;background:#f1f5f9;transform:scale(1.06)}
+.mcell .xm{font-weight:900;font-size:14px;pointer-events:none}
+.opt-lbl{font-size:9px;color:#9ca3af;font-weight:600;white-space:nowrap;pointer-events:none}
+.visit-notes{margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9}
+.visit-notes label{font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px}
+.visit-notes textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:48px;outline:none;font-family:inherit}
+.visit-notes textarea:focus{border-color:#3b82f6}
+
+/* MSK SECTION */
+.msk-toggle{margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.msk-toggle-label{font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.1em}
+.msk-toggle-arrow{font-size:11px;color:#7c3aed;transition:transform .2s;display:inline-block}
+.msk-toggle-arrow.open{transform:rotate(90deg)}
+.msk-body{display:none;margin-top:10px}
+.msk-body.open{display:block}
+.msk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:4px 10px}
+.msk-row{display:flex;align-items:center;gap:6px;padding:3px 0}
+.msk-label{font-size:11px;color:#374151;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msk-cells{display:flex;gap:4px;flex-shrink:0}
+.msk-cell-wrap{display:flex;flex-direction:column;align-items:center;gap:1px}
+.msk-cell{width:32px;height:22px;border:2px solid #d1d5db;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#fafafa;user-select:none;font-size:11px;font-weight:900}
+.msk-cell:hover{border-color:#7c3aed;background:#f5f3ff;transform:scale(1.08)}
+.msk-opt-lbl{font-size:8px;color:#9ca3af;font-weight:700}
+/* OFFENDER TAGS */
+.offender-btn{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:5px;cursor:pointer;font-size:11px;font-weight:800;color:#64748b;padding:1px 6px;line-height:1.4;transition:all .15s;flex-shrink:0}
+.offender-btn:hover{background:#e2e8f0;color:#374151}
+.offender-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px;padding-left:2px}
+/* TAG PILL PANELS */
+.tag-panel{display:none;flex-wrap:wrap;gap:5px;margin-top:6px;padding:8px 10px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:8px;border:1px solid #e9edf2}
+.tag-panel.open{display:flex}
+.tag-pill{padding:4px 11px;border-radius:20px;border:1px solid #dde3ea;background:white;font-size:11px;font-weight:600;cursor:pointer;color:#64748b;transition:all .15s;white-space:nowrap;user-select:none;letter-spacing:.01em;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.tag-pill:hover{border-color:#94a3b8;background:#f8fafc;color:#374151}
+.tag-pill.active{background:#1a1a2e;color:white;border-color:#1a1a2e;box-shadow:0 1px 4px rgba(26,26,46,.25)}
+.tag-pill.active:hover{background:#2d2d4e}
+.tag-pill:disabled{opacity:.3;cursor:default;box-shadow:none}
+.tag-panel-input{display:flex;width:100%;gap:6px;margin-top:4px;padding-top:5px;border-top:1px solid #e9edf2;align-items:center}
+.tag-panel-input input{flex:1;padding:4px 10px;border:1px solid #dde3ea;border-radius:14px;font-size:11px;outline:none;background:white;color:#374151}
+.tag-panel-input input:focus{border-color:#94a3b8;box-shadow:0 0 0 2px rgba(148,163,184,.15)}
+.vfield-tappable{cursor:pointer;color:#374151}
+.vfield-tappable:hover{color:#1a1a2e}
+.vfield-tappable::after{content:" ▾";font-size:9px;color:#94a3b8;vertical-align:middle}
+.offender-tag{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10px;font-weight:700;background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+#offenderPopup{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:9500;min-width:190px;display:none}
+.opp-title{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.opp-item{display:flex;align-items:center;gap:8px;padding:4px 2px;cursor:pointer;font-size:12px;color:#374151;border-radius:4px}
+.opp-item:hover{background:#f8fafc}
+.opp-item input{cursor:pointer;accent-color:#f59e0b;width:14px;height:14px}
+.opp-done{margin-top:10px;width:100%;padding:5px;border:1.5px solid #e2e8f0;border-radius:7px;background:#f8fafc;font-size:12px;font-weight:700;cursor:pointer;color:#374151}
+.opp-done:hover{background:#f1f5f9}
+
+/* SUPPLEMENT BRAND GROUPS */
+.supp-brand-hdr{display:flex;align-items:center;gap:6px;padding:6px 8px;background:#f8fafc;border:1px solid #e9edf2;border-radius:7px;margin-bottom:3px;cursor:pointer;user-select:none;transition:background .12s}
+.supp-brand-hdr:hover{background:#f1f5f9}
+.supp-brand-name{flex:1;font-size:11px;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.06em}
+.supp-brand-count{font-size:10px;color:#94a3b8;font-weight:600;background:#f1f5f9;border-radius:10px;padding:1px 7px}
+.supp-brand-arrow{font-size:9px;color:#94a3b8;transition:transform .18s}
+.supp-brand-body{display:none;padding:2px 0 6px 4px}
+.supp-brand-body.open{display:block}
+
+/* SUPPLEMENTS SECTION */
+.supp-toggle{margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.supp-toggle-label{font-size:10px;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.1em}
+.supp-toggle-arrow{font-size:11px;color:#0369a1;transition:transform .2s;display:inline-block}
+.supp-toggle-arrow.open{transform:rotate(90deg)}
+.supp-body{display:none;margin-top:8px}
+.supp-body.open{display:block}
+.supp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 10px}
+.supp-row{display:flex;align-items:center;gap:8px;padding:3px 5px;border-radius:5px;transition:background .12s}
+.supp-label{font-size:11px;color:#374151;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.supp-cell{width:32px;height:22px;border:2px solid #bae6fd;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;background:#f0f9ff;user-select:none;font-size:11px;font-weight:900;color:#0369a1}
+.supp-cell:hover{border-color:#0369a1;background:#e0f2fe;transform:scale(1.08)}
+
+.msk-sec-hdr{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#7c3aed;background:#f5f3ff;border-radius:6px;padding:6px 10px;margin:6px 0 0;border-left:3px solid #7c3aed;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}
+.msk-sec-hdr:hover{background:#ede9fe}
+.msk-org-hdr{color:#be185d;background:#fdf2f8;border-left-color:#be185d}
+.msk-org-hdr:hover{background:#fce7f3}
+.msk-sec-arrow{font-size:10px;transition:transform .18s;display:inline-block}
+.msk-sec-arrow.open{transform:rotate(90deg)}
+.msk-sec-body{display:none;padding:6px 4px 4px}
+.msk-sec-body.open{display:block}
+
+/* TOAST */
+#toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
+
+/* ── DASH TABS ── */
+.dash-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #e2e8f0}
+.dash-tab{padding:10px 22px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:700;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;border-radius:0}
+.dash-tab.active{color:#1a1a2e;border-bottom-color:#3b82f6}
+.dash-tab:hover:not(.active){color:#374151;background:#f8fafc;border-radius:8px 8px 0 0}
+
+/* ── STAT CARDS ── */
+.stat-cards{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.stat-card{flex:1;min-width:150px;background:white;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9;text-align:center}
+.stat-card .stat-emoji{font-size:28px;margin-bottom:6px}
+.stat-card .stat-value{font-size:28px;font-weight:900;color:#1a1a2e}
+.stat-card .stat-label{font-size:12px;color:#64748b;font-weight:600;margin-top:4px}
+
+/* ── STATS SECTION ── */
+.stats-section{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:16px}
+.stats-section-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:14px}
+.stats-table{width:100%;border-collapse:collapse;font-size:12px}
+.stats-table th{background:#1a1a2e;color:white;padding:8px 10px;text-align:center;font-size:11px;white-space:nowrap}
+.stats-table th:first-child{text-align:left;min-width:140px}
+.stats-table td{border:1px solid #e2e8f0;padding:6px 8px;text-align:center}
+.stats-table td:first-child{text-align:left;font-weight:700;color:#374151;background:#f8fafc}
+.stats-table tr:hover td{background:#f0f9ff}
+.stats-table tr:hover td:first-child{background:#e0f2fe}
+/* Symptom milestone cards */
+.sym-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px}
+.sym-card{background:white;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #e2e8f0}
+.sym-card-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.sym-card-name{font-size:14px;font-weight:800;color:#1a1a2e}
+.sym-card-n{font-size:11px;color:#94a3b8;font-weight:600}
+.sym-funnel-bar{height:10px;border-radius:6px;overflow:hidden;background:#f1f5f9;margin-bottom:12px;display:flex}
+.sym-milestones{display:flex;flex-direction:column;gap:5px}
+.sym-milestone{display:flex;align-items:center;gap:8px;font-size:12px}
+.sym-ml-emoji{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sym-ml-label{color:#64748b;flex:1;font-weight:600}
+.sym-ml-pct{font-weight:900;color:#1a1a2e;min-width:36px;text-align:right}
+.sym-ml-timing{color:#94a3b8;font-size:11px;min-width:90px;text-align:right}
+.sym-pt-list{margin-top:12px;border-top:1px solid #f1f5f9;padding-top:10px}
+.sym-pt-list-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:6px}
+.sym-pt-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:12px;transition:background .12s}
+.sym-pt-row:hover{background:#f0f9ff}
+.sym-pt-name{flex:1;font-weight:600;color:#374151}
+.sym-pt-timing{font-size:11px;color:#64748b;white-space:nowrap}
+
+/* ── STATUS BAR ── */
+.status-bar-wrap{height:28px;border-radius:8px;overflow:hidden;display:flex;margin-top:10px}
+.status-bar-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;transition:all .3s;white-space:nowrap;overflow:hidden}
+
+/* ── FINDING BARS ── */
+.finding-bar-wrap{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f8fafc}
+.finding-bar-wrap:last-child{border-bottom:none}
+.finding-label{font-size:12px;color:#374151;flex:1;min-width:0}
+.finding-count{font-size:11px;font-weight:700;color:#7c3aed;white-space:nowrap;width:50px;text-align:right}
+.finding-bar{height:10px;border-radius:5px;background:#ede9fe;overflow:hidden;flex:0 0 120px}
+.finding-bar-fill{height:100%;background:#7c3aed;border-radius:5px}
+
+/* ── RECENT ACTIVITY ── */
+.recent-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;flex-wrap:wrap}
+.recent-row:last-child{border-bottom:none}
+.recent-name{font-weight:700;font-size:14px;color:#1a1a2e;flex:1;min-width:120px}
+.recent-meta{font-size:11px;color:#64748b}
+
+/* PRINT */
+#printView{display:none}
+@page{size:landscape;margin:12mm}
+@media print{
+  @page{size:landscape;margin:12mm}
+  body{background:white!important}
+  #pwOverlay,#dash,#app,#toast{display:none!important}
+  #printView{display:block!important}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .pv-header{margin-bottom:16px;border-bottom:3px solid #1a1a2e;padding-bottom:10px}
+  .pv-title{font-size:18px;font-weight:900;color:#1a1a2e}
+  .pv-meta{font-size:11px;color:#374151;margin-top:4px}
+  .pv-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+  .pv-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700}
+  .pv-leg-dot{width:14px;height:14px;border-radius:3px}
+  .pv-section{margin-bottom:20px}
+  .pv-section-title{font-size:13px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 0;border-bottom:2px solid #e2e8f0}
+  .pv-note{font-size:10px;color:#64748b;font-style:italic;margin-bottom:8px}
+  .tl-table{border-collapse:collapse;width:100%;font-size:9px}
+  .tl-table th{background:#1a1a2e!important;color:white!important;padding:4px 3px;text-align:center;font-size:9px;white-space:nowrap;font-weight:700}
+  .tl-table th.row-hdr{text-align:left;min-width:160px;padding-left:6px;font-size:10px}
+  .tl-table th.sec-hdr{background:#374151!important;text-align:left;padding-left:6px;font-size:9px}
+  .tl-table td{border:1px solid #e5e7eb;padding:1px 2px;text-align:center;vertical-align:middle}
+  .tl-table td.row-lbl{text-align:left;padding:3px 6px;font-size:9px;white-space:nowrap;background:#f9fafb!important;font-weight:600}
+  .tl-table td.row-lbl.sub-lbl{padding-left:12px;font-weight:500}
+  .tl-block{width:28px;height:16px;border-radius:2px;display:inline-block;margin:1px auto}
+  .tl-empty{width:28px;height:16px;display:inline-block}
+  .pv-footer{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between}
+}
+@media(max-width:600px){
+  .visits-grid{grid-template-columns:1fr}
+  .cb-btn{padding:6px 11px;font-size:11px}
+  .pt-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD -->
+<div id="pwOverlay">
+  <div class="pw-box">
+    <div class="pw-logo">🏥</div>
+    <div class="pw-brand">Momentum Health & Wellness</div>
+    <div class="pw-sub">Secure Patient Records — Applied Kinesiology</div>
+    <input type="password" id="pwInput" placeholder="Enter access password" autocomplete="current-password">
+    <button id="pwBtn">Unlock Records</button>
+    <div class="pw-error" id="pwError"></div>
+    <div class="pw-error" id="pwErrDetail" style="background:#fef9c3;color:#854d0e;border:1px solid #fde047;margin-top:6px"></div>
+    <div class="pw-hipaa">🔒 <strong>Local only.</strong> No data transmitted. Stays on this device.</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">✓ Saved</div>
+
+<!-- OFFENDER POPUP -->
+<div id="offenderPopup">
+  <div class="opp-title" id="oppTitle">Offender Challenges</div>
+  <div id="oppItems"></div>
+  <button class="opp-done" onclick="closeOffenderPopup()">✓ Done</button>
+</div>
+
+<!-- PRINT VIEW -->
+<div id="printView">
+  <div class="pv-header">
+    <div class="pv-title">🏥 Momentum Health &amp; Wellness — Patient Progress Report</div>
+    <div class="pv-meta" id="pv-meta"></div>
+    <div class="pv-legend">
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#ef4444"></div>Red — No Progress</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#eab308"></div>Yellow — Any Progress</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#3b82f6"></div>Blue — 80% Better</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#22c55e"></div>Green — 100% Resolution</div>
+      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#1a1a2e"></div>✕ = Actual Visit &nbsp; □ = Continued Status</div>
+    </div>
+  </div>
+  <div id="pv-content"></div>
+  <div class="pv-footer">
+    <span>Momentum Health &amp; Wellness | Applied Kinesiology Clinical Documentation</span>
+    <span id="pv-date"></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PATIENT DASHBOARD
+══════════════════════════════════════ -->
+<div id="dash">
+  <div class="page-header">
+    <div>
+      <h1>🏥 Momentum Health &amp; Wellness</h1>
+      <div class="sub">Patient Records — Applied Kinesiology</div>
+    </div>
+    <div class="hbtns">
+      <button class="btn btn-blue" onclick="newPatient()">+ New Patient</button>
+      <button class="btn btn-light" onclick="bulkExport()">⬇ Backup All</button>
+      <button class="btn btn-light" onclick="document.getElementById('bulkImportFile').click()">⬆ Restore</button>
+      <input type="file" id="bulkImportFile" accept=".json" style="display:none" onchange="bulkImport(this)">
+      <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
+    </div>
+  </div>
+
+  <div class="dash-tabs">
+    <button class="dash-tab active" id="tab-stats" onclick="showStatsTab()">📊 Stats</button>
+    <button class="dash-tab" id="tab-patients" onclick="showPatientsTab()">👥 Patients</button>
+  </div>
+
+  <div id="statsContent"></div>
+
+  <div id="ptContent" style="display:none">
+    <div class="dash-toolbar">
+      <input type="text" class="dash-search" id="dashSearch" placeholder="Search patients by name, DOB, or MRN…" oninput="renderDash()">
+      <span class="dash-count" id="dashCount"></span>
+    </div>
+    <div class="pt-grid" id="ptGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PATIENT RECORD
+══════════════════════════════════════ -->
+<div id="app">
+
+  <div class="page-header">
+    <div>
+      <h1 id="appPatientName">🏥 Patient Record</h1>
+      <div class="sub">Applied Kinesiology Progress Report Card</div>
+      <div id="backupStatus"></div>
+    </div>
+    <div class="hbtns">
+      <button class="btn btn-light" onclick="backToDash()">← Patients</button>
+      <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
+      <button class="btn btn-light" onclick="doPrint()">🖨 Print Timeline</button>
+      <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
+      <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
+    </div>
+  </div>
+
+  <div id="colorBar">
+    <span class="cb-label">Active Color</span>
+    <div class="cb-colors">
+      <div class="cb-btn active" id="cb_red"    onclick="setColor('red')">   <div class="cb-dot" style="background:#ef4444"></div>Red — No Progress</div>
+      <div class="cb-btn"        id="cb_yellow" onclick="setColor('yellow')"><div class="cb-dot" style="background:#eab308"></div>Yellow — Any Progress</div>
+      <div class="cb-btn"        id="cb_blue"   onclick="setColor('blue')">  <div class="cb-dot" style="background:#3b82f6"></div>Blue — 80% Better</div>
+      <div class="cb-btn"        id="cb_green"  onclick="setColor('green')"> <div class="cb-dot" style="background:#22c55e"></div>Green — 100% Resolution</div>
+    </div>
+    <button class="cb-clr" onclick="clearMode()">✕ Clear Mode</button>
+  </div>
+
+  <div class="hipaa-bar">
+    🔒 <strong>HIPAA Notice:</strong> Data stored locally in your browser only. No external servers. Use on an encrypted, access-controlled device.
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 Patient Information</div>
+    <div class="field-row">
+      <div class="fg"><label>Patient Name</label><input type="text"  id="fi_name"     placeholder="Full legal name"    oninput="autoSave()"></div>
+      <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob"      oninput="autoSave()"></div>
+      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave()"></div>
+      <div class="fg"><label>Date of Collection</label><input type="date" id="fi_collection" oninput="autoSave()"></div>
+      <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
+      <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
+      <div class="fg"><label>Status</label>
+        <select id="fi_status" onchange="autoSave()">
+          <option value="active">Active</option>
+          <option value="discharged">Discharged</option>
+          <option value="on-hold">On Hold</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Subjective Symptom Tracking</div>
+    <div class="sym-hint">Enter complaint label, select a color above, then click week cells. Gaps auto-fill with the previous color. ✕ = actual visit. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
+    <div class="sym-scroll">
+      <table class="sym-table">
+        <thead><tr>
+          <th>Patient Complaint</th>
+          <th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>W6</th><th>W7</th>
+          <th>W8</th><th>W9</th><th>W10</th><th>W11</th><th>W12</th><th>W13</th><th>W14</th>
+          <th>W15</th><th>W16</th><th>W17</th><th>W18</th><th>W19</th><th>W20</th><th>W21</th>
+          <th>W22</th><th>W23</th><th>W24</th><th>W25</th><th>W26</th>
+        </tr></thead>
+        <tbody id="symBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="phase-tabs">
+    <div class="phase-tab active" onclick="switchPhase(1)">Phase 1 — Visits 1–6</div>
+    <div class="phase-tab"        onclick="switchPhase(2)">Phase 2 — Visits 7–12</div>
+    <div class="phase-tab"        onclick="switchPhase(3)">Phase 3 — Visits 13–18</div>
+  </div>
+  <div id="phase1" class="phase-content active"><div class="visits-grid" id="pg1"></div></div>
+  <div id="phase2" class="phase-content">       <div class="visits-grid" id="pg2"></div></div>
+  <div id="phase3" class="phase-content">       <div class="visits-grid" id="pg3"></div></div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════════════════════════════════
+var DEFAULT_PW   = "Momentum1!";
+var INDEX_KEY    = "mhw_index";   // [{id,name,dob,mrn,modified,status,visitCount}]
+var PT_PREFIX    = "mhw_pt_";     // + patientId = full record
+
+var COLOR_MAP = {
+  red:   {hex:"#ef4444",label:"No Progress"},
+  yellow:{hex:"#eab308",label:"Any Progress"},
+  blue:  {hex:"#3b82f6",label:"80% Better"},
+  green: {hex:"#22c55e",label:"100% Resolution"},
+};
+
+var activeColor     = "red";
+var currentPatientId = null;
+
+// ════════════════════════════════════════════════════════════════
+//  FIELD DEFINITIONS
+// ════════════════════════════════════════════════════════════════
+var OFFENDER_OPTIONS=[
+  "Ammonia","Aldehydes","Histamine","B2 / Cysteine",
+  "Bacteria","Fungus","Virus","Parasite"
+];
+
+var FIELDS = [
+  {sec:"GUT — INTESTINE",hasOffenders:true,items:[
+    {lbl:"ICV",opts:["Open","Closed"]},{lbl:"HV",opts:["Open","Closed"]},
+    {lbl:"Splenic Flexure",opts:["Fwd","Rev"]},{lbl:"Hepatic Flexure",opts:["Fwd","Rev"]},
+    {lbl:"Ascending",opts:["Fwd","Rev"]},{lbl:"Descending",opts:["Fwd","Rev"]},
+    {lbl:"Gastrocolic Reflex",opts:null},{lbl:"Sigmoid",opts:null},
+  ]},
+  {sec:"GUT — UPPER GI",hasOffenders:true,items:[
+    {lbl:"Hiatal Hernia",opts:null},{lbl:"GB Pump",opts:null},{lbl:"Pyloric",opts:["Open","Closed"]},
+  ]},
+  {sec:"GUT — OTHER CHALLENGES",items:[
+    {lbl:"Lig. Stretch Test (Type 3 LSASS)",opts:null},
+    {lbl:"Valve Combinations",opts:null,tagPopup:{options:["ICV + HV Open","ICV + HV Closed","ICV Open + HV Closed","ICV Closed + HV Open","Ammonia","Aldehydes","Histamine","B2 / Cysteine","Bacteria","Fungus","Virus","Parasite"],hasCustom:false}},
+  ]},
+  {sec:"AUTONOMIC CHALLENGES",items:[
+    {lbl:"Vagus Challenge",opts:null,tagPopup:{options:["Cortisol","Epinephrine","Norepinephrine"],hasCustom:true}},
+    {lbl:"Bilat. Closed Valves — SYM DOM",opts:null},
+    {lbl:"LASS",opts:null},{lbl:"HRV",opts:null},
+  ]},
+  {sec:"HORMONAL CHALLENGES",items:[
+    {lbl:"Pituitary: TL Glabella + endo org.",opts:null},
+    {lbl:"Uterine Lift (BDOFG)",opts:null},
+    {lbl:"Prostate Lift (BDOFG)",opts:null},
+  ]},
+  {sec:"TMJ — C2 HYOID",items:[
+    {lbl:"w/ Offenders",opts:null,tagPopup:{options:["Cortisol","Epinephrine","Norepinephrine"],hasCustom:true}},
+    {lbl:"w/ TL mental protub. & pubic sym.",opts:null},{lbl:"w/ Inferior Traction",opts:null},
+  ]},
+  {sec:"TMJ — OTHER",items:[
+    {lbl:"Vertical Dimension",opts:null},{lbl:"ICR (Estrogen + TMJ challenges)",opts:null},{lbl:"Bruxism (SSRI + TMJ challenges)",opts:null},
+  ]},
+  {sec:"SLEEP — REM",items:[
+    {lbl:"Cortisol",opts:null},{lbl:"Epinephrine",opts:null},{lbl:"Emotions",opts:null},
+    {lbl:"Foods",opts:null},{lbl:"Sugar",opts:null},{lbl:"Caffeine",opts:null},{lbl:"Physical Stress",opts:null},
+    {lbl:"Medications",opts:null},
+    {lbl:"Supplement",opts:null,tagPopup:{options:[],hasCustom:true}},
+    {lbl:"Hormones",opts:null},
+  ]},
+  {sec:"SLEEP — OTHER",items:[{lbl:"Then / Now",opts:null,thenNow:true},{lbl:"Pineal — Dark Room Weakness",opts:null}]},
+  {sec:"BLOOD SUGAR",items:[
+    {lbl:"Dysglycemia Pattern",opts:null},{lbl:"Pancreas CR weakens bicep (hyper.)",opts:null},
+  ]},
+  {sec:"RECURRENT INJURY PATTERNS",items:[
+    {lbl:"Two Organ",opts:null},{lbl:"Anaerobic / Aerobic / O2 Starv.",opts:null},
+    {lbl:"Bone Bend",opts:null},{lbl:"Joint Jam",opts:null},{lbl:"Inter. Membrane",opts:null},
+    {lbl:"Fascial Flush",opts:null},{lbl:"Temporal Tap",opts:null},
+  ]},
+  {sec:"BRAIN",items:[
+    {lbl:"Overfiring Supraspinatus",opts:null},{lbl:"CR Stim. Induces Overfiring Supra.",opts:null},
+  ]},
+];
+
+// ════════════════════════════════════════════════════════════════
+//  PATIENT RECORD STATE
+// ════════════════════════════════════════════════════════════════
+function blankState() {
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
+}
+var S = blankState();
+
+// ════════════════════════════════════════════════════════════════
+//  PASSWORD
+// ════════════════════════════════════════════════════════════════
+function checkPw() {
+  try {
+    var pw=localStorage.getItem("mhw_pw")||DEFAULT_PW;
+    var val=document.getElementById("pwInput").value;
+    var errEl=document.getElementById("pwError");
+    if(!val){ errEl.textContent="⚠️ Please enter the password."; errEl.style.display="block"; return; }
+    if(val===pw){
+      document.getElementById("pwOverlay").style.display="none";
+      showDash();
+    } else {
+      errEl.textContent="⚠️ Incorrect password. Please try again.";
+      errEl.style.display="block";
+      document.getElementById("pwInput").value="";
+      setTimeout(function(){ errEl.style.display="none"; },4000);
+    }
+  } catch(err) {
+    document.getElementById("pwErrDetail").textContent="Error: "+err.message;
+    document.getElementById("pwErrDetail").style.display="block";
+  }
+}
+document.getElementById("pwBtn").addEventListener("click",checkPw);
+document.getElementById("pwInput").addEventListener("keydown",function(e){ if(e.key==="Enter") checkPw(); });
+
+function logout() {
+  if(currentPatientId) saveAll();
+  currentPatientId=null;
+  document.getElementById("dash").style.display="none";
+  document.getElementById("app").style.display="none";
+  document.getElementById("pwOverlay").style.display="flex";
+  document.getElementById("pwInput").value="";
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PATIENT INDEX
+// ════════════════════════════════════════════════════════════════
+function loadIndex() {
+  try { return JSON.parse(localStorage.getItem(INDEX_KEY)||"[]"); } catch(e){ return []; }
+}
+function saveIndex(idx) {
+  localStorage.setItem(INDEX_KEY,JSON.stringify(idx));
+}
+
+function countVisits() {
+  var count = 0;
+  for (var v = 1; v <= 18; v++) {
+    var hasDate = S.visitDates[v] && S.visitDates[v].trim() !== "";
+    var hasMark = false;
+    var prefix = "v" + v + "_";
+    for (var key in S.marks) {
+      if (S.marks.hasOwnProperty(key) && key.indexOf(prefix) === 0) {
+        hasMark = true;
+        break;
+      }
+    }
+    if (hasDate || hasMark) count++;
+  }
+  return count;
+}
+
+function updateIndex(id, info) {
+  var idx=loadIndex();
+  var i=idx.findIndex(function(p){ return p.id===id; });
+  var entry={
+    id:id,
+    name:info.name||"Unnamed Patient",
+    dob:info.dob||"",
+    mrn:info.mrn||"",
+    start:info.start||"",
+    status:info.status||"active",
+    visitCount:countVisits(),
+    modified:new Date().toISOString()
+  };
+  if(i>=0) idx[i]=entry; else idx.unshift(entry);
+  saveIndex(idx);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DASHBOARD TABS
+// ════════════════════════════════════════════════════════════════
+function showStatsTab() {
+  var ts = document.getElementById("tab-stats");
+  var tp = document.getElementById("tab-patients");
+  var sc = document.getElementById("statsContent");
+  var pc = document.getElementById("ptContent");
+  if (ts) ts.classList.add("active");
+  if (tp) tp.classList.remove("active");
+  if (sc) sc.style.display = "block";
+  if (pc) pc.style.display = "none";
+  renderStats();
+}
+
+function showPatientsTab() {
+  var ts = document.getElementById("tab-stats");
+  var tp = document.getElementById("tab-patients");
+  var sc = document.getElementById("statsContent");
+  var pc = document.getElementById("ptContent");
+  if (tp) tp.classList.add("active");
+  if (ts) ts.classList.remove("active");
+  if (pc) pc.style.display = "block";
+  if (sc) sc.style.display = "none";
+  var ds = document.getElementById("dashSearch");
+  if (ds) ds.value = "";
+  renderDash();
+}
+
+function renderStats() {
+  var el = document.getElementById("statsContent");
+  if (!el) return;
+
+  var idx = loadIndex();
+  var totalPts = idx.length;
+  var activeCount = 0, dischargedCount = 0, onHoldCount = 0;
+  var stageCount = {red:0, yellow:0, blue:0, green:0};
+  var symAgg = {};
+  var findingCounts = {};
+
+  idx.forEach(function(pt) {
+    var isActive = (!pt.status || pt.status === "active");
+    if (isActive) activeCount++;
+    else if (pt.status === "discharged") dischargedCount++;
+    else onHoldCount++;
+
+    var raw = null;
+    try { raw = localStorage.getItem(PT_PREFIX + pt.id); } catch(e) {}
+    if (!raw) return;
+    var data = null;
+    try { data = JSON.parse(raw); } catch(e) { return; }
+    if (!data) return;
+
+    var symLabels  = data.symLabels  || {};
+    var symptoms   = data.symptoms   || {};
+    var symVisited = data.symVisited || {};
+    var symRows    = data.symRows    || 4;
+
+    for (var r = 0; r < symRows; r++) {
+      var lbl = (symLabels["r" + r] || "").trim();
+      if (!lbl || lbl === ("Complaint " + (r + 1))) continue;
+
+      var firstW = {yellow:null, blue:null, green:null};
+      var visitedWeeks = [];
+      var currentColor = null;
+
+      for (var w = 1; w <= 26; w++) {
+        var skey = "r" + r + "_c" + w;
+        var cn = symptoms[skey];
+        if (cn) currentColor = cn;
+        if (cn === "yellow" && !firstW.yellow) firstW.yellow = w;
+        if (cn === "blue"   && !firstW.blue)   firstW.blue   = w;
+        if (cn === "green"  && !firstW.green)  firstW.green  = w;
+        if (symVisited[skey]) visitedWeeks.push(w);
+      }
+      visitedWeeks.sort(function(a,b){return a-b;});
+
+      if (isActive) {
+        if (currentColor) stageCount[currentColor]++;
+        else stageCount.red++;
+      }
+
+      // Cumulative milestones — green counts toward blue and yellow
+      var wY = Math.min(
+        firstW.yellow !== null ? firstW.yellow : 999,
+        firstW.blue   !== null ? firstW.blue   : 999,
+        firstW.green  !== null ? firstW.green  : 999
+      );
+      var wB = Math.min(
+        firstW.blue  !== null ? firstW.blue  : 999,
+        firstW.green !== null ? firstW.green : 999
+      );
+      var wG = firstW.green !== null ? firstW.green : null;
+      wY = wY < 999 ? wY : null;
+      wB = wB < 999 ? wB : null;
+
+      function wkToV(wk) {
+        if (wk === null) return null;
+        for (var i = 0; i < visitedWeeks.length; i++) { if (visitedWeeks[i] >= wk) return i + 1; }
+        return null;
+      }
+
+      var lkey = lbl.toLowerCase();
+      if (!symAgg[lkey]) symAgg[lkey] = {label: lbl, patients: []};
+      symAgg[lkey].patients.push({
+        wY: wY !== null ? wY-1 : null,
+        wB: wB !== null ? wB-1 : null,
+        wG: wG !== null ? wG-1 : null,
+        vY: wkToV(wY), vB: wkToV(wB), vG: wkToV(wG),
+        hasY: wY !== null, hasB: wB !== null, hasG: wG !== null,
+        ptId: pt.id, ptName: pt.name || "Unnamed", ptStatus: pt.status,
+        currentColor: currentColor || "red"
+      });
+    }
+
+    var marks = data.marks || {};
+    Object.keys(marks).forEach(function(mkey) {
+      var m = mkey.match(/^v(\d+)_(\d+)_(\d+)(?:_(\d+))?$/);
+      if (!m) return;
+      var si = parseInt(m[2]), ii = parseInt(m[3]);
+      var oi = m[4] !== undefined ? parseInt(m[4]) : null;
+      if (si >= FIELDS.length) return;
+      var sec = FIELDS[si]; if (!sec || ii >= sec.items.length) return;
+      var item = sec.items[ii];
+      var flbl = item.lbl + (oi !== null && item.opts && oi < item.opts.length ? " (" + item.opts[oi] + ")" : "");
+      var fkey = si + "_" + ii + (oi !== null ? "_" + oi : "");
+      if (!findingCounts[fkey]) findingCounts[fkey] = {count:0, section:sec.sec, label:flbl, pts:{}};
+      findingCounts[fkey].pts[pt.id] = true;
+    });
+  });
+
+  Object.keys(findingCounts).forEach(function(k) {
+    findingCounts[k].count = Object.keys(findingCounts[k].pts).length;
+  });
+
+  var html = "";
+
+  // Row 1: Symptom stage cards (active patients only)
+  var totalActiveSyms = stageCount.red + stageCount.yellow + stageCount.blue + stageCount.green;
+  html += '<div class="stat-cards">';
+  html += symStageCard("\u{1F534}", stageCount.red,    "No Progress",    "#ef4444", totalActiveSyms);
+  html += symStageCard("\u{1F7E1}", stageCount.yellow, "Any Progress",   "#eab308", totalActiveSyms);
+  html += symStageCard("\u{1F535}", stageCount.blue,   "80% Better",     "#3b82f6", totalActiveSyms);
+  html += symStageCard("\u{1F7E2}", stageCount.green,  "100% Resolved",  "#22c55e", totalActiveSyms);
+  html += '<div class="stat-card" style="border-color:#e2e8f0"><div class="stat-emoji">\u{1F465}</div><div class="stat-value">' + totalPts + '</div><div class="stat-label">Total Patients</div></div>';
+  html += '</div>';
+  html += '<p style="font-size:11px;color:#94a3b8;margin:-10px 0 18px">Active patients only (' + activeCount + ' active' +
+    (onHoldCount ? ', ' + onHoldCount + ' on hold' : '') +
+    (dischargedCount ? ', ' + dischargedCount + ' discharged' : '') + ')</p>';
+
+  // Row 2: Symptom response milestone cards
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">\u{1F4C8} Symptom Response Times <span style="font-size:11px;font-weight:500;color:#94a3b8;margin-left:8px">Milestones are cumulative \u2014 100% resolution counts toward all lower stages</span></div>';
+  var symKeys = Object.keys(symAgg);
+  if (symKeys.length === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No named symptom data yet.</p>';
+  } else {
+    symKeys.sort(function(a,b){return symAgg[b].patients.length - symAgg[a].patients.length;});
+    html += '<div class="sym-cards-grid">';
+    symKeys.forEach(function(lkey) {
+      var agg = symAgg[lkey];
+      var n = agg.patients.length;
+      function avgOf(field) {
+        var vals = agg.patients.filter(function(p){return p[field]!==null;}).map(function(p){return p[field];});
+        return vals.length ? vals.reduce(function(a,b){return a+b;},0)/vals.length : null;
+      }
+      function pctOf(field) { return Math.round(agg.patients.filter(function(p){return p[field];}).length/n*100); }
+      var pY = pctOf("hasY"), pB = pctOf("hasB"), pG = pctOf("hasG");
+      var pRed = 100 - pY;
+      var safeKey = lkey.replace(/[^a-z0-9]/gi,"_");
+      html += '<div class="sym-card">';
+      html += '<div class="sym-card-header" onclick="toggleSymPatients(\'' + safeKey + '\')" style="cursor:pointer">';
+      html += '<span class="sym-card-name">' + escHtml(agg.label) + '</span>';
+      html += '<span style="display:flex;align-items:center;gap:6px"><span class="sym-card-n">' + n + ' case' + (n===1?"":"s") + '</span><span id="sca_'+safeKey+'" style="font-size:10px;color:#94a3b8;transition:transform .18s;display:inline-block">&#9654;</span></span>';
+      html += '</div>';
+      html += '<div class="sym-funnel-bar">';
+      if (pRed > 0)       html += '<div style="width:'+pRed+'%;background:#ef4444;height:100%;display:inline-block;vertical-align:top"></div>';
+      if (pY-pB-pG > 0)  html += '<div style="width:'+(pY-pB-pG)+'%;background:#eab308;height:100%;display:inline-block;vertical-align:top"></div>';
+      if (pB-pG > 0)     html += '<div style="width:'+(pB-pG)+'%;background:#3b82f6;height:100%;display:inline-block;vertical-align:top"></div>';
+      if (pG > 0)        html += '<div style="width:'+pG+'%;background:#22c55e;height:100%;display:inline-block;vertical-align:top"></div>';
+      html += '</div>';
+      html += '<div class="sym-milestones">';
+      html += symMilestone("\u{1F7E1}","Any Progress", pY, avgOf("wY"), avgOf("vY"));
+      html += symMilestone("\u{1F535}","80% Better",   pB, avgOf("wB"), avgOf("vB"));
+      html += symMilestone("\u{1F7E2}","100% Resolved",pG, avgOf("wG"), avgOf("vG"));
+      html += '</div>';
+      html += '<div class="sym-pt-list" id="spl_'+safeKey+'" style="display:none">';
+      html += '<div class="sym-pt-list-title">Patients</div>';
+      agg.patients.slice().sort(function(a,b){
+        var o={green:0,blue:1,yellow:2,red:3};
+        return (o[a.currentColor]||3)-(o[b.currentColor]||3);
+      }).forEach(function(p) {
+        var colorDot = {"red":"\u{1F534}","yellow":"\u{1F7E1}","blue":"\u{1F535}","green":"\u{1F7E2}"};
+        var dot = colorDot[p.currentColor] || "\u26AA";
+        var statusLbl = p.ptStatus === "discharged" ? " · Discharged" : p.ptStatus === "on-hold" ? " · On Hold" : "";
+        var timing = p.hasG ? "✓ Resolved" : p.hasB ? (p.wB !== null ? p.wB+"w · V"+p.vB : "80% better") : p.hasY ? (p.wY !== null ? p.wY+"w · V"+p.vY : "Progress") : "In progress";
+        html += '<div class="sym-pt-row" onclick="event.stopPropagation();openPatient(\'' + p.ptId + '\')">';
+        html += '<span>'+dot+'</span>';
+        html += '<span class="sym-pt-name">'+escHtml(p.ptName+statusLbl)+'</span>';
+        html += '<span class="sym-pt-timing">'+escHtml(timing)+'</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Row 3: Top Findings
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">\u{1F50D} Top Objective Findings</div>';
+  var findingsList = Object.keys(findingCounts).map(function(k){return findingCounts[k];});
+  findingsList.sort(function(a,b){return b.count-a.count;});
+  var topFindings = findingsList.slice(0,8);
+  if (topFindings.length === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No objective findings recorded yet.</p>';
+  } else {
+    var maxC = topFindings[0].count || 1;
+    topFindings.forEach(function(f) {
+      var pct = Math.round(f.count/maxC*100);
+      html += '<div class="finding-bar-wrap"><div class="finding-label"><span style="font-size:10px;color:#94a3b8">' + escHtml(f.section) + '</span><br>' + escHtml(f.label) + '</div>';
+      html += '<div class="finding-bar"><div class="finding-bar-fill" style="width:'+pct+'%"></div></div>';
+      html += '<div class="finding-count">'+f.count+' pt'+(f.count!==1?'s':'')+'</div></div>';
+    });
+  }
+  html += '</div>';
+
+  // Row 4: Recent Activity
+  html += '<div class="stats-section">';
+  html += '<div class="stats-section-title">\u{1F550} Recent Activity</div>';
+  var recent = idx.slice().sort(function(a,b){return (b.modified||"").localeCompare(a.modified||"");}).slice(0,5);
+  if (recent.length === 0) {
+    html += '<p style="color:#94a3b8;font-size:13px">No patients yet.</p>';
+  } else {
+    recent.forEach(function(pt) {
+      var mod = pt.modified ? new Date(pt.modified).toLocaleDateString() : "\u2014";
+      html += '<div class="recent-row"><div class="recent-name">'+escHtml(pt.name||"Unnamed Patient")+'</div>';
+      html += getStatusBadgeHtml(pt.status);
+      html += '<div class="recent-meta">'+escHtml(mod)+'</div>';
+      html += '<div class="recent-meta">'+(pt.visitCount||0)+' visit'+((pt.visitCount||0)!==1?'s':'')+'</div></div>';
+    });
+  }
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+function symStageCard(emoji, count, label, color, total) {
+  var pct = total > 0 ? Math.round(count/total*100) : 0;
+  return '<div class="stat-card" style="border-color:' + color + '33;border-left:4px solid ' + color + '">' +
+    '<div class="stat-emoji">' + emoji + '</div>' +
+    '<div class="stat-value" style="color:' + color + '">' + count + '</div>' +
+    '<div class="stat-label">' + label + '</div>' +
+    (total > 0 ? '<div style="font-size:11px;color:#94a3b8;margin-top:2px">' + pct + '% of symptoms</div>' : '') +
+    '</div>';
+}
+
+function toggleSymPatients(safeKey) {
+  var list = document.getElementById("spl_"+safeKey);
+  var arrow = document.getElementById("sca_"+safeKey);
+  if (!list) return;
+  var open = list.style.display === "none";
+  list.style.display = open ? "block" : "none";
+  if (arrow) arrow.style.transform = open ? "rotate(90deg)" : "";
+}
+
+function symMilestone(emoji, label, pct, avgWks, avgVis) {
+  var wStr = avgWks !== null ? 'avg ' + (Math.round(avgWks*10)/10) + 'w' : '\u2014';
+  var vStr = avgVis !== null ? 'V' + (Math.round(avgVis*10)/10) : '';
+  return '<div class="sym-milestone">' +
+    '<span class="sym-ml-emoji">' + emoji + '</span>' +
+    '<span class="sym-ml-label">' + label + '</span>' +
+    '<span class="sym-ml-pct">' + pct + '%</span>' +
+    '<span class="sym-ml-timing">' + (pct > 0 ? wStr + (vStr ? ' \u00b7 ' + vStr : '') : '\u2014') + '</span>' +
+    '</div>';
+}
+
+
+// ════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════════════
+function showDash() {
+  currentPatientId=null;
+  S=blankState();
+  document.getElementById("app").style.display="none";
+  document.getElementById("dash").style.display="block";
+  showStatsTab();
+}
+
+function getStatusBadgeHtml(status) {
+  var statusClass = "pt-status-active";
+  var statusLabel = "Active";
+  if (status === "discharged") {
+    statusClass = "pt-status-discharged";
+    statusLabel = "Discharged";
+  } else if (status === "on-hold") {
+    statusClass = "pt-status-on-hold";
+    statusLabel = "On Hold";
+  }
+  return '<span class="pt-status-badge ' + statusClass + '">' + statusLabel + '</span>';
+}
+
+function renderDash() {
+  var idx=loadIndex();
+  var q=(document.getElementById("dashSearch").value||"").toLowerCase().trim();
+  if(q) idx=idx.filter(function(p){
+    return (p.name||"").toLowerCase().includes(q)||(p.dob||"").includes(q)||(p.mrn||"").toLowerCase().includes(q);
+  });
+  idx.sort(function(a,b){ return (b.modified||"").localeCompare(a.modified||""); });
+
+  var count=loadIndex().length;
+  document.getElementById("dashCount").textContent=count+" patient"+(count===1?"":"s");
+
+  var grid=document.getElementById("ptGrid");
+  if(idx.length===0){
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="emoji">'+(q?"🔍":"👥")+'</div>'+
+      '<h3>'+(q?"No patients match your search":"No patients yet")+'</h3>'+
+      '<p>'+(q?"Try a different search term":"Click <strong>+ New Patient</strong> to add your first record")+'</p></div>';
+    return;
+  }
+
+  grid.innerHTML="";
+  idx.forEach(function(pt){
+    var card=document.createElement("div");
+    card.className="pt-card";
+    var mod=pt.modified?new Date(pt.modified).toLocaleDateString():"";
+    var visitBadge = pt.visitCount ? '<span class="pt-visits-badge">' + pt.visitCount + ' visit' + (pt.visitCount === 1 ? '' : 's') + '</span>' : '';
+    card.innerHTML=
+      '<div class="pt-name">'+escHtml(pt.name||"Unnamed Patient")+'</div>'+
+      '<div class="pt-meta">'+
+        (pt.dob?'<span>DOB: '+escHtml(pt.dob)+'</span>':'')+
+        (pt.mrn?'<span>MRN: '+escHtml(pt.mrn)+'</span>':'')+
+        (pt.start?'<span>Case Start: '+escHtml(pt.start)+'</span>':'')+
+      '</div>'+
+      '<span class="pt-badge">Applied Kinesiology</span>'+
+      getStatusBadgeHtml(pt.status)+
+      visitBadge+
+      (mod?'<div class="pt-modified">Last updated: '+mod+'</div>':'')+
+      '<button class="pt-del" title="Delete patient" onclick="deletePatient(event,\''+pt.id+'\')">✕</button>';
+    card.addEventListener("click",function(){ openPatient(pt.id); });
+    grid.appendChild(card);
+  });
+}
+
+function newPatient() {
+  var id="pt_"+Date.now();
+  currentPatientId=id;
+  S=blankState();
+  S.patientInfo.provider="Dr. Todd Anderson";
+  S.patientInfo.status="active";
+  // Save empty record so it appears in index
+  updateIndex(id,S.patientInfo);
+  localStorage.setItem(PT_PREFIX+id,JSON.stringify(S));
+  showApp();
+}
+
+function openPatient(id) {
+  currentPatientId=id;
+  S=blankState();
+  try{
+    var raw=localStorage.getItem(PT_PREFIX+id);
+    if(raw) S=Object.assign(blankState(),JSON.parse(raw));
+  }catch(e){}
+  showApp();
+}
+
+function deletePatient(e,id) {
+  e.stopPropagation();
+  var idx=loadIndex();
+  var pt=idx.find(function(p){ return p.id===id; });
+  var name=pt?pt.name:"this patient";
+  if(!confirm("Delete "+name+"?\n\nThis cannot be undone.")) return;
+  idx=idx.filter(function(p){ return p.id!==id; });
+  saveIndex(idx);
+  localStorage.removeItem(PT_PREFIX+id);
+  localStorage.removeItem("mhw_export_"+id);
+  renderDash();
+}
+
+function backToDash() {
+  saveAll();
+  showDash();
+}
+
+function escHtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ════════════════════════════════════════════════════════════════
+//  BACKUP STATUS
+// ════════════════════════════════════════════════════════════════
+function updateBackupStatus() {
+  var el = document.getElementById("backupStatus");
+  if (!el || !currentPatientId) return;
+  var exportKey = "mhw_export_" + currentPatientId;
+  var lastExport = localStorage.getItem(exportKey);
+  var html = "";
+  if (!lastExport) {
+    html = '<span class="backup-status backup-red">⚠️ Never exported — backup recommended</span>';
+  } else {
+    var exportDate = new Date(lastExport);
+    var now = new Date();
+    var diffMs = now - exportDate;
+    var diffDays = diffMs / (1000 * 60 * 60 * 24);
+    var dateStr = exportDate.toLocaleDateString();
+    if (diffDays < 1) {
+      html = '<span class="backup-status backup-green">✓ Last exported: ' + dateStr + '</span>';
+    } else if (diffDays <= 7) {
+      html = '<span class="backup-status backup-amber">📁 Last exported: ' + dateStr + '</span>';
+    } else {
+      html = '<span class="backup-status backup-red">⚠️ Last exported: ' + dateStr + ' — backup recommended</span>';
+    }
+  }
+  el.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SHOW PATIENT RECORD
+// ════════════════════════════════════════════════════════════════
+function showApp() {
+  document.getElementById("dash").style.display="none";
+  document.getElementById("app").style.display="block";
+  // Reset phase tabs
+  document.querySelectorAll(".phase-tab").forEach(function(t,i){ t.classList.toggle("active",i===0); });
+  document.querySelectorAll(".phase-content").forEach(function(c,i){ c.classList.toggle("active",i===0); });
+  // Reset color selector
+  setColor("red");
+  // Clear all cells
+  clearAllCells();
+  // Render
+  renderAll();
+  updateBackupStatus();
+  window.scrollTo(0,0);
+}
+
+function clearAllCells() {
+  document.querySelectorAll(".mcell").forEach(function(c){
+    c.classList.remove("marked");
+    c.style.borderColor=c.style.background="";
+    var x=c.querySelector(".xm"); if(x) x.remove();
+  });
+  document.querySelectorAll(".sym-cell").forEach(function(c){
+    c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
+  });
+  document.querySelectorAll(".msk-cell").forEach(function(c){
+    c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
+  });
+  document.querySelectorAll(".supp-cell").forEach(function(c){
+    c.style.borderColor=c.style.background=c.style.color=""; c.textContent="";
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  COLOR CONTROLS
+// ════════════════════════════════════════════════════════════════
+function setColor(n){
+  activeColor=n;
+  document.querySelectorAll(".cb-btn").forEach(function(b){ b.classList.remove("active"); });
+  var btn=document.getElementById("cb_"+n); if(btn) btn.classList.add("active");
+}
+function clearMode(){
+  activeColor=null;
+  document.querySelectorAll(".cb-btn").forEach(function(b){ b.classList.remove("active"); });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PHASE TABS
+// ════════════════════════════════════════════════════════════════
+function switchPhase(n){
+  document.querySelectorAll(".phase-tab").forEach(function(t,i){ t.classList.toggle("active",i===n-1); });
+  document.querySelectorAll(".phase-content").forEach(function(c,i){ c.classList.toggle("active",i===n-1); });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  VISIT MARK CELLS
+// ════════════════════════════════════════════════════════════════
+function mkKey(v,si,ii,oi){ return "v"+v+"_"+si+"_"+ii+(oi!==undefined?"_"+oi:""); }
+
+function onCellClick(key){
+  if(activeColor===null){ delete S.marks[key]; }
+  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
+  else{ S.marks[key]=activeColor; }
+  renderMark(key);
+  // parse vn and si from key "v{vn}_{si}_{ii}..."
+  var m=key.match(/^v(\d+)_(\d+)_/); if(m) updateVsecHL(parseInt(m[1]),parseInt(m[2]));
+  autoSave();
+}
+function renderMark(key){
+  var cell=document.getElementById("mc_"+key); if(!cell) return;
+  var cn=S.marks[key];
+  var old=cell.querySelector(".xm"); if(old) old.remove();
+  if(cn&&COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex;
+    cell.classList.add("marked"); cell.style.borderColor=h; cell.style.background=h+"18";
+    var x=document.createElement("span"); x.className="xm"; x.textContent="✕"; x.style.color=h;
+    cell.appendChild(x);
+  } else { cell.classList.remove("marked"); cell.style.borderColor=cell.style.background=""; }
+}
+function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
+
+// ════════════════════════════════════════════════════════════════
+//  SECTION HIGHLIGHTS
+// ════════════════════════════════════════════════════════════════
+function applyHL(el,on){
+  if(!el) return;
+  el.style.background=on?"#fef9c3":"";
+  el.style.color=on?"#713f12":"";
+  el.style.borderColor=on?"#fde68a":"";
+}
+function updateVsecHL(vn,si){
+  var el=document.getElementById("vsec_hdr_"+vn+"_"+si); if(!el) return;
+  var on=false, p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_", p3="v"+vn+"_tag_"+si+"_";
+  for(var k in S.marks){ if(k.indexOf(p1)===0){on=true;break;} }
+  if(!on&&S.offenderTags){ for(var k in S.offenderTags){ if((k.indexOf(p2)===0||k.indexOf(p3)===0)&&S.offenderTags[k].length){on=true;break;} } }
+  applyHL(el,on);
+}
+function updateMskSecHL(vn,si){
+  var el=document.getElementById("msk_sec_hdr_"+vn+"_"+si); if(!el) return;
+  var on=false, p="v"+vn+"_msk_"+si+"_";
+  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
+  applyHL(el,on);
+}
+function updateMskMainHL(vn){
+  var el=document.getElementById("msk_main_"+vn); if(!el) return;
+  var on=false;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_msk_")===0||k.indexOf("v"+vn+"_org_")===0){on=true;break;} }
+  applyHL(el,on);
+}
+function updateSuppHL(vn){
+  var el=document.getElementById("supp_hdr_"+vn); if(!el) return;
+  var on=false, p="v"+vn+"_supp_";
+  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
+  applyHL(el,on);
+}
+function updateAllHL(){
+  for(var v=1;v<=18;v++){
+    FIELDS.forEach(function(sec,si){ updateVsecHL(v,si); });
+    MSK_SECTIONS.forEach(function(sect,si){ updateMskSecHL(v,si); });
+    updateMskMainHL(v); updateSuppHL(v);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  OFFENDER TAGS
+// ════════════════════════════════════════════════════════════════
+var _oppKey=null;
+
+// Generic tag popup — used for items with tagPopup or thenNow flags
+// Storage key: v{vn}_tag_{si}_{ii} (in S.offenderTags)
+function openTagPopup(btn, key, title, options, hasCustom, isThenNow) {
+  _oppKey = key;
+  var popup = document.getElementById("offenderPopup");
+  document.getElementById("oppTitle").textContent = title;
+  var div = document.getElementById("oppItems"); div.innerHTML = "";
+  if (!S.offenderTags) S.offenderTags = {};
+  var selected = S.offenderTags[key] || [];
+
+  var optList = isThenNow ? MSK_ORGANS : options;
+
+  if (isThenNow) {
+    var hint = document.createElement("div");
+    hint.style.cssText = "font-size:10px;color:#94a3b8;margin-bottom:8px";
+    hint.textContent = "Select 2 organs";
+    div.appendChild(hint);
+  }
+
+  optList.forEach(function(opt) {
+    var lbl = document.createElement("label"); lbl.className = "opp-item";
+    var cb = document.createElement("input"); cb.type = "checkbox";
+    cb.checked = selected.indexOf(opt) >= 0;
+    if (isThenNow && selected.length >= 2 && !cb.checked) cb.disabled = true;
+    cb.addEventListener("change", function() {
+      var sel = (S.offenderTags[key] || []).slice();
+      if (cb.checked) {
+        if (isThenNow && sel.length >= 2) { cb.checked = false; return; }
+        if (sel.indexOf(opt) < 0) sel.push(opt);
+      } else {
+        sel = sel.filter(function(x){return x!==opt;});
+      }
+      S.offenderTags[key] = sel;
+      renderOffenderTags(key); autoSave();
+      // Re-open to refresh disabled states for thenNow
+      if (isThenNow) openTagPopup(btn, key, title, options, hasCustom, isThenNow);
+    });
+    lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt));
+    div.appendChild(lbl);
+  });
+
+  if (hasCustom && !isThenNow) {
+    var sep = document.createElement("div");
+    sep.style.cssText = "border-top:1px solid #f1f5f9;margin-top:8px;padding-top:8px";
+    var customWrap = document.createElement("div");
+    customWrap.style.cssText = "display:flex;gap:6px";
+    var inp = document.createElement("input"); inp.type = "text";
+    inp.placeholder = "Custom tag...";
+    inp.style.cssText = "flex:1;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none";
+    var addBtn2 = document.createElement("button"); addBtn2.textContent = "Add";
+    addBtn2.style.cssText = "padding:4px 10px;border:1.5px solid #e2e8f0;border-radius:6px;background:#f8fafc;font-size:11px;font-weight:700;cursor:pointer";
+    addBtn2.addEventListener("click", function() {
+      var val = inp.value.trim(); if (!val) return;
+      var sel = (S.offenderTags[key] || []).slice();
+      if (sel.indexOf(val) < 0) sel.push(val);
+      S.offenderTags[key] = sel; inp.value = "";
+      renderOffenderTags(key); autoSave();
+      openTagPopup(btn, key, title, options, hasCustom, isThenNow);
+    });
+    inp.addEventListener("keydown", function(e){ if(e.key==="Enter") addBtn2.click(); });
+    customWrap.appendChild(inp); customWrap.appendChild(addBtn2);
+    sep.appendChild(customWrap);
+    // Show removable custom tags (not in predefined list)
+    var customs = selected.filter(function(s){ return options.indexOf(s) < 0; });
+    if (customs.length) {
+      var ctags = document.createElement("div"); ctags.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-top:6px";
+      customs.forEach(function(ct) {
+        var t = document.createElement("span");
+        t.style.cssText = "background:#fef9c3;color:#92400e;border:1px solid #fde68a;border-radius:10px;font-size:10px;padding:2px 8px;cursor:pointer";
+        t.title = "Click to remove";
+        t.textContent = ct + " ×";
+        t.addEventListener("click", function() {
+          var sel = (S.offenderTags[key]||[]).filter(function(x){return x!==ct;});
+          S.offenderTags[key] = sel;
+          renderOffenderTags(key); autoSave();
+          openTagPopup(btn, key, title, options, hasCustom, isThenNow);
+        });
+        ctags.appendChild(t);
+      });
+      sep.appendChild(ctags);
+    }
+    div.appendChild(sep);
+  }
+
+  var rect = btn.getBoundingClientRect();
+  popup.style.left = Math.min(rect.left, window.innerWidth-220) + "px";
+  popup.style.top = (rect.bottom+6) + "px";
+  popup.style.maxHeight = "60vh";
+  popup.style.overflowY = "auto";
+  popup.style.display = "block";
+}
+
+function openOffenderPopup(btn,key,itemLabel){
+  _oppKey=key;
+  var popup=document.getElementById("offenderPopup");
+  document.getElementById("oppTitle").textContent=itemLabel;
+  var selected=(S.offenderTags&&S.offenderTags[key])||[];
+  var div=document.getElementById("oppItems"); div.innerHTML="";
+  OFFENDER_OPTIONS.forEach(function(opt){
+    var lbl=document.createElement("label"); lbl.className="opp-item";
+    var cb=document.createElement("input"); cb.type="checkbox"; cb.checked=selected.indexOf(opt)>=0;
+    cb.addEventListener("change",function(){
+      if(!S.offenderTags) S.offenderTags={};
+      var sel=S.offenderTags[_oppKey]||[];
+      if(cb.checked){ if(sel.indexOf(opt)<0) sel.push(opt); }
+      else { sel=sel.filter(function(x){return x!==opt;}); }
+      S.offenderTags[_oppKey]=sel;
+      renderOffenderTags(_oppKey);
+      var mo=_oppKey.match(/^v(\d+)_(?:of|tag)_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+      autoSave();
+    });
+    lbl.appendChild(cb); lbl.appendChild(document.createTextNode(opt));
+    div.appendChild(lbl);
+  });
+  // Position popup near button
+  var rect=btn.getBoundingClientRect();
+  popup.style.left=Math.min(rect.left,window.innerWidth-210)+"px";
+  popup.style.top=(rect.bottom+6)+"px";
+  popup.style.display="block";
+}
+function closeOffenderPopup(){
+  document.getElementById("offenderPopup").style.display="none"; _oppKey=null;
+}
+document.addEventListener("click",function(e){
+  var popup=document.getElementById("offenderPopup");
+  if(popup&&popup.style.display!=="none"&&!popup.contains(e.target)&&!e.target.classList.contains("offender-btn"))
+    closeOffenderPopup();
+});
+function renderOffenderTags(key){
+  if(!key) return;
+  var safe=key.replace(/[^a-z0-9]/gi,"_");
+  var div=document.getElementById("otags_"+safe); if(!div) return;
+  var sel=(S.offenderTags&&S.offenderTags[key])||[];
+  div.innerHTML="";
+  sel.forEach(function(opt){
+    var t=document.createElement("span"); t.className="offender-tag"; t.textContent=opt; div.appendChild(t);
+  });
+}
+function renderAllOffenderTags(){
+  if(!S.offenderTags) return;
+  Object.keys(S.offenderTags).forEach(function(k){ renderOffenderTags(k); });
+  // Also refresh all open tag panels
+  document.querySelectorAll(".tag-panel").forEach(function(p){ if(p._renderPanel) p._renderPanel(); });
+}
+
+// ── Inline tag pill panel ─────────────────────────────────────
+function buildTagPanel(container, key, options, hasCustom, isThenNow) {
+  var safe = key.replace(/[^a-z0-9]/gi,"_");
+  var panel = document.createElement("div");
+  panel.className = "tag-panel";
+  panel.id = "tbp_"+safe;
+
+  function renderPanel() {
+    panel.innerHTML = "";
+    if(!S.offenderTags) S.offenderTags={};
+    var selected = S.offenderTags[key] || [];
+    var optList = isThenNow ? MSK_ORGANS : options;
+
+    if(isThenNow){
+      var hint=document.createElement("div");
+      hint.style.cssText="width:100%;font-size:11px;color:#94a3b8;margin-bottom:2px";
+      hint.textContent="Select 2 organs (Then / Now)";
+      panel.appendChild(hint);
+    }
+
+    // Custom tags not in predefined list (show first as active pills)
+    if(hasCustom){
+      var customs=selected.filter(function(s){ return options.indexOf(s)<0; });
+      customs.forEach(function(ct){
+        var btn=document.createElement("button"); btn.className="tag-pill active";
+        btn.textContent=ct+" \u00d7";
+        btn.addEventListener("click",function(e){
+          e.stopPropagation();
+          S.offenderTags[key]=(S.offenderTags[key]||[]).filter(function(x){return x!==ct;});
+          renderOffenderTags(key);
+          var mo=key.match(/^v(\d+)_(?:of|tag)_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+          autoSave(); renderPanel();
+        });
+        panel.appendChild(btn);
+      });
+    }
+
+    // Predefined option pills
+    optList.forEach(function(opt){
+      var isActive = selected.indexOf(opt)>=0;
+      var btn=document.createElement("button"); btn.className="tag-pill"+(isActive?" active":"");
+      btn.textContent=opt;
+      if(isThenNow && selected.length>=2 && !isActive) btn.disabled=true;
+      btn.addEventListener("click",function(e){
+        e.stopPropagation();
+        if(!S.offenderTags) S.offenderTags={};
+        var sel=(S.offenderTags[key]||[]).slice();
+        if(isActive){ sel=sel.filter(function(x){return x!==opt;}); }
+        else {
+          if(isThenNow && sel.length>=2) return;
+          sel.push(opt);
+        }
+        S.offenderTags[key]=sel;
+        renderOffenderTags(key);
+        var mo=key.match(/^v(\d+)_(?:of|tag)_(\d+)_/); if(mo) updateVsecHL(parseInt(mo[1]),parseInt(mo[2]));
+        autoSave(); renderPanel();
+      });
+      panel.appendChild(btn);
+    });
+
+    // Custom text input
+    if(hasCustom && !isThenNow){
+      var wrap=document.createElement("div"); wrap.className="tag-panel-input";
+      var inp=document.createElement("input"); inp.type="text"; inp.placeholder="Custom tag...";
+      var addBtn=document.createElement("button"); addBtn.className="tag-pill"; addBtn.textContent="+ Add";
+      addBtn.addEventListener("click",function(){
+        var val=inp.value.trim(); if(!val) return;
+        if(!S.offenderTags) S.offenderTags={};
+        var sel=(S.offenderTags[key]||[]).slice();
+        if(sel.indexOf(val)<0) sel.push(val);
+        S.offenderTags[key]=sel; inp.value="";
+        renderOffenderTags(key); autoSave(); renderPanel();
+      });
+      inp.addEventListener("keydown",function(e){ if(e.key==="Enter") addBtn.click(); });
+      wrap.appendChild(inp); wrap.appendChild(addBtn);
+      panel.appendChild(wrap);
+    }
+  }
+
+  renderPanel();
+  panel._renderPanel = renderPanel;
+  container.appendChild(panel);
+  return panel;
+}
+
+function toggleTagPanel(safeKey) {
+  var panel=document.getElementById("tbp_"+safeKey); if(!panel) return;
+  var open=panel.classList.toggle("open");
+  if(open && panel._renderPanel) panel._renderPanel();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  MSK MUSCLE LIST
+// ════════════════════════════════════════════════════════════════
+var SUPPLEMENTS=["Vitamin E (UNIQUE E Mixed Tocopherols)", "Artichoke Extract (AMG)", "Artemisia Annua Full (Ancient Ways)", "Goldenseal - Ancient Ways", "OSHA Root", "Passion Flower", "Oxicell SE", "A.D.P.", "Aqueous Zinc", "Bio-Ae", "Bio-D-Mulsion", "Cr-Zyme", "Cu-Zyme", "Dismuzyme (SOD) Plus", "E-Mulsion", "Garlic Plus", "L-Carnitine Powder", "Mg-Zyme Magnesium", "Mn-Zyme", "Mo-Zyme Forte", "Purified Chondroitin Sulfates", "SOD Powder (Dismuzyme Plus Granules) (17.9 oz)", "Selenium (Se-Zyme Forte) - Biotics", "Selenomethionine - Biotics", "TMG Powder", "Thiamin 50", "Zn-Zyme", "Metal Free and Chemical Cleanse", "Ferritin", "Aloe", "Bone Broth Protein", "Broccoprotect", "C3 Complex Curcumin", "Organic Pure Pea Powder", "Whey Cool", "Bone Guard", "Natural Calm", "Natural Calm Gummies", "Pteridin-4 / BH4", "Andrographis", "Bidens", "Bladderwack", "Blue Cohosh", "Clove Bud", "Cordyceps", "Echinacea", "Lomatium Root", "Myrrh", "OSHA Root 2oz (ELK)", "St. Johns Wort - Weed", "St. John’s Wort", "Usnea", "Daily Immune Builder", "FIT 132", "FIT 176", "FIT 22", "Cysteine - Metabolics", "Hydroxy-B12 Liquid", "Methyltetrahydrofolate (Liquid 5 MTHF)", "Arctic Cod Liver Oil", "Artic Omega", "DHA Gummies Kids", "PRO DHA (120)", "PRO EPA", "PRO-OMEGA", "Pro Eyes", "D-Hist", "D-Hist Jr.", "Digestzyme-V", "Houttuynia - liquid", "Progon B XL", "Self Adhesive Tape", "TCPS Iodine Roller", "Thyme - liquid", "Thyroid", "Vitamin A", "Vitamin D Gummy", "Alpha Lipoic Acid", "Chaste Tree", "CoQ10", "CurcumaSorb", "Curcumin", "D-Mannose", "D-Mannose w/ Cranberry", "DHEA", "Folic Acid", "GABA", "Ginger Extract", "Glycine", "Green Tea Extract", "Inositol Powder", "Ionic Molybdenum", "L-Carnitine", "L-Carnitine (Pure)", "L-Tyrosine Pure", "Magnesium Citrate (Pure)", "Magnesium Glycinate", "Methycobalamin", "P5P 50", "Pantethine", "Pantethinine", "Peptic-Care Zinc L Carnosine", "Quercetin Pure 120", "Quercetine 60 Caps", "Resveratrol", "Resveratrol Extra", "Saccharomyces Boulardii", "Saw Palmetto 320", "Saw Palmetto Plus", "Silymarin", "Taurine 1000", "Vit D", "GABA + L-Theanine", "Liposomal Glutathione", "Adrenal Desiccated", "Albaplex", "Allerplex", "Antronex", "Antronex (180)", "Arginex", "Betacol", "Betafood", "Betaine Hydrochloride", "Bio-Dent", "Biost", "Cal-Amo", "Cal-Ma Plus", "Calcium Lactate", "Cardio Plus GF (330T)", "Cardiotrophin PMG", "Cataplex B GF", "Cataplex B Normal (360)", "Cataplex B2/ G", "Cataplex C", "Cataplex E", "Cataplex E2", "Cholacol", "Choline", "Chromium Complex/ Cataplex GTF (180)", "Congaplex", "Cyruta Plus", "Dermatropin PMG", "Disodium Phosphate", "Drenamin", "Drenatrophin PMG", "Eleuthero", "Enzycore", "Ferrofood", "Glucosamine Synergy", "Immuplex", "Min-Chex", "Min-Tran", "Min-Tran (360)", "Okra Pepsin", "Orchex (150c)", "Orchex (90c)", "Orchic PMG", "Organically Bound Minerals", "Ovatrophin P PMG", "Ovex", "Ovex P", "Pancreatrophin PMG", "Paraplex", "Parotid PMG", "Phosfood Liquid", "Pituitrophin PMG", "Pneumotrophin PMG", "Prolamine Iodine", "Prolamine Iodine 180 Tablets", "Prolamine Iodine Plus", "Prost-X", "Prostate PMG", "RNA (180t)", "Sesame Oil Capsules", "Spleen PMG", "Thymex", "Thymus PMG", "Thytrophin PMG", "Trace Minerals-B12", "Utrophin PMG", "Wheat Germ Oil Fortified", "Zinc Chelate", "Zinc Taste Test", "Zypan", "Zypan (90T)", "Alaria Supreme 90 caps", "Albizia", "American Ginseng", "Artemisia", "Ashwaganda", "Astragalus - Supreme", "BFB-1, 11ml", "BFB-2, 11ml", "Body Guard", "Camu Supreme", "Cissus", "Dan Shen", "Endo Supreme", "Glypho-X Supreme", "Goldenthread Supreme", "Gud Multivitamin", "Gud Prenatal", "Hemo Guard Supreme 120", "Houttuynia", "Illicium Supreme", "Lectin Protect", "Lurong", "MT Supreme", "Manjistha Supreme", "Melia Supreme", "Mimosa Supreme", "Morinda", "Mucuna Supreme", "Olive Leaf Supreme", "Oral Defense", "Reishi Supreme", "Rosemary Supreme", "Schisandra Supreme", "Scutellaria", "Shatavari Supreme", "Smilax Supreme", "St. John's Wort (Supreme)", "THERASUPREME", "Takesumi Supreme", "Tulsi Supreme", "Vidanga", "Vital Guard", "WOAD", "Wild Greens", "Iodine (IOSOL) Drops", "Iodine (IOSOL) Roll-on", "5 HTP (Hydroxytryptophan)", "5 MTHF", "Acetyl-L-Carnitine", "B COMPLEX #12", "B COMPLEX #6", "BASIC B COMPLEX", "Basic Nutrients 2/Day", "Basic Prenatal", "Berberine", "Betaine HCL & Pepsin", "Biotin-8", "Calcium-Magnesium Malate", "Choleast-900", "Chromium Picolinate", "Creatine", "Curcumin Phytosome", "Curcumin Phytosome (Meriva 500 SF) 60 Caps", "D-10,000", "D-1000", "D-5000", "FloraMend", "Glucosamine & Chondrotin", "Hormone Advantage (DIM)", "Iron Bisglycinate", "L-Arginine (Perfusia SR)", "L-Glutamine Powder", "L-Lysine", "Magnesium Citramate", "Men's Multi 50+", "Methyl Guard Plus", "Methyl-Guard", "Molybdenum Glycinate", "NAC", "NAC (N-Acetylcysteine)", "Niacinimide", "OPC - 100 (Grape Seed Extract)", "Pantethine - Discontinued", "Pepti-Guard Discontinued", "Potassium Citrate", "Pyridoxal 5' Phosphate", "R-Lipoic Acid", "Riboflavin 5'- Phosphate", "Selenium (Selenomethionine)- Thorne", "Ultimate E", "Undecylenic Acid", "Vitamin B12 (Methylcobalamin)", "Vitamin C w/ Flavanoids", "Zinc Picolinate", "Astragulus Root (Weed)", "Black Cohosh", "Black Walnut - Weed", "Cat's Claw - Weed", "Clove Bud - Weed", "Dong Quai", "Elderberry - Weed", "Gentian", "Ginger Root - Weed", "Goldenseal (Weed)", "Juniper Berry", "Licorice Root", "Liquid Olive Leaf", "Marshmallow Root", "Milk Thistle Seed - Weed", "Oregon Grape - Weed", "Passion Flower - Weed", "Pau D' Arco", "Peppermint", "Rhodiola Root", "Rosemary- WEED", "Skullcap", "Thyme - Weed", "Uva Ursi - Weed", "Valerian Root - Weed", "Vitex", "Herbal Blend - Flower Essence", "Lavender Vitality", "Lemon Vitality", "Peppermint Vitality", "Theives Dentarome", "Thieves Fruit & Veggie Spray", "Thieves Hand Soap", "Thieves House Hold Cleaner", "Thieves Spray 1fl Oz", "Thieves Vitality Oil", "Thieves hand sanitizer/small"];
+var SUPP_BRANDS=[{"brand": "AC GRACE", "items": [{"name": "Vitamin E (UNIQUE E Mixed Tocopherols)", "idx": 0}]}, {"brand": "AMG Naturals", "items": [{"name": "Artichoke Extract (AMG)", "idx": 1}]}, {"brand": "Ancient Ways", "items": [{"name": "Artemisia Annua Full (Ancient Ways)", "idx": 2}, {"name": "Goldenseal - Ancient Ways", "idx": 3}, {"name": "OSHA Root", "idx": 4}, {"name": "Passion Flower", "idx": 5}]}, {"brand": "Apex Energetics", "items": [{"name": "Oxicell SE", "idx": 6}]}, {"brand": "Biotics Research", "items": [{"name": "A.D.P.", "idx": 7}, {"name": "Aqueous Zinc", "idx": 8}, {"name": "Bio-Ae", "idx": 9}, {"name": "Bio-D-Mulsion", "idx": 10}, {"name": "Cr-Zyme", "idx": 11}, {"name": "Cu-Zyme", "idx": 12}, {"name": "Dismuzyme (SOD) Plus", "idx": 13}, {"name": "E-Mulsion", "idx": 14}, {"name": "Garlic Plus", "idx": 15}, {"name": "L-Carnitine Powder", "idx": 16}, {"name": "Mg-Zyme Magnesium", "idx": 17}, {"name": "Mn-Zyme", "idx": 18}, {"name": "Mo-Zyme Forte", "idx": 19}, {"name": "Purified Chondroitin Sulfates", "idx": 20}, {"name": "SOD Powder (Dismuzyme Plus Granules) (17.9 oz)", "idx": 21}, {"name": "Selenium (Se-Zyme Forte) - Biotics", "idx": 22}, {"name": "Selenomethionine - Biotics", "idx": 23}, {"name": "TMG Powder", "idx": 24}, {"name": "Thiamin 50", "idx": 25}, {"name": "Zn-Zyme", "idx": 26}]}, {"brand": "BodyHealth", "items": [{"name": "Metal Free and Chemical Cleanse", "idx": 27}]}, {"brand": "Cardiovascular Research", "items": [{"name": "Ferritin", "idx": 28}]}, {"brand": "Designs For Health", "items": [{"name": "Aloe", "idx": 29}, {"name": "Bone Broth Protein", "idx": 30}, {"name": "Broccoprotect", "idx": 31}, {"name": "C3 Complex Curcumin", "idx": 32}, {"name": "Organic Pure Pea Powder", "idx": 33}, {"name": "Whey Cool", "idx": 34}]}, {"brand": "Eclectic Institute", "items": [{"name": "Bone Guard", "idx": 35}, {"name": "Natural Calm", "idx": 36}, {"name": "Natural Calm Gummies", "idx": 37}]}, {"brand": "Ecological Formulas", "items": [{"name": "Pteridin-4 / BH4", "idx": 38}]}, {"brand": "Elk Mountain", "items": [{"name": "Andrographis", "idx": 39}, {"name": "Bidens", "idx": 40}, {"name": "Bladderwack", "idx": 41}, {"name": "Blue Cohosh", "idx": 42}, {"name": "Clove Bud", "idx": 43}, {"name": "Cordyceps", "idx": 44}, {"name": "Echinacea", "idx": 45}, {"name": "Lomatium Root", "idx": 46}, {"name": "Myrrh", "idx": 47}, {"name": "OSHA Root 2oz (ELK)", "idx": 48}, {"name": "St. Johns Wort - Weed", "idx": 49}, {"name": "St. John’s Wort", "idx": 50}, {"name": "Usnea", "idx": 51}]}, {"brand": "Herb Farm", "items": [{"name": "Daily Immune Builder", "idx": 52}]}, {"brand": "KBMO", "items": [{"name": "FIT 132", "idx": 53}, {"name": "FIT 176", "idx": 54}, {"name": "FIT 22", "idx": 55}]}, {"brand": "Metabolics", "items": [{"name": "Cysteine - Metabolics", "idx": 56}, {"name": "Hydroxy-B12 Liquid", "idx": 57}, {"name": "Methyltetrahydrofolate (Liquid 5 MTHF)", "idx": 58}]}, {"brand": "Nordic Naturals", "items": [{"name": "Arctic Cod Liver Oil", "idx": 59}, {"name": "Artic Omega", "idx": 60}, {"name": "DHA Gummies Kids", "idx": 61}, {"name": "PRO DHA (120)", "idx": 62}, {"name": "PRO EPA", "idx": 63}, {"name": "PRO-OMEGA", "idx": 64}, {"name": "Pro Eyes", "idx": 65}]}, {"brand": "Ortho Molecular", "items": [{"name": "D-Hist", "idx": 66}, {"name": "D-Hist Jr.", "idx": 67}, {"name": "Digestzyme-V", "idx": 68}]}, {"brand": "Other", "items": [{"name": "Houttuynia - liquid", "idx": 69}, {"name": "Progon B XL", "idx": 70}, {"name": "Self Adhesive Tape", "idx": 71}, {"name": "TCPS Iodine Roller", "idx": 72}, {"name": "Thyme - liquid", "idx": 73}, {"name": "Thyroid", "idx": 74}, {"name": "Vitamin A", "idx": 75}, {"name": "Vitamin D Gummy", "idx": 76}]}, {"brand": "Pure Encapsulations", "items": [{"name": "Alpha Lipoic Acid", "idx": 77}, {"name": "Chaste Tree", "idx": 78}, {"name": "CoQ10", "idx": 79}, {"name": "CurcumaSorb", "idx": 80}, {"name": "Curcumin", "idx": 81}, {"name": "D-Mannose", "idx": 82}, {"name": "D-Mannose w/ Cranberry", "idx": 83}, {"name": "DHEA", "idx": 84}, {"name": "Folic Acid", "idx": 85}, {"name": "GABA", "idx": 86}, {"name": "Ginger Extract", "idx": 87}, {"name": "Glycine", "idx": 88}, {"name": "Green Tea Extract", "idx": 89}, {"name": "Inositol Powder", "idx": 90}, {"name": "Ionic Molybdenum", "idx": 91}, {"name": "L-Carnitine", "idx": 92}, {"name": "L-Carnitine (Pure)", "idx": 93}, {"name": "L-Tyrosine Pure", "idx": 94}, {"name": "Magnesium Citrate (Pure)", "idx": 95}, {"name": "Magnesium Glycinate", "idx": 96}, {"name": "Methycobalamin", "idx": 97}, {"name": "P5P 50", "idx": 98}, {"name": "Pantethine", "idx": 99}, {"name": "Pantethinine", "idx": 100}, {"name": "Peptic-Care Zinc L Carnosine", "idx": 101}, {"name": "Quercetin Pure 120", "idx": 102}, {"name": "Quercetine 60 Caps", "idx": 103}, {"name": "Resveratrol", "idx": 104}, {"name": "Resveratrol Extra", "idx": 105}, {"name": "Saccharomyces Boulardii", "idx": 106}, {"name": "Saw Palmetto 320", "idx": 107}, {"name": "Saw Palmetto Plus", "idx": 108}, {"name": "Silymarin", "idx": 109}, {"name": "Taurine 1000", "idx": 110}, {"name": "Vit D", "idx": 111}]}, {"brand": "Quick Silver", "items": [{"name": "GABA + L-Theanine", "idx": 112}, {"name": "Liposomal Glutathione", "idx": 113}]}, {"brand": "Standard Process", "items": [{"name": "Adrenal Desiccated", "idx": 114}, {"name": "Albaplex", "idx": 115}, {"name": "Allerplex", "idx": 116}, {"name": "Antronex", "idx": 117}, {"name": "Antronex (180)", "idx": 118}, {"name": "Arginex", "idx": 119}, {"name": "Betacol", "idx": 120}, {"name": "Betafood", "idx": 121}, {"name": "Betaine Hydrochloride", "idx": 122}, {"name": "Bio-Dent", "idx": 123}, {"name": "Biost", "idx": 124}, {"name": "Cal-Amo", "idx": 125}, {"name": "Cal-Ma Plus", "idx": 126}, {"name": "Calcium Lactate", "idx": 127}, {"name": "Cardio Plus GF (330T)", "idx": 128}, {"name": "Cardiotrophin PMG", "idx": 129}, {"name": "Cataplex B GF", "idx": 130}, {"name": "Cataplex B Normal (360)", "idx": 131}, {"name": "Cataplex B2/ G", "idx": 132}, {"name": "Cataplex C", "idx": 133}, {"name": "Cataplex E", "idx": 134}, {"name": "Cataplex E2", "idx": 135}, {"name": "Cholacol", "idx": 136}, {"name": "Choline", "idx": 137}, {"name": "Chromium Complex/ Cataplex GTF (180)", "idx": 138}, {"name": "Congaplex", "idx": 139}, {"name": "Cyruta Plus", "idx": 140}, {"name": "Dermatropin PMG", "idx": 141}, {"name": "Disodium Phosphate", "idx": 142}, {"name": "Drenamin", "idx": 143}, {"name": "Drenatrophin PMG", "idx": 144}, {"name": "Eleuthero", "idx": 145}, {"name": "Enzycore", "idx": 146}, {"name": "Ferrofood", "idx": 147}, {"name": "Glucosamine Synergy", "idx": 148}, {"name": "Immuplex", "idx": 149}, {"name": "Min-Chex", "idx": 150}, {"name": "Min-Tran", "idx": 151}, {"name": "Min-Tran (360)", "idx": 152}, {"name": "Okra Pepsin", "idx": 153}, {"name": "Orchex (150c)", "idx": 154}, {"name": "Orchex (90c)", "idx": 155}, {"name": "Orchic PMG", "idx": 156}, {"name": "Organically Bound Minerals", "idx": 157}, {"name": "Ovatrophin P PMG", "idx": 158}, {"name": "Ovex", "idx": 159}, {"name": "Ovex P", "idx": 160}, {"name": "Pancreatrophin PMG", "idx": 161}, {"name": "Paraplex", "idx": 162}, {"name": "Parotid PMG", "idx": 163}, {"name": "Phosfood Liquid", "idx": 164}, {"name": "Pituitrophin PMG", "idx": 165}, {"name": "Pneumotrophin PMG", "idx": 166}, {"name": "Prolamine Iodine", "idx": 167}, {"name": "Prolamine Iodine 180 Tablets", "idx": 168}, {"name": "Prolamine Iodine Plus", "idx": 169}, {"name": "Prost-X", "idx": 170}, {"name": "Prostate PMG", "idx": 171}, {"name": "RNA (180t)", "idx": 172}, {"name": "Sesame Oil Capsules", "idx": 173}, {"name": "Spleen PMG", "idx": 174}, {"name": "Thymex", "idx": 175}, {"name": "Thymus PMG", "idx": 176}, {"name": "Thytrophin PMG", "idx": 177}, {"name": "Trace Minerals-B12", "idx": 178}, {"name": "Utrophin PMG", "idx": 179}, {"name": "Wheat Germ Oil Fortified", "idx": 180}, {"name": "Zinc Chelate", "idx": 181}, {"name": "Zinc Taste Test", "idx": 182}, {"name": "Zypan", "idx": 183}, {"name": "Zypan (90T)", "idx": 184}]}, {"brand": "Supreme Nutrition", "items": [{"name": "Alaria Supreme 90 caps", "idx": 185}, {"name": "Albizia", "idx": 186}, {"name": "American Ginseng", "idx": 187}, {"name": "Artemisia", "idx": 188}, {"name": "Ashwaganda", "idx": 189}, {"name": "Astragalus - Supreme", "idx": 190}, {"name": "BFB-1, 11ml", "idx": 191}, {"name": "BFB-2, 11ml", "idx": 192}, {"name": "Body Guard", "idx": 193}, {"name": "Camu Supreme", "idx": 194}, {"name": "Cissus", "idx": 195}, {"name": "Dan Shen", "idx": 196}, {"name": "Endo Supreme", "idx": 197}, {"name": "Glypho-X Supreme", "idx": 198}, {"name": "Goldenthread Supreme", "idx": 199}, {"name": "Gud Multivitamin", "idx": 200}, {"name": "Gud Prenatal", "idx": 201}, {"name": "Hemo Guard Supreme 120", "idx": 202}, {"name": "Houttuynia", "idx": 203}, {"name": "Illicium Supreme", "idx": 204}, {"name": "Lectin Protect", "idx": 205}, {"name": "Lurong", "idx": 206}, {"name": "MT Supreme", "idx": 207}, {"name": "Manjistha Supreme", "idx": 208}, {"name": "Melia Supreme", "idx": 209}, {"name": "Mimosa Supreme", "idx": 210}, {"name": "Morinda", "idx": 211}, {"name": "Mucuna Supreme", "idx": 212}, {"name": "Olive Leaf Supreme", "idx": 213}, {"name": "Oral Defense", "idx": 214}, {"name": "Reishi Supreme", "idx": 215}, {"name": "Rosemary Supreme", "idx": 216}, {"name": "Schisandra Supreme", "idx": 217}, {"name": "Scutellaria", "idx": 218}, {"name": "Shatavari Supreme", "idx": 219}, {"name": "Smilax Supreme", "idx": 220}, {"name": "St. John's Wort (Supreme)", "idx": 221}, {"name": "THERASUPREME", "idx": 222}, {"name": "Takesumi Supreme", "idx": 223}, {"name": "Tulsi Supreme", "idx": 224}, {"name": "Vidanga", "idx": 225}, {"name": "Vital Guard", "idx": 226}, {"name": "WOAD", "idx": 227}, {"name": "Wild Greens", "idx": 228}]}, {"brand": "TPCS Distributions", "items": [{"name": "Iodine (IOSOL) Drops", "idx": 229}, {"name": "Iodine (IOSOL) Roll-on", "idx": 230}]}, {"brand": "Thorne Research", "items": [{"name": "5 HTP (Hydroxytryptophan)", "idx": 231}, {"name": "5 MTHF", "idx": 232}, {"name": "Acetyl-L-Carnitine", "idx": 233}, {"name": "B COMPLEX #12", "idx": 234}, {"name": "B COMPLEX #6", "idx": 235}, {"name": "BASIC B COMPLEX", "idx": 236}, {"name": "Basic Nutrients 2/Day", "idx": 237}, {"name": "Basic Prenatal", "idx": 238}, {"name": "Berberine", "idx": 239}, {"name": "Betaine HCL & Pepsin", "idx": 240}, {"name": "Biotin-8", "idx": 241}, {"name": "Calcium-Magnesium Malate", "idx": 242}, {"name": "Choleast-900", "idx": 243}, {"name": "Chromium Picolinate", "idx": 244}, {"name": "Creatine", "idx": 245}, {"name": "Curcumin Phytosome", "idx": 246}, {"name": "Curcumin Phytosome (Meriva 500 SF) 60 Caps", "idx": 247}, {"name": "D-10,000", "idx": 248}, {"name": "D-1000", "idx": 249}, {"name": "D-5000", "idx": 250}, {"name": "FloraMend", "idx": 251}, {"name": "Glucosamine & Chondrotin", "idx": 252}, {"name": "Hormone Advantage (DIM)", "idx": 253}, {"name": "Iron Bisglycinate", "idx": 254}, {"name": "L-Arginine (Perfusia SR)", "idx": 255}, {"name": "L-Glutamine Powder", "idx": 256}, {"name": "L-Lysine", "idx": 257}, {"name": "Magnesium Citramate", "idx": 258}, {"name": "Men's Multi 50+", "idx": 259}, {"name": "Methyl Guard Plus", "idx": 260}, {"name": "Methyl-Guard", "idx": 261}, {"name": "Molybdenum Glycinate", "idx": 262}, {"name": "NAC", "idx": 263}, {"name": "NAC (N-Acetylcysteine)", "idx": 264}, {"name": "Niacinimide", "idx": 265}, {"name": "OPC - 100 (Grape Seed Extract)", "idx": 266}, {"name": "Pantethine - Discontinued", "idx": 267}, {"name": "Pepti-Guard Discontinued", "idx": 268}, {"name": "Potassium Citrate", "idx": 269}, {"name": "Pyridoxal 5' Phosphate", "idx": 270}, {"name": "R-Lipoic Acid", "idx": 271}, {"name": "Riboflavin 5'- Phosphate", "idx": 272}, {"name": "Selenium (Selenomethionine)- Thorne", "idx": 273}, {"name": "Ultimate E", "idx": 274}, {"name": "Undecylenic Acid", "idx": 275}, {"name": "Vitamin B12 (Methylcobalamin)", "idx": 276}, {"name": "Vitamin C w/ Flavanoids", "idx": 277}, {"name": "Zinc Picolinate", "idx": 278}]}, {"brand": "Weed", "items": [{"name": "Astragulus Root (Weed)", "idx": 279}, {"name": "Black Cohosh", "idx": 280}, {"name": "Black Walnut - Weed", "idx": 281}, {"name": "Cat's Claw - Weed", "idx": 282}, {"name": "Clove Bud - Weed", "idx": 283}, {"name": "Dong Quai", "idx": 284}, {"name": "Elderberry - Weed", "idx": 285}, {"name": "Gentian", "idx": 286}, {"name": "Ginger Root - Weed", "idx": 287}, {"name": "Goldenseal (Weed)", "idx": 288}, {"name": "Juniper Berry", "idx": 289}, {"name": "Licorice Root", "idx": 290}, {"name": "Liquid Olive Leaf", "idx": 291}, {"name": "Marshmallow Root", "idx": 292}, {"name": "Milk Thistle Seed - Weed", "idx": 293}, {"name": "Oregon Grape - Weed", "idx": 294}, {"name": "Passion Flower - Weed", "idx": 295}, {"name": "Pau D' Arco", "idx": 296}, {"name": "Peppermint", "idx": 297}, {"name": "Rhodiola Root", "idx": 298}, {"name": "Rosemary- WEED", "idx": 299}, {"name": "Skullcap", "idx": 300}, {"name": "Thyme - Weed", "idx": 301}, {"name": "Uva Ursi - Weed", "idx": 302}, {"name": "Valerian Root - Weed", "idx": 303}, {"name": "Vitex", "idx": 304}]}, {"brand": "Woodland Essences", "items": [{"name": "Herbal Blend - Flower Essence", "idx": 305}]}, {"brand": "Young Living", "items": [{"name": "Lavender Vitality", "idx": 306}, {"name": "Lemon Vitality", "idx": 307}, {"name": "Peppermint Vitality", "idx": 308}, {"name": "Theives Dentarome", "idx": 309}, {"name": "Thieves Fruit & Veggie Spray", "idx": 310}, {"name": "Thieves Hand Soap", "idx": 311}, {"name": "Thieves House Hold Cleaner", "idx": 312}, {"name": "Thieves Spray 1fl Oz", "idx": 313}, {"name": "Thieves Vitality Oil", "idx": 314}, {"name": "Thieves hand sanitizer/small", "idx": 315}]}];
+
+var MSK_SECTIONS=[
+  {sec:"Neck", muscles:["Deep Neck Flexors","Masseter","Neck Extensor","Pterygoid (Med/Lat)","Scalenes","SCM","Temporalis"]},
+  {sec:"Shoulder", muscles:["Biceps Long Head","Coracobrachialis","Deltoid - Anterior","Deltoid - Middle","Deltoid - Posterior","Infraspinatus","Latissimus Dorsi","Levator Scapulae","Lower Trapezius","Middle Trapezius","Pec Clavicular","Pec Minor","Pec Sternal","Rhomboid","Serratus Anterior","Subclavicular","Subscapularis","Supraspinatus","Teres Major","Teres Minor","Tricep (Long Head)","Upper Trapezius"]},
+  {sec:"Wrist", muscles:["Finger Extensors","Finger Flexors","Pronator Quadratus","Wrist Extensor","Wrist Flexor"]},
+  {sec:"Elbow", muscles:["Brachialis","Brachioradialis","Pronator Teres","Supinator","Tricep (Med/Lat)"]},
+  {sec:"Hip", muscles:["Adductors","Gluteus Maximus","Gluteus Medius","Gluteus Minimus","Gracilis","Iliacus","Pectineus","Piriformis/Gemellus","Psoas","Quadratus Lumborum","Rectus Femoris","Sartorius","TFL"]},
+  {sec:"Knee", muscles:["Gastrocnemius (Med/Lat)","Hamstring (Med/Lat)","Popliteus","Quads (Med/Lat)"]},
+  {sec:"Ankle", muscles:["Anterior Tibialis","Peroneus Brevis","Peroneus Longus","Peroneus Tertius","Posterior Tibialis","Soleus"]},
+  {sec:"Trunk", muscles:["Abdominals","C/S, T/S, L/S","Diaphragm","Iliolumbar Ligament","Obliques"]}
+];
+var MSK_ORGANS=[
+  "Adrenal (Medulla/Cortex)","Bladder","Brain","Diaphragm","Ears/Eyes","Gallbladder","Heart",
+  "Immune - Spleen","Immune - Thymus","Kidney","Large Intestine","Liver","Lower Immune",
+  "Lung","Ovary","Pancreas","Parotid","Pineal","Pituitary","Prostate",
+  "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus"
+];
+
+function onMskClick(key){
+  if(activeColor===null){ delete S.marks[key]; }
+  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor; }
+  renderMskCell(key);
+  var m=key.match(/^v(\d+)_msk_(\d+)_/); if(m){ updateMskSecHL(parseInt(m[1]),parseInt(m[2])); updateMskMainHL(parseInt(m[1])); }
+  var m2=key.match(/^v(\d+)_org_/); if(m2) updateMskMainHL(parseInt(m2[1]));
+  autoSave();
+}
+function renderMskCell(key){
+  var cell=document.getElementById("mc_"+key); if(!cell) return;
+  var cn=S.marks[key];
+  cell.textContent="";
+  if(cn&&COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex;
+    cell.style.borderColor=h; cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕";
+  } else { cell.style.borderColor=cell.style.background=cell.style.color=""; }
+}
+function renderAllMskCells(){
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_msk_")>=0||k.indexOf("_org_")>=0) renderMskCell(k); });
+}
+
+// ────────────────────────────────────────────────────────────────
+//  SUPPLEMENTS
+// ────────────────────────────────────────────────────────────────
+function filterSupps(vn, query) {
+  var q = (query||"").trim().toLowerCase();
+  var brandsDiv = document.getElementById("supp_brands_"+vn); if(!brandsDiv) return;
+  SUPP_BRANDS.forEach(function(brand, bi) {
+    var brandId = "supp_brand_"+vn+"_"+bi;
+    var body = document.getElementById(brandId+"_body");
+    var hdr  = document.getElementById(brandId+"_hdr");
+    if(!body||!hdr) return;
+    var brandMatch = q && brand.brand.toLowerCase().indexOf(q)>=0;
+    var visibleCount = 0;
+    body.querySelectorAll(".supp-row").forEach(function(row) {
+      var name = row.dataset.name||"";
+      var si = parseInt(row.dataset.si);
+      var marked = !!(S.marks["v"+vn+"_supp_"+si]);
+      var match = !q || brandMatch || name.indexOf(q)>=0 || marked;
+      row.style.display = match ? "" : "none";
+      if(match) visibleCount++;
+    });
+    // Show/hide brand entirely
+    hdr.style.display = (!q || visibleCount>0) ? "" : "none";
+    // Auto-expand on search
+    if(q && visibleCount>0) {
+      body.classList.add("open");
+      var arr=document.getElementById(brandId+"_arr");
+      if(arr) arr.style.transform="rotate(90deg)";
+    }
+    // Update count badge
+    var cnt=document.getElementById(brandId+"_count");
+    if(cnt) cnt.textContent = q ? visibleCount : brand.items.length;
+  });
+}
+
+function renderSuppMarked(vn) {
+  var div = document.getElementById("supp_marked_"+vn); if(!div) return;
+  var pills = [];
+  SUPPLEMENTS.forEach(function(supp,si){
+    var key = "v"+vn+"_supp_"+si;
+    var color = S.marks[key];
+    if(color) {
+      var hex = COLOR_MAP[color]||"#94a3b8";
+      pills.push('<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:'+hex+'22;border:1px solid '+hex+'55;font-size:11px;font-weight:600;color:'+hex+';margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:'+hex+';display:inline-block"></span>'+escHtml(supp)+'</span>');
+    }
+  });
+  div.innerHTML = pills.length
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Prescribed this visit</div>'+pills.join('')+'<div style="border-top:1px solid #f1f5f9;margin:8px 0 4px"></div>'
+    : '';
+  // Also refresh grid visibility
+  filterSupps(vn, (document.querySelector("#supp_body_"+vn+" input")||{}).value||"");
+}
+
+function renderAllSuppMarked() {
+  for(var v=1; v<=18; v++) renderSuppMarked(v);
+}
+
+function onSuppClick(key){
+  if(activeColor===null){ delete S.marks[key]; }
+  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor; }
+  renderSuppCell(key);
+  var m=key.match(/^v(\d+)_supp_/); if(m) updateSuppHL(parseInt(m[1]));
+  autoSave();
+}
+function renderSuppCell(key){
+  var cell=document.getElementById("sc2_"+key); if(!cell) return;
+  var row=cell.closest(".supp-row");
+  var cn=S.marks[key];
+  cell.textContent="";
+  if(cn&&COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex;
+    cell.style.borderColor=h; cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕";
+    if(row){ row.style.background=h+"20"; }
+  } else {
+    cell.style.borderColor="#bae6fd"; cell.style.background="#f0f9ff"; cell.style.color="#0369a1";
+    if(row){ row.style.background=""; }
+  }
+}
+function renderAllSuppCells(){
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf("_supp_")>=0) renderSuppCell(k); });
+}
+function toggleMsk(vn){
+  var body=document.getElementById("msk_body_"+vn);
+  var arrow=document.getElementById("msk_arrow_"+vn);
+  if(!body||!arrow) return;
+  var open=body.classList.toggle("open");
+  arrow.classList.toggle("open",open);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  VISIT CARDS
+// ════════════════════════════════════════════════════════════════
+function buildVisitCard(vn){
+  var div=document.createElement("div"); div.className="visit-card"; div.id="vc"+vn;
+  div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
+    '<div style="display:flex;align-items:center;gap:6px">'+
+    '<span style="font-size:10px;color:#94a3b8">Date</span>'+
+    '<input type="date" class="vdi" id="vd'+vn+'">'+
+    '<button class="today-btn" onclick="setToday(\'vd'+vn+'\')">Today</button>'+
+    '</div></div>';
+  FIELDS.forEach(function(sec,si){
+    var secId="vsec_"+vn+"_"+si;
+    var sd=document.createElement("div"); sd.className="vsec";
+
+    // Collapsible section header
+    var t=document.createElement("div"); t.className="vsec-title vsec-toggle"; t.id="vsec_hdr_"+vn+"_"+si;
+    t.innerHTML=sec.sec+'<span class="vsec-arrow" id="'+secId+'_arr">▶</span>';
+    t.addEventListener("click",(function(id){ return function(){
+      var body=document.getElementById(id+"_body");
+      var arr=document.getElementById(id+"_arr");
+      var open=body.classList.toggle("open");
+      arr.classList.toggle("open",open);
+    }; })(secId));
+    sd.appendChild(t);
+
+    // Collapsible body
+    var body=document.createElement("div"); body.className="vsec-body"; body.id=secId+"_body";
+    sec.items.forEach(function(item,ii){
+      var itemWrap=document.createElement("div"); itemWrap.style.marginBottom="2px";
+      var row=document.createElement("div"); row.className="vfield";
+      var hasPanel=(sec.hasOffenders||item.tagPopup||item.thenNow);
+      var lbl=document.createElement("span"); lbl.className="vfield-label"+(hasPanel?" vfield-tappable":""); lbl.textContent=item.lbl+(hasPanel?" +":"");
+      if(hasPanel){
+        var panelKey=(sec.hasOffenders?"v"+vn+"_of_"+si+"_"+ii:"v"+vn+"_tag_"+si+"_"+ii);
+        var panelSafe=panelKey.replace(/[^a-z0-9]/gi,"_");
+        lbl.addEventListener("click",(function(sk){ return function(e){ e.stopPropagation(); toggleTagPanel(sk); }; })(panelSafe));
+      }
+      row.appendChild(lbl);
+      var od=document.createElement("div"); od.className="vfield-opts";
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var key=mkKey(vn,si,ii,oi);
+          var w=document.createElement("div"); w.className="mwrap";
+          var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
+          c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
+          var ol=document.createElement("span"); ol.className="opt-lbl"; ol.textContent=opt;
+          w.appendChild(c); w.appendChild(ol); od.appendChild(w);
+        });
+      } else {
+        var key=mkKey(vn,si,ii);
+        var w=document.createElement("div"); w.className="mwrap";
+        var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
+        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
+        w.appendChild(c); od.appendChild(w);
+      }
+      row.appendChild(od); itemWrap.appendChild(row);
+      // Inline tag pill panels (iPad-friendly, no popup)
+      if(sec.hasOffenders){
+        var ofKey="v"+vn+"_of_"+si+"_"+ii;
+        buildTagPanel(itemWrap, ofKey, OFFENDER_OPTIONS, false, false);
+      }
+      if(item.tagPopup){
+        var tpKey="v"+vn+"_tag_"+si+"_"+ii;
+        buildTagPanel(itemWrap, tpKey, item.tagPopup.options, item.tagPopup.hasCustom, false);
+      }
+      if(item.thenNow){
+        var tnKey="v"+vn+"_tag_"+si+"_"+ii;
+        buildTagPanel(itemWrap, tnKey, [], false, true);
+      }
+      body.appendChild(itemWrap);
+    });
+    sd.appendChild(body);
+    div.appendChild(sd);
+  });
+  var no=document.createElement("div"); no.className="visit-notes";
+  no.innerHTML='<label>Visit Notes</label><textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>';
+  div.appendChild(no);
+
+  // MSK section
+  var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle"; mskToggle.id="msk_main_"+vn;
+  mskToggle.innerHTML='<span class="msk-toggle-label">💪 MSK — Muscle Testing</span><span class="msk-toggle-arrow" id="msk_arrow_'+vn+'">▶</span>';
+  mskToggle.addEventListener("click",(function(v){ return function(){ toggleMsk(v); }; })(vn));
+  div.appendChild(mskToggle);
+
+  var mskBody=document.createElement("div"); mskBody.className="msk-body"; mskBody.id="msk_body_"+vn;
+
+  // Build muscle sections — each collapsible
+  MSK_SECTIONS.forEach(function(sect,si){
+    var secId="msk_sec_"+vn+"_"+si;
+    var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.id="msk_sec_hdr_"+vn+"_"+si;
+    sh.innerHTML='<span>'+sect.sec+'</span><span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
+    sh.addEventListener("click",(function(id){ return function(){
+      var body=document.getElementById(id+"_body");
+      var arr=document.getElementById(id+"_arr");
+      var open=body.classList.toggle("open");
+      arr.classList.toggle("open",open);
+    }; })(secId));
+    mskBody.appendChild(sh);
+
+    var secBody=document.createElement("div"); secBody.className="msk-sec-body"; secBody.id=secId+"_body";
+    var grid=document.createElement("div"); grid.className="msk-grid";
+    sect.muscles.forEach(function(muscle,mi){
+      var rKey="v"+vn+"_msk_"+si+"_"+mi+"_R", lKey="v"+vn+"_msk_"+si+"_"+mi+"_L";
+      var row=document.createElement("div"); row.className="msk-row";
+      var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=muscle; lbl.textContent=muscle;
+      var cells=document.createElement("div"); cells.className="msk-cells";
+      ["R","L"].forEach(function(side){
+        var key=side==="R"?rKey:lKey;
+        var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
+        var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
+        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
+        var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
+        wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
+      });
+      row.appendChild(lbl); row.appendChild(cells); grid.appendChild(row);
+    });
+    secBody.appendChild(grid);
+    mskBody.appendChild(secBody);
+  });
+
+  // Organs section — also collapsible
+  var orgSecId="msk_org_"+vn;
+  var oh=document.createElement("div"); oh.className="msk-sec-hdr msk-org-hdr";
+  oh.innerHTML='<span>🫀 Organ Indicators</span><span class="msk-sec-arrow" id="'+orgSecId+'_arr">▶</span>';
+  oh.addEventListener("click",(function(id){ return function(){
+    var body=document.getElementById(id+"_body");
+    var arr=document.getElementById(id+"_arr");
+    var open=body.classList.toggle("open");
+    arr.classList.toggle("open",open);
+  }; })(orgSecId));
+  mskBody.appendChild(oh);
+
+  var orgSecBody=document.createElement("div"); orgSecBody.className="msk-sec-body"; orgSecBody.id=orgSecId+"_body";
+  var orgGrid=document.createElement("div"); orgGrid.className="msk-grid";
+  MSK_ORGANS.forEach(function(organ,oi){
+    var key="v"+vn+"_org_"+oi;
+    var row=document.createElement("div"); row.className="msk-row";
+    var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=organ; lbl.textContent=organ;
+    var cells=document.createElement("div"); cells.className="msk-cells";
+    var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
+    var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
+    c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
+    var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent="RL";
+    wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
+    row.appendChild(lbl); row.appendChild(cells); orgGrid.appendChild(row);
+  });
+  orgSecBody.appendChild(orgGrid);
+  mskBody.appendChild(orgSecBody);
+  div.appendChild(mskBody);
+
+  // ── Supplements section ──────────────────────────────────────
+  var suppToggle=document.createElement("div"); suppToggle.className="supp-toggle"; suppToggle.id="supp_hdr_"+vn;
+  suppToggle.innerHTML='<span class="supp-toggle-label">💊 Supplements</span><span class="supp-toggle-arrow" id="supp_arrow_'+vn+'">▶</span>';
+  suppToggle.addEventListener("click",(function(v){ return function(){
+    var body=document.getElementById("supp_body_"+v);
+    var arr=document.getElementById("supp_arrow_"+v);
+    var open=body.classList.toggle("open");
+    arr.classList.toggle("open",open);
+  }; })(vn));
+  div.appendChild(suppToggle);
+
+  var suppBody=document.createElement("div"); suppBody.className="supp-body"; suppBody.id="supp_body_"+vn;
+
+  // Prescribed summary
+  var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn; suppBody.appendChild(suppMarked);
+
+  // Search bar
+  var suppSearch=document.createElement("input"); suppSearch.type="text";
+  suppSearch.placeholder="\uD83D\uDD0D Search all "+SUPPLEMENTS.length+" supplements...";
+  suppSearch.style.cssText="width:100%;padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:20px;font-size:12px;outline:none;margin-bottom:8px;box-sizing:border-box;color:#374151";
+  suppSearch.addEventListener("input",(function(v2){ return function(){ filterSupps(v2, suppSearch.value); }; })(vn));
+  suppBody.appendChild(suppSearch);
+
+  // Brand groups
+  var suppBrandsDiv=document.createElement("div"); suppBrandsDiv.id="supp_brands_"+vn;
+  SUPP_BRANDS.forEach(function(brand,bi){
+    var brandId="supp_brand_"+vn+"_"+bi;
+    // Brand header
+    var hdr=document.createElement("div"); hdr.className="supp-brand-hdr"; hdr.id=brandId+"_hdr";
+    hdr.dataset.brand=brand.brand.toLowerCase();
+    hdr.innerHTML='<span class="supp-brand-name">'+escHtml(brand.brand)+'</span>'+
+      '<span class="supp-brand-count" id="'+brandId+'_count">'+brand.items.length+'</span>'+
+      '<span class="supp-brand-arrow" id="'+brandId+'_arr">\u25B6</span>';
+    hdr.addEventListener("click",(function(bid){ return function(e){
+      e.stopPropagation();
+      var body=document.getElementById(bid+"_body");
+      var arr=document.getElementById(bid+"_arr");
+      var open=body.classList.toggle("open");
+      arr.style.transform=open?"rotate(90deg)":"";
+    }; })(brandId));
+    suppBrandsDiv.appendChild(hdr);
+    // Brand body
+    var body=document.createElement("div"); body.className="supp-brand-body"; body.id=brandId+"_body";
+    brand.items.forEach(function(item){
+      var si=item.idx;
+      var key="v"+vn+"_supp_"+si;
+      var row=document.createElement("div"); row.className="supp-row"; row.dataset.name=item.name.toLowerCase(); row.dataset.si=si;
+      var lbl=document.createElement("span"); lbl.className="supp-label"; lbl.textContent=item.name;
+      var c=document.createElement("div"); c.className="supp-cell"; c.id="sc2_"+key;
+      c.addEventListener("click",(function(k,v2){ return function(e){ e.stopPropagation(); onSuppClick(k); renderSuppMarked(v2); updateSuppHL(v2); }; })(key,vn));
+      row.appendChild(lbl); row.appendChild(c); body.appendChild(row);
+    });
+    suppBrandsDiv.appendChild(body);
+  });
+  suppBody.appendChild(suppBrandsDiv);
+  div.appendChild(suppBody);
+
+  return div;
+}
+
+function buildAllVisits(){
+  [[1,6,"pg1"],[7,12,"pg2"],[13,18,"pg3"]].forEach(function(p){
+    var g=document.getElementById(p[2]); g.innerHTML="";
+    for(var v=p[0];v<=p[1];v++) g.appendChild(buildVisitCard(v));
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SYMPTOM TABLE
+// ════════════════════════════════════════════════════════════════
+function addSymRow(){ S.symRows++; renderSymTable(); autoSave(); }
+
+function onSymCellClick(row,week){
+  var key="r"+row+"_c"+week;
+  if(activeColor===null){ delete S.symptoms[key]; delete S.symVisited[key]; renderSymCell(row,week); autoSave(); return; }
+  if(S.symptoms[key]===activeColor&&S.symVisited[key]){ delete S.symptoms[key]; delete S.symVisited[key]; renderSymCell(row,week); autoSave(); return; }
+  var lastMarked=0,prevColor=null;
+  for(var w=week-1;w>=1;w--){ if(S.symptoms["r"+row+"_c"+w]){ lastMarked=w; prevColor=S.symptoms["r"+row+"_c"+w]; break; } }
+  if(prevColor){
+    for(var fw=lastMarked+1;fw<week;fw++){
+      var fk="r"+row+"_c"+fw;
+      if(!S.symptoms[fk]){ S.symptoms[fk]=prevColor; renderSymCell(row,fw); }
+    }
+  }
+  S.symptoms[key]=activeColor; S.symVisited[key]=true; renderSymCell(row,week); autoSave();
+}
+
+function renderSymCell(row,week){
+  var cell=document.getElementById("sc_r"+row+"_c"+week); if(!cell) return;
+  var key="r"+row+"_c"+week;
+  var cn=S.symptoms[key]; var visited=S.symVisited[key];
+  if(cn&&COLOR_MAP[cn]){
+    var h=COLOR_MAP[cn].hex; cell.style.borderColor=h;
+    if(visited){ cell.style.background=h+"25"; cell.style.color=h; cell.textContent="✕"; }
+    else { cell.style.background=h+"55"; cell.style.color="transparent"; cell.textContent="·"; }
+  } else { cell.style.borderColor=cell.style.background=cell.style.color=""; cell.textContent=""; }
+}
+function renderAllSymCells(){ for(var r=0;r<S.symRows;r++) for(var w=1;w<=26;w++) renderSymCell(r,w); }
+
+function renderSymTable(){
+  var tbody=document.getElementById("symBody"); tbody.innerHTML="";
+  for(var r=0;r<S.symRows;r++){
+    (function(row){
+      var tr=document.createElement("tr");
+      var tdL=document.createElement("td");
+      var inp=document.createElement("input"); inp.type="text"; inp.placeholder="Complaint "+(row+1);
+      inp.value=S.symLabels["r"+row]||"";
+      inp.addEventListener("input",(function(rr){ return function(){ S.symLabels["r"+rr]=inp.value; autoSave(); }; })(row));
+      tdL.appendChild(inp); tr.appendChild(tdL);
+      for(var w=1;w<=26;w++){
+        (function(wk){
+          var td=document.createElement("td"); td.style.padding="2px";
+          var cell=document.createElement("div"); cell.className="sym-cell"; cell.id="sc_r"+row+"_c"+wk;
+          cell.addEventListener("click",(function(rr,ww){ return function(){ onSymCellClick(rr,ww); }; })(row,wk));
+          td.appendChild(cell); tr.appendChild(td);
+        })(w);
+      }
+      tbody.appendChild(tr);
+    })(r);
+  }
+  renderAllSymCells();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PATIENT INFO
+// ════════════════════════════════════════════════════════════════
+var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_status:"status"};
+
+function loadPatientInfo(){
+  Object.keys(PI_MAP).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.value=S.patientInfo[PI_MAP[id]]||"";
+  });
+  // Update header name
+  var n=S.patientInfo.name;
+  document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
+}
+function collectPatientInfo(){
+  Object.keys(PI_MAP).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) S.patientInfo[PI_MAP[id]]=el.value;
+  });
+  var n=S.patientInfo.name;
+  document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
+}
+
+function loadVisitDates(){
+  for(var v=1;v<=18;v++){
+    (function(vn){
+      var el=document.getElementById("vd"+vn);
+      if(el){
+        el.value=S.visitDates[vn]||"";
+        el.addEventListener("input",(function(n){ return function(){
+          S.visitDates[n]=el.value;
+          // Auto-fill Case Start from V1 date if still blank
+          if(n===1 && el.value && !S.patientInfo.start){
+            S.patientInfo.start=el.value;
+            var se=document.getElementById("fi_start"); if(se) se.value=el.value;
+          }
+          autoSave();
+        }; })(vn));
+      }
+      var ne=document.getElementById("vn"+vn);
+      if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; autoSave(); }; })(vn)); }
+    })(v);
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SAVE / LOAD / RENDER
+// ════════════════════════════════════════════════════════════════
+function saveAll(){
+  if(!currentPatientId) return;
+  collectPatientInfo();
+  localStorage.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
+  updateIndex(currentPatientId,S.patientInfo);
+  var t=document.getElementById("toast"); t.style.opacity="1";
+  setTimeout(function(){ t.style.opacity="0"; },1600);
+}
+
+function renderAll(){
+  loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
+  // Hook up patient info inputs (once per open)
+  Object.keys(PI_MAP).forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){ el.oninput=function(){ collectPatientInfo(); autoSave(); }; }
+  });
+}
+
+var _aT;
+function autoSave(){ clearTimeout(_aT); _aT=setTimeout(saveAll,1200); }
+
+// ════════════════════════════════════════════════════════════════
+//  EXPORT
+// ════════════════════════════════════════════════════════════════
+// ── BULK EXPORT ────────────────────────────────────────────────
+function bulkExport(){
+  var idx=loadIndex();
+  var patients={};
+  idx.forEach(function(pt){
+    var raw=localStorage.getItem(PT_PREFIX+pt.id);
+    if(raw){ try{ patients[pt.id]=JSON.parse(raw); }catch(e){} }
+  });
+  var payload={
+    version:1,
+    exportedAt:new Date().toISOString(),
+    practice:"Momentum Health & Wellness",
+    index:idx,
+    patients:patients
+  };
+  var date=new Date().toISOString().split("T")[0];
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="momentum_backup_"+date+".json"; a.click();
+  showToast("✓ Backup downloaded — "+idx.length+" patient"+(idx.length===1?"":"s"));
+}
+
+// ── BULK IMPORT ────────────────────────────────────────────────
+function bulkImport(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var payload=JSON.parse(e.target.result);
+      if(!payload.version||!payload.index||!payload.patients){
+        alert("❌ Not a valid Momentum backup file."); return;
+      }
+      var incoming=payload.index.length;
+      var existing=loadIndex().length;
+      var msg="Import "+incoming+" patient record"+(incoming===1?"":"s")+" from backup dated "+
+        (payload.exportedAt?payload.exportedAt.split("T")[0]:"unknown")+"?\n\n"+
+        "Choose:\n• OK = Merge (keeps existing, adds/updates from backup)\n• Cancel = Abort";
+      if(!confirm(msg)){ input.value=""; return; }
+
+      // Merge: build a map of existing IDs
+      var existingIdx=loadIndex();
+      var existingMap={};
+      existingIdx.forEach(function(pt){ existingMap[pt.id]=pt; });
+
+      // Write all patient data from backup
+      payload.index.forEach(function(pt){
+        existingMap[pt.id]=pt; // upsert into index
+        if(payload.patients[pt.id]){
+          localStorage.setItem(PT_PREFIX+pt.id, JSON.stringify(payload.patients[pt.id]));
+        }
+      });
+
+      // Save merged index
+      var mergedIdx=Object.values(existingMap);
+      localStorage.setItem(INDEX_KEY, JSON.stringify(mergedIdx));
+
+      input.value="";
+      renderDash(); renderStats();
+      showToast("✓ Imported "+incoming+" patient"+(incoming===1?"":"s"));
+    }catch(err){
+      alert("❌ Failed to read backup file: "+err.message);
+      input.value="";
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportData(){
+  collectPatientInfo();
+  var name=(S.patientInfo.name||"patient").replace(/\s+/g,"_");
+  var date=new Date().toISOString().split("T")[0];
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="momentum_"+name+"_"+date+".json"; a.click();
+  // Save export timestamp
+  if(currentPatientId){
+    localStorage.setItem("mhw_export_"+currentPatientId, new Date().toISOString());
+    updateBackupStatus();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PRINT TIMELINE — UNIFIED
+// ════════════════════════════════════════════════════════════════
+function hexToRgba(hex,alpha){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+alpha+')';
+}
+function colorBlock(colorName,visited){
+  if(!colorName||!COLOR_MAP[colorName]) return '<span style="display:inline-block;width:26px;height:14px"></span>';
+  var h=COLOR_MAP[colorName].hex;
+  var base='display:inline-block;width:26px;height:14px;border-radius:2px;margin:1px auto;text-align:center;vertical-align:middle;';
+  if(visited) return '<span style="'+base+'background:'+h+';color:white;font-size:9px;font-weight:900;line-height:14px">✕</span>';
+  return '<span style="'+base+'background:'+hexToRgba(h,0.25)+';border:1.5px solid '+h+'"></span>';
+}
+
+function calcWeekNum(startDate, visitDate) {
+  if (!startDate || !visitDate) return null;
+  var start = new Date(startDate);
+  var visit = new Date(visitDate);
+  if (isNaN(start.getTime()) || isNaN(visit.getTime())) return null;
+  var diffMs = visit - start;
+  var weekNum = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
+  return Math.max(1, Math.min(26, weekNum));
+}
+
+function buildPrintView(){
+  var pi=S.patientInfo, meta=[];
+  if(pi.name)     meta.push("<strong>Patient:</strong> "+escHtml(pi.name));
+  if(pi.dob)      meta.push("<strong>DOB:</strong> "+pi.dob);
+  if(pi.start)    meta.push("<strong>Case Start:</strong> "+pi.start);
+  if(pi.provider) meta.push("<strong>Provider:</strong> "+escHtml(pi.provider));
+  if(pi.mrn)      meta.push("<strong>MRN:</strong> "+escHtml(pi.mrn));
+  if(pi.status)   meta.push("<strong>Status:</strong> "+escHtml(pi.status.charAt(0).toUpperCase()+pi.status.slice(1)));
+  document.getElementById("pv-meta").innerHTML=meta.join(" &nbsp;|&nbsp; ");
+  document.getElementById("pv-date").textContent="Printed: "+new Date().toLocaleDateString();
+
+  // ── determine max visit with any data ──────────────────────
+  var maxV=0;
+  for(var v=1;v<=18;v++){
+    if(S.visitDates[v]){ maxV=v; continue; }
+    var keys=Object.keys(S.marks);
+    for(var k=0;k<keys.length;k++){ if(keys[k].indexOf("v"+v+"_")===0){ maxV=v; break; } }
+  }
+  maxV=Math.max(maxV,1);
+
+  // ── effective start: Case Start date, or V1 date as fallback ─
+  var effectiveStart=pi.start||S.visitDates[1]||null;
+
+  // ── find all directly-visited (X-marked) symptom weeks in order ──
+  var visitedSymWeekSet={};
+  for(var r=0;r<S.symRows;r++){
+    for(var w=1;w<=26;w++){
+      if(S.symVisited["r"+r+"_c"+w]) visitedSymWeekSet[w]=true;
+    }
+  }
+  var visitedSymWeeks=Object.keys(visitedSymWeekSet).map(Number).sort(function(a,b){return a-b;});
+
+  // ── visit → week map ───────────────────────────────────────
+  // Primary: order-based (V1→1st X week, V2→2nd X week, V3→3rd X week, ...)
+  // Fallback: calendar date if we run out of marked weeks
+  var visitWeekMap={}, hasVisitDates=false;
+  for(var v=1;v<=18;v++){
+    var idx=v-1;
+    if(idx<visitedSymWeeks.length){
+      visitWeekMap[v]=visitedSymWeeks[idx]; hasVisitDates=true;
+    } else if(S.visitDates[v]&&effectiveStart){
+      var wk=calcWeekNum(effectiveStart,S.visitDates[v]);
+      if(wk){ visitWeekMap[v]=wk; hasVisitDates=true; }
+    }
+  }
+
+  // ── subjective: always gather by week, also map to visit cols if dates available ──
+  var symRowsByWeek=[], maxSymW=0;   // for W-axis fallback
+  var symRows=[];                    // for visit-column mapping
+  for(var r=0;r<S.symRows;r++){
+    var weekM={},weekV={},anyW=false;
+    for(var w=1;w<=26;w++){
+      var cn=S.symptoms["r"+r+"_c"+w];
+      if(cn){ weekM[w]=cn; weekV[w]=!!S.symVisited["r"+r+"_c"+w]; anyW=true; if(w>maxSymW) maxSymW=w; }
+    }
+    if(anyW) symRowsByWeek.push({label:S.symLabels["r"+r]||("Complaint "+(r+1)),marks:weekM,visited:weekV});
+
+    if(hasVisitDates){
+      var colM={},colV={},anyC=false;
+      for(var v=1;v<=maxV;v++){
+        var wk=visitWeekMap[v]; if(!wk) continue;
+        var cn2=S.symptoms["r"+r+"_c"+wk];
+        if(cn2){ colM[v]=cn2; colV[v]=!!S.symVisited["r"+r+"_c"+wk]; anyC=true; }
+      }
+      if(anyC) symRows.push({label:S.symLabels["r"+r]||("Complaint "+(r+1)),marks:colM,visited:colV});
+    }
+  }
+
+  // ── objective ──────────────────────────────────────────────
+  var secData={};
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      // Gather offender tags per visit for offenderable sections
+      var offByVisit={};
+      if(sec.hasOffenders&&S.offenderTags){
+        for(var v=1;v<=18;v++){
+          var tags=(S.offenderTags["v"+v+"_of_"+si+"_"+ii])||[];
+          if(tags.length) offByVisit[v]=tags;
+        }
+      }
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var rm={},any=false;
+          for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii,oi)]; if(cn){ rm[v]=cn; any=true; } }
+          if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl+" ("+opt+")",marks:rm,offByVisit:offByVisit}); }
+        });
+      } else {
+        var rm={},any=false;
+        for(var v=1;v<=18;v++){ var cn=S.marks[mkKey(v,si,ii)]; if(cn){ rm[v]=cn; any=true; } }
+        if(any){ if(!secData[sec.sec]) secData[sec.sec]=[]; secData[sec.sec].push({label:item.lbl,marks:rm,offByVisit:offByVisit}); }
+      }
+    });
+  });
+
+  // ── MSK ────────────────────────────────────────────────────
+  var mskSecData={};
+  MSK_SECTIONS.forEach(function(sect,si){
+    sect.muscles.forEach(function(muscle,mi){
+      var rmR={},rmL={},anyR=false,anyL=false;
+      for(var v=1;v<=18;v++){
+        var kr=S.marks["v"+v+"_msk_"+si+"_"+mi+"_R"]; if(kr){ rmR[v]=kr; anyR=true; }
+        var kl=S.marks["v"+v+"_msk_"+si+"_"+mi+"_L"]; if(kl){ rmL[v]=kl; anyL=true; }
+      }
+      if(anyR||anyL){
+        if(!mskSecData[sect.sec]) mskSecData[sect.sec]=[];
+        if(anyR) mskSecData[sect.sec].push({label:muscle+" (R)",marks:rmR});
+        if(anyL) mskSecData[sect.sec].push({label:muscle+" (L)",marks:rmL});
+      }
+    });
+  });
+
+  // ── organs ─────────────────────────────────────────────────
+  var orgRows=[];
+  MSK_ORGANS.forEach(function(organ,oi){
+    var rm={},any=false;
+    for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_org_"+oi]; if(cn){ rm[v]=cn; any=true; } }
+    if(any) orgRows.push({label:organ,marks:rm});
+  });
+
+  // ── supplements ────────────────────────────────────────────
+  var suppRows=[];
+  SUPPLEMENTS.forEach(function(supp,si){
+    var rm={},any=false;
+    for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_supp_"+si]; if(cn){ rm[v]=cn; any=true; } }
+    if(any) suppRows.push({label:supp,marks:rm});
+  });
+
+  var hasAnyData=symRows.length||Object.keys(secData).length||Object.keys(mskSecData).length||orgRows.length||suppRows.length;
+  var content=document.getElementById("pv-content");
+
+  if(!hasAnyData){
+    content.innerHTML='<p style="font-size:11px;color:#94a3b8;font-style:italic">No data recorded yet.</p>';
+    return;
+  }
+
+  // ── subjective week-axis table (shown when no visit dates, or as supplement) ──
+  var symPreamble='';
+  if(symRowsByWeek.length&&(!hasVisitDates)){
+    maxSymW=Math.max(maxSymW,1);
+    symPreamble+='<div class="pv-section"><div class="pv-section-title">Subjective Complaints — Weekly Progress</div>';
+    symPreamble+='<table class="tl-table"><thead><tr><th class="row-hdr">Complaint</th>';
+    for(var w=1;w<=maxSymW;w++) symPreamble+='<th>W'+w+'</th>';
+    symPreamble+='</tr></thead><tbody>';
+    symRowsByWeek.forEach(function(row){
+      symPreamble+='<tr><td class="row-lbl">'+escHtml(row.label)+'</td>';
+      for(var w=1;w<=maxSymW;w++) symPreamble+='<td>'+colorBlock(row.marks[w],row.visited[w])+'</td>';
+      symPreamble+='</tr>';
+    });
+    symPreamble+='</tbody></table></div>';
+  }
+
+  // ── extra week cols: symptom weeks beyond the last visit ──
+  var maxVisitWk=0;
+  for(var v=1;v<=maxV;v++){ if(visitWeekMap[v]&&visitWeekMap[v]>maxVisitWk) maxVisitWk=visitWeekMap[v]; }
+  var extraWeeks=[];
+  if(hasVisitDates){
+    for(var w=maxVisitWk+1;w<=maxSymW;w++){
+      var hasSymHere=false;
+      for(var r2=0;r2<S.symRows;r2++){ if(S.symptoms["r"+r2+"_c"+w]){ hasSymHere=true; break; } }
+      if(hasSymHere) extraWeeks.push(w);
+    }
+  }
+  var totalCols=maxV+extraWeeks.length;
+
+  // Build a lookup from symRowsByWeek by label for extra week data
+  var symByLabel={};
+  symRowsByWeek.forEach(function(row){ symByLabel[row.label]={marks:row.marks,visited:row.visited}; });
+
+  // Helper: extra-week cells for a row (empty for objective/MSK/organs/supplements)
+  function extraCells(symLabel){
+    var s='';
+    for(var ei=0;ei<extraWeeks.length;ei++){
+      var ew=extraWeeks[ei];
+      if(symLabel!==null){
+        var wd=symByLabel[symLabel]||{marks:{},visited:{}};
+        s+='<td>'+colorBlock(wd.marks[ew],wd.visited[ew])+'</td>';
+      } else {
+        s+='<td></td>';
+      }
+    }
+    return s;
+  }
+
+  // ── build single visit-aligned table ──────────────────────
+  var html='<table class="tl-table"><thead><tr><th class="row-hdr">Visit →</th>';
+  for(var v=1;v<=maxV;v++){
+    html+='<th>V'+v;
+    if(S.visitDates[v]) html+='<br><span style="font-size:7px;font-weight:600;opacity:.85">'+S.visitDates[v]+'</span>';
+    if(hasVisitDates&&visitWeekMap[v]) html+='<br><span style="font-size:7px;opacity:.55">Wk'+visitWeekMap[v]+'</span>';
+    html+='</th>';
+  }
+  for(var ei=0;ei<extraWeeks.length;ei++){
+    html+='<th style="background:#374151!important;font-style:italic;opacity:.85">W'+extraWeeks[ei]+'<br><span style="font-size:7px;opacity:.6">pending</span></th>';
+  }
+  html+='</tr></thead><tbody>';
+
+  // SUBJECTIVE — visit-mapped + extra weeks
+  if(hasVisitDates&&(symRows.length||extraWeeks.length)){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'">SUBJECTIVE COMPLAINTS</th></tr>';
+    symRows.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],row.visited[v])+'</td>';
+      html+=extraCells(row.label);
+      html+='</tr>';
+    });
+  }
+
+  // OBJECTIVE
+  if(Object.keys(secData).length){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'">OBJECTIVE FINDINGS</th></tr>';
+    Object.keys(secData).forEach(function(sn){
+      html+='<tr><td class="row-lbl" colspan="'+(totalCols+1)+'" style="background:#f1f5f9!important;font-size:9px;font-weight:800;color:#374151;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
+      secData[sn].forEach(function(row){
+        html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+        for(var v=1;v<=maxV;v++){
+          var cell=colorBlock(row.marks[v],true);
+          // Only show offender tags if this option actually has a mark at this visit
+          if(row.marks[v]&&row.offByVisit&&row.offByVisit[v]&&row.offByVisit[v].length)
+            cell+='<br><span style="font-size:6px;color:#92400e;display:block;text-align:center;line-height:1.3">'+escHtml(row.offByVisit[v].join(", "))+'</span>';
+          html+='<td>'+cell+'</td>';
+        }
+        html+=extraCells(null);
+        html+='</tr>';
+      });
+    });
+  }
+
+  // MSK
+  if(Object.keys(mskSecData).length){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#5b21b6!important">MSK — MUSCLE TESTING</th></tr>';
+    Object.keys(mskSecData).forEach(function(sn){
+      html+='<tr><td class="row-lbl" colspan="'+(totalCols+1)+'" style="background:#ede9fe!important;font-size:9px;font-weight:800;color:#5b21b6;letter-spacing:.05em;text-transform:uppercase;padding:3px 6px">'+sn+'</td></tr>';
+      mskSecData[sn].forEach(function(row){
+        html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+        for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+        html+=extraCells(null);
+        html+='</tr>';
+      });
+    });
+  }
+
+  // ORGANS
+  if(orgRows.length){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#9d174d!important">ORGAN INDICATORS</th></tr>';
+    orgRows.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+=extraCells(null);
+      html+='</tr>';
+    });
+  }
+
+  // SUPPLEMENTS
+  if(suppRows.length){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#0369a1!important">SUPPLEMENTS PRESCRIBED</th></tr>';
+    suppRows.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+=extraCells(null);
+      html+='</tr>';
+    });
+  }
+
+  html+='</tbody></table>';
+  if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter Visit 1 date to align subjective symptoms with visit columns (V1 date = Week 1 anchor).</p>';
+  else if(!pi.start&&S.visitDates[1]) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">ℹ️ Week 1 anchored to Visit 1 date ('+S.visitDates[1]+').</p>';
+
+  content.innerHTML=symPreamble+html;
+
+  // (no more code below — old branches removed)
+  return;
+}
+
+function doPrint(){
+  buildPrintView();
+  var pi=S.patientInfo;
+  var rawName=(pi.name||"").trim();
+  var lastName="", firstName="";
+  if(rawName.indexOf(",")>-1){
+    var parts=rawName.split(",");
+    lastName=(parts[0]||"").trim();
+    firstName=(parts[1]||"").trim();
+  } else {
+    var words=rawName.split(/\s+/);
+    lastName=words.length>1?words[words.length-1]:"";
+    firstName=words.length>1?words.slice(0,words.length-1).join(" "):words[0]||"";
+  }
+  var colDate=(pi.collection||"").trim();
+  var namePart=lastName&&firstName?(lastName+", "+firstName):(rawName||"Patient");
+  var titleStr=colDate?(namePart+" "+colDate):namePart;
+  var origTitle=document.title;
+  document.title=titleStr;
+  window.print();
+  document.title=origTitle;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  TODAY BUTTON
+// ════════════════════════════════════════════════════════════════
+function setToday(inputId){
+  var el=document.getElementById(inputId); if(!el) return;
+  var t=new Date();
+  el.value=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+  var vn=parseInt(inputId.replace("vd","")); if(vn) S.visitDates[vn]=el.value;
+  autoSave();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════
+buildAllVisits();
+</script>
+</body>
+</html>
