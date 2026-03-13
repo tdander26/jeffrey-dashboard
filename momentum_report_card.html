@@ -297,6 +297,43 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .recent-name{font-weight:700;font-size:14px;color:#1a1a2e;flex:1;min-width:120px}
 .recent-meta{font-size:11px;color:#64748b}
 
+/* ── VISIT MODAL ── */
+#visitModal{position:fixed;inset:0;z-index:2000;background:rgba(10,14,30,0.97);display:none;overflow-y:auto}
+#visitModal.open{display:block}
+#vmHdr{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:2px solid rgba(255,255,255,.08);box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.vm-back{background:rgba(255,255,255,.12);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;flex-shrink:0}
+.vm-back:hover{background:rgba(255,255,255,.25)}
+#vmTitle{font-size:20px;font-weight:900;color:white;line-height:1}
+#vmDate{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px}
+.vm-colors{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.vm-cb{display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:8px;border:2px solid rgba(255,255,255,.18);cursor:pointer;font-size:12px;font-weight:700;color:rgba(255,255,255,.65);transition:all .18s;user-select:none;white-space:nowrap}
+.vm-cb:hover{border-color:rgba(255,255,255,.5);color:white}
+.vm-cb.active{border-color:white;color:white;background:rgba(255,255,255,.18);box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.vm-clr{background:transparent;color:rgba(255,255,255,.5);border:2px solid rgba(255,255,255,.18);border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:all .18s;white-space:nowrap}
+.vm-clr:hover{background:rgba(255,255,255,.1);color:white;border-color:rgba(255,255,255,.4)}
+#vmBody{padding:20px;max-width:1400px;margin:0 auto}
+/* Card inside modal — 2-col grid layout */
+.visit-card.in-modal{background:white;border-radius:14px;padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;border:none;box-shadow:none;margin:0}
+.visit-card.in-modal .visit-header,
+.visit-card.in-modal .visit-notes,
+.visit-card.in-modal .msk-toggle,
+.visit-card.in-modal .msk-body,
+.visit-card.in-modal .supp-toggle,
+.visit-card.in-modal .supp-body{grid-column:1/-1}
+.visit-card.in-modal .vsec{background:#f8fafc;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0}
+.visit-card.in-modal .vsec-title{font-size:11px;background:transparent;border:none;padding:0 0 8px 0;border-bottom:1px solid #e2e8f0;margin-bottom:6px}
+.visit-card.in-modal .vsec-body{display:block!important;padding:0}
+.visit-card.in-modal .vsec-arrow{display:none}
+.visit-card.in-modal .vfield-label{font-size:12px}
+.visit-card.in-modal .msk-grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.visit-card.in-modal .supp-brand-body{display:block!important}
+.visit-card.in-modal .supp-brand-arrow{display:none}
+/* Clickable visit number in the card */
+.visit-num{cursor:pointer;transition:color .15s;display:flex;align-items:center;gap:6px}
+.visit-num:hover{color:#3b82f6}
+.visit-num:hover .vn-expand{opacity:1;color:#3b82f6}
+.vn-expand{font-size:13px;opacity:.3;transition:opacity .2s;font-weight:400}
+
 /* PRINT */
 #printView{display:none}
 @page{size:landscape;margin:12mm}
@@ -357,6 +394,25 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   <div class="opp-title" id="oppTitle">Offender Challenges</div>
   <div id="oppItems"></div>
   <button class="opp-done" onclick="closeOffenderPopup()">✓ Done</button>
+</div>
+
+<!-- VISIT MODAL -->
+<div id="visitModal">
+  <div id="vmHdr">
+    <button class="vm-back" onclick="closeVisitModal()">← Back</button>
+    <div>
+      <div id="vmTitle"></div>
+      <div id="vmDate"></div>
+    </div>
+    <div class="vm-colors">
+      <div class="vm-cb" id="vm_cb_red"    onclick="setColorVM('red')">   <div style="width:11px;height:11px;border-radius:50%;background:#ef4444;flex-shrink:0"></div>Red</div>
+      <div class="vm-cb" id="vm_cb_yellow" onclick="setColorVM('yellow')"><div style="width:11px;height:11px;border-radius:50%;background:#eab308;flex-shrink:0"></div>Yellow</div>
+      <div class="vm-cb" id="vm_cb_blue"   onclick="setColorVM('blue')">  <div style="width:11px;height:11px;border-radius:50%;background:#3b82f6;flex-shrink:0"></div>Blue</div>
+      <div class="vm-cb" id="vm_cb_green"  onclick="setColorVM('green')"> <div style="width:11px;height:11px;border-radius:50%;background:#22c55e;flex-shrink:0"></div>Green</div>
+      <button class="vm-clr" onclick="clearModeVM()">✕ Clear</button>
+    </div>
+  </div>
+  <div id="vmBody"></div>
 </div>
 
 <!-- PRINT VIEW -->
@@ -1583,7 +1639,7 @@ function toggleMsk(vn){
 // ════════════════════════════════════════════════════════════════
 function buildVisitCard(vn){
   var div=document.createElement("div"); div.className="visit-card"; div.id="vc"+vn;
-  div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
+  div.innerHTML='<div class="visit-header"><div class="visit-num" onclick="openVisitModal('+vn+')" title="Open full view">Visit '+vn+' <span class="vn-expand">↗</span></div>'+
     '<div style="display:flex;align-items:center;gap:6px">'+
     '<span style="font-size:10px;color:#94a3b8">Date</span>'+
     '<input type="date" class="vdi" id="vd'+vn+'">'+
@@ -1795,6 +1851,105 @@ function buildAllVisits(){
     for(var v=p[0];v<=p[1];v++) g.appendChild(buildVisitCard(v));
   });
 }
+
+// ════════════════════════════════════════════════════════════════
+//  VISIT MODAL
+// ════════════════════════════════════════════════════════════════
+var _vmVn = null;
+
+function openVisitModal(vn) {
+  var card = document.getElementById("vc" + vn);
+  if (!card) return;
+  _vmVn = vn;
+
+  // Header info
+  var d = document.getElementById("vd" + vn);
+  document.getElementById("vmTitle").textContent = "Visit " + vn;
+  document.getElementById("vmDate").textContent = (d && d.value) ? d.value.replace(/(\d{4})-(\d{2})-(\d{2})/,"$2/$3/$1") : "No date set";
+
+  // Move card into modal
+  card._vmParent = card.parentNode;
+  card._vmNext   = card.nextSibling;
+  document.getElementById("vmBody").appendChild(card);
+  card.classList.add("in-modal");
+
+  // Expand all field sections
+  card.querySelectorAll(".vsec-body").forEach(function(b){ b.classList.add("open"); });
+  card.querySelectorAll(".vsec-arrow").forEach(function(a){ a.classList.add("open"); });
+
+  // Expand MSK
+  var mskBody  = document.getElementById("msk_body_"  + vn);
+  var mskArrow = document.getElementById("msk_arrow_" + vn);
+  if (mskBody)  mskBody.classList.add("open");
+  if (mskArrow) mskArrow.classList.add("open");
+  card.querySelectorAll(".msk-sec-body").forEach(function(b){ b.classList.add("open"); });
+  card.querySelectorAll(".msk-sec-arrow").forEach(function(a){ a.classList.add("open"); });
+
+  // Expand supplements + all brand groups
+  var suppBody  = document.getElementById("supp_body_"  + vn);
+  var suppArrow = document.getElementById("supp_arrow_" + vn);
+  if (suppBody)  suppBody.classList.add("open");
+  if (suppArrow) suppArrow.classList.add("open");
+  SUPP_BRANDS.forEach(function(brand, bi) {
+    var bb = document.getElementById("supp_brand_" + vn + "_" + bi + "_body");
+    var ba = document.getElementById("supp_brand_" + vn + "_" + bi + "_arr");
+    if (bb) bb.classList.add("open");
+    if (ba) ba.style.transform = "rotate(90deg)";
+  });
+
+  syncVMColors();
+  document.getElementById("visitModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+  document.getElementById("visitModal").scrollTop = 0;
+}
+
+function closeVisitModal() {
+  var vmBody = document.getElementById("vmBody");
+  var card   = vmBody.querySelector(".visit-card");
+  if (card && card._vmParent) {
+    card.classList.remove("in-modal");
+    // Collapse sections back to default state
+    card.querySelectorAll(".vsec-body").forEach(function(b){ b.classList.remove("open"); });
+    card.querySelectorAll(".vsec-arrow").forEach(function(a){ a.classList.remove("open"); });
+    if (_vmVn) {
+      var mskBody  = document.getElementById("msk_body_"  + _vmVn);
+      var mskArrow = document.getElementById("msk_arrow_" + _vmVn);
+      if (mskBody)  mskBody.classList.remove("open");
+      if (mskArrow) mskArrow.classList.remove("open");
+      card.querySelectorAll(".msk-sec-body").forEach(function(b){ b.classList.remove("open"); });
+      card.querySelectorAll(".msk-sec-arrow").forEach(function(a){ a.classList.remove("open"); });
+      var suppBody  = document.getElementById("supp_body_"  + _vmVn);
+      var suppArrow = document.getElementById("supp_arrow_" + _vmVn);
+      if (suppBody)  suppBody.classList.remove("open");
+      if (suppArrow) suppArrow.classList.remove("open");
+    }
+    card._vmParent.insertBefore(card, card._vmNext || null);
+  }
+  document.getElementById("visitModal").classList.remove("open");
+  document.body.style.overflow = "";
+  _vmVn = null;
+}
+
+function setColorVM(n) {
+  setColor(n);
+  syncVMColors();
+}
+function clearModeVM() {
+  clearMode();
+  syncVMColors();
+}
+function syncVMColors() {
+  document.querySelectorAll(".vm-cb").forEach(function(b){ b.classList.remove("active"); });
+  if (activeColor) {
+    var btn = document.getElementById("vm_cb_" + activeColor);
+    if (btn) btn.classList.add("active");
+  }
+}
+
+// Close modal on Escape key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape" && _vmVn !== null) closeVisitModal();
+});
 
 // ════════════════════════════════════════════════════════════════
 //  SYMPTOM TABLE
