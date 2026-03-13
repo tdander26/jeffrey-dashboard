@@ -350,11 +350,23 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 #visitModalBody .supp-toggle{grid-column:1/-1;background:white;border-radius:12px 12px 0 0;padding:16px 18px;border:1px solid #f1f5f9;border-bottom:none}
 #visitModalBody .supp-body{grid-column:1/-1;background:white;border-radius:0 0 12px 12px;padding:0 18px 18px;border:1px solid #f1f5f9;border-top:none;margin-top:0}
 #visitModalBody .supp-body.open{display:block}
-#visitModalBody .supp-row{padding:5px 6px}
-#visitModalBody .supp-label{font-size:12px}
-#visitModalBody .supp-cell{width:38px;height:28px}
-#visitModalBody .supp-brand-hdr{padding:8px 12px}
+/* Supplement rows → full-width tappable buttons */
+#visitModalBody .supp-row{padding:10px 14px;margin-bottom:4px;border-radius:9px;border:1.5px solid #e2e8f0;background:#f8fafc;cursor:pointer;transition:all .15s}
+#visitModalBody .supp-row:not(.marked-red):not(.marked-yellow):not(.marked-blue):not(.marked-green):hover{background:#f1f5f9;border-color:#94a3b8}
+#visitModalBody .supp-row.marked-red{border-color:#ef4444;background:rgba(239,68,68,0.1)}
+#visitModalBody .supp-row.marked-yellow{border-color:#eab308;background:rgba(234,179,8,0.1)}
+#visitModalBody .supp-row.marked-blue{border-color:#3b82f6;background:rgba(59,130,246,0.1)}
+#visitModalBody .supp-row.marked-green{border-color:#22c55e;background:rgba(34,197,94,0.1)}
+#visitModalBody .supp-label{font-size:13px;font-weight:500;white-space:normal;line-height:1.3}
+#visitModalBody .supp-cell{display:none}
+#visitModalBody .supp-brand-hdr{padding:9px 12px;border-radius:8px;margin-bottom:5px}
 #visitModalBody .supp-brand-name{font-size:12px}
+/* Field cells → larger pill buttons */
+#visitModalBody .mcell{width:64px;height:36px;border-radius:8px;font-size:13px;font-weight:700}
+#visitModalBody .mwrap .opt-lbl{font-size:10px;font-weight:700}
+/* MSK cells → bigger */
+#visitModalBody .msk-cell{width:42px;height:30px;border-radius:6px;font-size:12px}
+#visitModalBody .msk-opt-lbl{font-size:9px;font-weight:700}
 /* Clickable visit number */
 .visit-num-btn{cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:#1a1a2e;transition:color .15s;user-select:none;padding:2px 4px;border-radius:6px;margin:-2px -4px}
 .visit-num-btn:hover{color:#3b82f6;background:#f0f9ff}
@@ -1869,6 +1881,7 @@ function buildVisitCard(vn){
       var c=document.createElement("div"); c.className="supp-cell"; c.id="sc2_"+key;
       c.addEventListener("click",(function(k,v2){ return function(e){ e.stopPropagation(); onSuppClick(k); renderSuppMarked(v2); updateSuppHL(v2); }; })(key,vn));
       row.appendChild(lbl); row.appendChild(c); body.appendChild(row);
+      row.addEventListener("click",(function(k,v2){ return function(e){ if(!e.target.classList.contains("supp-cell")){ onSuppClick(k); renderSuppMarked(v2); updateSuppHL(v2); } }; })(key,vn));
     });
     suppBrandsDiv.appendChild(body);
   });
