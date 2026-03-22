@@ -567,6 +567,104 @@
       color: var(--text-light);
     }
 
+    /* ─── ABOUT ──────────────────────────────────────────────── */
+    .about {
+      padding: 100px 0;
+      background: var(--sage-pale);
+      position: relative;
+      overflow: hidden;
+    }
+    .about::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,186,106,.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .about__grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .about__photo-col {
+      position: relative;
+    }
+    .about__photo {
+      border-radius: var(--radius-lg);
+      width: 100%;
+      object-fit: cover;
+      aspect-ratio: 3/4;
+      box-shadow: var(--shadow-lg);
+    }
+    .about__photo-card {
+      position: absolute;
+      bottom: 28px;
+      right: -28px;
+      background: var(--olive-dark);
+      color: #fff;
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-md);
+      min-width: 190px;
+    }
+    .about__photo-card-title {
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--olive-light);
+      margin-bottom: 6px;
+    }
+    .about__photo-card-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .about__photo-card-cred {
+      font-size: .78rem;
+      color: rgba(255,255,255,.65);
+      margin-top: 4px;
+    }
+    .about__content {}
+    .about__bio {
+      font-size: 1rem;
+      color: var(--text-mid);
+      line-height: 1.78;
+      margin-top: 18px;
+    }
+    .about__bio p + p { margin-top: 14px; }
+    .about__credentials {
+      margin-top: 36px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .about__cred-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .about__cred-icon {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      background: var(--sage-pale);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .about__cred-text { font-size: .82rem; color: var(--text-mid); line-height: 1.4; }
+    .about__cred-text strong { display: block; color: var(--olive-dark); font-weight: 600; font-size: .85rem; }
+    .about__actions { margin-top: 36px; display: flex; gap: 14px; flex-wrap: wrap; }
+
     /* ─── FOOTER ─────────────────────────────────────────────── */
     footer {
       background: var(--olive-dark);
@@ -657,6 +755,9 @@
       .hero__image-wrap { display: none; }
       .welcome__grid { grid-template-columns: 1fr; gap: 48px; }
       .welcome__img-accent, .welcome__dot-grid { display: none; }
+      .about__grid { grid-template-columns: 1fr; }
+      .about__photo-card { right: 0; }
+      .about__credentials { grid-template-columns: 1fr; }
       .services__grid { grid-template-columns: 1fr; }
       .testi__grid { grid-template-columns: 1fr; }
       .cta-banner__inner { grid-template-columns: 1fr; }
@@ -888,6 +989,84 @@
         <a href="https://drholzinger.janeapp.com/" class="btn btn-white" target="_blank">Book Online</a>
         <a href="/new-patients/" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4);">New Patients</a>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ──────────────────────────────────────────────────────── -->
+<section class="about">
+  <div class="container">
+    <div class="about__grid">
+
+      <div class="about__photo-col">
+        <img class="about__photo" src="https://drholzinger.com/wp-content/uploads/2022/03/Westin-Holzinger-DC.png" alt="Dr. Weston Holzinger DC" />
+        <div class="about__photo-card">
+          <div class="about__photo-card-title">Your Doctor</div>
+          <div class="about__photo-card-name">Dr. Weston Holzinger</div>
+          <div class="about__photo-card-cred">DC, MS — Logan University</div>
+        </div>
+      </div>
+
+      <div class="about__content">
+        <span class="section-label">About Dr. Holzinger</span>
+        <h2 class="section-title">Finding the <em style="font-style:normal;color:var(--olive-mid);">Why</em> Behind<br/>Your Symptoms</h2>
+        <div class="about__bio">
+          <p>Dr. Weston Holzinger is a Chiropractic physician with advanced training in nutrition and functional biochemistry. He graduated from Logan University as a Doctor of Chiropractic <strong>with honors</strong> and earned a <strong>Master's degree in Nutrition and Human Performance as valedictorian</strong> — receiving multiple awards including the Clinical Science Award.</p>
+          <p>His passion is to uncover the <em>why</em> behind a patient's symptoms and guide them not just toward being symptom-free, but toward continually growing in health.</p>
+          <p>His primary treatment methods include manual adjustments, myofascial therapies, nutritional analysis, lifestyle recommendations, and acupuncture/pressure — blending Eastern principles with the Western scientific model.</p>
+        </div>
+
+        <div class="about__credentials">
+          <div class="about__cred-item">
+            <div class="about__cred-icon">🧬</div>
+            <div class="about__cred-text">
+              <strong>Applied Kinesiology</strong>
+              300+ hrs training · multiple advanced certifications incl. Systems Health Care
+            </div>
+          </div>
+          <div class="about__cred-item">
+            <div class="about__cred-icon">🩸</div>
+            <div class="about__cred-text">
+              <strong>Functional Blood Chemistry</strong>
+              Certified in Thyroid &amp; Endocrine assessment
+            </div>
+          </div>
+          <div class="about__cred-item">
+            <div class="about__cred-icon">🏥</div>
+            <div class="about__cred-text">
+              <strong>Chiropractic Internist</strong>
+              300+ hours of internist training
+            </div>
+          </div>
+          <div class="about__cred-item">
+            <div class="about__cred-icon">☯️</div>
+            <div class="about__cred-text">
+              <strong>Acupuncture &amp; Meridian Therapy</strong>
+              National board certified
+            </div>
+          </div>
+          <div class="about__cred-item">
+            <div class="about__cred-icon">🎓</div>
+            <div class="about__cred-text">
+              <strong>Logan University — Valedictorian</strong>
+              DC with honors · MS Nutrition &amp; Human Performance
+            </div>
+          </div>
+          <div class="about__cred-item">
+            <div class="about__cred-icon">📖</div>
+            <div class="about__cred-text">
+              <strong>Technique Manual Contributor</strong>
+              Systems Health Care technique manual
+            </div>
+          </div>
+        </div>
+
+        <div class="about__actions">
+          <a href="https://drholzinger.janeapp.com/" class="btn btn-primary" target="_blank">Book with Dr. Holzinger</a>
+          <a href="/services/" class="btn btn-outline">View Services</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
