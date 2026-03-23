@@ -26,7 +26,7 @@
 
       --text-dark:    #1E2410;
       --text-mid:     #4A4A3A;
-      --text-light:   #7A7A68;
+      --text-light:   #555548; /* was #7A7A68 — darkened to pass WCAG AA */
 
       --radius-sm:    6px;
       --radius-md:    12px;
@@ -39,6 +39,28 @@
 
       --transition:   .3s cubic-bezier(.4,0,.2,1);
     }
+
+    /* ─── SKIP LINK (accessibility) ─────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -999px; left: -999px;
+      background: var(--olive-dark);
+      color: #fff;
+      padding: 10px 20px;
+      font-weight: 600;
+      border-radius: 0 0 var(--radius-sm) 0;
+      z-index: 9999;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 0; left: 0; }
+
+    /* ─── FOCUS STYLES (accessibility) ──────────────────────── */
+    :focus-visible {
+      outline: 3px solid var(--olive-mid);
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--olive-mid); outline-offset: 3px; }
 
     /* ─── RESET ──────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -62,7 +84,7 @@
       font-weight: 600;
       letter-spacing: .12em;
       text-transform: uppercase;
-      color: var(--olive-mid);
+      color: var(--olive-dark); /* darkened from olive-mid — WCAG AA fix */
       background: var(--sage-pale);
       padding: 4px 14px;
       border-radius: var(--radius-pill);
@@ -291,7 +313,9 @@
       box-shadow: var(--shadow-lg);
       width: 100%;
       object-fit: cover;
+      object-position: top center;
       aspect-ratio: 3/4;
+      border: 3px solid rgba(168,186,106,.5);
     }
     .hero__badge {
       position: absolute;
@@ -423,7 +447,10 @@
       transition: var(--transition);
       display: flex;
       flex-direction: column;
+      border-top: 4px solid var(--olive-mid);
     }
+    .service-card:nth-child(2) { border-top-color: var(--earth); }
+    .service-card:nth-child(3) { border-top-color: var(--olive-light); }
     .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
     .service-card__img {
       width: 100%;
@@ -535,6 +562,15 @@
       font-size: 1rem;
       margin-bottom: 16px;
     }
+    .testi-card::before {
+      content: '\201C';
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      line-height: .6;
+      color: var(--sage);
+      display: block;
+      margin-bottom: 12px;
+    }
     .testi-card__quote {
       font-size: .95rem;
       color: var(--text-mid);
@@ -596,8 +632,11 @@
       border-radius: var(--radius-lg);
       width: 100%;
       object-fit: cover;
+      object-position: top center;
       aspect-ratio: 3/4;
       box-shadow: var(--shadow-lg);
+      border: 4px solid #fff;
+      outline: 4px solid var(--olive-light);
     }
     .about__photo-card {
       position: absolute;
@@ -746,8 +785,67 @@
       .hero__image-wrap { flex: 0 0 280px; }
       .footer__grid { grid-template-columns: 1fr 1fr; gap: 36px; }
     }
+    /* Mobile nav toggle */
+    .nav__hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+    }
+    .nav__hamburger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--olive-dark);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+    .nav__hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav__hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav__hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .nav__mobile-cta { display: none; }
+
     @media (max-width: 768px) {
-      .nav__menu, .nav__cta { display: none; }
+      .nav__menu { 
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0; right: 0;
+        background: var(--off-white);
+        border-top: 1px solid var(--sage-pale);
+        border-bottom: 2px solid var(--olive-light);
+        padding: 16px 24px 20px;
+        flex-direction: column;
+        gap: 0;
+        box-shadow: var(--shadow-md);
+        z-index: 99;
+      }
+      .nav__menu.open { display: flex; }
+      .nav__menu a { 
+        padding: 12px 0;
+        border-bottom: 1px solid var(--sage-pale);
+        font-size: 1rem;
+        color: var(--text-dark);
+      }
+      .nav__menu li:last-child a { border-bottom: none; }
+      .nav__cta { display: none; }
+      .nav__hamburger { display: flex; }
+      .nav__mobile-cta { 
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 18px;
+        background: var(--olive);
+        color: #fff;
+        border-radius: var(--radius-pill);
+        font-size: .85rem;
+        font-weight: 600;
+      }
+      .nav { position: sticky; }
+
       .hero__inner { flex-direction: column; padding: 80px 24px 60px; text-align: center; }
       .hero__sub { margin: 0 auto 36px; }
       .hero__actions { justify-content: center; }
@@ -772,6 +870,8 @@
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <!-- ── TOPBAR ──────────────────────────────────────────────────── -->
 <div class="topbar">
   <div class="container">
@@ -790,7 +890,7 @@
 </div>
 
 <!-- ── NAV ─────────────────────────────────────────────────────── -->
-<nav class="nav">
+<nav class="nav" aria-label="Main navigation">
   <div class="container">
     <div class="nav__inner">
       <a href="https://drholzinger.com/" class="nav__logo">
@@ -803,7 +903,11 @@
           <span class="nav__logo-tag">Chiropractic Internist</span>
         </div>
       </a>
-      <ul class="nav__menu">
+      <button class="nav__hamburger" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="https://drholzinger.janeapp.com/" class="nav__mobile-cta" target="_blank" aria-label="Book an appointment">Book Now</a>
+      <ul class="nav__menu" id="nav-menu" role="list">
         <li><a href="https://drholzinger.com/">Home</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="https://drholzinger.com/services/">Services</a></li>
@@ -820,7 +924,7 @@
 </nav>
 
 <!-- ── HERO ─────────────────────────────────────────────────────── -->
-<section class="hero">
+<section class="hero" id="main-content" aria-label="Welcome">
   <div class="hero__bg"></div>
   <div class="hero__overlay"></div>
   <div class="hero__inner">
@@ -924,7 +1028,7 @@
 </section>
 
 <!-- ── SERVICES ──────────────────────────────────────────────────── -->
-<section class="services">
+<section class="services" aria-label="Our services">
   <div class="container">
     <div class="services__header">
       <span class="section-label">What We Do</span>
@@ -1072,7 +1176,7 @@
 </section>
 
 <!-- ── TESTIMONIALS ───────────────────────────────────────────────── -->
-<section class="testi">
+<section class="testi" aria-label="Patient testimonials">
   <div class="container">
     <div class="testi__header">
       <span class="section-label">Patient Stories</span>
@@ -1192,5 +1296,30 @@
   </div>
 </footer>
 
+<script>
+  // Mobile nav toggle
+  const hamburger = document.querySelector('.nav__hamburger');
+  const navMenu = document.querySelector('.nav__menu');
+  if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+      const open = navMenu.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', open);
+    });
+    // Close on link click
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+  // Close nav on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav__inner')) {
+      navMenu && navMenu.classList.remove('open');
+      hamburger && hamburger.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
 </body>
 </html>
