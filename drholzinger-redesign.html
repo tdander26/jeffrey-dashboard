@@ -105,7 +105,7 @@
     .nav.scrolled { box-shadow:var(--sh-md); }
     .nav__in { display:flex; align-items:center; justify-content:space-between; padding:18px 0; transition:padding var(--ease); gap:24px; }
     .nav.scrolled .nav__in { padding:12px 0; }
-    .nav__logo { display:flex; align-items:center; gap:10px; }
+    .nav__logo { display:flex; align-items:center; gap:10px; flex-shrink:0; }
     .nav__mark {
       width:40px; height:40px; background:var(--olive); border-radius:var(--r-md);
       display:flex; align-items:center; justify-content:center; transition:var(--ease);
@@ -481,13 +481,9 @@
   <div class="container">
     <div class="nav__in">
       <a href="https://drholzinger.com/" class="nav__logo" aria-label="Weston Holzinger DC — home">
-        <div class="nav__mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-13 5.5 0 0 3-2 8-.5z"/></svg>
-        </div>
-        <div>
-          <div class="nav__name">Weston Holzinger DC</div>
-          <div class="nav__tag">Chiropractic Internist</div>
-        </div>
+        <img src="https://raw.githubusercontent.com/tdander26/jeffrey-dashboard/main/drholzinger-logo.jpg"
+             alt="DrHolzinger.com logo"
+             style="height:48px; width:auto; display:block;" />
       </a>
       <button class="nav__burger" aria-expanded="false" aria-controls="nav-links" aria-label="Open navigation menu">
         <span></span><span></span><span></span>
@@ -866,7 +862,9 @@
     <div class="container">
       <div class="footer__grid">
         <div>
-          <div class="footer__name">Weston Holzinger DC</div>
+          <img src="https://raw.githubusercontent.com/tdander26/jeffrey-dashboard/main/drholzinger-logo.jpg"
+               alt="DrHolzinger.com"
+               style="height:52px; width:auto; margin-bottom:14px; filter:brightness(0) invert(1); opacity:.85;" />
           <p class="footer__tag">Chiropractic Internist serving St. Louis &amp; Edwardsville — uncovering the root causes of complex health challenges since 2022.</p>
           <div class="footer__cta-wrap">
             <a href="https://drholzinger.janeapp.com/" class="btn btn-green" target="_blank" rel="noopener" style="font-size:.84rem;padding:11px 22px;">Book an Appointment</a>
