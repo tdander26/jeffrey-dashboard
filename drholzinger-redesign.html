@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Weston Holzinger DC | Chiropractic Internist | St. Louis & Edwardsville</title>
+  <title>Weston Holzinger DC | Chiropractic Internist | St. Louis &amp; Edwardsville</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
-    /* ─── TOKENS ─────────────────────────────────────────────── */
+    /* ── DESIGN TOKENS ───────────────────────────────────────── */
     :root {
       --olive-dark:   #3D4F1C;
       --olive:        #5B6E2F;
@@ -16,898 +16,486 @@
       --olive-light:  #A8BA6A;
       --sage:         #C4D09A;
       --sage-pale:    #E6EDD4;
-
       --earth-dark:   #5A3E2B;
       --earth:        #8B6347;
       --earth-warm:   #B8966E;
       --sand:         #D9C4A8;
       --cream:        #F4EFE6;
       --off-white:    #FAFAF7;
-
       --text-dark:    #1E2410;
       --text-mid:     #4A4A3A;
-      --text-light:   #555548; /* was #7A7A68 — darkened to pass WCAG AA */
-
-      --radius-sm:    6px;
-      --radius-md:    12px;
-      --radius-lg:    24px;
-      --radius-pill:  999px;
-
-      --shadow-sm:    0 2px 8px rgba(61,79,28,.10);
-      --shadow-md:    0 6px 24px rgba(61,79,28,.14);
-      --shadow-lg:    0 16px 48px rgba(61,79,28,.18);
-
-      --transition:   .3s cubic-bezier(.4,0,.2,1);
+      --text-light:   #555548;
+      --r-sm: 6px; --r-md: 12px; --r-lg: 24px; --r-pill: 999px;
+      --sh-sm: 0 2px 8px rgba(61,79,28,.10);
+      --sh-md: 0 6px 24px rgba(61,79,28,.15);
+      --sh-lg: 0 16px 48px rgba(61,79,28,.20);
+      --ease: .35s cubic-bezier(.4,0,.2,1);
     }
 
-    /* ─── SKIP LINK (accessibility) ─────────────────────────── */
-    .skip-link {
-      position: absolute;
-      top: -999px; left: -999px;
-      background: var(--olive-dark);
-      color: #fff;
-      padding: 10px 20px;
-      font-weight: 600;
-      border-radius: 0 0 var(--radius-sm) 0;
-      z-index: 9999;
-      text-decoration: none;
-    }
-    .skip-link:focus { top: 0; left: 0; }
+    /* ── SKIP / FOCUS ────────────────────────────────────────── */
+    .skip-link { position:absolute; top:-999px; left:-999px; background:var(--olive-dark); color:#fff; padding:10px 20px; font-weight:600; z-index:9999; text-decoration:none; border-radius:0 0 var(--r-sm) 0; }
+    .skip-link:focus { top:0; left:0; }
+    :focus-visible { outline:3px solid var(--olive-mid); outline-offset:3px; border-radius:3px; }
 
-    /* ─── FOCUS STYLES (accessibility) ──────────────────────── */
-    :focus-visible {
-      outline: 3px solid var(--olive-mid);
-      outline-offset: 3px;
-      border-radius: 3px;
-    }
-    a:focus-visible, button:focus-visible { outline: 3px solid var(--olive-mid); outline-offset: 3px; }
+    /* ── RESET ───────────────────────────────────────────────── */
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',sans-serif; font-size:16px; color:var(--text-dark); background:var(--off-white); line-height:1.65; }
+    img { max-width:100%; display:block; }
+    a { color:inherit; text-decoration:none; }
+    ul { list-style:none; }
 
-    /* ─── RESET ──────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      color: var(--text-dark);
-      background: var(--off-white);
-      line-height: 1.65;
-    }
-    img { max-width: 100%; display: block; }
-    a { color: inherit; text-decoration: none; }
-    ul { list-style: none; }
+    /* ── SCROLL REVEAL ───────────────────────────────────────── */
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .6s var(--ease), transform .6s var(--ease); }
+    .reveal.visible { opacity:1; transform:none; }
+    .reveal-delay-1 { transition-delay:.1s; }
+    .reveal-delay-2 { transition-delay:.2s; }
+    .reveal-delay-3 { transition-delay:.3s; }
+    .reveal-delay-4 { transition-delay:.4s; }
 
-    /* ─── UTILS ──────────────────────────────────────────────── */
-    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
-    .section-label {
-      display: inline-block;
-      font-size: .75rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--olive-dark); /* darkened from olive-mid — WCAG AA fix */
-      background: var(--sage-pale);
-      padding: 4px 14px;
-      border-radius: var(--radius-pill);
-      margin-bottom: 14px;
+    /* ── UTILS ───────────────────────────────────────────────── */
+    .container { max-width:1160px; margin:0 auto; padding:0 28px; }
+    .label {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--olive-dark); background:var(--sage-pale);
+      padding:5px 14px; border-radius:var(--r-pill); margin-bottom:16px;
     }
-    .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-      font-weight: 700;
-      line-height: 1.25;
-      color: var(--olive-dark);
+    .label::before { content:''; width:6px; height:6px; background:var(--olive-mid); border-radius:50%; }
+    h2.headline {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(1.9rem, 3.5vw, 2.7rem);
+      font-weight:700; line-height:1.22; color:var(--olive-dark);
     }
-    .section-sub {
-      font-size: 1.05rem;
-      color: var(--text-mid);
-      max-width: 560px;
-      margin-top: 12px;
-    }
-
+    h2.headline em { font-style:normal; color:var(--olive-mid); }
+    .sub { font-size:1.02rem; color:var(--text-mid); line-height:1.72; margin-top:12px; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      border-radius: var(--radius-pill);
-      font-weight: 600;
-      font-size: .95rem;
-      transition: var(--transition);
-      cursor: pointer;
-      border: none;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:13px 28px; border-radius:var(--r-pill);
+      font-weight:600; font-size:.92rem; border:none; cursor:pointer;
+      transition:var(--ease);
     }
-    .btn-primary {
-      background: var(--olive);
-      color: #fff;
-      box-shadow: var(--shadow-sm);
-    }
-    .btn-primary:hover { background: var(--olive-dark); box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .btn-outline {
-      background: transparent;
-      color: var(--olive);
-      border: 2px solid var(--olive);
-    }
-    .btn-outline:hover { background: var(--olive); color: #fff; transform: translateY(-2px); }
-    .btn-white {
-      background: #fff;
-      color: var(--olive-dark);
-    }
-    .btn-white:hover { background: var(--cream); transform: translateY(-2px); }
+    .btn svg { width:16px; height:16px; fill:currentColor; flex-shrink:0; }
+    .btn-green { background:var(--olive); color:#fff; box-shadow:var(--sh-sm); }
+    .btn-green:hover { background:var(--olive-dark); box-shadow:var(--sh-md); transform:translateY(-2px); }
+    .btn-outline-green { background:transparent; color:var(--olive); border:2px solid var(--olive); }
+    .btn-outline-green:hover { background:var(--olive); color:#fff; transform:translateY(-2px); }
+    .btn-ghost-white { background:rgba(255,255,255,.12); color:#fff; border:1.5px solid rgba(255,255,255,.4); }
+    .btn-ghost-white:hover { background:rgba(255,255,255,.22); transform:translateY(-2px); }
+    .btn-solid-white { background:#fff; color:var(--olive-dark); font-weight:700; }
+    .btn-solid-white:hover { background:var(--cream); transform:translateY(-2px); }
 
-    /* ─── TOPBAR ─────────────────────────────────────────────── */
-    .topbar {
-      background: var(--olive-dark);
-      color: rgba(255,255,255,.85);
-      font-size: .82rem;
-      font-weight: 500;
-      letter-spacing: .02em;
-    }
-    .topbar__inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 9px 0;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .topbar a { color: rgba(255,255,255,.85); transition: var(--transition); }
-    .topbar a:hover { color: var(--olive-light); }
-    .topbar__links { display: flex; gap: 20px; }
-    .topbar__pill {
-      display: inline-flex; align-items: center; gap: 6px;
-    }
-    .topbar__pill svg { width: 14px; height: 14px; fill: var(--olive-light); }
+    /* ── TOPBAR ──────────────────────────────────────────────── */
+    .topbar { background:var(--olive-dark); color:rgba(255,255,255,.82); font-size:.8rem; font-weight:500; letter-spacing:.02em; }
+    .topbar__in { display:flex; align-items:center; justify-content:space-between; padding:8px 0; flex-wrap:wrap; gap:8px; }
+    .topbar a { color:rgba(255,255,255,.82); transition:color .2s; }
+    .topbar a:hover { color:var(--olive-light); }
+    .topbar__left { display:flex; align-items:center; gap:6px; }
+    .topbar__left svg { width:13px; height:13px; fill:var(--olive-light); }
+    .topbar__right { display:flex; gap:20px; }
+    @media(max-width:600px){ .topbar__right { display:none; } }
 
-    /* ─── NAV ────────────────────────────────────────────────── */
+    /* ── NAV ─────────────────────────────────────────────────── */
     .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(250,250,247,.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--sage-pale);
-      box-shadow: var(--shadow-sm);
+      position:sticky; top:0; z-index:200;
+      background:rgba(250,250,247,.96); backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--sage-pale);
+      transition:padding var(--ease), box-shadow var(--ease);
     }
-    .nav__inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 0;
-      gap: 24px;
+    .nav.scrolled { box-shadow:var(--sh-md); }
+    .nav__in { display:flex; align-items:center; justify-content:space-between; padding:18px 0; transition:padding var(--ease); gap:24px; }
+    .nav.scrolled .nav__in { padding:12px 0; }
+    .nav__logo { display:flex; align-items:center; gap:10px; }
+    .nav__mark {
+      width:40px; height:40px; background:var(--olive); border-radius:var(--r-md);
+      display:flex; align-items:center; justify-content:center; transition:var(--ease);
     }
-    .nav__logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .nav__mark svg { width:22px; height:22px; fill:#fff; }
+    .nav__mark:hover { background:var(--olive-dark); }
+    .nav__name { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--olive-dark); line-height:1.1; }
+    .nav__tag { font-size:.68rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--text-light); }
+    .nav__links { display:flex; align-items:center; gap:30px; }
+    .nav__links a { font-size:.86rem; font-weight:500; color:var(--text-mid); transition:color .2s; position:relative; }
+    .nav__links a::after { content:''; position:absolute; bottom:-3px; left:0; right:0; height:2px; background:var(--olive); border-radius:2px; transform:scaleX(0); transform-origin:left; transition:transform .25s; }
+    .nav__links a:hover { color:var(--olive); }
+    .nav__links a:hover::after { transform:scaleX(1); }
+    /* Hamburger */
+    .nav__burger { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:8px; border-radius:var(--r-sm); }
+    .nav__burger span { display:block; width:22px; height:2px; background:var(--olive-dark); border-radius:2px; transition:var(--ease); }
+    .nav__burger[aria-expanded="true"] span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .nav__burger[aria-expanded="true"] span:nth-child(2) { opacity:0; }
+    .nav__burger[aria-expanded="true"] span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+    .nav__mob-cta { display:none; }
+    @media(max-width:800px){
+      .nav__links,.nav__cta { display:none; }
+      .nav__links {
+        position:absolute; top:100%; left:0; right:0;
+        flex-direction:column; gap:0;
+        background:var(--off-white);
+        border-bottom:2px solid var(--olive-light);
+        box-shadow:var(--sh-md); z-index:99; padding:12px 28px 18px;
+      }
+      .nav__links.open { display:flex; }
+      .nav__links a { padding:11px 0; border-bottom:1px solid var(--sage-pale); font-size:.96rem; color:var(--text-dark); }
+      .nav__links a::after { display:none; }
+      .nav__links li:last-child a { border:none; }
+      .nav__burger { display:flex; }
+      .nav__mob-cta { display:inline-flex; align-items:center; padding:9px 18px; background:var(--olive); color:#fff; border-radius:var(--r-pill); font-size:.82rem; font-weight:600; }
     }
-    .nav__logo-mark {
-      width: 42px; height: 42px;
-      background: var(--olive);
-      border-radius: var(--radius-md);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .nav__logo-mark svg { width: 24px; height: 24px; fill: #fff; }
-    .nav__logo-text { display: flex; flex-direction: column; }
-    .nav__logo-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--olive-dark);
-      line-height: 1.1;
-    }
-    .nav__logo-tag {
-      font-size: .7rem;
-      font-weight: 500;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--text-light);
-    }
-    .nav__menu {
-      display: flex;
-      align-items: center;
-      gap: 32px;
-    }
-    .nav__menu a {
-      font-size: .88rem;
-      font-weight: 500;
-      color: var(--text-mid);
-      transition: var(--transition);
-      white-space: nowrap;
-    }
-    .nav__menu a:hover { color: var(--olive); }
-    .nav__cta { margin-left: 8px; }
 
-    /* ─── HERO ───────────────────────────────────────────────── */
+    /* ── HERO ────────────────────────────────────────────────── */
     .hero {
-      position: relative;
-      min-height: 88vh;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-      background: linear-gradient(135deg, var(--olive-dark) 0%, var(--earth-dark) 100%);
+      position:relative; min-height:90vh; display:flex; align-items:center; overflow:hidden;
+      background:linear-gradient(135deg, var(--olive-dark) 0%, #2A3812 40%, var(--earth-dark) 100%);
     }
     .hero__bg {
-      position: absolute;
-      inset: 0;
-      background: url('https://drholzinger.com/wp-content/uploads/2022/03/slide_1.jpg') center/cover no-repeat;
-      opacity: .18;
+      position:absolute; inset:0;
+      background:url('https://drholzinger.com/wp-content/uploads/2022/03/slide_1.jpg') center/cover;
+      opacity:.14; mix-blend-mode:luminosity;
     }
-    .hero__overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(125deg, rgba(61,79,28,.92) 0%, rgba(90,62,43,.78) 60%, rgba(61,79,28,.4) 100%);
+    /* subtle dot pattern overlay */
+    .hero__pattern {
+      position:absolute; inset:0;
+      background-image:radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size:28px 28px;
     }
-    .hero__inner {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 64px;
-      padding: 100px 24px 80px;
-      max-width: 1160px;
-      margin: 0 auto;
-      width: 100%;
+    .hero__glow {
+      position:absolute; top:-10%; right:5%; width:600px; height:600px; border-radius:50%;
+      background:radial-gradient(circle, rgba(91,110,47,.35) 0%, transparent 65%);
+      pointer-events:none;
     }
-    .hero__content { flex: 1; }
-    .hero__eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.2);
-      color: var(--sage);
-      font-size: .78rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      padding: 6px 16px;
-      border-radius: var(--radius-pill);
-      margin-bottom: 24px;
+    .hero__in {
+      position:relative; z-index:2;
+      display:flex; align-items:center; gap:72px;
+      max-width:1160px; margin:0 auto; padding:110px 28px 90px; width:100%;
     }
-    .hero__title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.4rem, 5vw, 4rem);
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.15;
-      margin-bottom: 20px;
-    }
-    .hero__title em { color: var(--olive-light); font-style: normal; }
-    .hero__sub {
-      font-size: 1.1rem;
-      color: rgba(255,255,255,.78);
-      max-width: 520px;
-      line-height: 1.7;
-      margin-bottom: 36px;
-    }
-    .hero__actions { display: flex; gap: 14px; flex-wrap: wrap; }
-    .hero__stats {
-      display: flex;
-      gap: 32px;
-      margin-top: 52px;
-      padding-top: 36px;
-      border-top: 1px solid rgba(255,255,255,.15);
-      flex-wrap: wrap;
-    }
-    .hero__stat {}
-    .hero__stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--olive-light);
-      line-height: 1;
-    }
-    .hero__stat-lbl {
-      font-size: .8rem;
-      color: rgba(255,255,255,.6);
-      font-weight: 500;
-      letter-spacing: .04em;
-      margin-top: 4px;
-    }
-    .hero__image-wrap {
-      flex: 0 0 360px;
-      position: relative;
-    }
-    .hero__image-wrap img {
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      width: 100%;
-      object-fit: cover;
-      object-position: top center;
-      aspect-ratio: 3/4;
-      border: 3px solid rgba(168,186,106,.5);
-    }
+    .hero__content { flex:1; }
     .hero__badge {
-      position: absolute;
-      bottom: -20px;
-      left: -20px;
-      background: var(--cream);
-      border-radius: var(--radius-md);
-      padding: 14px 18px;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18);
+      color:var(--sage); font-size:.74rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+      padding:7px 16px; border-radius:var(--r-pill); margin-bottom:26px;
     }
-    .hero__badge-icon {
-      width: 40px; height: 40px;
-      background: var(--sage-pale);
-      border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
+    .hero__badge-dot { width:7px; height:7px; background:#6EE7A0; border-radius:50%; box-shadow:0 0 0 3px rgba(110,231,160,.25); animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{box-shadow:0 0 0 3px rgba(110,231,160,.25)} 50%{box-shadow:0 0 0 6px rgba(110,231,160,.10)} }
+    .hero__h1 {
+      font-family:'Playfair Display',serif;
+      font-size:clamp(2.5rem, 5.5vw, 4.2rem);
+      font-weight:700; color:#fff; line-height:1.12; margin-bottom:22px;
     }
-    .hero__badge-text { font-size: .78rem; line-height: 1.3; }
-    .hero__badge-text strong { display: block; color: var(--olive-dark); font-weight: 700; }
-    .hero__badge-text span { color: var(--text-light); }
+    .hero__h1 em { font-style:normal; color:var(--olive-light); }
+    .hero__sub { font-size:1.08rem; color:rgba(255,255,255,.76); max-width:510px; line-height:1.72; margin-bottom:38px; }
+    .hero__btns { display:flex; gap:14px; flex-wrap:wrap; }
+    .hero__stats {
+      display:flex; gap:0; margin-top:54px; padding-top:32px;
+      border-top:1px solid rgba(255,255,255,.13); flex-wrap:wrap;
+    }
+    .hero__stat { flex:1; min-width:100px; padding:0 24px 0 0; }
+    .hero__stat + .hero__stat { border-left:1px solid rgba(255,255,255,.13); padding-left:24px; }
+    .hero__stat-n { font-family:'Playfair Display',serif; font-size:2.1rem; font-weight:700; color:var(--olive-light); line-height:1; }
+    .hero__stat-l { font-size:.75rem; color:rgba(255,255,255,.55); font-weight:500; letter-spacing:.04em; margin-top:5px; }
+    /* Photo side */
+    .hero__img-col { flex:0 0 340px; position:relative; }
+    .hero__img-ring {
+      position:absolute; inset:-12px; border-radius:calc(var(--r-lg) + 12px);
+      background:linear-gradient(135deg, rgba(168,186,106,.5) 0%, rgba(168,186,106,.08) 60%);
+      animation:ringPulse 4s ease-in-out infinite;
+    }
+    @keyframes ringPulse { 0%,100%{opacity:.7} 50%{opacity:1} }
+    .hero__img {
+      position:relative; z-index:1;
+      border-radius:var(--r-lg); width:100%; object-fit:cover; object-position:top center;
+      aspect-ratio:3/4; box-shadow:var(--sh-lg);
+      border:3px solid rgba(168,186,106,.4);
+    }
+    .hero__float-card {
+      position:absolute; bottom:-18px; left:-18px; z-index:2;
+      background:var(--cream); border-radius:var(--r-md);
+      padding:14px 18px; box-shadow:var(--sh-md);
+      display:flex; align-items:center; gap:12px;
+      animation:float 5s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .hero__float-icon { width:38px; height:38px; background:var(--sage-pale); border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:1.1rem; }
+    .hero__float-text strong { display:block; font-size:.82rem; font-weight:700; color:var(--olive-dark); }
+    .hero__float-text span { font-size:.72rem; color:var(--text-light); }
 
-    /* Wave divider */
-    .wave-divider { display: block; margin-top: -2px; }
+    /* Wave */
+    .wave { display:block; margin-top:-2px; }
 
-    /* ─── TRUST BAR ──────────────────────────────────────────── */
-    .trust {
-      background: var(--cream);
-      padding: 28px 0;
-      border-bottom: 1px solid var(--sand);
-    }
-    .trust__inner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 40px;
-      flex-wrap: wrap;
-    }
+    /* ── TRUST STRIP ─────────────────────────────────────────── */
+    .trust { background:var(--cream); border-bottom:1px solid var(--sand); padding:24px 0; }
+    .trust__in { display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap; }
     .trust__item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: .85rem;
-      font-weight: 500;
-      color: var(--text-mid);
+      display:flex; align-items:center; gap:10px;
+      font-size:.82rem; font-weight:500; color:var(--text-mid);
+      padding:10px 28px; border-right:1px solid var(--sand);
     }
-    .trust__item-icon {
-      width: 36px; height: 36px;
-      background: var(--sage-pale);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-    }
+    .trust__item:last-child { border-right:none; }
+    .trust__icon { font-size:1.2rem; }
+    @media(max-width:700px){ .trust__item { border:none; padding:8px 16px; } }
 
-    /* ─── WELCOME ────────────────────────────────────────────── */
-    .welcome {
-      padding: 100px 0;
-      background: var(--off-white);
-    }
-    .welcome__grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-    .welcome__img-wrap {
-      position: relative;
-    }
+    /* ── WELCOME ─────────────────────────────────────────────── */
+    .welcome { padding:100px 0; background:var(--off-white); }
+    .welcome__grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+    .welcome__img-wrap { position:relative; }
     .welcome__img {
-      border-radius: var(--radius-lg);
-      width: 100%;
-      object-fit: cover;
-      aspect-ratio: 4/5;
-      box-shadow: var(--shadow-lg);
+      border-radius:var(--r-lg); width:100%; object-fit:cover; aspect-ratio:4/5;
+      box-shadow:var(--sh-lg);
     }
-    .welcome__img-accent {
-      position: absolute;
-      bottom: -24px;
-      right: -24px;
-      width: 200px;
-      height: 200px;
-      border-radius: var(--radius-lg);
-      background: var(--sage-pale);
-      z-index: -1;
-    }
-    .welcome__dot-grid {
-      position: absolute;
-      top: -24px;
-      left: -24px;
-      width: 120px;
-      height: 120px;
-      background-image: radial-gradient(var(--sand) 1.5px, transparent 1.5px);
-      background-size: 14px 14px;
-      z-index: -1;
-    }
-    .welcome__content {}
-    .welcome__body {
-      color: var(--text-mid);
-      font-size: 1.02rem;
-      line-height: 1.75;
-      margin-top: 20px;
-    }
-    .welcome__body p + p { margin-top: 16px; }
-    .welcome__body a { color: var(--olive); font-weight: 500; text-decoration: underline; }
-    .welcome__actions { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .welcome__accent { position:absolute; bottom:-20px; right:-20px; width:180px; height:180px; background:var(--sage-pale); border-radius:var(--r-lg); z-index:-1; }
+    .welcome__dots { position:absolute; top:-20px; left:-20px; width:110px; height:110px; background-image:radial-gradient(var(--sand) 1.5px, transparent 1.5px); background-size:13px 13px; z-index:-1; }
+    .welcome__body { color:var(--text-mid); font-size:1rem; line-height:1.78; margin-top:18px; }
+    .welcome__body p+p { margin-top:14px; }
+    .welcome__body a { color:var(--olive); font-weight:500; text-decoration:underline; }
+    .welcome__btns { margin-top:32px; display:flex; gap:14px; flex-wrap:wrap; }
 
-    /* ─── SERVICES ───────────────────────────────────────────── */
-    .services {
-      padding: 100px 0;
-      background: var(--cream);
+    /* ── HOW IT WORKS ────────────────────────────────────────── */
+    .how { padding:100px 0; background:var(--cream); }
+    .how__header { text-align:center; margin-bottom:64px; }
+    .how__header .sub { margin:12px auto 0; }
+    .how__grid { display:grid; grid-template-columns:repeat(3,1fr); gap:32px; position:relative; }
+    /* Connector line between steps */
+    .how__grid::before {
+      content:''; position:absolute;
+      top:48px; left:calc(16.66% + 20px); right:calc(16.66% + 20px);
+      height:2px;
+      background:linear-gradient(90deg, var(--olive-light), var(--sage), var(--olive-light));
+      border-radius:2px;
     }
-    .services__header {
-      text-align: center;
-      margin-bottom: 60px;
+    .how__step { text-align:center; padding:0 16px; }
+    .how__num-wrap { display:flex; align-items:center; justify-content:center; margin-bottom:24px; }
+    .how__num {
+      width:64px; height:64px; border-radius:50%;
+      background:var(--olive); color:#fff;
+      font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 0 0 8px rgba(91,110,47,.15);
+      position:relative; z-index:1;
+      transition:var(--ease);
     }
-    .services__header .section-sub { margin: 12px auto 0; }
-    .services__grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 28px;
-    }
-    .service-card {
-      background: #fff;
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-      transition: var(--transition);
-      display: flex;
-      flex-direction: column;
-      border-top: 4px solid var(--olive-mid);
-    }
-    .service-card:nth-child(2) { border-top-color: var(--earth); }
-    .service-card:nth-child(3) { border-top-color: var(--olive-light); }
-    .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
-    .service-card__img {
-      width: 100%;
-      aspect-ratio: 16/9;
-      object-fit: cover;
-    }
-    .service-card__body { padding: 28px; flex: 1; display: flex; flex-direction: column; }
-    .service-card__icon {
-      width: 48px; height: 48px;
-      background: var(--sage-pale);
-      border-radius: var(--radius-md);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      margin-bottom: 16px;
-    }
-    .service-card__title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--olive-dark);
-      margin-bottom: 12px;
-    }
-    .service-card__desc {
-      font-size: .93rem;
-      color: var(--text-mid);
-      line-height: 1.65;
-      flex: 1;
-    }
-    .service-card__link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 20px;
-      font-size: .88rem;
-      font-weight: 600;
-      color: var(--olive);
-      transition: var(--transition);
-    }
-    .service-card__link:hover { gap: 10px; }
-    .service-card__link svg { width: 16px; height: 16px; fill: currentColor; }
+    .how__step:hover .how__num { background:var(--olive-dark); transform:scale(1.08); box-shadow:0 0 0 12px rgba(91,110,47,.12); }
+    .how__step-title { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:var(--olive-dark); margin-bottom:10px; }
+    .how__step-desc { font-size:.92rem; color:var(--text-mid); line-height:1.65; }
+    @media(max-width:700px){ .how__grid { grid-template-columns:1fr; } .how__grid::before { display:none; } }
 
-    /* ─── CTA BANNER ─────────────────────────────────────────── */
-    .cta-banner {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(135deg, var(--olive-dark) 0%, var(--earth-dark) 100%);
-      padding: 90px 0;
+    /* ── SERVICES ────────────────────────────────────────────── */
+    .services { padding:100px 0; background:var(--off-white); }
+    .services__hd { text-align:center; margin-bottom:60px; }
+    .services__hd .sub { margin:12px auto 0; }
+    .services__grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+    .scard {
+      background:#fff; border-radius:var(--r-lg); overflow:hidden;
+      box-shadow:var(--sh-sm); transition:var(--ease); display:flex; flex-direction:column;
+      border-top:4px solid transparent;
     }
-    .cta-banner__bg {
-      position: absolute;
-      inset: 0;
-      background: url('https://drholzinger.com/wp-content/uploads/2022/03/slide_1.jpg') center/cover no-repeat;
-      opacity: .12;
-    }
-    .cta-banner__inner {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 40px;
-    }
-    .cta-banner__title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.25;
-    }
-    .cta-banner__sub {
-      font-size: 1rem;
-      color: rgba(255,255,255,.72);
-      margin-top: 10px;
-      max-width: 560px;
-      line-height: 1.7;
-    }
-    .cta-banner__sub a { color: var(--olive-light); }
-    .cta-banner__actions { display: flex; gap: 12px; flex-direction: column; align-items: flex-end; }
+    .scard:nth-child(1) { border-top-color:var(--olive-mid); }
+    .scard:nth-child(2) { border-top-color:var(--earth); }
+    .scard:nth-child(3) { border-top-color:var(--olive-light); }
+    .scard:hover { transform:translateY(-7px); box-shadow:var(--sh-md); }
+    .scard__img { width:100%; aspect-ratio:16/9; object-fit:cover; transition:transform .5s var(--ease); }
+    .scard:hover .scard__img { transform:scale(1.04); }
+    .scard__body { padding:28px; flex:1; display:flex; flex-direction:column; }
+    .scard__icon { width:46px; height:46px; background:var(--sage-pale); border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; font-size:1.3rem; margin-bottom:16px; }
+    .scard__title { font-family:'Playfair Display',serif; font-size:1.25rem; font-weight:700; color:var(--olive-dark); margin-bottom:10px; }
+    .scard__desc { font-size:.92rem; color:var(--text-mid); line-height:1.65; flex:1; }
+    .scard__tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; }
+    .scard__tag { font-size:.7rem; font-weight:600; background:var(--sage-pale); color:var(--olive-dark); padding:3px 10px; border-radius:var(--r-pill); }
+    .scard__link { display:inline-flex; align-items:center; gap:6px; margin-top:18px; font-size:.86rem; font-weight:600; color:var(--olive); transition:gap .2s; }
+    .scard__link:hover { gap:10px; }
+    .scard__link svg { width:15px; height:15px; fill:currentColor; }
 
-    /* ─── TESTIMONIALS ───────────────────────────────────────── */
-    .testi {
-      padding: 100px 0;
-      background: var(--off-white);
+    /* ── CTA BAND ────────────────────────────────────────────── */
+    .cta {
+      position:relative; overflow:hidden;
+      background:linear-gradient(130deg, var(--olive-dark) 0%, #2A3812 50%, var(--earth-dark) 100%);
+      padding:90px 0;
     }
-    .testi__header {
-      text-align: center;
-      margin-bottom: 56px;
-    }
-    .testi__grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-    }
-    .testi-card {
-      background: #fff;
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--sage-pale);
-      display: flex;
-      flex-direction: column;
-      transition: var(--transition);
-    }
-    .testi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
-    .testi-card__stars {
-      display: flex;
-      gap: 4px;
-      color: var(--earth-warm);
-      font-size: 1rem;
-      margin-bottom: 16px;
-    }
-    .testi-card::before {
-      content: '\201C';
-      font-family: 'Playfair Display', serif;
-      font-size: 5rem;
-      line-height: .6;
-      color: var(--sage);
-      display: block;
-      margin-bottom: 12px;
-    }
-    .testi-card__quote {
-      font-size: .95rem;
-      color: var(--text-mid);
-      line-height: 1.7;
-      flex: 1;
-      font-style: italic;
-    }
-    .testi-card__author {
-      margin-top: 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .testi-card__avatar {
-      width: 42px; height: 42px;
-      border-radius: 50%;
-      background: var(--sage-pale);
-      display: flex; align-items: center; justify-content: center;
-      font-size: .85rem;
-      font-weight: 700;
-      color: var(--olive);
-    }
-    .testi-card__name {
-      font-weight: 600;
-      font-size: .9rem;
-      color: var(--olive-dark);
-    }
-    .testi-card__role {
-      font-size: .78rem;
-      color: var(--text-light);
-    }
+    .cta__pattern { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px); background-size:24px 24px; }
+    .cta__in { position:relative; z-index:2; display:grid; grid-template-columns:1fr auto; align-items:center; gap:60px; }
+    .cta__title { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3vw,2.3rem); font-weight:700; color:#fff; line-height:1.22; }
+    .cta__checks { margin-top:20px; display:flex; flex-direction:column; gap:10px; }
+    .cta__check { display:flex; align-items:center; gap:10px; font-size:.9rem; color:rgba(255,255,255,.78); }
+    .cta__check-icon { width:20px; height:20px; background:rgba(168,186,106,.25); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .cta__check-icon svg { width:11px; height:11px; fill:var(--olive-light); }
+    .cta__btns { display:flex; flex-direction:column; gap:12px; align-items:center; }
+    .cta__phone { font-size:.82rem; color:rgba(255,255,255,.55); margin-top:6px; text-align:center; }
+    .cta__phone a { color:rgba(255,255,255,.75); transition:color .2s; }
+    .cta__phone a:hover { color:var(--olive-light); }
+    @media(max-width:768px){ .cta__in { grid-template-columns:1fr; } .cta__btns { align-items:flex-start; } }
 
-    /* ─── ABOUT ──────────────────────────────────────────────── */
+    /* ── ABOUT ───────────────────────────────────────────────── */
     .about {
-      padding: 100px 0;
-      background: var(--sage-pale);
-      position: relative;
-      overflow: hidden;
+      padding:100px 0; background:var(--sage-pale); position:relative; overflow:hidden;
     }
-    .about::before {
-      content: '';
-      position: absolute;
-      top: -80px; right: -80px;
-      width: 420px; height: 420px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(168,186,106,.25) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .about__grid {
-      display: grid;
-      grid-template-columns: 1fr 1.3fr;
-      gap: 80px;
-      align-items: start;
-    }
-    .about__photo-col {
-      position: relative;
-    }
+    .about::after { content:''; position:absolute; top:-100px; right:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(168,186,106,.18) 0%, transparent 65%); pointer-events:none; }
+    .about__grid { display:grid; grid-template-columns:1fr 1.35fr; gap:80px; align-items:start; }
+    .about__photo-col { position:relative; }
     .about__photo {
-      border-radius: var(--radius-lg);
-      width: 100%;
-      object-fit: cover;
-      object-position: top center;
-      aspect-ratio: 3/4;
-      box-shadow: var(--shadow-lg);
-      border: 4px solid #fff;
-      outline: 4px solid var(--olive-light);
+      border-radius:var(--r-lg); width:100%; object-fit:cover; object-position:top center;
+      aspect-ratio:3/4; box-shadow:var(--sh-lg);
+      border:4px solid #fff; outline:4px solid var(--olive-light);
     }
-    .about__photo-card {
-      position: absolute;
-      bottom: 28px;
-      right: -28px;
-      background: var(--olive-dark);
-      color: #fff;
-      border-radius: var(--radius-md);
-      padding: 20px 24px;
-      box-shadow: var(--shadow-md);
-      min-width: 190px;
+    .about__card {
+      position:absolute; bottom:32px; right:-24px; z-index:2;
+      background:var(--olive-dark); color:#fff; border-radius:var(--r-md);
+      padding:18px 22px; box-shadow:var(--sh-md); min-width:185px;
     }
-    .about__photo-card-title {
-      font-size: .7rem;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--olive-light);
-      margin-bottom: 6px;
+    .about__card-sup { font-size:.68rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--olive-light); margin-bottom:5px; }
+    .about__card-name { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; line-height:1.2; }
+    .about__card-sub { font-size:.74rem; color:rgba(255,255,255,.6); margin-top:4px; }
+    /* Pull quote */
+    .about__pull {
+      background:var(--olive-dark); color:#fff; border-radius:var(--r-md);
+      padding:28px 32px; margin-top:28px; position:relative; overflow:hidden;
     }
-    .about__photo-card-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #fff;
-      line-height: 1.2;
+    .about__pull::before {
+      content:'\201C';
+      font-family:'Playfair Display',serif; font-size:8rem; line-height:.6;
+      color:rgba(168,186,106,.2); position:absolute; top:16px; left:20px;
+      pointer-events:none;
     }
-    .about__photo-card-cred {
-      font-size: .78rem;
-      color: rgba(255,255,255,.65);
-      margin-top: 4px;
+    .about__pull-text { font-family:'Playfair Display',serif; font-size:1.08rem; font-style:italic; line-height:1.6; position:relative; z-index:1; }
+    .about__pull-attr { font-size:.78rem; color:var(--olive-light); margin-top:14px; font-weight:600; letter-spacing:.04em; }
+    /* Bio */
+    .about__bio { font-size:.98rem; color:var(--text-mid); line-height:1.78; margin-top:20px; }
+    .about__bio p+p { margin-top:12px; }
+    /* Credentials */
+    .about__creds { margin-top:32px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .about__cred {
+      display:flex; align-items:flex-start; gap:12px;
+      background:#fff; border-radius:var(--r-md); padding:14px 16px; box-shadow:var(--sh-sm);
+      transition:var(--ease);
     }
-    .about__content {}
-    .about__bio {
-      font-size: 1rem;
-      color: var(--text-mid);
-      line-height: 1.78;
-      margin-top: 18px;
-    }
-    .about__bio p + p { margin-top: 14px; }
-    .about__credentials {
-      margin-top: 36px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .about__cred-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      background: #fff;
-      border-radius: var(--radius-md);
-      padding: 14px 16px;
-      box-shadow: var(--shadow-sm);
-    }
-    .about__cred-icon {
-      flex-shrink: 0;
-      width: 36px; height: 36px;
-      background: var(--sage-pale);
-      border-radius: var(--radius-sm);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-    }
-    .about__cred-text { font-size: .82rem; color: var(--text-mid); line-height: 1.4; }
-    .about__cred-text strong { display: block; color: var(--olive-dark); font-weight: 600; font-size: .85rem; }
-    .about__actions { margin-top: 36px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .about__cred:hover { box-shadow:var(--sh-md); transform:translateY(-2px); }
+    .about__cred-icon { flex-shrink:0; width:34px; height:34px; background:var(--sage-pale); border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; font-size:.95rem; }
+    .about__cred-txt { font-size:.8rem; color:var(--text-mid); line-height:1.4; }
+    .about__cred-txt strong { display:block; color:var(--olive-dark); font-weight:700; font-size:.82rem; margin-bottom:2px; }
+    .about__btns { margin-top:32px; display:flex; gap:14px; flex-wrap:wrap; }
 
-    /* ─── FOOTER ─────────────────────────────────────────────── */
-    footer {
-      background: var(--olive-dark);
-      color: rgba(255,255,255,.78);
+    /* ── TESTIMONIALS ────────────────────────────────────────── */
+    .testi { padding:100px 0; background:var(--off-white); }
+    .testi__hd { text-align:center; margin-bottom:16px; }
+    .testi__rating {
+      display:flex; align-items:center; justify-content:center; gap:12px;
+      margin-bottom:56px; flex-wrap:wrap;
     }
-    .footer__wave { display: block; }
-    .footer__top {
-      padding: 70px 0 50px;
+    .testi__stars { font-size:1.3rem; color:var(--earth-warm); letter-spacing:2px; }
+    .testi__rating-text { font-size:.9rem; color:var(--text-mid); font-weight:500; }
+    .testi__rating-text strong { color:var(--olive-dark); }
+    .testi__grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+    .tcard {
+      background:#fff; border-radius:var(--r-lg); padding:32px;
+      box-shadow:var(--sh-sm); border:1px solid var(--sage-pale);
+      display:flex; flex-direction:column; transition:var(--ease);
+      position:relative; overflow:hidden;
     }
-    .footer__grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr;
-      gap: 48px;
+    .tcard::before {
+      content:'\201C';
+      font-family:'Playfair Display',serif; font-size:5.5rem; line-height:.55;
+      color:var(--sage-pale); display:block; margin-bottom:8px;
+      transition:color var(--ease);
     }
-    .footer__brand {}
-    .footer__logo-text {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 14px;
-    }
-    .footer__tagline {
-      font-size: .88rem;
-      color: rgba(255,255,255,.6);
-      line-height: 1.7;
-      max-width: 260px;
-    }
-    .footer__cta-wrap { margin-top: 24px; }
-    .footer__col-title {
-      font-size: .78rem;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--olive-light);
-      margin-bottom: 18px;
-    }
-    .footer__links { display: flex; flex-direction: column; gap: 10px; }
-    .footer__links a {
-      font-size: .88rem;
-      color: rgba(255,255,255,.65);
-      transition: var(--transition);
-    }
-    .footer__links a:hover { color: #fff; }
-    .footer__contact-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: .88rem;
-      color: rgba(255,255,255,.65);
-      margin-bottom: 12px;
-    }
-    .footer__contact-item svg { flex-shrink: 0; width: 16px; height: 16px; fill: var(--olive-light); margin-top: 2px; }
-    .footer__contact-item a { color: rgba(255,255,255,.65); transition: var(--transition); }
-    .footer__contact-item a:hover { color: #fff; }
-    .footer__bottom {
-      border-top: 1px solid rgba(255,255,255,.12);
-      padding: 22px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-    .footer__bottom p { font-size: .8rem; color: rgba(255,255,255,.45); }
-    .footer__locations {
-      display: flex;
-      gap: 16px;
-    }
-    .footer__locations a {
-      font-size: .8rem;
-      color: rgba(255,255,255,.5);
-      transition: var(--transition);
-    }
-    .footer__locations a:hover { color: var(--olive-light); }
+    .tcard:hover { box-shadow:var(--sh-md); transform:translateY(-5px); }
+    .tcard:hover::before { color:var(--sage); }
+    .tcard__stars { font-size:.92rem; color:var(--earth-warm); margin-bottom:14px; letter-spacing:2px; }
+    .tcard__quote { font-size:.93rem; color:var(--text-mid); line-height:1.72; flex:1; font-style:italic; }
+    .tcard__author { margin-top:24px; display:flex; align-items:center; gap:12px; }
+    .tcard__av { width:42px; height:42px; border-radius:50%; background:var(--sage-pale); display:flex; align-items:center; justify-content:center; font-size:.82rem; font-weight:700; color:var(--olive); flex-shrink:0; border:2px solid var(--sage); }
+    .tcard__name { font-weight:700; font-size:.88rem; color:var(--olive-dark); }
+    .tcard__role { font-size:.76rem; color:var(--text-light); margin-top:2px; }
 
-    /* ─── RESPONSIVE ─────────────────────────────────────────── */
-    @media (max-width: 1024px) {
-      .hero__image-wrap { flex: 0 0 280px; }
-      .footer__grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+    /* ── FOOTER ──────────────────────────────────────────────── */
+    footer { background:var(--olive-dark); }
+    .footer__wave { display:block; background:var(--off-white); }
+    .footer__body { padding:70px 0 50px; }
+    .footer__grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:48px; }
+    .footer__name { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#fff; margin-bottom:12px; }
+    .footer__tag { font-size:.85rem; color:rgba(255,255,255,.55); line-height:1.7; max-width:240px; }
+    .footer__cta-wrap { margin-top:24px; }
+    .footer__col-h { font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--olive-light); margin-bottom:18px; }
+    .footer__links { display:flex; flex-direction:column; gap:10px; }
+    .footer__links a { font-size:.86rem; color:rgba(255,255,255,.6); transition:color .2s; }
+    .footer__links a:hover { color:#fff; }
+    .footer__ci { display:flex; align-items:flex-start; gap:10px; font-size:.86rem; color:rgba(255,255,255,.6); margin-bottom:12px; }
+    .footer__ci svg { flex-shrink:0; width:15px; height:15px; fill:var(--olive-light); margin-top:3px; }
+    .footer__ci a { color:rgba(255,255,255,.6); transition:color .2s; }
+    .footer__ci a:hover { color:#fff; }
+    .footer__bar {
+      border-top:1px solid rgba(255,255,255,.10); padding:20px 0;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
     }
-    /* Mobile nav toggle */
-    .nav__hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      background: none;
-      border: none;
-      padding: 8px;
-      border-radius: var(--radius-sm);
-    }
-    .nav__hamburger span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: var(--olive-dark);
-      border-radius: 2px;
-      transition: var(--transition);
-    }
-    .nav__hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav__hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
-    .nav__hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    .nav__mobile-cta { display: none; }
+    .footer__bar p { font-size:.78rem; color:rgba(255,255,255,.38); }
+    .footer__bar-links { display:flex; gap:16px; }
+    .footer__bar-links a { font-size:.78rem; color:rgba(255,255,255,.42); transition:color .2s; }
+    .footer__bar-links a:hover { color:var(--olive-light); }
 
-    @media (max-width: 768px) {
-      .nav__menu { 
-        display: none;
-        position: absolute;
-        top: 100%;
-        left: 0; right: 0;
-        background: var(--off-white);
-        border-top: 1px solid var(--sage-pale);
-        border-bottom: 2px solid var(--olive-light);
-        padding: 16px 24px 20px;
-        flex-direction: column;
-        gap: 0;
-        box-shadow: var(--shadow-md);
-        z-index: 99;
-      }
-      .nav__menu.open { display: flex; }
-      .nav__menu a { 
-        padding: 12px 0;
-        border-bottom: 1px solid var(--sage-pale);
-        font-size: 1rem;
-        color: var(--text-dark);
-      }
-      .nav__menu li:last-child a { border-bottom: none; }
-      .nav__cta { display: none; }
-      .nav__hamburger { display: flex; }
-      .nav__mobile-cta { 
-        display: inline-flex;
-        align-items: center;
-        padding: 10px 18px;
-        background: var(--olive);
-        color: #fff;
-        border-radius: var(--radius-pill);
-        font-size: .85rem;
-        font-weight: 600;
-      }
-      .nav { position: sticky; }
-
-      .hero__inner { flex-direction: column; padding: 80px 24px 60px; text-align: center; }
-      .hero__sub { margin: 0 auto 36px; }
-      .hero__actions { justify-content: center; }
-      .hero__stats { justify-content: center; }
-      .hero__image-wrap { display: none; }
-      .welcome__grid { grid-template-columns: 1fr; gap: 48px; }
-      .welcome__img-accent, .welcome__dot-grid { display: none; }
-      .about__grid { grid-template-columns: 1fr; }
-      .about__photo-card { right: 0; }
-      .about__credentials { grid-template-columns: 1fr; }
-      .services__grid { grid-template-columns: 1fr; }
-      .testi__grid { grid-template-columns: 1fr; }
-      .cta-banner__inner { grid-template-columns: 1fr; }
-      .cta-banner__actions { align-items: flex-start; }
-      .footer__grid { grid-template-columns: 1fr; }
-      .topbar__links { display: none; }
+    /* ── RESPONSIVE ──────────────────────────────────────────── */
+    @media(max-width:1024px){
+      .hero__img-col { flex:0 0 280px; }
+      .footer__grid { grid-template-columns:1fr 1fr; gap:36px; }
     }
-    @media (max-width: 480px) {
-      .trust__inner { gap: 20px; }
+    @media(max-width:768px){
+      .hero__in { flex-direction:column; padding:90px 28px 60px; text-align:center; }
+      .hero__sub { margin:0 auto 36px; }
+      .hero__btns { justify-content:center; }
+      .hero__stats { justify-content:center; }
+      .hero__img-col { display:none; }
+      .welcome__grid { grid-template-columns:1fr; gap:48px; }
+      .welcome__accent,.welcome__dots { display:none; }
+      .services__grid { grid-template-columns:1fr; }
+      .testi__grid { grid-template-columns:1fr; }
+      .about__grid { grid-template-columns:1fr; }
+      .about__card { right:0; }
+      .about__creds { grid-template-columns:1fr; }
+      .footer__grid { grid-template-columns:1fr; }
+    }
+    @media(max-width:580px){
+      .trust__in { gap:0; }
+      .trust__item { padding:8px 12px; font-size:.76rem; }
+      .hero__stat-n { font-size:1.7rem; }
     }
   </style>
 </head>
 <body>
 
-<a class="skip-link" href="#main-content">Skip to main content</a>
+<a class="skip-link" href="#main">Skip to main content</a>
 
-<!-- ── TOPBAR ──────────────────────────────────────────────────── -->
-<div class="topbar">
+<!-- TOPBAR -->
+<div class="topbar" role="banner">
   <div class="container">
-    <div class="topbar__inner">
-      <span class="topbar__pill">
-        <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-        <a href="tel:(314) 884-1791">(314) 884-1791</a>
-      </span>
-      <div class="topbar__links">
+    <div class="topbar__in">
+      <div class="topbar__left">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+        <a href="tel:+13148841791">(314) 884-1791</a>
+      </div>
+      <div class="topbar__right">
         <a href="https://drholzinger.com/st-louis-office/">St. Louis Office</a>
         <a href="https://drholzinger.com/edwardsville-office/">Edwardsville Office</a>
-        <a href="https://drholzinger.janeapp.com/" target="_blank">Book Online →</a>
+        <a href="https://drholzinger.janeapp.com/" target="_blank" rel="noopener">Book Online →</a>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── NAV ─────────────────────────────────────────────────────── -->
-<nav class="nav" aria-label="Main navigation">
+<!-- NAV -->
+<nav class="nav" id="nav" aria-label="Main navigation">
   <div class="container">
-    <div class="nav__inner">
-      <a href="https://drholzinger.com/" class="nav__logo">
-        <div class="nav__logo-mark">
-          <!-- Leaf icon -->
+    <div class="nav__in">
+      <a href="https://drholzinger.com/" class="nav__logo" aria-label="Weston Holzinger DC — home">
+        <div class="nav__mark" aria-hidden="true">
           <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 008 20C19 20 22 3 22 3c-1 2-8 2-13 5.5 0 0 3-2 8-.5z"/></svg>
         </div>
-        <div class="nav__logo-text">
-          <span class="nav__logo-name">Weston Holzinger DC</span>
-          <span class="nav__logo-tag">Chiropractic Internist</span>
+        <div>
+          <div class="nav__name">Weston Holzinger DC</div>
+          <div class="nav__tag">Chiropractic Internist</div>
         </div>
       </a>
-      <button class="nav__hamburger" aria-expanded="false" aria-controls="nav-menu" aria-label="Toggle navigation menu">
+      <button class="nav__burger" aria-expanded="false" aria-controls="nav-links" aria-label="Open navigation menu">
         <span></span><span></span><span></span>
       </button>
-      <a href="https://drholzinger.janeapp.com/" class="nav__mobile-cta" target="_blank" aria-label="Book an appointment">Book Now</a>
-      <ul class="nav__menu" id="nav-menu" role="list">
+      <a href="https://drholzinger.janeapp.com/" class="nav__mob-cta" target="_blank" rel="noopener">Book Now</a>
+      <ul class="nav__links" id="nav-links" role="list">
         <li><a href="https://drholzinger.com/">Home</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="https://drholzinger.com/services/">Services</a></li>
@@ -915,411 +503,457 @@
         <li><a href="https://drholzinger.com/contact/">Contact</a></li>
       </ul>
       <div class="nav__cta">
-        <a href="https://drholzinger.janeapp.com/" class="btn btn-primary" target="_blank">
-          Book Appointment
-        </a>
+        <a href="https://drholzinger.janeapp.com/" class="btn btn-green" target="_blank" rel="noopener">Book Appointment</a>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- ── HERO ─────────────────────────────────────────────────────── -->
-<section class="hero" id="main-content" aria-label="Welcome">
-  <div class="hero__bg"></div>
-  <div class="hero__overlay"></div>
-  <div class="hero__inner">
+<!-- HERO -->
+<section class="hero" id="main" aria-label="Welcome to Weston Holzinger DC">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__pattern" aria-hidden="true"></div>
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="hero__in">
     <div class="hero__content">
-      <div class="hero__eyebrow">✦ Accepting New Patients</div>
-      <h1 class="hero__title">
-        Whole-Body Healing<br/>in <em>St. Louis</em> &amp;<br/><em>Edwardsville</em>
-      </h1>
-      <p class="hero__sub">
-        Weston Holzinger DC blends chiropractic expertise with functional medicine and applied kinesiology to uncover the root causes of chronic disease — not just manage the symptoms.
-      </p>
-      <div class="hero__actions">
-        <a href="https://drholzinger.janeapp.com/" class="btn btn-primary" target="_blank">Request an Appointment</a>
-        <a href="#about" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.5);">Meet Dr. Holzinger</a>
+      <div class="hero__badge" aria-label="Currently accepting new patients">
+        <span class="hero__badge-dot" aria-hidden="true"></span>
+        Now Accepting New Patients
       </div>
-      <div class="hero__stats">
+      <h1 class="hero__h1">
+        Real Answers for<br/><em>Complex Health</em><br/>Problems
+      </h1>
+      <p class="hero__sub">Dr. Weston Holzinger combines chiropractic expertise, applied kinesiology, and functional medicine to find the <em>root cause</em> — not just treat the symptoms.</p>
+      <div class="hero__btns">
+        <a href="https://drholzinger.janeapp.com/" class="btn btn-green" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Request Appointment
+        </a>
+        <a href="#about" class="btn btn-ghost-white">Meet Dr. Holzinger</a>
+      </div>
+      <div class="hero__stats" aria-label="Practice highlights">
         <div class="hero__stat">
-          <div class="hero__stat-num">2</div>
-          <div class="hero__stat-lbl">Convenient Locations</div>
+          <div class="hero__stat-n" aria-label="2 locations">2</div>
+          <div class="hero__stat-l">Locations</div>
         </div>
         <div class="hero__stat">
-          <div class="hero__stat-num">5★</div>
-          <div class="hero__stat-lbl">Patient Reviews</div>
+          <div class="hero__stat-n" aria-label="5 star rating">5★</div>
+          <div class="hero__stat-l">Google Rating</div>
         </div>
         <div class="hero__stat">
-          <div class="hero__stat-num">AK</div>
-          <div class="hero__stat-lbl">Applied Kinesiology</div>
+          <div class="hero__stat-n">600+</div>
+          <div class="hero__stat-l">Training Hours</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-n">DC, MS</div>
+          <div class="hero__stat-l">Credentials</div>
         </div>
       </div>
     </div>
-    <div class="hero__image-wrap">
-      <img src="https://raw.githubusercontent.com/tdander26/jeffrey-dashboard/main/dr-holzinger-photo.jpg" alt="Dr. Weston Holzinger DC" />
-      <div class="hero__badge">
-        <div class="hero__badge-icon">🌿</div>
-        <div class="hero__badge-text">
+    <div class="hero__img-col" aria-hidden="true">
+      <div class="hero__img-ring"></div>
+      <img class="hero__img"
+           src="https://raw.githubusercontent.com/tdander26/jeffrey-dashboard/main/dr-holzinger-photo.jpg"
+           alt="Dr. Weston Holzinger DC, Chiropractic Internist" />
+      <div class="hero__float-card">
+        <div class="hero__float-icon">🌿</div>
+        <div class="hero__float-text">
           <strong>Functional Medicine</strong>
-          <span>Root-cause approach</span>
+          <span>Root-cause care</span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Wave -->
-<svg class="wave-divider" style="background:var(--olive-dark);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none">
-  <path fill="#f4efe6" d="M0,60 C360,0 1080,60 1440,20 L1440,60 Z"/>
+<svg class="wave" style="background:var(--olive-dark);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+  <path fill="#F4EFE6" d="M0,60 C360,0 1080,60 1440,20 L1440,60 Z"/>
 </svg>
 
-<!-- ── TRUST BAR ─────────────────────────────────────────────────── -->
-<div class="trust">
+<!-- TRUST STRIP -->
+<div class="trust" role="complementary" aria-label="Specialties">
   <div class="container">
-    <div class="trust__inner">
-      <div class="trust__item">
-        <div class="trust__item-icon">🏥</div>
-        Chiropractic Internist
-      </div>
-      <div class="trust__item">
-        <div class="trust__item-icon">🧬</div>
-        Applied Kinesiology
-      </div>
-      <div class="trust__item">
-        <div class="trust__item-icon">🌿</div>
-        Functional Medicine
-      </div>
-      <div class="trust__item">
-        <div class="trust__item-icon">📍</div>
-        St. Louis &amp; Edwardsville
-      </div>
-      <div class="trust__item">
-        <div class="trust__item-icon">📅</div>
-        Online Booking Available
-      </div>
+    <div class="trust__in">
+      <div class="trust__item"><span class="trust__icon" aria-hidden="true">🏥</span> Chiropractic Internist</div>
+      <div class="trust__item"><span class="trust__icon" aria-hidden="true">🧬</span> Applied Kinesiology</div>
+      <div class="trust__item"><span class="trust__icon" aria-hidden="true">🌿</span> Functional Medicine</div>
+      <div class="trust__item"><span class="trust__icon" aria-hidden="true">☯️</span> Acupuncture Certified</div>
+      <div class="trust__item"><span class="trust__icon" aria-hidden="true">📍</span> St. Louis &amp; Edwardsville</div>
     </div>
   </div>
 </div>
 
-<!-- ── WELCOME ───────────────────────────────────────────────────── -->
+<!-- WELCOME -->
 <section class="welcome">
   <div class="container">
     <div class="welcome__grid">
-      <div class="welcome__img-wrap">
-        <div class="welcome__dot-grid"></div>
-        <img class="welcome__img" src="https://drholzinger.com/wp-content/uploads/2022/03/chiro6-1.jpg" alt="Chiropractic care at Weston Holzinger DC" />
-        <div class="welcome__img-accent"></div>
+      <div class="welcome__img-wrap reveal">
+        <div class="welcome__dots" aria-hidden="true"></div>
+        <img class="welcome__img" src="https://drholzinger.com/wp-content/uploads/2022/03/chiro6-1.jpg" alt="Patient receiving chiropractic care at Weston Holzinger DC" loading="lazy" />
+        <div class="welcome__accent" aria-hidden="true"></div>
       </div>
-      <div class="welcome__content">
-        <span class="section-label">Welcome to Our Practice</span>
-        <h2 class="section-title">A Clinic Built on<br/>Genuine Care</h2>
+      <div class="welcome__content reveal reveal-delay-1">
+        <span class="label">Welcome to the Practice</span>
+        <h2 class="headline">A Clinic Built on<br/>Genuine Care</h2>
         <div class="welcome__body">
-          <p>We are dedicated to staying on top of the latest chiropractic tools and treatments. It is our goal to create a friendly and professional atmosphere that you can rely on for all of your chiropractic needs.</p>
-          <p>We couldn't be the office we are without our staff. They are always helping patients by giving them the information they need to make the right decision. Our staff will discuss all of your options and what to expect — here to answer your questions and address your concerns every step of the way.</p>
-          <p>If you'd like to visit our office, feel free to <a href="https://drholzinger.com/contact/">contact us</a> today at <a href="tel:(314) 884-1791">(314) 884-1791</a>.</p>
+          <p>We are dedicated to staying on top of the latest chiropractic tools and treatments. Our goal is to create a friendly, professional atmosphere you can rely on for all of your chiropractic needs.</p>
+          <p>Our team helps patients navigate their options with honesty — discussing what to expect, answering questions, and addressing concerns every step of the way. We think of our patients as extended family.</p>
+          <p>Ready to visit? <a href="https://drholzinger.com/contact/">Contact us</a> or call <a href="tel:+13148841791">(314) 884-1791</a>.</p>
         </div>
-        <div class="welcome__actions">
-          <a href="#about" class="btn btn-primary">Learn About Us</a>
-          <a href="https://drholzinger.com/new-patients/" class="btn btn-outline">New Patients</a>
+        <div class="welcome__btns">
+          <a href="#about" class="btn btn-green">Learn About Us</a>
+          <a href="https://drholzinger.com/new-patients/" class="btn btn-outline-green">New Patients</a>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── SERVICES ──────────────────────────────────────────────────── -->
+<!-- HOW IT WORKS -->
+<section class="how" aria-label="How to get started">
+  <div class="container">
+    <div class="how__header reveal">
+      <span class="label">Getting Started</span>
+      <h2 class="headline">Three Steps to Better Health</h2>
+      <p class="sub">No mystery, no runaround. Here's exactly what to expect when you become a patient.</p>
+    </div>
+    <div class="how__grid">
+      <div class="how__step reveal reveal-delay-1">
+        <div class="how__num-wrap"><div class="how__num" aria-hidden="true">1</div></div>
+        <h3 class="how__step-title">Book Your Visit</h3>
+        <p class="how__step-desc">Request an appointment online in minutes. Complete your intake forms from home before you arrive — we respect your time.</p>
+      </div>
+      <div class="how__step reveal reveal-delay-2">
+        <div class="how__num-wrap"><div class="how__num" aria-hidden="true">2</div></div>
+        <h3 class="how__step-title">In-Depth Assessment</h3>
+        <p class="how__step-desc">Dr. Holzinger uses applied kinesiology, functional blood chemistry, and comprehensive testing to understand the full picture of your health.</p>
+      </div>
+      <div class="how__step reveal reveal-delay-3">
+        <div class="how__num-wrap"><div class="how__num" aria-hidden="true">3</div></div>
+        <h3 class="how__step-title">Personalized Treatment</h3>
+        <p class="how__step-desc">Receive a tailored care plan — adjustments, nutrition, lifestyle, or acupuncture — designed around the root cause, not just the symptom.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
 <section class="services" aria-label="Our services">
   <div class="container">
-    <div class="services__header">
-      <span class="section-label">What We Do</span>
-      <h2 class="section-title">Specialized Care for the<br/>Whole Person</h2>
-      <p class="section-sub">We address root causes — not just symptoms — using a multidisciplinary approach that combines chiropractic, kinesiology, and functional medicine.</p>
+    <div class="services__hd reveal">
+      <span class="label">What We Do</span>
+      <h2 class="headline">Specialized Care for the<br/>Whole Person</h2>
+      <p class="sub">A multidisciplinary approach that treats structure, chemistry, and lifestyle — together.</p>
     </div>
     <div class="services__grid">
-
-      <div class="service-card">
-        <img class="service-card__img" src="https://drholzinger.com/wp-content/uploads/2022/03/lifestyleadvice_img.jpg" alt="Applied Kinesiology" />
-        <div class="service-card__body">
-          <div class="service-card__icon">🧬</div>
-          <h3 class="service-card__title">Applied Kinesiology</h3>
-          <p class="service-card__desc">A multidisciplinary technique developed by Dr. George Goodhart and used by DCs, DOs, MDs, and NDs worldwide to assess and treat structural, chemical, and mental health factors.</p>
-          <a href="https://drholzinger.com/what-is-applied-kinesiology/" class="service-card__link">
+      <div class="scard reveal reveal-delay-1">
+        <img class="scard__img" src="https://drholzinger.com/wp-content/uploads/2022/03/lifestyleadvice_img.jpg" alt="Applied Kinesiology treatment" loading="lazy" />
+        <div class="scard__body">
+          <div class="scard__icon" aria-hidden="true">🧬</div>
+          <h3 class="scard__title">Applied Kinesiology</h3>
+          <p class="scard__desc">A multidisciplinary technique used by DCs, DOs, MDs, and NDs worldwide to assess structural, chemical, and mental health factors simultaneously.</p>
+          <div class="scard__tags">
+            <span class="scard__tag">Muscle Testing</span>
+            <span class="scard__tag">Structural</span>
+            <span class="scard__tag">Neurological</span>
+          </div>
+          <a href="https://drholzinger.com/what-is-applied-kinesiology/" class="scard__link">
             Learn more
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
         </div>
       </div>
-
-      <div class="service-card">
-        <img class="service-card__img" src="https://drholzinger.com/wp-content/uploads/2022/04/nutrition_img.jpg" alt="Lifestyle Advice" />
-        <div class="service-card__body">
-          <div class="service-card__icon">🌱</div>
-          <h3 class="service-card__title">Lifestyle Advice</h3>
-          <p class="service-card__desc">We address typical chiropractic issues while also coaching patients to live healthier lives by looking at the individual as a whole — mentally, physically, and emotionally.</p>
-          <a href="https://drholzinger.com/services/" class="service-card__link">
+      <div class="scard reveal reveal-delay-2">
+        <img class="scard__img" src="https://drholzinger.com/wp-content/uploads/2022/04/nutrition_img.jpg" alt="Lifestyle and nutrition coaching" loading="lazy" />
+        <div class="scard__body">
+          <div class="scard__icon" aria-hidden="true">🌱</div>
+          <h3 class="scard__title">Lifestyle &amp; Nutrition</h3>
+          <p class="scard__desc">We coach patients toward a healthier life by looking at the individual as a whole — mentally, physically, and emotionally — not just the presenting complaint.</p>
+          <div class="scard__tags">
+            <span class="scard__tag">Nutrition</span>
+            <span class="scard__tag">Lifestyle</span>
+            <span class="scard__tag">Holistic</span>
+          </div>
+          <a href="https://drholzinger.com/services/" class="scard__link">
             Learn more
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
         </div>
       </div>
-
-      <div class="service-card">
-        <img class="service-card__img" src="https://drholzinger.com/wp-content/uploads/2022/04/functionalmedicine_img.jpg" alt="Functional Medicine" />
-        <div class="service-card__body">
-          <div class="service-card__icon">⚗️</div>
-          <h3 class="service-card__title">Functional Medicine</h3>
-          <p class="service-card__desc">A personalized, integrative approach to healthcare — understanding the prevention, management, and root causes of complex chronic disease rather than masking symptoms.</p>
-          <a href="https://drholzinger.com/services/" class="service-card__link">
+      <div class="scard reveal reveal-delay-3">
+        <img class="scard__img" src="https://drholzinger.com/wp-content/uploads/2022/04/functionalmedicine_img.jpg" alt="Functional medicine consultation" loading="lazy" />
+        <div class="scard__body">
+          <div class="scard__icon" aria-hidden="true">⚗️</div>
+          <h3 class="scard__title">Functional Medicine</h3>
+          <p class="scard__desc">A personalized, integrative approach to understanding the prevention, management, and root causes of complex chronic disease — not just symptom suppression.</p>
+          <div class="scard__tags">
+            <span class="scard__tag">Chronic Disease</span>
+            <span class="scard__tag">Root Cause</span>
+            <span class="scard__tag">Integrative</span>
+          </div>
+          <a href="https://drholzinger.com/services/" class="scard__link">
             Learn more
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ── CTA BANNER ────────────────────────────────────────────────── -->
-<section class="cta-banner">
-  <div class="cta-banner__bg"></div>
+<!-- CTA BAND -->
+<section class="cta" aria-label="Call to action">
+  <div class="cta__pattern" aria-hidden="true"></div>
   <div class="container">
-    <div class="cta-banner__inner">
-      <div>
-        <h2 class="cta-banner__title">Ready to Take the<br/>First Step?</h2>
-        <p class="cta-banner__sub">We think of our patients as part of our extended family. We include the option to complete intake forms at home, and we're always available to answer questions before your visit. Call us at <a href="tel:(314) 884-1791">(314) 884-1791</a>.</p>
+    <div class="cta__in">
+      <div class="reveal">
+        <h2 class="cta__title">Ready to Take the<br/>First Step?</h2>
+        <div class="cta__checks" role="list" aria-label="What to expect">
+          <div class="cta__check" role="listitem">
+            <div class="cta__check-icon" aria-hidden="true">
+              <svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Complete intake forms from home — before your visit
+          </div>
+          <div class="cta__check" role="listitem">
+            <div class="cta__check-icon" aria-hidden="true">
+              <svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            We take time to actually listen and investigate
+          </div>
+          <div class="cta__check" role="listitem">
+            <div class="cta__check-icon" aria-hidden="true">
+              <svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Two convenient locations — St. Louis &amp; Edwardsville
+          </div>
+          <div class="cta__check" role="listitem">
+            <div class="cta__check-icon" aria-hidden="true">
+              <svg viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            Trusted by fellow healthcare professionals
+          </div>
+        </div>
       </div>
-      <div class="cta-banner__actions">
-        <a href="https://drholzinger.janeapp.com/" class="btn btn-white" target="_blank">Book Online</a>
-        <a href="https://drholzinger.com/new-patients/" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.4);">New Patients</a>
+      <div class="cta__btns reveal reveal-delay-1">
+        <a href="https://drholzinger.janeapp.com/" class="btn btn-solid-white" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Book Online
+        </a>
+        <a href="https://drholzinger.com/new-patients/" class="btn btn-ghost-white">New Patient Info</a>
+        <p class="cta__phone">Or call: <a href="tel:+13148841791">(314) 884-1791</a></p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── ABOUT ──────────────────────────────────────────────────────── -->
-<section class="about" id="about">
+<!-- ABOUT -->
+<section class="about" id="about" aria-label="About Dr. Holzinger">
   <div class="container">
     <div class="about__grid">
-
-      <div class="about__photo-col">
-        <img class="about__photo" src="https://raw.githubusercontent.com/tdander26/jeffrey-dashboard/main/dr-holzinger-photo.jpg" alt="Dr. Weston Holzinger DC" />
-        <div class="about__photo-card">
-          <div class="about__photo-card-title">Your Doctor</div>
-          <div class="about__photo-card-name">Dr. Weston Holzinger</div>
-          <div class="about__photo-card-cred">DC, MS — Logan University</div>
+      <div class="about__photo-col reveal">
+        <img class="about__photo"
+             src="https://raw.githubusercontent.com/tdander26/jeffrey-dashboard/main/dr-holzinger-photo.jpg"
+             alt="Dr. Weston Holzinger DC" loading="lazy" />
+        <div class="about__card" aria-hidden="true">
+          <div class="about__card-sup">Your Doctor</div>
+          <div class="about__card-name">Dr. Weston Holzinger</div>
+          <div class="about__card-sub">DC, MS — Logan University</div>
         </div>
+        <blockquote class="about__pull">
+          <p class="about__pull-text">My passion is to figure out the <em>why</em> behind the symptoms a patient presents with — and help point them toward not just being symptom-free, but continually growing in health.</p>
+          <footer class="about__pull-attr">— Dr. Weston Holzinger DC, MS</footer>
+        </blockquote>
       </div>
-
-      <div class="about__content">
-        <span class="section-label">About Dr. Holzinger</span>
-        <h2 class="section-title">Finding the <em style="font-style:normal;color:var(--olive-mid);">Why</em> Behind<br/>Your Symptoms</h2>
+      <div class="about__content reveal reveal-delay-2">
+        <span class="label">About Dr. Holzinger</span>
+        <h2 class="headline">Finding the <em>Why</em> Behind<br/>Your Symptoms</h2>
         <div class="about__bio">
-          <p>Dr. Weston Holzinger is a Chiropractic physician with advanced training in nutrition and functional biochemistry. He graduated from Logan University as a Doctor of Chiropractic <strong>with honors</strong> and earned a <strong>Master's degree in Nutrition and Human Performance as valedictorian</strong> — receiving multiple awards including the Clinical Science Award.</p>
-          <p>His passion is to uncover the <em>why</em> behind a patient's symptoms and guide them not just toward being symptom-free, but toward continually growing in health.</p>
-          <p>His primary treatment methods include manual adjustments, myofascial therapies, nutritional analysis, lifestyle recommendations, and acupuncture/pressure — blending Eastern principles with the Western scientific model.</p>
+          <p>Dr. Holzinger is a Chiropractic physician with advanced training in nutrition and functional biochemistry. He graduated from Logan University as a Doctor of Chiropractic <strong>with honors</strong> and earned his <strong>Master's degree in Nutrition and Human Performance as valedictorian</strong>, receiving the Clinical Science Award among others.</p>
+          <p>His treatment methods include manual adjustments, myofascial therapies, nutritional analysis, lifestyle recommendations, and acupuncture — blending Eastern principles with the Western scientific model to get at the real root of your problem.</p>
         </div>
-
-        <div class="about__credentials">
-          <div class="about__cred-item">
-            <div class="about__cred-icon">🧬</div>
-            <div class="about__cred-text">
-              <strong>Applied Kinesiology</strong>
-              300+ hrs training · multiple advanced certifications incl. Systems Health Care
-            </div>
+        <div class="about__creds" role="list" aria-label="Credentials and certifications">
+          <div class="about__cred" role="listitem">
+            <div class="about__cred-icon" aria-hidden="true">🧬</div>
+            <div class="about__cred-txt"><strong>Applied Kinesiology</strong>300+ hrs · Systems Health Care contributor</div>
           </div>
-          <div class="about__cred-item">
-            <div class="about__cred-icon">🩸</div>
-            <div class="about__cred-text">
-              <strong>Functional Blood Chemistry</strong>
-              Certified in Thyroid &amp; Endocrine assessment
-            </div>
+          <div class="about__cred" role="listitem">
+            <div class="about__cred-icon" aria-hidden="true">🩸</div>
+            <div class="about__cred-txt"><strong>Functional Blood Chemistry</strong>Thyroid &amp; Endocrine certified</div>
           </div>
-          <div class="about__cred-item">
-            <div class="about__cred-icon">🏥</div>
-            <div class="about__cred-text">
-              <strong>Chiropractic Internist</strong>
-              300+ hours of internist training
-            </div>
+          <div class="about__cred" role="listitem">
+            <div class="about__cred-icon" aria-hidden="true">🏥</div>
+            <div class="about__cred-txt"><strong>Chiropractic Internist</strong>300+ hours specialized training</div>
           </div>
-          <div class="about__cred-item">
-            <div class="about__cred-icon">☯️</div>
-            <div class="about__cred-text">
-              <strong>Acupuncture &amp; Meridian Therapy</strong>
-              National board certified
-            </div>
+          <div class="about__cred" role="listitem">
+            <div class="about__cred-icon" aria-hidden="true">☯️</div>
+            <div class="about__cred-txt"><strong>Acupuncture &amp; Meridian Therapy</strong>Nationally board certified</div>
           </div>
-          <div class="about__cred-item">
-            <div class="about__cred-icon">🎓</div>
-            <div class="about__cred-text">
-              <strong>Logan University — Valedictorian</strong>
-              DC with honors · MS Nutrition &amp; Human Performance
-            </div>
+          <div class="about__cred" role="listitem">
+            <div class="about__cred-icon" aria-hidden="true">🎓</div>
+            <div class="about__cred-txt"><strong>Logan University — Valedictorian</strong>DC with honors · MS Nutrition &amp; Human Performance</div>
           </div>
-          <div class="about__cred-item">
-            <div class="about__cred-icon">📖</div>
-            <div class="about__cred-text">
-              <strong>Technique Manual Contributor</strong>
-              Systems Health Care technique manual
-            </div>
+          <div class="about__cred" role="listitem">
+            <div class="about__cred-icon" aria-hidden="true">📖</div>
+            <div class="about__cred-txt"><strong>Technique Manual Contributor</strong>Systems Health Care manual</div>
           </div>
         </div>
-
-        <div class="about__actions">
-          <a href="https://drholzinger.janeapp.com/" class="btn btn-primary" target="_blank">Book with Dr. Holzinger</a>
-          <a href="https://drholzinger.com/services/" class="btn btn-outline">View Services</a>
+        <div class="about__btns">
+          <a href="https://drholzinger.janeapp.com/" class="btn btn-green" target="_blank" rel="noopener">Book with Dr. Holzinger</a>
+          <a href="https://drholzinger.com/services/" class="btn btn-outline-green">View Services</a>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ── TESTIMONIALS ───────────────────────────────────────────────── -->
+<!-- TESTIMONIALS -->
 <section class="testi" aria-label="Patient testimonials">
   <div class="container">
-    <div class="testi__header">
-      <span class="section-label">Patient Stories</span>
-      <h2 class="section-title">What Our Patients Say</h2>
+    <div class="testi__hd reveal">
+      <span class="label">Patient Stories</span>
+      <h2 class="headline">Trusted by Patients &amp;<br/>Fellow Physicians</h2>
+    </div>
+    <div class="testi__rating reveal reveal-delay-1" aria-label="5 star rating from 88 Google reviews">
+      <span class="testi__stars" aria-hidden="true">★★★★★</span>
+      <span class="testi__rating-text"><strong>5.0</strong> out of 5 &nbsp;·&nbsp; 88 Google Reviews</span>
     </div>
     <div class="testi__grid">
-
-      <div class="testi-card">
-        <div class="testi-card__stars">★★★★★</div>
-        <p class="testi-card__quote">"As a fellow functional medicine doctor and applied kinesiologist I can say that Dr. Holzinger is one of the best! His vast knowledge of how complex diseases work together and his ability to simplify the most complex topics is astounding. He has treated me multiple times and I highly recommend him!"</p>
-        <div class="testi-card__author">
-          <div class="testi-card__avatar">HA</div>
+      <div class="tcard reveal reveal-delay-1">
+        <div class="tcard__stars" aria-label="5 stars">★★★★★</div>
+        <p class="tcard__quote">"As a fellow functional medicine doctor and applied kinesiologist I can say that Dr. Holzinger is one of the best! His vast knowledge of how complex diseases work together and his ability to simplify the most complex topics is astounding."</p>
+        <div class="tcard__author">
+          <div class="tcard__av" aria-hidden="true">HA</div>
           <div>
-            <div class="testi-card__name">Houston A.</div>
-            <div class="testi-card__role">Functional Medicine Doctor</div>
+            <div class="tcard__name">Houston A.</div>
+            <div class="tcard__role">Functional Medicine Doctor</div>
           </div>
         </div>
       </div>
-
-      <div class="testi-card">
-        <div class="testi-card__stars">★★★★★</div>
-        <p class="testi-card__quote">"Dr. Holzinger has a unique knowledge of biochemistry and kinesiology that help get to the underlying causes of many health problems. He can often make sense of what seems complex, often helping patients with difficult issues. Can't recommend him highly enough!"</p>
-        <div class="testi-card__author">
-          <div class="testi-card__avatar">TH</div>
+      <div class="tcard reveal reveal-delay-2">
+        <div class="tcard__stars" aria-label="5 stars">★★★★★</div>
+        <p class="tcard__quote">"Dr. Holzinger has a unique knowledge of biochemistry and kinesiology that helps get to the underlying causes of many health problems. He can make sense of what seems complex — often helping patients with truly difficult issues."</p>
+        <div class="tcard__author">
+          <div class="tcard__av" aria-hidden="true">TH</div>
           <div>
-            <div class="testi-card__name">Torry H.</div>
-            <div class="testi-card__role">Verified Patient</div>
+            <div class="tcard__name">Torry H.</div>
+            <div class="tcard__role">Verified Patient</div>
           </div>
         </div>
       </div>
-
-      <div class="testi-card">
-        <div class="testi-card__stars">★★★★★</div>
-        <p class="testi-card__quote">"Dr. Holzinger is the functional medicine specialist I seek out when I'm having issues. As a chiropractor myself, I know the work he puts into every patient is above and beyond the status quo. He explains exactly how your digestive, hormonal, or nutrient deficiencies are contributing to your symptoms."</p>
-        <div class="testi-card__author">
-          <div class="testi-card__avatar">TA</div>
+      <div class="tcard reveal reveal-delay-3">
+        <div class="tcard__stars" aria-label="5 stars">★★★★★</div>
+        <p class="tcard__quote">"Dr. Holzinger is the functional medicine specialist I seek out for my own health. As a chiropractor, I know the work he puts into every patient is above and beyond. He explains exactly how your digestive, hormonal, or nutrient issues connect to your symptoms."</p>
+        <div class="tcard__author">
+          <div class="tcard__av" aria-hidden="true">TA</div>
           <div>
-            <div class="testi-card__name">Todd A.</div>
-            <div class="testi-card__role">Chiropractor</div>
+            <div class="tcard__name">Todd A.</div>
+            <div class="tcard__role">Chiropractor, DC</div>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
 
-<!-- ── FOOTER ─────────────────────────────────────────────────────── -->
-<footer>
-  <!-- Wave into footer -->
-  <svg class="footer__wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" style="display:block;background:var(--off-white);">
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <svg class="footer__wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
     <path fill="#3D4F1C" d="M0,0 C480,60 960,0 1440,40 L1440,60 L0,60 Z"/>
   </svg>
-
-  <div class="footer__top">
+  <div class="footer__body">
     <div class="container">
       <div class="footer__grid">
-
-        <div class="footer__brand">
-          <div class="footer__logo-text">Weston Holzinger DC</div>
-          <p class="footer__tagline">Chiropractic Internist serving St. Louis, MO and Edwardsville, IL — helping patients find real answers to complex health challenges.</p>
+        <div>
+          <div class="footer__name">Weston Holzinger DC</div>
+          <p class="footer__tag">Chiropractic Internist serving St. Louis &amp; Edwardsville — uncovering the root causes of complex health challenges since 2022.</p>
           <div class="footer__cta-wrap">
-            <a href="https://drholzinger.janeapp.com/" class="btn btn-primary" target="_blank" style="font-size:.85rem;padding:11px 22px;">Book an Appointment</a>
+            <a href="https://drholzinger.janeapp.com/" class="btn btn-green" target="_blank" rel="noopener" style="font-size:.84rem;padding:11px 22px;">Book an Appointment</a>
           </div>
         </div>
-
         <div>
-          <div class="footer__col-title">Quick Links</div>
+          <div class="footer__col-h">Quick Links</div>
           <ul class="footer__links">
             <li><a href="https://drholzinger.com/">Home</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="https://drholzinger.com/services/">Services</a></li>
             <li><a href="https://drholzinger.com/what-is-applied-kinesiology/">Applied Kinesiology</a></li>
             <li><a href="https://drholzinger.com/new-patients/">New Patients</a></li>
-            <li><a href="https://drholzinger.com/contact/">Contact</a></li>
             <li><a href="https://drholzinger.com/category/blog/">Blog</a></li>
+            <li><a href="https://drholzinger.com/contact/">Contact</a></li>
           </ul>
         </div>
-
         <div>
-          <div class="footer__col-title">St. Louis Office</div>
-          <div class="footer__contact-item">
-            <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-            <a href="tel:(314) 884-1791">(314) 884-1791</a>
+          <div class="footer__col-h">St. Louis Office</div>
+          <div class="footer__ci">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            <a href="tel:+13148841791">(314) 884-1791</a>
           </div>
-          <div class="footer__contact-item">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            <a href="https://drholzinger.com/st-louis-office/" target="_blank">11628 Old Ballas Rd Suite 217<br/>St. Louis, MO 63141</a>
+          <div class="footer__ci">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <a href="https://drholzinger.com/st-louis-office/" target="_blank" rel="noopener">11628 Old Ballas Rd, Suite 217<br/>St. Louis, MO 63141</a>
           </div>
         </div>
-
         <div>
-          <div class="footer__col-title">Edwardsville Office</div>
-          <div class="footer__contact-item">
-            <svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
-            <a href="tel:(314) 884-1791">(314) 884-1791</a>
+          <div class="footer__col-h">Edwardsville Office</div>
+          <div class="footer__ci">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/></svg>
+            <a href="tel:+13148841791">(314) 884-1791</a>
           </div>
-          <div class="footer__contact-item">
-            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-            <a href="https://drholzinger.com/edwardsville-office/" target="_blank">215 S Kansas St, Suite 101<br/>Edwardsville, IL 62025</a>
+          <div class="footer__ci">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            <a href="https://drholzinger.com/edwardsville-office/" target="_blank" rel="noopener">215 S Kansas St, Suite 101<br/>Edwardsville, IL 62025</a>
           </div>
         </div>
-
       </div>
     </div>
   </div>
-
   <div class="container">
-    <div class="footer__bottom">
+    <div class="footer__bar">
       <p>© 2025 Weston Holzinger DC. All rights reserved.</p>
-      <div class="footer__locations">
+      <div class="footer__bar-links">
         <a href="https://drholzinger.com/st-louis-office/">St. Louis</a>
         <a href="https://drholzinger.com/edwardsville-office/">Edwardsville</a>
-        <a href="https://drholzinger.com/privacy-policy/">Privacy Policy</a>
+        <a href="https://drholzinger.com/privacy-policy/">Privacy</a>
       </div>
     </div>
   </div>
 </footer>
 
 <script>
-  // Mobile nav toggle
-  const hamburger = document.querySelector('.nav__hamburger');
-  const navMenu = document.querySelector('.nav__menu');
-  if (hamburger && navMenu) {
-    hamburger.addEventListener('click', () => {
-      const open = navMenu.classList.toggle('open');
-      hamburger.setAttribute('aria-expanded', open);
+  // ── Scroll reveal ──────────────────────────────────────────────
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // ── Nav shrink on scroll ───────────────────────────────────────
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // ── Mobile hamburger ───────────────────────────────────────────
+  const burger = document.querySelector('.nav__burger');
+  const links = document.querySelector('.nav__links');
+  if (burger && links) {
+    burger.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      burger.setAttribute('aria-expanded', open);
     });
-    // Close on link click
-    navMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-      });
+    links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      links.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    }));
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#nav')) {
+        links.classList.remove('open');
+        burger.setAttribute('aria-expanded', 'false');
+      }
     });
   }
-  // Close nav on outside click
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.nav__inner')) {
-      navMenu && navMenu.classList.remove('open');
-      hamburger && hamburger.setAttribute('aria-expanded', 'false');
-    }
-  });
 </script>
+
 </body>
 </html>
