@@ -96,8 +96,27 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.04);
   }
 
+  /* ── Year sub-tabs ── */
+  .year-tab-bar {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 16px;
+  }
+  .segmented-sm {
+    padding: 2px;
+    border-radius: 8px;
+  }
+  .segmented-sm .seg-btn {
+    padding: 5px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+  .tax-year-content { display: none; }
+  .tax-year-content.active { display: block; }
+
   /* ── Main Content ── */
   .main { padding: 20px 24px 120px; max-width: 1600px; margin: 0 auto; }
+
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
@@ -201,6 +220,35 @@
     border-top: 2px solid rgba(0,0,0,0.08);
     background: #f5f5f7 !important;
     color: #1d1d1f;
+  }
+
+  /* Show all toggle bar */
+  .pf-show-toggle {
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pf-show-toggle .btn-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: rgba(0,122,255,0.07);
+    color: #007AFF;
+    border: 1px solid rgba(0,122,255,0.2);
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .pf-show-toggle .btn-toggle:hover { background: rgba(0,122,255,0.13); }
+  .pf-show-toggle .toggle-info {
+    font-size: 12px;
+    color: #86868b;
   }
 
   /* Footer notes */
@@ -329,7 +377,7 @@
     font-weight: 600;
     color: #007AFF;
     letter-spacing: 0.5px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   .tax-id-badge span { font-size: 12px; font-weight: 500; color: #86868b; }
 
@@ -399,6 +447,14 @@
     font-weight: 600;
   }
 
+  .placeholder-note {
+    padding: 24px;
+    text-align: center;
+    color: #86868b;
+    font-size: 13px;
+    font-style: italic;
+  }
+
   /* ── Scrollbar ── */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -465,6 +521,10 @@
         </div>
         <span class="badge badge-blue" id="entryCount">0 entries</span>
       </div>
+      <div class="pf-show-toggle" id="pfToggleBar">
+        <button class="btn-toggle" id="pfToggleBtn" onclick="toggleShowAll()">Show All (<span id="pfTotalCount">0</span> rows)</button>
+        <span class="toggle-info" id="pfToggleInfo">Showing most recent 10 rows</span>
+      </div>
       <div class="pf-table-wrap">
         <table id="pfTable">
           <thead>
@@ -499,219 +559,627 @@
       87-2838444
     </div>
 
-    <div class="taxes-grid">
+    <!-- Year sub-tabs -->
+    <div class="year-tab-bar">
+      <div class="segmented-control segmented-sm">
+        <button class="seg-btn" onclick="switchTaxYear('2024', this)">2024</button>
+        <button class="seg-btn" onclick="switchTaxYear('2025', this)">2025</button>
+        <button class="seg-btn active" onclick="switchTaxYear('2026', this)">2026</button>
+      </div>
+    </div>
 
-      <!-- Federal Quarterly -->
-      <div class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">Federal Quarterly Estimates 2026</div>
-            <div class="panel-subtitle">IRS Form 1040-ES</div>
+    <!-- ── Year 2024 ── -->
+    <div id="tax-year-2024" class="tax-year-content">
+      <div class="taxes-grid">
+
+        <!-- Federal Quarterly 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Federal Quarterly Estimates 2024</div>
+              <div class="panel-subtitle">IRS Form 1040-ES</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="amount">Estimated</th>
+                  <th class="amount">Quarter Amount</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Q1 — April 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2024 Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+        <!-- MN Quarterly 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Quarterly Estimates 2024</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="check-cell">Paid?</th>
+                  <th class="amount">Actually Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Q1 — April 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>Total Paid</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+        <!-- MN Care Tax 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Care Tax 2024</div>
+              <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+        <!-- MN S-Corp 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN S-Corp Tax — 2024 Yearly Fee</div>
+              <div class="panel-subtitle">Minnesota S-Corporation Annual Fee</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2024" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+      </div><!-- end taxes-grid 2024 -->
+    </div><!-- end tax-year-2024 -->
+
+    <!-- ── Year 2025 ── -->
+    <div id="tax-year-2025" class="tax-year-content">
+      <div class="taxes-grid">
+
+        <!-- Federal Quarterly 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Federal Quarterly Estimates 2025</div>
+              <div class="panel-subtitle">IRS Form 1040-ES</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="amount">Estimated</th>
+                  <th class="amount">Quarter Amount</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Last Year @ 110%</td>
+                  <td class="amount">$65,431.30</td>
+                  <td class="amount">$16,357.83</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$16,332.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$16,332.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 16th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$16,332.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$4,000.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2025 Total <span style="font-weight:400;font-size:11px;color:#86868b">(7285 rolled over)</span></td>
+                  <td class="amount">$52,996.00 → $45,711.00</td>
+                  <td class="amount">$52,996.00</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15 &nbsp;|&nbsp; $1,000 owed or less: not required &nbsp;|&nbsp; 110% of prior year tax bill<br>
+            <strong>Pay at:</strong> <a href="https://www.irs.gov/payments" target="_blank">irs.gov/payments</a> → "Make Payment: Balance Due or Estimate" &nbsp;|&nbsp;
+            Also registered: <a href="https://www.eftps.gov/eftps/login/loginInitial" target="_blank">eftps.gov</a><br>
+            ⚠️ Use <strong>Individual SSN</strong> (not EIN) · PIN arriving by mail
           </div>
         </div>
-        <div class="pf-table-wrap">
-          <table class="tax-table">
-            <thead>
-              <tr>
-                <th>Quarter</th>
-                <th class="amount">Estimated</th>
-                <th class="amount">Quarter Amount</th>
-                <th class="check-cell">Paid?</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="na-row">
-                <td>Last Year at 110%</td>
-                <td class="amount">$50,282.10</td>
-                <td class="amount">$12,570.53</td>
-                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
-              </tr>
-              <tr>
-                <td>Q1 — April 18th</td>
-                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
-                <td class="amount">$5,290.00</td>
-                <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr>
-                <td>Q2 — June 15th</td>
-                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
-                <td class="amount">$12,580.00</td>
-                <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr>
-                <td>Q3 — Sept 16th</td>
-                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
-                <td class="amount">$12,580.00</td>
-                <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr>
-                <td>Q4 — Jan 15th</td>
-                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
-                <td class="amount">$12,580.00</td>
-                <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr class="totals-row na-row">
-                <td>2025 Total</td>
-                <td class="amount">—</td>
-                <td class="amount">$50,315.00</td>
-                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tax-note">
-          <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15 &nbsp;|&nbsp; $1,000 owed or less: not required &nbsp;|&nbsp; Use 110% of prior year tax bill<br>
-          <strong>Pay at:</strong> <a href="https://www.irs.gov/payments" target="_blank">irs.gov/payments</a> → "Make Payment: Balance Due or Estimate" &nbsp;|&nbsp;
-          Also registered: <a href="https://www.eftps.gov" target="_blank">eftps.gov</a><br>
-          ⚠️ Use <strong>Individual SSN</strong> (not EIN) · PIN arriving by mail
-        </div>
-      </div>
 
-      <!-- MN Quarterly -->
-      <div class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">MN Quarterly Estimates 2026</div>
-            <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+        <!-- MN Quarterly 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Quarterly Estimates 2025</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+            </div>
+            <span class="badge badge-green">Autopay Set</span>
           </div>
-          <span class="badge badge-green">Autopay Set</span>
-        </div>
-        <div class="pf-table-wrap">
-          <table class="tax-table">
-            <thead>
-              <tr>
-                <th>Quarter</th>
-                <th class="check-cell">Paid?</th>
-                <th class="amount">Actually Paid</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="na-row">
-                <td>Est. 110%</td>
-                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
-                <td class="amount">$3,109.70</td>
-              </tr>
-              <tr>
-                <td>Q1 — April 18th</td>
-                <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" onclick="toggleCheck(this)"></div></td>
-                <td class="amount">$1,226.00</td>
-              </tr>
-              <tr>
-                <td>Q2 — June 15th</td>
-                <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" onclick="toggleCheck(this)"></div></td>
-                <td class="amount">$3,110.00</td>
-              </tr>
-              <tr>
-                <td>Q3 — Sept 15th</td>
-                <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" onclick="toggleCheck(this)"></div></td>
-                <td class="amount">$3,110.00</td>
-              </tr>
-              <tr>
-                <td>Q4 — Jan 16th</td>
-                <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" onclick="toggleCheck(this)"></div></td>
-                <td class="amount">$3,110.00</td>
-              </tr>
-              <tr class="totals-row na-row">
-                <td>AUTOPAY IS SET <span class="auto-badge">✓</span></td>
-                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
-                <td class="amount">$10,556.00</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tax-note">
-          <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15<br>
-          🟢 <strong>AUTOPAY SET — March 1, 2026</strong>
-        </div>
-      </div>
-
-      <!-- MN Care Tax -->
-      <div class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">MN Care Tax 2024–2025</div>
-            <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="check-cell">Paid?</th>
+                  <th class="amount">Actually Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Est. Income</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 16th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q4" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>Total Paid</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">$13,192.00</td>
+                </tr>
+                <tr class="na-row">
+                  <td>Rolled to 2026</td>
+                  <td class="check-cell" style="color:#1d1d1f;font-weight:500">$1,884.00</td>
+                  <td class="amount">$11,308.00</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <span class="badge badge-orange">2 Outstanding</span>
-        </div>
-        <div class="pf-table-wrap">
-          <table class="tax-table">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th class="amount">Service Amount</th>
-                <th class="amount">Amount Due</th>
-                <th class="check-cell">Paid?</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2024</td>
-                <td class="amount">$252,167.42</td>
-                <td class="amount">$4,539.01</td>
-                <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr>
-                <td>2025</td>
-                <td class="amount">—</td>
-                <td class="amount">$4,459.44</td>
-                <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2025" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr class="totals-row">
-                <td>Total</td>
-                <td class="amount">$252,167.42</td>
-                <td class="amount">$8,998.45</td>
-                <td class="check-cell">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tax-note">
-          ⚠️ 2025 amount includes underpayment on estimate penalty
-        </div>
-      </div>
-
-      <!-- MN S-Corp Tax -->
-      <div class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">MN S-Corp Tax — 2026 Yearly Fee</div>
-            <div class="panel-subtitle">Minnesota S-Corporation Annual Fee</div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15<br>
+            🟢 <strong>AUTO PAY — April 18, 2025</strong>
           </div>
-          <span class="due-badge">Due April 15, 2027</span>
         </div>
-        <div class="pf-table-wrap">
-          <table class="tax-table">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th class="amount">Service Amount</th>
-                <th class="amount">Amount Due</th>
-                <th class="check-cell">Paid?</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2026</td>
-                <td class="amount">$200.00</td>
-                <td class="amount">$200.00</td>
-                <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" onclick="toggleCheck(this)"></div></td>
-              </tr>
-              <tr class="totals-row">
-                <td>Total</td>
-                <td class="amount">$200.00</td>
-                <td class="amount">$200.00</td>
-                <td class="check-cell">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="tax-note">
-          ⚠️ 2025 includes underpayment on estimate penalty &nbsp;|&nbsp; <strong>DUE: April 15, 2027</strong>
-        </div>
-      </div>
 
-    </div><!-- end taxes-grid -->
+        <!-- MN Care Tax 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Care Tax 2024–2025</div>
+              <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$4,539.01</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2024" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>2025</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$4,459.44</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2025" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$8,998.45</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            ⚠️ 2025 amount includes underpayment on estimate penalty
+          </div>
+        </div>
+
+        <!-- End of Year Journal Entries 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">End of Year Journal Entries 2025</div>
+              <div class="panel-subtitle">Year-end accounting entries</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="check-cell">Done?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sales Tax, Merchant Fees, Cash/Checks</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="eoy_journal" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            Year-end reconciliation entries for 2025
+          </div>
+        </div>
+
+      </div><!-- end taxes-grid 2025 -->
+    </div><!-- end tax-year-2025 -->
+
+    <!-- ── Year 2026 ── -->
+    <div id="tax-year-2026" class="tax-year-content active">
+      <div class="taxes-grid">
+
+        <!-- Federal Quarterly 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Federal Quarterly Estimates 2026</div>
+              <div class="panel-subtitle">IRS Form 1040-ES</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="amount">Estimated</th>
+                  <th class="amount">Quarter Amount</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Last Year at 110%</td>
+                  <td class="amount">$50,282.10</td>
+                  <td class="amount">$12,570.53</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$5,290.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$12,580.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 16th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$12,580.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$12,580.00</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2025 Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$50,315.00</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15 &nbsp;|&nbsp; $1,000 owed or less: not required &nbsp;|&nbsp; Use 110% of prior year tax bill<br>
+            <strong>Pay at:</strong> <a href="https://www.irs.gov/payments" target="_blank">irs.gov/payments</a> → "Make Payment: Balance Due or Estimate" &nbsp;|&nbsp;
+            Also registered: <a href="https://www.eftps.gov" target="_blank">eftps.gov</a><br>
+            ⚠️ Use <strong>Individual SSN</strong> (not EIN) · PIN arriving by mail
+          </div>
+        </div>
+
+        <!-- MN Quarterly 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Quarterly Estimates 2026</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+            </div>
+            <span class="badge badge-green">Autopay Set</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="check-cell">Paid?</th>
+                  <th class="amount">Actually Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Est. 110%</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">$3,109.70</td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$1,226.00</td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,110.00</td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,110.00</td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 16th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,110.00</td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>AUTOPAY IS SET <span class="auto-badge">✓</span></td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">$10,556.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15<br>
+            🟢 <strong>AUTOPAY SET — March 1, 2026</strong>
+          </div>
+        </div>
+
+        <!-- MN Care Tax 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Care Tax 2024–2025</div>
+              <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+            </div>
+            <span class="badge badge-orange">2 Outstanding</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$4,539.01</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>2025</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$4,459.44</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2025" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$8,998.45</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            ⚠️ 2025 amount includes underpayment on estimate penalty
+          </div>
+        </div>
+
+        <!-- MN S-Corp Tax 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN S-Corp Tax — 2026 Yearly Fee</div>
+              <div class="panel-subtitle">Minnesota S-Corporation Annual Fee</div>
+            </div>
+            <span class="due-badge">Due April 15, 2027</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026</td>
+                  <td class="amount">$200.00</td>
+                  <td class="amount">$200.00</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">$200.00</td>
+                  <td class="amount">$200.00</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            ⚠️ 2025 includes underpayment on estimate penalty &nbsp;|&nbsp; <strong>DUE: April 15, 2027</strong>
+          </div>
+        </div>
+
+      </div><!-- end taxes-grid 2026 -->
+    </div><!-- end tax-year-2026 -->
+
   </div><!-- end tab-taxes -->
 
 </div><!-- end main -->
@@ -830,14 +1298,15 @@ function saveData(data) {
   localStorage.setItem('profitfirst_data', JSON.stringify(data));
 }
 
-function loadCheckboxes() {
+function loadCheckboxes(year) {
+  const storageKey = 'tax_checkboxes_' + (year || '2026');
   try {
-    return JSON.parse(localStorage.getItem('tax_checkboxes') || '{}');
+    return JSON.parse(localStorage.getItem(storageKey) || '{}');
   } catch(e) { return {}; }
 }
 
-function saveCheckboxes(obj) {
-  localStorage.setItem('tax_checkboxes', JSON.stringify(obj));
+function saveCheckboxes(year, obj) {
+  localStorage.setItem('tax_checkboxes_' + (year || '2026'), JSON.stringify(obj));
 }
 
 // ─────────────────────────────────────────────
@@ -853,6 +1322,16 @@ function calcDollar(total, pct) {
 }
 
 // ─────────────────────────────────────────────
+// SHOW ALL TOGGLE
+// ─────────────────────────────────────────────
+let pfShowAll = false;
+
+function toggleShowAll() {
+  pfShowAll = !pfShowAll;
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
 // RENDER TABLE
 // ─────────────────────────────────────────────
 let pfData = [];
@@ -861,29 +1340,61 @@ function renderTable() {
   pfData = loadData();
   const tbody = document.getElementById('pfBody');
   const tfoot = document.getElementById('pfFoot');
+  const toggleBtn = document.getElementById('pfToggleBtn');
+  const toggleInfo = document.getElementById('pfToggleInfo');
+  const totalCountEl = document.getElementById('pfTotalCount');
+
+  const totalRows = pfData.length;
+  const PREVIEW_COUNT = 10;
+
+  // Update toggle bar
+  totalCountEl.textContent = totalRows;
+  if (pfShowAll) {
+    toggleBtn.innerHTML = 'Show Less';
+    toggleInfo.textContent = 'Showing all ' + totalRows + ' rows';
+  } else {
+    toggleBtn.innerHTML = 'Show All (<span id="pfTotalCount">' + totalRows + '</span> rows)';
+    const showing = Math.min(PREVIEW_COUNT, totalRows);
+    toggleInfo.textContent = totalRows > PREVIEW_COUNT
+      ? 'Showing most recent ' + PREVIEW_COUNT + ' rows'
+      : 'Showing all ' + totalRows + ' rows';
+  }
+
+  // Determine which rows to display
+  let displayData;
+  let displayOffset; // index offset in pfData for the displayed rows
+  if (!pfShowAll && totalRows > PREVIEW_COUNT) {
+    displayData = pfData.slice(totalRows - PREVIEW_COUNT);
+    displayOffset = totalRows - PREVIEW_COUNT;
+  } else {
+    displayData = pfData;
+    displayOffset = 0;
+  }
 
   tbody.innerHTML = '';
 
   let sumTotal = 0, sumProfit = 0, sumTax = 0, sumOC = 0, sumOPEX = 0;
 
-  pfData.forEach((row, idx) => {
+  // Always accumulate totals from ALL rows
+  pfData.forEach(row => {
+    const total = parseFloat(row.total) || 0;
+    sumTotal  += total;
+    sumProfit += calcDollar(total, row.profit);
+    sumTax    += calcDollar(total, row.tax);
+    sumOC     += calcDollar(total, row.oc);
+    sumOPEX   += calcDollar(total, row.opex);
+  });
+
+  displayData.forEach((row, localIdx) => {
+    const idx = displayOffset + localIdx; // actual index in pfData
     const pSum = (parseFloat(row.profit)||0) + (parseFloat(row.tax)||0) + (parseFloat(row.oc)||0) + (parseFloat(row.opex)||0);
     const isError = pSum !== 100;
-    if (isError) {
-      // mark
-    }
 
     const total = parseFloat(row.total) || 0;
     const profitD = calcDollar(total, row.profit);
     const taxD    = calcDollar(total, row.tax);
     const ocD     = calcDollar(total, row.oc);
     const opexD   = calcDollar(total, row.opex);
-
-    sumTotal  += total;
-    sumProfit += profitD;
-    sumTax    += taxD;
-    sumOC     += ocD;
-    sumOPEX   += opexD;
 
     const tr = document.createElement('tr');
     if (isError) tr.classList.add('row-error');
@@ -962,11 +1473,63 @@ function deleteRow(idx) {
 }
 
 // ─────────────────────────────────────────────
+// SMART NEXT DATE
+// ─────────────────────────────────────────────
+function getNextDate() {
+  const data = loadData();
+  if (!data.length) return '';
+
+  const lastDate = data[data.length - 1].date;
+
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTH_MAP = {};
+  MONTH_NAMES.forEach((m, i) => {
+    MONTH_MAP[m.toLowerCase()] = i;
+    MONTH_MAP[m.toLowerCase().substring(0, 3)] = i;
+  });
+  // Extra common variants
+  MONTH_MAP['sept'] = 8;
+
+  const parts = lastDate.trim().split(/[\s,]+/);
+  let monthIdx = -1;
+  let day = null;
+
+  for (const part of parts) {
+    const p = part.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (p in MONTH_MAP) {
+      monthIdx = MONTH_MAP[p];
+      continue;
+    }
+    const num = parseInt(p);
+    if (!isNaN(num) && num >= 1 && num <= 31) {
+      day = num;
+    }
+  }
+
+  if (monthIdx === -1 || day === null) return '';
+
+  // Pattern: 10th → 25th of same month; 25th (or anything >10) → 10th of next month
+  if (day <= 17) {
+    // next is 25th of same month
+    return MONTH_NAMES[monthIdx] + ' 25';
+  } else {
+    // next is 10th of next month
+    const nextMonthIdx = (monthIdx + 1) % 12;
+    return MONTH_NAMES[nextMonthIdx] + ' 10';
+  }
+}
+
+// ─────────────────────────────────────────────
 // MODAL
 // ─────────────────────────────────────────────
 function openModal() {
+  // Auto-populate smart date
+  const nextDate = getNextDate();
+  document.getElementById('m_date').value = nextDate;
+
   document.getElementById('modalOverlay').classList.add('open');
-  document.getElementById('m_date').focus();
+  // Focus total instead of date (date is pre-filled)
+  document.getElementById('m_total').focus();
   updateModalPreview();
 }
 
@@ -1026,24 +1589,38 @@ function switchTab(tab, btn) {
 }
 
 // ─────────────────────────────────────────────
-// CHECKBOXES (Tax tab)
+// TAX YEAR TABS
+// ─────────────────────────────────────────────
+function switchTaxYear(year, btn) {
+  document.querySelectorAll('.tax-year-content').forEach(el => el.classList.remove('active'));
+  // Only deactivate seg-btns inside the year-tab-bar
+  btn.closest('.segmented-control').querySelectorAll('.seg-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tax-year-' + year).classList.add('active');
+  btn.classList.add('active');
+  initCheckboxes(year);
+}
+
+// ─────────────────────────────────────────────
+// CHECKBOXES (Tax tab) — year-aware
 // ─────────────────────────────────────────────
 function toggleCheck(el) {
   el.classList.toggle('checked');
   const key = el.dataset.key;
-  const checks = loadCheckboxes();
+  const year = el.dataset.year || '2026';
+  const checks = loadCheckboxes(year);
   checks[key] = el.classList.contains('checked');
-  saveCheckboxes(checks);
+  saveCheckboxes(year, checks);
 }
 
-function initCheckboxes() {
-  const checks = loadCheckboxes();
-  document.querySelectorAll('.checkbox-custom[data-key]').forEach(el => {
+function initCheckboxes(year) {
+  const checks = loadCheckboxes(year);
+  document.querySelectorAll('.checkbox-custom[data-year="' + year + '"]').forEach(el => {
     const key = el.dataset.key;
     if (key in checks) {
       if (checks[key]) el.classList.add('checked');
       else el.classList.remove('checked');
     }
+    // If not in storage, keep the HTML default (checked/unchecked as written)
   });
 }
 
@@ -1058,7 +1635,9 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 // INIT
 // ─────────────────────────────────────────────
 renderTable();
-initCheckboxes();
+initCheckboxes('2024');
+initCheckboxes('2025');
+initCheckboxes('2026');
 </script>
 </body>
 </html>
