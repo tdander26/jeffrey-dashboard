@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    min-height: 100vh;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 12px; }
+  .app-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff;
+  }
+  .app-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .app-subtitle { font-size: 12px; color: #86868b; margin-top: 1px; }
+  .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .btn-primary { background: #007AFF; color: #fff; }
+  .btn-primary:hover { background: #0066d6; }
+  .btn-secondary {
+    background: rgba(0,0,0,0.05);
+    color: #1d1d1f;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  .btn-secondary:hover { background: rgba(0,0,0,0.08); }
+  .btn-danger { background: #FF3B30; color: #fff; }
+  .btn-danger:hover { background: #d63029; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* ── Segmented Control / Tabs ── */
+  .tab-bar {
+    display: flex; justify-content: center;
+    padding: 16px 24px 0;
+  }
+  .segmented-control {
+    display: inline-flex;
+    background: rgba(0,0,0,0.06);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg-btn {
+    padding: 7px 20px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    color: #3c3c43;
+  }
+  .seg-btn.active {
+    background: #fff;
+    color: #007AFF;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.04);
+  }
+
+  /* ── Main Content ── */
+  .main { padding: 20px 24px 120px; max-width: 1600px; margin: 0 auto; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── Panel ── */
+  .panel {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .panel-subtitle { font-size: 12px; color: #86868b; margin-top: 2px; }
+
+  /* ── Profit First Table ── */
+  .pf-table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: #f5f5f7;
+    padding: 10px 10px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: #86868b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    white-space: nowrap;
+  }
+  th:first-child, th:last-child { text-align: left; }
+  th.col-notes { text-align: left; }
+  td {
+    padding: 9px 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    text-align: right;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; font-weight: 500; }
+  td.col-notes { text-align: left; white-space: normal; min-width: 140px; max-width: 220px; color: #636366; font-size: 12px; }
+  tr:hover td { background: #f9f9fb; }
+  tr.row-error td { background: #fff2f1 !important; }
+  tr.row-error:hover td { background: #ffe9e8 !important; }
+
+  .total-pct {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .total-pct.ok { background: #e8f8f0; color: #34c759; }
+  .total-pct.bad { background: #ffe9e8; color: #FF3B30; }
+
+  /* Editable cells */
+  .editable {
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 3px 5px;
+    transition: background 0.12s;
+    display: inline-block;
+    min-width: 40px;
+  }
+  .editable:hover { background: rgba(0,122,255,0.08); }
+  .editable:focus {
+    outline: 2px solid #007AFF;
+    background: rgba(0,122,255,0.06);
+  }
+
+  .delete-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #FF3B30;
+    font-size: 14px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    transition: opacity 0.15s, background 0.12s;
+  }
+  tr:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { background: rgba(255,59,48,0.1); }
+
+  /* Totals row */
+  .totals-row td {
+    font-weight: 700;
+    border-top: 2px solid rgba(0,0,0,0.08);
+    background: #f5f5f7 !important;
+    color: #1d1d1f;
+  }
+
+  /* Footer notes */
+  .pf-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 10px 24px;
+    z-index: 90;
+    display: none;
+  }
+  .pf-footer.visible { display: block; }
+  .footer-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    align-items: center;
+  }
+  .footer-note {
+    font-size: 11.5px;
+    color: #636366;
+    padding: 3px 8px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .footer-note strong { color: #1d1d1f; }
+  .footer-note.warn { background: rgba(255,149,0,0.1); color: #995700; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+    width: 480px;
+    max-width: 95vw;
+    overflow: hidden;
+    animation: modal-in 0.2s ease;
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .modal-close {
+    background: rgba(0,0,0,0.06);
+    border: none;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #636366;
+    transition: background 0.12s;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.12); }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; justify-content: flex-end; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 12px; font-weight: 600; color: #636366; text-transform: uppercase; letter-spacing: 0.3px; }
+  .form-input {
+    padding: 9px 12px;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1d1d1f;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
+  .pct-sum-preview {
+    padding: 10px 12px;
+    background: #f5f5f7;
+    border-radius: 9px;
+    font-size: 13px;
+    color: #636366;
+    text-align: center;
+  }
+  .pct-sum-preview .sum { font-weight: 700; font-size: 16px; }
+  .pct-sum-preview .sum.ok { color: #34c759; }
+  .pct-sum-preview .sum.bad { color: #FF3B30; }
+
+  /* ── Taxes Tab ── */
+  .taxes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) { .taxes-grid { grid-template-columns: 1fr; } }
+
+  .tax-id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #007AFF15, #5856D615);
+    border: 1px solid rgba(0,122,255,0.2);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #007AFF;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+  .tax-id-badge span { font-size: 12px; font-weight: 500; color: #86868b; }
+
+  .tax-table th { text-align: left; }
+  .tax-table td { text-align: left; }
+  .tax-table td.amount { text-align: right; font-variant-numeric: tabular-nums; }
+  .tax-table tr.totals-row td { font-weight: 700; }
+  .tax-table tr.na-row td { color: #86868b; font-style: italic; }
+  .tax-table tr.na-row td:first-child { font-style: normal; font-weight: 500; color: #1d1d1f; }
+
+  .check-cell { text-align: center !important; }
+  .checkbox-custom {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 2px solid #c7c7cc;
+    background: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    vertical-align: middle;
+  }
+  .checkbox-custom.checked {
+    background: #007AFF;
+    border-color: #007AFF;
+  }
+  .checkbox-custom.checked::after {
+    content: '';
+    width: 10px; height: 6px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+
+  .tax-note {
+    padding: 12px 16px;
+    background: #f5f5f7;
+    border-radius: 0 0 12px 12px;
+    font-size: 12px;
+    color: #636366;
+    line-height: 1.6;
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+  .tax-note a { color: #007AFF; text-decoration: none; }
+  .tax-note a:hover { text-decoration: underline; }
+
+  .due-badge {
+    display: inline-flex;
+    background: rgba(255,59,48,0.1);
+    color: #FF3B30;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  .auto-badge {
+    display: inline-flex;
+    background: rgba(52,199,89,0.1);
+    color: #34c759;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+  /* ── Print ── */
+  @media print {
+    .toolbar, .tab-bar, .pf-footer, .delete-btn, .btn, .modal-overlay { display: none !important; }
+    body { background: #fff; }
+    .panel { box-shadow: none; border: 1px solid #ddd; }
+    .tab-content { display: block !important; page-break-before: always; }
+    .tab-content:first-of-type { page-break-before: auto; }
+    .main { padding: 10px; }
+  }
+
+  .badge {
+    display: inline-flex;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-blue { background: rgba(0,122,255,0.1); color: #007AFF; }
+  .badge-green { background: rgba(52,199,89,0.1); color: #34c759; }
+  .badge-orange { background: rgba(255,149,0,0.1); color: #FF9500; }
+  .badge-red { background: rgba(255,59,48,0.1); color: #FF3B30; }
+</style>
+</head>
+<body>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="app-icon">💼</div>
+    <div>
+      <div class="app-title">Finance Dashboard</div>
+      <div class="app-subtitle">Dr. Todd Anderson · Momentum Health</div>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+    <button class="btn btn-primary" id="addEntryBtn" onclick="openModal()">+ Add Entry</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+  <div class="segmented-control">
+    <button class="seg-btn active" onclick="switchTab('profitfirst', this)">💰 Profit First</button>
+    <button class="seg-btn" onclick="switchTab('taxes', this)">📊 Taxes</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- ══ Tab 1: Profit First ══ -->
+  <div id="tab-profitfirst" class="tab-content active">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Profit First Allocations</div>
+          <div class="panel-subtitle">Click any cell to edit · Rows highlighted red when % ≠ 100%</div>
+        </div>
+        <span class="badge badge-blue" id="entryCount">0 entries</span>
+      </div>
+      <div class="pf-table-wrap">
+        <table id="pfTable">
+          <thead>
+            <tr>
+              <th style="min-width:100px">Date</th>
+              <th style="min-width:90px">Total</th>
+              <th>Profit %</th>
+              <th>Profit $</th>
+              <th>Tax %</th>
+              <th>Tax $</th>
+              <th>OC %</th>
+              <th>OC $</th>
+              <th>OPEX %</th>
+              <th>OPEX $</th>
+              <th class="col-notes" style="min-width:160px">Notes</th>
+              <th>100%</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="pfBody"></tbody>
+          <tfoot id="pfFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2: Taxes ══ -->
+  <div id="tab-taxes" class="tab-content">
+
+    <div class="tax-id-badge">
+      <span>Tax ID (EIN):</span>
+      87-2838444
+    </div>
+
+    <div class="taxes-grid">
+
+      <!-- Federal Quarterly -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Federal Quarterly Estimates 2026</div>
+            <div class="panel-subtitle">IRS Form 1040-ES</div>
+          </div>
+        </div>
+        <div class="pf-table-wrap">
+          <table class="tax-table">
+            <thead>
+              <tr>
+                <th>Quarter</th>
+                <th class="amount">Estimated</th>
+                <th class="amount">Quarter Amount</th>
+                <th class="check-cell">Paid?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="na-row">
+                <td>Last Year at 110%</td>
+                <td class="amount">$50,282.10</td>
+                <td class="amount">$12,570.53</td>
+                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+              </tr>
+              <tr>
+                <td>Q1 — April 18th</td>
+                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                <td class="amount">$5,290.00</td>
+                <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr>
+                <td>Q2 — June 15th</td>
+                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                <td class="amount">$12,580.00</td>
+                <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr>
+                <td>Q3 — Sept 16th</td>
+                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                <td class="amount">$12,580.00</td>
+                <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr>
+                <td>Q4 — Jan 15th</td>
+                <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                <td class="amount">$12,580.00</td>
+                <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr class="totals-row na-row">
+                <td>2025 Total</td>
+                <td class="amount">—</td>
+                <td class="amount">$50,315.00</td>
+                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tax-note">
+          <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15 &nbsp;|&nbsp; $1,000 owed or less: not required &nbsp;|&nbsp; Use 110% of prior year tax bill<br>
+          <strong>Pay at:</strong> <a href="https://www.irs.gov/payments" target="_blank">irs.gov/payments</a> → "Make Payment: Balance Due or Estimate" &nbsp;|&nbsp;
+          Also registered: <a href="https://www.eftps.gov" target="_blank">eftps.gov</a><br>
+          ⚠️ Use <strong>Individual SSN</strong> (not EIN) · PIN arriving by mail
+        </div>
+      </div>
+
+      <!-- MN Quarterly -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">MN Quarterly Estimates 2026</div>
+            <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+          </div>
+          <span class="badge badge-green">Autopay Set</span>
+        </div>
+        <div class="pf-table-wrap">
+          <table class="tax-table">
+            <thead>
+              <tr>
+                <th>Quarter</th>
+                <th class="check-cell">Paid?</th>
+                <th class="amount">Actually Paid</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="na-row">
+                <td>Est. 110%</td>
+                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                <td class="amount">$3,109.70</td>
+              </tr>
+              <tr>
+                <td>Q1 — April 18th</td>
+                <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" onclick="toggleCheck(this)"></div></td>
+                <td class="amount">$1,226.00</td>
+              </tr>
+              <tr>
+                <td>Q2 — June 15th</td>
+                <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" onclick="toggleCheck(this)"></div></td>
+                <td class="amount">$3,110.00</td>
+              </tr>
+              <tr>
+                <td>Q3 — Sept 15th</td>
+                <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" onclick="toggleCheck(this)"></div></td>
+                <td class="amount">$3,110.00</td>
+              </tr>
+              <tr>
+                <td>Q4 — Jan 16th</td>
+                <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" onclick="toggleCheck(this)"></div></td>
+                <td class="amount">$3,110.00</td>
+              </tr>
+              <tr class="totals-row na-row">
+                <td>AUTOPAY IS SET <span class="auto-badge">✓</span></td>
+                <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                <td class="amount">$10,556.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tax-note">
+          <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15<br>
+          🟢 <strong>AUTOPAY SET — March 1, 2026</strong>
+        </div>
+      </div>
+
+      <!-- MN Care Tax -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">MN Care Tax 2024–2025</div>
+            <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+          </div>
+          <span class="badge badge-orange">2 Outstanding</span>
+        </div>
+        <div class="pf-table-wrap">
+          <table class="tax-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th class="amount">Service Amount</th>
+                <th class="amount">Amount Due</th>
+                <th class="check-cell">Paid?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2024</td>
+                <td class="amount">$252,167.42</td>
+                <td class="amount">$4,539.01</td>
+                <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr>
+                <td>2025</td>
+                <td class="amount">—</td>
+                <td class="amount">$4,459.44</td>
+                <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2025" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr class="totals-row">
+                <td>Total</td>
+                <td class="amount">$252,167.42</td>
+                <td class="amount">$8,998.45</td>
+                <td class="check-cell">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tax-note">
+          ⚠️ 2025 amount includes underpayment on estimate penalty
+        </div>
+      </div>
+
+      <!-- MN S-Corp Tax -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">MN S-Corp Tax — 2026 Yearly Fee</div>
+            <div class="panel-subtitle">Minnesota S-Corporation Annual Fee</div>
+          </div>
+          <span class="due-badge">Due April 15, 2027</span>
+        </div>
+        <div class="pf-table-wrap">
+          <table class="tax-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th class="amount">Service Amount</th>
+                <th class="amount">Amount Due</th>
+                <th class="check-cell">Paid?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2026</td>
+                <td class="amount">$200.00</td>
+                <td class="amount">$200.00</td>
+                <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" onclick="toggleCheck(this)"></div></td>
+              </tr>
+              <tr class="totals-row">
+                <td>Total</td>
+                <td class="amount">$200.00</td>
+                <td class="amount">$200.00</td>
+                <td class="check-cell">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tax-note">
+          ⚠️ 2025 includes underpayment on estimate penalty &nbsp;|&nbsp; <strong>DUE: April 15, 2027</strong>
+        </div>
+      </div>
+
+    </div><!-- end taxes-grid -->
+  </div><!-- end tab-taxes -->
+
+</div><!-- end main -->
+
+<!-- Profit First Footer -->
+<div class="pf-footer visible" id="pfFooter">
+  <div class="footer-notes">
+    <div class="footer-note">📧 <strong>Use:</strong> profit@drtoddanderson.com</div>
+    <div class="footer-note">💵 <strong>W2:</strong> $3,004.56 OC · $745.44 Tax · $375.84 OPEX</div>
+    <div class="footer-note warn">⚠️ <strong>Min Tax:</strong> $2,500 (incl. $745)</div>
+    <div class="footer-note warn">👷 <strong>Employee Payroll:</strong> $2,500 total ($2,307 OPEX + $200 Tax)</div>
+  </div>
+</div>
+
+<!-- Add Entry Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Entry</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Date</label>
+          <input class="form-input" id="m_date" type="text" placeholder="e.g. January 10" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Total ($)</label>
+          <input class="form-input" id="m_total" type="number" step="0.01" placeholder="0.00" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profit %</label>
+          <input class="form-input" id="m_profit_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tax %</label>
+          <input class="form-input" id="m_tax_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner's Comp %</label>
+          <input class="form-input" id="m_oc_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">OPEX %</label>
+          <input class="form-input" id="m_opex_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <input class="form-input" id="m_notes" type="text" placeholder="Optional notes..." />
+        </div>
+        <div class="form-group full">
+          <div class="pct-sum-preview" id="pctPreview">
+            Total %: <span class="sum" id="pctSum">0</span>% (must equal 100%)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addEntry()">Add Entry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DEFAULT DATA
+// ─────────────────────────────────────────────
+const DEFAULT_DATA = [
+  { date: 'January 10',    total: 13879.33, profit: 4,  tax: 20, oc: 29, opex: 47, notes: 'Cut it close on OPEX balance.' },
+  { date: 'January 25',    total: 12760.97, profit: 0,  tax: 20, oc: 18, opex: 62, notes: 'Saving for employee' },
+  { date: 'Feb 10',        total: 14234.36, profit: 0,  tax: 20, oc: 18, opex: 62, notes: '' },
+  { date: 'Feb 25',        total: 14514.19, profit: 0,  tax: 25, oc: 15, opex: 60, notes: 'OPEX BAL is $17000 saving for W2' },
+  { date: 'March 10',      total: 12406.28, profit: 0,  tax: 25, oc: 15, opex: 60, notes: 'OPEX BAL is 13500 - 1 W2 paid' },
+  { date: 'March 25',      total: 12078.00, profit: 2,  tax: 25, oc: 24, opex: 49, notes: '15296' },
+  { date: 'April 10',      total: 17864.00, profit: 2,  tax: 25, oc: 24, opex: 49, notes: '' },
+  { date: 'April 25',      total: 12448.00, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '' },
+  { date: 'May 10',        total: 16079.00, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '' },
+  { date: 'May 25',        total: 11455.00, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '' },
+  { date: 'June 10',       total: 14590.48, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '15400 OPEX $8400 before' },
+  { date: 'June 25',       total: 13945.00, profit: 2,  tax: 31, oc: 21, opex: 46, notes: 'Transf. OPEX 500 to Tax to cover drained profit account' },
+  { date: 'Jul 10 2025',   total: 15898.75, profit: 2,  tax: 31, oc: 25, opex: 42, notes: '17400 opex moved 3k opex to OC' },
+  { date: 'July 25',       total: 14407.00, profit: 2,  tax: 31, oc: 25, opex: 42, notes: '' },
+  { date: 'August 10',     total: 13769.00, profit: 2,  tax: 28, oc: 28, opex: 42, notes: '' },
+  { date: 'Aug 25',        total: 14933.00, profit: 2,  tax: 27, oc: 29, opex: 42, notes: '' },
+  { date: 'Sept 10',       total: 12252.00, profit: 2,  tax: 27, oc: 29, opex: 42, notes: '' },
+  { date: 'Sept 24',       total: 16777.00, profit: 2,  tax: 27, oc: 30, opex: 41, notes: 'OPEX BAL is 10k Oct 1 TRANSFER 1500 tax to personal $500 from OPEX to personal' },
+  { date: 'Oct 10',        total: 14223.27, profit: 2,  tax: 27, oc: 30, opex: 41, notes: '' },
+  { date: 'Oct 25',        total: 10330.00, profit: 2,  tax: 27, oc: 30, opex: 41, notes: 'Paid $719 out of income sales tax OPEX 11k' },
+  { date: 'Nov 10',        total: 12794.36, profit: 2,  tax: 27, oc: 33, opex: 38, notes: 'Overdrew moved 1k over to OC early OPEX 13k after' },
+  { date: 'Nov 25',        total: 17572.00, profit: 2,  tax: 27, oc: 35, opex: 36, notes: '' },
+  { date: 'Dec 10',        total: 13500.00, profit: 2,  tax: 27, oc: 35, opex: 36, notes: '' },
+  { date: 'Dec 25',        total: 14281.73, profit: 2,  tax: 27, oc: 35, opex: 36, notes: '' },
+  { date: 'Jan 10',        total: 5676.00,  profit: 4,  tax: 20, oc: 40, opex: 36, notes: '$1550.16 Sent to OPEX to compensate for Vacation $0 to tax and profit' },
+  { date: 'Jan 25',        total: 15150.00, profit: 4,  tax: 20, oc: 40, opex: 36, notes: '15150' },
+  { date: 'Feb 10',        total: 12337.00, profit: 2,  tax: 20, oc: 40, opex: 38, notes: 'OPEX low 1800 moved over early' },
+  { date: 'Feb 25',        total: 14383.96, profit: 2,  tax: 20, oc: 40, opex: 38, notes: '' },
+  { date: 'March 10',      total: 10223.00, profit: 1,  tax: 20, oc: 41, opex: 38, notes: 'Didnt make enough' },
+  { date: 'March 25',      total: 13300.00, profit: 1,  tax: 20, oc: 41, opex: 38, notes: '' },
+  { date: 'April 10',      total: 0,        profit: 1,  tax: 20, oc: 34, opex: 45, notes: '293+911.62 trans to OPEX' },
+];
+
+// ─────────────────────────────────────────────
+// STORAGE
+// ─────────────────────────────────────────────
+function loadData() {
+  try {
+    const raw = localStorage.getItem('profitfirst_data');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return DEFAULT_DATA.map((r,i) => ({...r, id: i}));
+}
+
+function saveData(data) {
+  localStorage.setItem('profitfirst_data', JSON.stringify(data));
+}
+
+function loadCheckboxes() {
+  try {
+    return JSON.parse(localStorage.getItem('tax_checkboxes') || '{}');
+  } catch(e) { return {}; }
+}
+
+function saveCheckboxes(obj) {
+  localStorage.setItem('tax_checkboxes', JSON.stringify(obj));
+}
+
+// ─────────────────────────────────────────────
+// FORMAT
+// ─────────────────────────────────────────────
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '$0.00';
+  return '$' + parseFloat(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calcDollar(total, pct) {
+  return parseFloat(total) * parseFloat(pct) / 100;
+}
+
+// ─────────────────────────────────────────────
+// RENDER TABLE
+// ─────────────────────────────────────────────
+let pfData = [];
+
+function renderTable() {
+  pfData = loadData();
+  const tbody = document.getElementById('pfBody');
+  const tfoot = document.getElementById('pfFoot');
+
+  tbody.innerHTML = '';
+
+  let sumTotal = 0, sumProfit = 0, sumTax = 0, sumOC = 0, sumOPEX = 0;
+
+  pfData.forEach((row, idx) => {
+    const pSum = (parseFloat(row.profit)||0) + (parseFloat(row.tax)||0) + (parseFloat(row.oc)||0) + (parseFloat(row.opex)||0);
+    const isError = pSum !== 100;
+    if (isError) {
+      // mark
+    }
+
+    const total = parseFloat(row.total) || 0;
+    const profitD = calcDollar(total, row.profit);
+    const taxD    = calcDollar(total, row.tax);
+    const ocD     = calcDollar(total, row.oc);
+    const opexD   = calcDollar(total, row.opex);
+
+    sumTotal  += total;
+    sumProfit += profitD;
+    sumTax    += taxD;
+    sumOC     += ocD;
+    sumOPEX   += opexD;
+
+    const tr = document.createElement('tr');
+    if (isError) tr.classList.add('row-error');
+
+    tr.innerHTML = `
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="date" onblur="cellEdit(this)">${escHtml(row.date)}</span></td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span></td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="profit" onblur="cellEdit(this)">${row.profit}</span>%</td>
+      <td>${fmt$(profitD)}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="tax" onblur="cellEdit(this)">${row.tax}</span>%</td>
+      <td>${fmt$(taxD)}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="oc" onblur="cellEdit(this)">${row.oc}</span>%</td>
+      <td>${fmt$(ocD)}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="opex" onblur="cellEdit(this)">${row.opex}</span>%</td>
+      <td>${fmt$(opexD)}</td>
+      <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
+      <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
+      <td><button class="delete-btn" onclick="deleteRow(${idx})" title="Delete row">🗑</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Totals row
+  tfoot.innerHTML = `
+    <tr class="totals-row">
+      <td><strong>TOTALS</strong></td>
+      <td style="text-align:right"><strong>${fmt$(sumTotal)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumProfit)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumTax)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumOC)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumOPEX)}</strong></td>
+      <td colspan="3"></td>
+    </tr>
+  `;
+
+  document.getElementById('entryCount').textContent = pfData.length + ' entries';
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// CELL EDIT
+// ─────────────────────────────────────────────
+function cellEdit(el) {
+  const idx = parseInt(el.dataset.idx);
+  const field = el.dataset.field;
+  let val = el.innerText.trim();
+
+  if (['profit','tax','oc','opex','total'].includes(field)) {
+    val = parseFloat(val) || 0;
+  }
+
+  pfData[idx][field] = val;
+  saveData(pfData);
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// DELETE ROW
+// ─────────────────────────────────────────────
+function deleteRow(idx) {
+  if (!confirm('Delete this entry?')) return;
+  pfData.splice(idx, 1);
+  saveData(pfData);
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('m_date').focus();
+  updateModalPreview();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  ['m_date','m_total','m_profit_pct','m_tax_pct','m_oc_pct','m_opex_pct','m_notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function updateModalPreview() {
+  const p = parseFloat(document.getElementById('m_profit_pct').value) || 0;
+  const t = parseFloat(document.getElementById('m_tax_pct').value) || 0;
+  const o = parseFloat(document.getElementById('m_oc_pct').value) || 0;
+  const x = parseFloat(document.getElementById('m_opex_pct').value) || 0;
+  const sum = p + t + o + x;
+  const el = document.getElementById('pctSum');
+  el.textContent = sum;
+  el.className = 'sum ' + (sum === 100 ? 'ok' : 'bad');
+}
+
+function addEntry() {
+  const date  = document.getElementById('m_date').value.trim();
+  const total = parseFloat(document.getElementById('m_total').value) || 0;
+  const profit= parseFloat(document.getElementById('m_profit_pct').value) || 0;
+  const tax   = parseFloat(document.getElementById('m_tax_pct').value) || 0;
+  const oc    = parseFloat(document.getElementById('m_oc_pct').value) || 0;
+  const opex  = parseFloat(document.getElementById('m_opex_pct').value) || 0;
+  const notes = document.getElementById('m_notes').value.trim();
+
+  if (!date) { alert('Please enter a date.'); return; }
+
+  pfData.push({ date, total, profit, tax, oc, opex, notes });
+  saveData(pfData);
+  renderTable();
+  closeModal();
+}
+
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.seg-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+
+  const footer = document.getElementById('pfFooter');
+  const addBtn = document.getElementById('addEntryBtn');
+  if (tab === 'profitfirst') {
+    footer.classList.add('visible');
+    addBtn.style.display = '';
+  } else {
+    footer.classList.remove('visible');
+    addBtn.style.display = 'none';
+  }
+}
+
+// ─────────────────────────────────────────────
+// CHECKBOXES (Tax tab)
+// ─────────────────────────────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const key = el.dataset.key;
+  const checks = loadCheckboxes();
+  checks[key] = el.classList.contains('checked');
+  saveCheckboxes(checks);
+}
+
+function initCheckboxes() {
+  const checks = loadCheckboxes();
+  document.querySelectorAll('.checkbox-custom[data-key]').forEach(el => {
+    const key = el.dataset.key;
+    if (key in checks) {
+      if (checks[key]) el.classList.add('checked');
+      else el.classList.remove('checked');
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// MODAL CLOSE ON BACKDROP
+// ─────────────────────────────────────────────
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+renderTable();
+initCheckboxes();
+</script>
+</body>
+</html>
