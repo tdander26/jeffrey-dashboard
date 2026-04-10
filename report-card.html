@@ -2599,6 +2599,7 @@ function _patientMetaHtml(){
   return meta.join(" &nbsp;|&nbsp; ");
 }
 function buildPrintView(){
+  var pi=S.patientInfo||{};
 
   // ── determine max visit with any data ──────────────────────
   var maxV=0;
