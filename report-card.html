@@ -413,6 +413,51 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .suggest-supp-row .check.on{background:#22c55e;border-color:#22c55e}
 
 /* ══════════════════════════════════════
+   MACRO MODAL — TABS + QUICK PICK DRILL-DOWN
+══════════════════════════════════════ */
+.mac-tabs{display:flex;gap:4px;padding:0 20px 0 20px;border-bottom:2px solid #f1f5f9}
+.mac-tab{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:700;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+.mac-tab.active{color:#7c3aed;border-bottom-color:#7c3aed}
+.mac-tab:hover:not(.active){color:#374151}
+.qp-crumbs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:11px;color:#64748b;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
+.qp-crumb{padding:3px 8px;border-radius:12px;background:#f1f5f9;color:#374151;cursor:pointer;font-weight:600}
+.qp-crumb:hover{background:#e2e8f0}
+.qp-crumb-sep{color:#cbd5e1;font-weight:900}
+.qp-crumb.current{background:#ede9fe;color:#5b21b6;cursor:default}
+.qp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.qp-item{padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;background:white;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:all .15s;text-align:left;display:flex;flex-direction:column;gap:3px}
+.qp-item:hover{border-color:#7c3aed;background:#faf5ff;color:#5b21b6;transform:translateY(-1px)}
+.qp-item.has-children::after{content:"▸";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#94a3b8}
+.qp-item{position:relative;padding-right:26px}
+.qp-item .qp-sub{font-size:10px;font-weight:500;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em}
+.qp-item.marked{border-color:#22c55e;background:#f0fdf4;color:#166534}
+.qp-item.marked::before{content:"✓";position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#22c55e;font-weight:900;font-size:14px}
+.qp-item.marked{padding-left:28px}
+.qp-empty{font-size:12px;color:#94a3b8;padding:16px;text-align:center;background:#f8fafc;border-radius:10px}
+.qp-visit-badge{background:#ede9fe;color:#5b21b6;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:800;white-space:nowrap}
+
+/* ══════════════════════════════════════
+   COMPLIANCE LETTER GRADES (per visit)
+══════════════════════════════════════ */
+.compl-bar{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #f1f5f9;margin-top:8px}
+.compl-group{display:flex;align-items:center;gap:5px}
+.compl-label{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em}
+.compl-pills{display:flex;gap:2px}
+.compl-pill{width:22px;height:22px;border:1.5px solid #e2e8f0;border-radius:5px;background:white;font-size:11px;font-weight:900;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;padding:0;font-family:inherit}
+.compl-pill:hover{border-color:#94a3b8;background:#f8fafc}
+.compl-pill.active{color:white;transform:scale(1.08)}
+.compl-pill.active[data-grade="A"]{background:#22c55e;border-color:#16a34a}
+.compl-pill.active[data-grade="B"]{background:#84cc16;border-color:#65a30d}
+.compl-pill.active[data-grade="C"]{background:#eab308;border-color:#ca8a04}
+.compl-pill.active[data-grade="D"]{background:#f97316;border-color:#ea580c}
+.compl-pill.active[data-grade="F"]{background:#ef4444;border-color:#dc2626}
+
+/* ══════════════════════════════════════
+   REVIEWED LABS BADGE
+══════════════════════════════════════ */
+.labs-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;margin-left:6px}
+
+/* ══════════════════════════════════════
    A7: AUTO-LOCK
 ══════════════════════════════════════ */
 .lock-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:none;align-items:center;justify-content:center;z-index:9800}
@@ -444,12 +489,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <div class="modal-hdr">
       <div>
         <div class="modal-title">⚡ Macros</div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="macroModalSub">Tap a macro to apply it to the current visit</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="macroModalSub">Drill into a section and tap to mark findings on the current visit</div>
       </div>
-      <button class="modal-close" onclick="closeMacroModal()">✕</button>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="qp-visit-badge" id="macroModalVn">V—</span>
+        <button class="modal-close" onclick="closeMacroModal()">✕</button>
+      </div>
+    </div>
+    <div class="mac-tabs">
+      <button class="mac-tab active" id="macTabQP" onclick="switchMacroTab('qp')">🔍 Quick Pick</button>
+      <button class="mac-tab" id="macTabSaved" onclick="switchMacroTab('saved')">⭐ Saved Macros</button>
     </div>
     <div class="modal-body" id="macroModalBody"></div>
-    <div style="padding:10px 20px;border-top:2px solid #f1f5f9;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap">
+    <div style="padding:10px 20px;border-top:2px solid #f1f5f9;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap" id="macroModalFooter">
       <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="openMacroBuilder()">+ Save current visit as macro</button>
       <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="exportMacros()">⬇ Export library</button>
       <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="document.getElementById('macroImportFile').click()">⬆ Import library</button>
@@ -755,7 +807,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{}};
 }
 var S = blankState();
 
@@ -1848,15 +1900,25 @@ function buildVisitCard(vn){
   div.appendChild(secGrid);
 
   var no=document.createElement("div"); no.className="visit-notes";
-  no.innerHTML='<label>Visit Notes</label>'+
+  no.innerHTML='<label style="display:flex;align-items:center;gap:6px">Visit Notes <span id="labsBadge'+vn+'"></span></label>'+
     '<div class="snippet-chips" id="sch'+vn+'"></div>'+
     '<div class="notes-editor-wrap">'+
     '<textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>'+
     '<button class="mic-btn" id="mic'+vn+'" title="Dictate" onclick="toggleDictation('+vn+')">🎤</button>'+
+    '</div>'+
+    '<div class="compl-bar">'+
+      '<div class="compl-group">'+
+        '<span class="compl-label">🥗 Diet</span>'+
+        '<div class="compl-pills" id="diet'+vn+'">'+_complPillsHtml(vn,"diet")+'</div>'+
+      '</div>'+
+      '<div class="compl-group">'+
+        '<span class="compl-label">💊 Supp</span>'+
+        '<div class="compl-pills" id="supp'+vn+'">'+_complPillsHtml(vn,"supp")+'</div>'+
+      '</div>'+
     '</div>';
   div.appendChild(no);
   // Snippet chips build after append so the container exists
-  setTimeout(function(){ buildSnippetChips(vn); },0);
+  setTimeout(function(){ buildSnippetChips(vn); renderLabsBadge(vn); },0);
 
   // MSK section
   var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle"; mskToggle.id="msk_main_"+vn;
@@ -2093,7 +2155,7 @@ function loadVisitDates(){
         }; })(vn));
       }
       var ne=document.getElementById("vn"+vn);
-      if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; autoSave(); }; })(vn)); }
+      if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; renderLabsBadge(n); autoSave(); }; })(vn)); }
     })(v);
   }
 }
@@ -2112,6 +2174,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
+  renderAllCompliance(); renderAllLabsBadges();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -2427,6 +2490,37 @@ function buildPrintView(){
   }
   html+='</tr></thead><tbody>';
 
+  // ── Compliance + Labs Reviewed rows (top of timeline) ──
+  var _gc={A:"#22c55e",B:"#84cc16",C:"#eab308",D:"#f97316",F:"#ef4444"};
+  function _gCell(g){
+    if(!g) return '<td></td>';
+    var c=_gc[g]||"#64748b";
+    return '<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:'+c+';color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">'+g+'</span></td>';
+  }
+  var _anyC=false, _anyL=false;
+  if(S.compliance){ for(var v=1;v<=maxV;v++){ if(S.compliance[v+"_diet"]||S.compliance[v+"_supp"]){ _anyC=true; break; } } }
+  for(var v=1;v<=maxV;v++){ if(labsWasReviewed(v)){ _anyL=true; break; } }
+  if(_anyC||_anyL){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#0369a1!important">COMPLIANCE &amp; LABS</th></tr>';
+    if(_anyC){
+      html+='<tr><td class="row-lbl sub-lbl">🥗 Diet compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=_gCell((S.compliance||{})[v+"_diet"]);
+      html+=extraCells(null); html+='</tr>';
+      html+='<tr><td class="row-lbl sub-lbl">💊 Supplement compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=_gCell((S.compliance||{})[v+"_supp"]);
+      html+=extraCells(null); html+='</tr>';
+    }
+    if(_anyL){
+      html+='<tr><td class="row-lbl sub-lbl">🧪 Labs reviewed</td>';
+      for(var v=1;v<=maxV;v++){
+        html+=labsWasReviewed(v)
+          ?'<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:#1e40af;color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">✓</span></td>'
+          :'<td></td>';
+      }
+      html+=extraCells(null); html+='</tr>';
+    }
+  }
+
   // SUBJECTIVE — visit-mapped + extra weeks
   if(hasVisitDates&&(symRows.length||extraWeeks.length)){
     html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'">SUBJECTIVE COMPLAINTS</th></tr>';
@@ -2539,6 +2633,49 @@ function setToday(inputId){
 }
 
 // ════════════════════════════════════════════════════════════════
+//  COMPLIANCE LETTER GRADES + LABS BADGE
+// ════════════════════════════════════════════════════════════════
+var COMPL_GRADES=["A","B","C","D","F"];
+function _complPillsHtml(vn,kind){
+  var key=vn+"_"+kind;
+  var cur=(S.compliance&&S.compliance[key])||"";
+  var out="";
+  COMPL_GRADES.forEach(function(g){
+    out+='<button class="compl-pill '+(cur===g?"active":"")+'" data-grade="'+g+'" onclick="setCompliance('+vn+',\''+kind+'\',\''+g+'\')">'+g+'</button>';
+  });
+  return out;
+}
+function setCompliance(vn,kind,grade){
+  if(!S.compliance) S.compliance={};
+  var key=vn+"_"+kind;
+  if(S.compliance[key]===grade) delete S.compliance[key]; // tap again to clear
+  else S.compliance[key]=grade;
+  // Re-render just this group
+  var groupEl=document.getElementById((kind==="diet"?"diet":"supp")+vn);
+  if(groupEl) groupEl.innerHTML=_complPillsHtml(vn,kind);
+  autoSave();
+}
+function renderAllCompliance(){
+  for(var v=1;v<=18;v++){
+    var d=document.getElementById("diet"+v); if(d) d.innerHTML=_complPillsHtml(v,"diet");
+    var s=document.getElementById("supp"+v); if(s) s.innerHTML=_complPillsHtml(v,"supp");
+  }
+}
+
+// Labs reviewed: derived from whether the notes contain the "Reviewed labs" snippet.
+// Also supports an explicit override via S.labsReviewed[vn]=true/false.
+function labsWasReviewed(vn){
+  if(S.labsReviewed && S.labsReviewed[vn]!==undefined) return !!S.labsReviewed[vn];
+  var n=(S.visitNotes[vn]||"").toLowerCase();
+  return n.indexOf("reviewed labs")>=0;
+}
+function renderLabsBadge(vn){
+  var el=document.getElementById("labsBadge"+vn); if(!el) return;
+  el.innerHTML=labsWasReviewed(vn)?'<span class="labs-badge">🧪 Labs reviewed</span>':'';
+}
+function renderAllLabsBadges(){ for(var v=1;v<=18;v++) renderLabsBadge(v); }
+
+// ════════════════════════════════════════════════════════════════
 //  A3: COPY FORWARD FROM PRIOR VISIT
 // ════════════════════════════════════════════════════════════════
 function copyPriorVisit(vn){
@@ -2577,6 +2714,14 @@ function copyPriorVisit(vn){
       if(mTg && parseInt(mTg[1])===prev) S.offenderTags["v"+vn+"_tag_"+mTg[2]]=S.offenderTags[k].slice();
     });
   }
+  // Copy compliance grades
+  if(S.compliance){
+    ["diet","supp"].forEach(function(kind){
+      var fromKey=prev+"_"+kind, toKey=vn+"_"+kind;
+      if(S.compliance[fromKey]) S.compliance[toKey]=S.compliance[fromKey];
+      else delete S.compliance[toKey];
+    });
+  }
   // Re-render the affected cells for this visit
   Object.keys(S.marks).forEach(function(k){
     if(k.indexOf(toPfx)!==0) return;
@@ -2585,6 +2730,9 @@ function copyPriorVisit(vn){
     else renderMark(k);
   });
   renderAllOffenderTags(); renderSuppMarked(vn); updateAllHL();
+  var d=document.getElementById("diet"+vn); if(d) d.innerHTML=_complPillsHtml(vn,"diet");
+  var sp=document.getElementById("supp"+vn); if(sp) sp.innerHTML=_complPillsHtml(vn,"supp");
+  renderLabsBadge(vn);
   autoSave();
   showToast("✓ Copied V"+prev+" → V"+vn);
 }
@@ -2613,7 +2761,7 @@ function buildSnippetChips(vn){
       var ta=document.getElementById("vn"+vn); if(!ta) return;
       var cur=ta.value.trim();
       ta.value=(cur?cur+" ":"")+"- "+s+". ";
-      S.visitNotes[vn]=ta.value; ta.focus(); autoSave();
+      S.visitNotes[vn]=ta.value; ta.focus(); renderLabsBadge(vn); autoSave();
     });
     c.appendChild(b);
   });
@@ -2730,42 +2878,262 @@ function _flattenMacro(macroId, macros, visited){
 }
 
 var _currentMacroVn=null;
+var _macroTab="qp";            // 'qp' or 'saved'
+var _qpPath=[];                // hierarchical path: [{type,label,...},...]
+
 function openMacroModal(vn){
   if(!currentPatientId){ alert("Open a patient first."); return; }
   if(typeof vn==="number") _currentMacroVn=vn;
   else if(!_currentMacroVn){
-    // Fall back to active phase's first visit
     var activePhase=0;
     document.querySelectorAll(".phase-tab").forEach(function(t,i){ if(t.classList.contains("active")) activePhase=i; });
     _currentMacroVn=activePhase*6+1;
   }
-  var body=document.getElementById("macroModalBody");
-  document.getElementById("macroModalSub").textContent="Tap a macro to apply it to Visit "+_currentMacroVn;
-  var macros=getMacros();
-  if(!macros.length){ body.innerHTML='<p style="color:#94a3b8;font-size:13px">No macros yet. Build some with "Save current visit as macro".</p>'; }
-  else {
-    var byCat={};
-    macros.forEach(function(m){ var c=m.category||"Other"; (byCat[c]=byCat[c]||[]).push(m); });
-    var html="";
-    Object.keys(byCat).sort().forEach(function(c){
-      html+='<div class="macro-cat">'+escHtml(c)+'</div><div class="macro-list">';
-      byCat[c].forEach(function(m){
-        var nApp=(m.applies||[]).length, nInc=(m.includes||[]).length, nSupp=(m.supplements||[]).length;
-        var meta=[]; if(nApp) meta.push(nApp+" mark"+(nApp===1?"":"s"));
-        if(nInc) meta.push(nInc+" nested"); if(nSupp) meta.push(nSupp+" supp");
-        html+='<button class="macro-item" onclick="applyMacro(\''+m.id+'\')">'+
-          '<span>'+escHtml(m.label)+'</span>'+
-          (meta.length?'<span class="mac-meta">'+meta.join(" · ")+'</span>':'')+
-          '<span class="mac-del" onclick="event.stopPropagation();deleteMacro(\''+m.id+'\')" title="Delete">✕</span>'+
-          '</button>';
-      });
-      html+='</div>';
-    });
-    body.innerHTML=html;
-  }
+  document.getElementById("macroModalVn").textContent="V"+_currentMacroVn;
   document.getElementById("macroModal").classList.add("open");
+  _qpPath=[]; _macroTab="qp";
+  switchMacroTab("qp");
 }
 function closeMacroModal(){ document.getElementById("macroModal").classList.remove("open"); }
+
+function switchMacroTab(tab){
+  _macroTab=tab;
+  document.getElementById("macTabQP").classList.toggle("active",tab==="qp");
+  document.getElementById("macTabSaved").classList.toggle("active",tab==="saved");
+  if(tab==="qp") renderQuickPick();
+  else renderSavedMacros();
+}
+
+// ── QUICK PICK TREE ──────────────────────────────────────────────
+// Hierarchical drill-down built from FIELDS + MSK + SUPP_BRANDS.
+// Leaves are "mark" actions that apply the active color to the current visit.
+function renderQuickPick(){
+  var body=document.getElementById("macroModalBody");
+  document.getElementById("macroModalSub").textContent="Drill into a section and tap to mark findings on Visit "+_currentMacroVn+" (active color: "+(activeColor||"none")+")";
+
+  // Breadcrumbs
+  var crumbs='<div class="qp-crumbs"><span class="qp-crumb" onclick="qpGoto(0)">🏠 Root</span>';
+  _qpPath.forEach(function(p,i){
+    crumbs+='<span class="qp-crumb-sep">›</span>';
+    var isLast=(i===_qpPath.length-1);
+    crumbs+='<span class="qp-crumb '+(isLast?"current":"")+'" '+(isLast?"":"onclick=\"qpGoto("+(i+1)+")\"")+'>'+escHtml(p.label)+'</span>';
+  });
+  crumbs+='</div>';
+
+  var items=_qpChildren(_qpPath);
+  if(!items.length){
+    body.innerHTML=crumbs+'<div class="qp-empty">Nothing to show here.</div>';
+    return;
+  }
+  var gridHtml='<div class="qp-grid">';
+  items.forEach(function(it,idx){
+    var marked=_qpIsMarked(it);
+    var extra=it.sub?'<span class="qp-sub">'+escHtml(it.sub)+'</span>':'';
+    gridHtml+='<button class="qp-item '+(it.children?"has-children":"")+(marked?" marked":"")+'" onclick="qpSelect('+idx+')">'+
+      escHtml(it.label)+extra+'</button>';
+  });
+  gridHtml+='</div>';
+  body.innerHTML=crumbs+gridHtml;
+}
+
+function _qpChildren(path){
+  var vn=_currentMacroVn;
+  // ROOT
+  if(path.length===0){
+    var roots=[];
+    FIELDS.forEach(function(sec,si){
+      roots.push({type:"section",label:sec.sec,si:si,children:true,sub:(sec.items.length+" item"+(sec.items.length===1?"":"s"))});
+    });
+    roots.push({type:"mskroot",label:"💪 MSK — Muscle Testing",children:true,sub:MSK_SECTIONS.length+" regions"});
+    roots.push({type:"organroot",label:"🫀 Organ Indicators",children:true,sub:MSK_ORGANS.length+" organs"});
+    roots.push({type:"supproot",label:"💊 Supplements",children:true,sub:SUPPLEMENTS.length+" items"});
+    return roots;
+  }
+  var last=path[path.length-1];
+  // SECTION → items
+  if(last.type==="section"){
+    var sec=FIELDS[last.si], out=[];
+    sec.items.forEach(function(item,ii){
+      var hasChildren=!!(item.opts||sec.hasOffenders||item.tagPopup||item.thenNow);
+      if(hasChildren){
+        out.push({type:"sec_item",label:item.lbl,si:last.si,ii:ii,children:true});
+      } else {
+        // Direct mark leaf
+        out.push({type:"leaf_field",label:item.lbl,si:last.si,ii:ii});
+      }
+    });
+    return out;
+  }
+  // SECTION ITEM → options, offenders, tag popup entries
+  if(last.type==="sec_item"){
+    var sec=FIELDS[last.si], item=sec.items[last.ii], out=[];
+    if(item.opts){
+      item.opts.forEach(function(opt,oi){
+        out.push({type:"leaf_field",label:opt,si:last.si,ii:last.ii,oi:oi,sub:item.lbl});
+      });
+    } else {
+      // A markable finding with no opts but with a tag panel — still allow direct mark
+      out.push({type:"leaf_field",label:"Mark "+item.lbl,si:last.si,ii:last.ii});
+    }
+    if(sec.hasOffenders){
+      OFFENDER_OPTIONS.forEach(function(opt){
+        out.push({type:"leaf_offender",label:opt,si:last.si,ii:last.ii,tag:opt,sub:"offender"});
+      });
+    }
+    if(item.tagPopup && item.tagPopup.options){
+      item.tagPopup.options.forEach(function(opt){
+        out.push({type:"leaf_tag",label:opt,si:last.si,ii:last.ii,tag:opt,sub:"tag"});
+      });
+    }
+    return out;
+  }
+  // MSK ROOT → regions
+  if(last.type==="mskroot"){
+    return MSK_SECTIONS.map(function(s,si){
+      return {type:"mskregion",label:s.sec,si:si,children:true,sub:s.muscles.length+" muscles"};
+    });
+  }
+  // MSK REGION → muscles
+  if(last.type==="mskregion"){
+    return MSK_SECTIONS[last.si].muscles.map(function(m,mi){
+      return {type:"mskmuscle",label:m,si:last.si,mi:mi,children:true,sub:"R / L"};
+    });
+  }
+  // MSK MUSCLE → R / L / both
+  if(last.type==="mskmuscle"){
+    return [
+      {type:"leaf_msk",label:"R",si:last.si,mi:last.mi,side:"R",sub:last.label},
+      {type:"leaf_msk",label:"L",si:last.si,mi:last.mi,side:"L",sub:last.label},
+      {type:"leaf_msk_both",label:"R + L",si:last.si,mi:last.mi,sub:last.label}
+    ];
+  }
+  // ORGAN ROOT → organs
+  if(last.type==="organroot"){
+    return MSK_ORGANS.map(function(o,oi){ return {type:"leaf_organ",label:o,oi:oi}; });
+  }
+  // SUPP ROOT → brands
+  if(last.type==="supproot"){
+    return SUPP_BRANDS.map(function(b,bi){
+      return {type:"suppbrand",label:b.brand,bi:bi,children:true,sub:b.items.length+" item"+(b.items.length===1?"":"s")};
+    });
+  }
+  // SUPP BRAND → items
+  if(last.type==="suppbrand"){
+    return SUPP_BRANDS[last.bi].items.map(function(it){
+      return {type:"leaf_supp",label:it.name,idx:it.idx};
+    });
+  }
+  return [];
+}
+
+function _qpIsMarked(it){
+  var vn=_currentMacroVn;
+  if(it.type==="leaf_field"){
+    var k=(it.oi!==undefined)?mkKey(vn,it.si,it.ii,it.oi):mkKey(vn,it.si,it.ii);
+    return !!S.marks[k];
+  }
+  if(it.type==="leaf_msk"){
+    return !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+it.side];
+  }
+  if(it.type==="leaf_msk_both"){
+    return !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_R"] && !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_L"];
+  }
+  if(it.type==="leaf_organ"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
+  if(it.type==="leaf_supp"){ return !!S.marks["v"+vn+"_supp_"+it.idx]; }
+  if(it.type==="leaf_offender"){
+    var key="v"+vn+"_of_"+it.si+"_"+it.ii;
+    var sel=(S.offenderTags&&S.offenderTags[key])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="leaf_tag"){
+    var key="v"+vn+"_tag_"+it.si+"_"+it.ii;
+    var sel=(S.offenderTags&&S.offenderTags[key])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  return false;
+}
+
+function qpSelect(idx){
+  var items=_qpChildren(_qpPath);
+  var it=items[idx]; if(!it) return;
+  if(it.children){
+    _qpPath.push(it);
+    renderQuickPick();
+    return;
+  }
+  // Leaf: apply / toggle
+  var vn=_currentMacroVn;
+  var color=activeColor||"red";
+  if(it.type==="leaf_field"){
+    var k=(it.oi!==undefined)?mkKey(vn,it.si,it.ii,it.oi):mkKey(vn,it.si,it.ii);
+    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    renderMark(k); updateVsecHL(vn,it.si);
+  } else if(it.type==="leaf_msk"){
+    var k="v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+it.side;
+    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    renderMskCell(k); updateMskSecHL(vn,it.si); updateMskMainHL(vn);
+  } else if(it.type==="leaf_msk_both"){
+    ["R","L"].forEach(function(side){
+      var k="v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+side;
+      if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+      renderMskCell(k);
+    });
+    updateMskSecHL(vn,it.si); updateMskMainHL(vn);
+  } else if(it.type==="leaf_organ"){
+    var k="v"+vn+"_org_"+it.oi;
+    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    renderMskCell(k); updateMskMainHL(vn);
+  } else if(it.type==="leaf_supp"){
+    var k="v"+vn+"_supp_"+it.idx;
+    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn);
+  } else if(it.type==="leaf_offender" || it.type==="leaf_tag"){
+    var key=(it.type==="leaf_offender")?"v"+vn+"_of_"+it.si+"_"+it.ii:"v"+vn+"_tag_"+it.si+"_"+it.ii;
+    if(!S.offenderTags) S.offenderTags={};
+    var sel=(S.offenderTags[key]||[]).slice();
+    var i=sel.indexOf(it.tag);
+    if(i>=0) sel.splice(i,1); else sel.push(it.tag);
+    S.offenderTags[key]=sel;
+    renderOffenderTags(key); updateVsecHL(vn,it.si);
+  }
+  autoSave();
+  // Re-render the drill-down level so the ✓ checkmark updates live
+  renderQuickPick();
+}
+
+function qpGoto(depth){
+  _qpPath=_qpPath.slice(0,depth);
+  renderQuickPick();
+}
+
+// ── SAVED MACROS TAB ─────────────────────────────────────────────
+function renderSavedMacros(){
+  var body=document.getElementById("macroModalBody");
+  document.getElementById("macroModalSub").textContent="Tap a saved macro to apply it to Visit "+_currentMacroVn;
+  var macros=getMacros();
+  if(!macros.length){
+    body.innerHTML='<p style="color:#94a3b8;font-size:13px;padding:12px">No saved macros yet. Build one with "Save current visit as macro".</p>';
+    return;
+  }
+  var byCat={};
+  macros.forEach(function(m){ var c=m.category||"Other"; (byCat[c]=byCat[c]||[]).push(m); });
+  var html="";
+  Object.keys(byCat).sort().forEach(function(c){
+    html+='<div class="macro-cat">'+escHtml(c)+'</div><div class="macro-list">';
+    byCat[c].forEach(function(m){
+      var nApp=(m.applies||[]).length, nInc=(m.includes||[]).length, nSupp=(m.supplements||[]).length;
+      var meta=[]; if(nApp) meta.push(nApp+" mark"+(nApp===1?"":"s"));
+      if(nInc) meta.push(nInc+" nested"); if(nSupp) meta.push(nSupp+" supp");
+      html+='<button class="macro-item" onclick="applyMacro(\''+m.id+'\')">'+
+        '<span>'+escHtml(m.label)+'</span>'+
+        (meta.length?'<span class="mac-meta">'+meta.join(" · ")+'</span>':'')+
+        '<span class="mac-del" onclick="event.stopPropagation();deleteMacro(\''+m.id+'\')" title="Delete">✕</span>'+
+        '</button>';
+    });
+    html+='</div>';
+  });
+  body.innerHTML=html;
+}
 
 function applyMacro(macroId){
   if(!_currentMacroVn) return;
@@ -2806,7 +3174,7 @@ function applyMacro(macroId){
 function deleteMacro(id){
   if(!confirm("Delete this macro?")) return;
   var arr=getMacros().filter(function(m){ return m.id!==id; });
-  saveMacros(arr); openMacroModal(_currentMacroVn);
+  saveMacros(arr); renderSavedMacros();
 }
 
 function openMacroBuilder(){
@@ -2883,7 +3251,7 @@ function importMacros(input){
       var arr=JSON.parse(e.target.result);
       if(!Array.isArray(arr)) throw new Error("Not a macro library file");
       if(!confirm("Replace current macro library with "+arr.length+" imported macros?")) return;
-      saveMacros(arr); openMacroModal(_currentMacroVn);
+      saveMacros(arr); switchMacroTab("saved");
       showToast("✓ Imported "+arr.length+" macros");
     }catch(err){ alert("Import failed: "+err.message); }
     input.value="";
@@ -3013,7 +3381,7 @@ function buildPositiveFindingsView(){
     return;
   }
   var html='<div class="pv-section"><div class="pv-section-title">Positive Findings — Bird\'s-Eye View</div>';
-  html+='<p class="pv-note">Each row is a finding that was marked on at least one visit. Cells show the color on that visit so you can scan across to see progression (red → yellow → blue → green) or persistence. Blank = not marked.</p>';
+  html+='<p class="pv-note">Each row is a finding that was marked on at least one visit. Cells show the color on that visit so you can scan across to see progression (red → yellow → blue → green) or persistence. Blank = not marked. Top section shows compliance grades and labs-reviewed visits.</p>';
   html+='<table class="tl-table"><thead><tr><th class="row-hdr">Finding</th>';
   for(var v=1;v<=maxV;v++){
     html+='<th>V'+v;
@@ -3021,6 +3389,40 @@ function buildPositiveFindingsView(){
     html+='</th>';
   }
   html+='</tr></thead><tbody>';
+
+  // ── Compliance + Labs Reviewed header rows ──
+  var gradeColors={A:"#22c55e",B:"#84cc16",C:"#eab308",D:"#f97316",F:"#ef4444"};
+  function gradeCell(g){
+    if(!g) return '<td></td>';
+    var c=gradeColors[g]||"#64748b";
+    return '<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:'+c+';color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">'+g+'</span></td>';
+  }
+  var anyCompl=false, anyLabs=false;
+  if(S.compliance){
+    for(var v=1;v<=maxV;v++){ if(S.compliance[v+"_diet"]||S.compliance[v+"_supp"]){ anyCompl=true; break; } }
+  }
+  for(var v=1;v<=maxV;v++){ if(labsWasReviewed(v)){ anyLabs=true; break; } }
+  if(anyCompl||anyLabs){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#0369a1!important">COMPLIANCE &amp; LABS</th></tr>';
+    if(anyCompl){
+      html+='<tr><td class="row-lbl sub-lbl">🥗 Diet compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=gradeCell((S.compliance||{})[v+"_diet"]);
+      html+='</tr>';
+      html+='<tr><td class="row-lbl sub-lbl">💊 Supplement compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=gradeCell((S.compliance||{})[v+"_supp"]);
+      html+='</tr>';
+    }
+    if(anyLabs){
+      html+='<tr><td class="row-lbl sub-lbl">🧪 Labs reviewed</td>';
+      for(var v=1;v<=maxV;v++){
+        html+=labsWasReviewed(v)
+          ?'<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:#1e40af;color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">✓</span></td>'
+          :'<td></td>';
+      }
+      html+='</tr>';
+    }
+  }
+
   Object.keys(secRows).forEach(function(sn){
     html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">'+escHtml(sn)+'</th></tr>';
     secRows[sn].forEach(function(row){
