@@ -319,9 +319,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 @page{size:landscape;margin:18mm 16mm}
 @media print{
   @page{size:landscape;margin:18mm 16mm}
-  body{background:white!important}
+  html,body{height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:white!important}
   #pwOverlay,#dash,#app,#toast,.preview-overlay{display:none!important}
-  #printView{display:block!important}
+  #printView{display:block!important;height:auto!important;overflow:visible!important}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .tl-table th{background:#1a1a2e!important;color:white!important}
   .tl-table th.sec-hdr{background:#374151!important;color:white!important}
