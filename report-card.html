@@ -1929,6 +1929,46 @@ var DIET_RECS=[
   "Anti-fungal","Low Histamine","Low FODMAP","Bear Diet","Carnivore","Dysglycemia Diet"
 ];
 
+// ── ORGAN NUTRIENT/OFFENDER DATA ──────────────────────────────
+// Each entry corresponds to MSK_ORGANS[index]. {n: nutrients[], o: offenders[]}
+var ORGAN_INFO=[
+  /*0  Adrenal*/{n:["Adaptogens (ashwagandha, ginseng, holy basil, rhodiola)","B1","Choline","Cordyceps","DHEA","G vitamins (B2, B3)","Licorice","Alkaline ash minerals (kelp, alfalfa)","Niacinamide","Pantothenic acid (B5/pantethine)","Potassium","Reishi","Schisandra","Vitamin A","Vitamin C","Vitamin E (mixed tocopherols)","Whole adrenal tissue","Zinc"],o:["Allergies (histamine)","Caffeine/methylxanthines","EMR","Emotional stress","Injuries","Insulin/sugar","MSG/glutamate","NutraSweet/aspartame","Stress to chakras"]},
+  /*1  Bladder*/{n:["Antihistamines","Antimicrobials","Bioflavonoids (rutin)","Cranberry","Blueberry","Mannose","Vitamin A","Vitamin C"],o:["Food allergies","Heavy metal toxicity","Histamine","Medications"]},
+  /*2  Brain*/{n:["CYP450 antioxidants (ashwagandha, holy basil, rosemary, noni)","EFAs and AA fats","Glucose","Glutathione","Iron","Methylation factors","Movement/exercise","Neurotransmitters","Nitric oxide","Oxygen factors (Cu, folate, Fe, Mo, B6, B12)","Prostacyclins","Steroid hormones","Stonebreaker","Vitamins A and D"],o:["Aldehyde toxicity","Ammonia toxicity","Caffeine/stimulants","EMR","Homocysteine","Hypochlorite","Inflammation","Inflammatory prostaglandins/leukotrienes","Insulin","Medication reactions","MSG/aspartame","Stress hormones (cortisol, epi, norepi)","Sulfites/sulfates","Toxic metals","Xanthine"]},
+  /*3  Diaphragm*/{n:["G vitamins (parasympathetic tone)"],o:["Poor air quality","Emotional stress","Excess sympathetic stress","Hiatal hernia/structural problems"]},
+  /*4  Ears/Eyes*/{n:["Antimicrobials","Antihistamines","H2O2 drops","Mullein oil","Bioflavonoids","Vitamin A","Milk thistle","Healthy fats","Ginkgo biloba","Bilberry"],o:["Allergies","Visual strain"]},
+  /*5  Gallbladder*/{n:["Betaine (TMG)","Betaine HCl","Chanca piedra","Choline","Copper (small amounts)","Disodium phosphate","Ginger","Healthy fats","Lecithin","Ox/beef bile salts","Taurine","Glycine","Vitamin A"],o:["Alcohol","Aldehydes","Ammonia","Bad fats (refined oils)","Caffeine","Xenobiotics","Coffee","Chocolate","Excess copper","Estrogen","Heavy metal toxicity","Insulin","Medications","MSG/aspartame","Smoking","Stress hormones"]},
+  /*6  Heart*/{n:["B1 (thiamine)","E complexes (tocopherols/tocotrienols)","G vitamins (B2, B3)","L-Carnitine","CoQ10","Healthy fats","Methylation factors (B12, 5-MTHF, Mg)","Ribose","Vitamin K2 (MK-4)","Anticoagulants (thrombin inhibitors, fibrinolytics, antiplatelets)"],o:["Elevated blood lipids (ox cholesterol, LDL, TGs)","Homocysteine","Inflammation","Medications","Stress"]},
+  /*7  Immune-Spleen*/{n:["Th1 support (Astragalus, Echinacea, Lemon balm, Licorice, Maitake, Vit A/D/E)","Th2 support (Green tea, Lycopene, OPCs, Quercetin, Resveratrol, Vit A/D/E)","Treg support (EPA, DHA, GLA, AA, Glutathione, Iron, SOD, Vit A/D)"],o:["Emotional strain","Dental issues","Pro-inflammatory cytokines (TNF-α, IL-6, IL-1)"]},
+  /*8  Immune-Thymus*/{n:["Th1 support (Astragalus, Echinacea, Lemon balm, Licorice, Maitake, Vit A/D/E)","Th2 support (Green tea, Lycopene, OPCs, Quercetin, Resveratrol, Vit A/D/E)","Treg support (EPA, DHA, GLA, AA, Glutathione, Iron, SOD, Vit A/D)"],o:["Emotional strain","Dental issues","Pro-inflammatory cytokines (TNF-α, IL-6, IL-1)"]},
+  /*9  Kidney*/{n:["Alkaline ash mineral complexes","Antimicrobials","Arginase","Bioflavonoids","Carbamide","Creatine","Phosphorus","Potassium","Urea cycle factors","Vitamin A","Vitamin D"],o:["Ammonia","Caffeine","Calcium excess (supplements)","Heavy metal toxicity","Medications","Uric acid"]},
+  /*10 Large Intestine*/{n:["5-MTHF","Antihistamines","Anti-inflammatories","Probiotics","SIgA nutrients","Short-chain fatty acids (butyric, propionic)","Fiber/resistant starch","St. John's wort","Vitamins A, D, K2","Biotin"],o:["Allergies/food intolerances","Ammonia","Improper supplements/medications","Inflammation","Dysbiosis","Lectins"]},
+  /*11 Liver*/{n:["Phase 2 conjugation (Cys, Met, Mg, Mo, P5P, B12, 5-MTHF, Gly, Arg, Betaine, Choline)","Healthy fats (EPA, DHA, AA)","Schisandra","NAC","SOD","Vitamins A, C, D, E","CoQ10","Quercetin","Silymarin","Dandelion","Burdock","Basil","Red sage","Activated charcoal"],o:["Steroid hormones","Insulin","NSAIDs","MSG","Caffeine","Histamine","Homocysteine","ROS/free radicals","Hypochlorite","H2O2","Medications","Pesticides","Cytokines","Guanidine","Refined sugar/alcohol"]},
+  /*12 Lower Immune*/{n:["Th1 support (Astragalus, Echinacea, Lemon balm, Licorice, Maitake, Vit A/D/E)","Th2 support (Green tea, Lycopene, OPCs, Quercetin, Resveratrol, Vit A/D/E)","Treg support (EPA, DHA, GLA, AA, Glutathione, Iron, SOD, Vit A/D)"],o:["Emotional strain","Dental issues","Pro-inflammatory cytokines (TNF-α, IL-6, IL-1)"]},
+  /*13 Lung*/{n:["Aldehyde detox nutrients","Anti-inflammatories","Antimicrobials","Glutathione","Lung tissue","Vitamin A","Vitamin C"],o:["Air pollution","Aldehydes","Hydrocarbons","Inflammation","Mycotoxins","Radon"]},
+  /*14 Ovary*/{n:["Black cohosh","Blue cohosh","Chaste tree","Fatty acids","Iodine","Liver detox nutrients","Ovarian tissue","Progesterone","Vitamin A","Vitamin E"],o:["Contraceptives","Emotional stress","Copper excess","High insulin (testosterone)","Physical stress","Stress hormones","Xenoestrogens","Phytoestrogens"]},
+  /*15 Pancreas*/{n:["Digestive enzymes","Healthy fats","Lipoic acid","Minerals (Cr, Mg, Mn, V, Zn)","Pancreatic tissue","Sesame seed oil (SSO)","Vitamin E"],o:["Caffeine/stimulants","Food allergies","Medications","Milk (molecular mimicry)","MSG","Aspartame","Stress hormones","Autoimmune Th17 issues"]},
+  /*16 Parotid*/{n:["Activated charcoal/bamboo","Modified citrus pectin","Parotid tissue","Red root","B12","Folic acid"],o:["Ammonia","Chemical sensitivities","Food allergies","Heavy metal toxicity","Hormones","Medications","Trans fats","Pesticides"]},
+  /*17 Pineal*/{n:["Melatonin precursors","Methyl donors (B6, B12, 5-MTHF, Mg)","Iron","Magnesium","Manganese","B3","B5"],o:["Caffeine","Food allergies","Insulin","Jaw/tooth issues","Radiation","Stress hormones"]},
+  /*18 Pituitary*/{n:["Pituitary tissue","B3","Arginine"],o:["Caffeine","Cranial faults","EMR","Excess estrogen/testosterone/thyroid","Insulin","Stress hormones"]},
+  /*19 Prostate*/{n:["Selenium","Zinc","Iron","Calcium","Nettle leaf","Prostate tissue","Pygeum","Saturated fats/EFAs","Saw palmetto","Schisandra","Vitamins A, D, B3, B5, E"],o:["Caffeine","Digestive problems","DHT","Emotional stress","Estrogen","Inflammation","Insulin","Stress hormones","Xeno/phytoestrogens"]},
+  /*20 Sinus*/{n:["Antihistamines","Antimicrobials","Bile salts","Iodine","Ponaris oil","Vitamin A","B3","B5","B6"],o:["Airborne allergens","Chemical odors","Histamine","Stress hormones"]},
+  /*21 Small Intestine*/{n:["5-MTHF","Antihistamines","Antimicrobials","Bentonite clay","Bladderwrack/okra","Comfrey","SIgA nutrients","St. John's wort","Vitamins A, D, B12"],o:["Allergies/food intolerances","Bad fats","Emotional stress","Improper supplements/medications","Inflammation","Lectins"]},
+  /*22 Stomach*/{n:["Aloe","Antihistamines","Antimicrobials","Betaine HCl","Bismuth","Comfrey/okra","DGL","Intrinsic factor","Mastic","Noni","Goldthread","Vitamin A","B1","B2","B12","Zinc","Apple cider vinegar/baking soda"],o:["Allergies","Emotional stress","Hiatal hernia","H. pylori","Medications (NSAIDs)","Mycotoxins"]},
+  /*23 Testes*/{n:["DHEA","BCAAs","Flavonoids (Chrysin, Apigenin, Naringenin)","Saturated fats/EFAs","Testicular tissue","Velvet deer/elk antler","Vitamins A, B3, B5, E"],o:["Caffeine","Emotional stress","High insulin (estrogen)","Physical stress","Stress hormones","Xeno/phytoestrogens"]},
+  /*24 Thyroid*/{n:["Ashwagandha","Bladderwrack","L-Carnitine","Copper (low dose)","Glutathione","Healthy/essential fats","Iodine","Iron","Magnesium","Parotid tissue","Selenium","L-Tyrosine","Vitamins A, D, B2, B3, B6","Zinc"],o:["Anemia","Autoimmune conditions","Caffeine","Chlorine/fluoride","High cortisol/estrogen/insulin","Inflammation","Low dopamine/serotonin"]},
+  /*25 Uterus*/{n:["Black cohosh","Blue cohosh","Chaste tree","Iodine","Progesterone","Se, Zn, Fe, Ca","Saturated fats/EFAs","Uterine tissue","Vitamins A, D, E, B3, B5"],o:["Caffeine","Contraceptives/IUDs","Copper","Digestive problems","Emotional stress","Estrogen dominance/progesterone deficiency","Hormonal imbalances","Inflammation","Insulin","Stress hormones","Xeno/phytoestrogens"]}
+];
+
+// Antimicrobial nutrients by infection type
+var INFECTION_NUTRIENTS={
+  "Bacteria":["Andrographis","Artemisia","Astragalus","Barberry","Goldenseal","Goldthread","Oregon grape","Bidens","Biotin","Caprylic acid","Cat's claw","Chinese skullcap","Chrysanthemum","Gentian root","Houttuynia","Iodine","Isatis","Juniper","Lauric acid/monolaurin","Molybdenum","Myrrh","Neem","Noni/Morinda","Olive leaf","Osha root","Pau d'arco","Red clover","Reishi","Schisandra","Selenium","Tea tree oil","Undecylenic acid","Usnea","Uva-ursi"],
+  "Fungus":["Andrographis","Artemisia","Astragalus","Barberry","Goldenseal","Goldthread","Oregon grape","Bidens","Biotin","Caprylic acid","Cat's claw","Chinese skullcap","Chrysanthemum","Gentian root","Houttuynia","Iodine","Isatis","Juniper","Lauric acid/monolaurin","Molybdenum","Myrrh","Neem","Noni/Morinda","Olive leaf","Osha root","Pau d'arco","Red clover","Reishi","Schisandra","Selenium","Tea tree oil","Undecylenic acid","Usnea","Uva-ursi"],
+  "Virus":["Andrographis","Astragalus","Cat's claw","Chinese skullcap","Echinacea","Elderberry","Goldenseal","Houttuynia","Lomatium","Neem","Olive leaf","Osha root","Selenium","Star anise (shikimic acid)","Uva-ursi"],
+  "Parasite":["Andrographis","Artemisia","Astragalus","Black walnut","Garlic","Gentian root","Juniper","Mimosa","Noni/Morinda","Undecylenic acid"]
+};
+var INFECTION_TYPES=["Bacteria","Fungus","Virus","Parasite"];
+
 // Wire items that should use the organ list as their selectable tags.
 // Pituitary: TL Glabella + Endo Organ → provider selects which endocrine organ was tested.
 // Two Organ → provider picks exactly 2 organs (reuses the thenNow flag: same
@@ -2112,12 +2152,21 @@ function renderChallengesFound(vn) {
         '<span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;display:inline-block"></span>'+escHtml(m)+" ("+side+")</span>");
     });
   });
-  // Organs
+  // Organs (with offender/nutrient/infection detail)
   MSK_ORGANS.forEach(function(org,oi){
-    if(S.marks["v"+vn+"_org_"+oi]){
-      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fdf2f8;border:1px solid #f9a8d4;font-size:11px;font-weight:600;color:#9d174d;margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:#be185d;display:inline-block"></span>'+escHtml(org)+'</span>');
-    }
+    if(!S.marks["v"+vn+"_org_"+oi]) return;
+    var detail=[];
+    var offs=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+oi])||[];
+    if(offs.length) detail.push("off: "+offs.join(", "));
+    INFECTION_TYPES.forEach(function(t){
+      var rx=(S.offenderTags&&S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t])||[];
+      if(rx.length) detail.push(t+": "+rx.join(", "));
+    });
+    var nuts=(S.offenderTags&&S.offenderTags["v"+vn+"_orgnut_"+oi])||[];
+    if(nuts.length) detail.push("rx: "+nuts.join(", "));
+    var sub=detail.length?' <em style="color:#92400e;font-size:10px">— '+escHtml(detail.join(" | "))+'</em>':"";
+    pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fdf2f8;border:1px solid #f9a8d4;font-size:11px;font-weight:600;color:#9d174d;margin:2px">'+
+      '<span style="width:8px;height:8px;border-radius:50%;background:#be185d;display:inline-block"></span>'+escHtml(org)+sub+'</span>');
   });
   div.innerHTML = pills.length
     ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">⚠️ Challenges found</div>'+pills.join('')
@@ -2246,6 +2295,10 @@ function buildVisitCard(vn){
         '<span class="compl-label">💊 Supp</span>'+
         '<div class="compl-pills" id="supp'+vn+'">'+_complPillsHtml(vn,"supp")+'</div>'+
       '</div>'+
+      '<div class="compl-group" style="margin-left:auto">'+
+        '<span class="compl-label">📅 Follow-up</span>'+
+        '<div class="fu-bar" id="fuBar'+vn+'" style="margin:0">'+_fuChipsHtml(vn)+'</div>'+
+      '</div>'+
     '</div>';
   div.appendChild(no);
   // Snippet chips build after append so the container exists
@@ -2265,14 +2318,6 @@ function buildVisitCard(vn){
   var dietMarked=document.createElement("div"); dietMarked.id="diet_marked_"+vn;
   dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
   div.appendChild(dietMarked);
-
-  // Follow-up interval inline picker
-  var fuWrap=document.createElement("div"); fuWrap.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
-  fuWrap.innerHTML='<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">📅 Follow-up</div>'+
-    '<div class="fu-bar" id="fuBar'+vn+'">'+
-      _fuChipsHtml(vn)+
-    '</div>';
-  div.appendChild(fuWrap);
 
   // Per-visit action bar: print summary / email summary
   var actBar=document.createElement("div");
@@ -3145,25 +3190,24 @@ function copyPriorVisit(vn){
 //  A4: SNIPPET CHIPS
 // ════════════════════════════════════════════════════════════════
 var DEFAULT_SNIPPETS=[
-  "Reviewed labs","+2 week follow-up","+3 week follow-up","+4 week follow-up"
+  "Reviewed labs"
 ];
 // One-time migration: prior build shipped a larger default snippet list.
 // If the stored snippets are the old default AND the user hasn't customized them,
 // reset to the new minimal list.
 (function _migrateSnippets(){
-  var OLD_DEFAULTS=[
-    "Improved","No change","Resolved","Flare-up","Adherent","Non-adherent",
-    "Emotional component","Diet compliance good","Diet compliance poor",
-    "+1 week follow-up","+2 week follow-up","Homework given","Reviewed labs"
+  // Migrate from any prior default lists to the current one
+  var KNOWN_DEFAULTS=[
+    ["Improved","No change","Resolved","Flare-up","Adherent","Non-adherent","Emotional component","Diet compliance good","Diet compliance poor","+1 week follow-up","+2 week follow-up","Homework given","Reviewed labs"],
+    ["Reviewed labs","+2 week follow-up","+3 week follow-up","+4 week follow-up"]
   ];
   try{
     var raw=_LS.getItem("mhw_snippets");
     if(!raw) return;
     var arr=JSON.parse(raw);
     if(!Array.isArray(arr)) return;
-    if(arr.length===OLD_DEFAULTS.length && arr.every(function(v,i){return v===OLD_DEFAULTS[i];})){
-      _LS.setItem("mhw_snippets",JSON.stringify(DEFAULT_SNIPPETS.slice()));
-    }
+    var isOld=KNOWN_DEFAULTS.some(function(od){ return arr.length===od.length && arr.every(function(v,i){return v===od[i];}); });
+    if(isOld) _LS.setItem("mhw_snippets",JSON.stringify(DEFAULT_SNIPPETS.slice()));
   }catch(e){}
 })();
 function getSnippets(){
@@ -3435,9 +3479,37 @@ function _qpChildren(path){
       {type:"leaf_msk_both",label:"R + L",si:last.si,mi:last.mi,sub:last.label}
     ];
   }
-  // ORGAN ROOT → organs
+  // ORGAN ROOT → organs (drill into detail)
   if(last.type==="organroot"){
-    return MSK_ORGANS.map(function(o,oi){ return {type:"leaf_organ",label:o,oi:oi}; });
+    return MSK_ORGANS.map(function(o,oi){ return {type:"organ_detail",label:o,oi:oi,children:true}; });
+  }
+  // ORGAN DETAIL → Offenders, Infection, Nutrients groups
+  if(last.type==="organ_detail"){
+    var info=ORGAN_INFO[last.oi]||{n:[],o:[]};
+    return [
+      {type:"organ_offenders_group",label:"⚠️ Offenders ("+info.o.length+")",oi:last.oi,children:true,sub:info.o.length+" options"},
+      {type:"organ_infection_group",label:"🦠 Infection",oi:last.oi,children:true,sub:"Bacteria / Fungus / Virus / Parasite"},
+      {type:"organ_nutrients_group",label:"💊 Nutrients ("+info.n.length+")",oi:last.oi,children:true,sub:info.n.length+" options"}
+    ];
+  }
+  // ORGAN OFFENDERS → leaf toggles
+  if(last.type==="organ_offenders_group"){
+    var info=ORGAN_INFO[last.oi]||{n:[],o:[]};
+    return info.o.map(function(off){ return {type:"leaf_orgoff",label:off,oi:last.oi,tag:off}; });
+  }
+  // ORGAN INFECTION → 4 types
+  if(last.type==="organ_infection_group"){
+    return INFECTION_TYPES.map(function(t){ return {type:"organ_inf_type",label:t,oi:last.oi,infType:t,children:true}; });
+  }
+  // ORGAN INFECTION TYPE → antimicrobial nutrients
+  if(last.type==="organ_inf_type"){
+    var list=INFECTION_NUTRIENTS[last.infType]||[];
+    return list.map(function(rx){ return {type:"leaf_orginfnut",label:rx,oi:last.oi,infType:last.infType,tag:rx}; });
+  }
+  // ORGAN NUTRIENTS → leaf toggles
+  if(last.type==="organ_nutrients_group"){
+    var info=ORGAN_INFO[last.oi]||{n:[],o:[]};
+    return info.n.map(function(nut){ return {type:"leaf_orgnut",label:nut,oi:last.oi,tag:nut}; });
   }
   // SUPP ROOT → brands
   if(last.type==="supproot"){
@@ -3471,6 +3543,24 @@ function _qpIsMarked(it){
     return !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_R"] && !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_L"];
   }
   if(it.type==="leaf_organ"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
+  if(it.type==="leaf_orgoff"){
+    var sel=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+it.oi])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="leaf_orgnut"){
+    var sel=(S.offenderTags&&S.offenderTags["v"+vn+"_orgnut_"+it.oi])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="leaf_orginfnut"){
+    var sel=(S.offenderTags&&S.offenderTags["v"+vn+"_orgrx_"+it.oi+"_"+it.infType])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  // Infection type node: ✓ if any antimicrobial selected under it
+  if(it.type==="organ_inf_type"){
+    return ((S.offenderTags&&S.offenderTags["v"+vn+"_orgrx_"+it.oi+"_"+it.infType])||[]).length>0;
+  }
+  // Organ detail node: ✓ if organ is marked
+  if(it.type==="organ_detail"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
   if(it.type==="leaf_supp"){ return !!S.marks["v"+vn+"_supp_"+it.idx]; }
   if(it.type==="leaf_diet"){ return !!S.marks["v"+vn+"_diet_"+it.idx]; }
   if(it.type==="leaf_offender"){
@@ -3520,6 +3610,19 @@ function qpSelect(idx){
     var k="v"+vn+"_org_"+it.oi;
     if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
     renderMskCell(k); updateMskMainHL(vn);
+  } else if(it.type==="leaf_orgoff"||it.type==="leaf_orgnut"||it.type==="leaf_orginfnut"){
+    // Toggle organ offender / nutrient / antimicrobial selection
+    var tagKey;
+    if(it.type==="leaf_orgoff") tagKey="v"+vn+"_orgoff_"+it.oi;
+    else if(it.type==="leaf_orgnut") tagKey="v"+vn+"_orgnut_"+it.oi;
+    else tagKey="v"+vn+"_orgrx_"+it.oi+"_"+it.infType;
+    if(!S.offenderTags) S.offenderTags={};
+    var sel=(S.offenderTags[tagKey]||[]).slice();
+    var idx=sel.indexOf(it.tag);
+    if(idx>=0) sel.splice(idx,1); else sel.push(it.tag);
+    S.offenderTags[tagKey]=sel;
+    // Auto-mark/unmark the organ based on whether any selections remain
+    _autoMarkOrgan(vn,it.oi);
   } else if(it.type==="leaf_supp"){
     var k="v"+vn+"_supp_"+it.idx;
     if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
@@ -3555,6 +3658,19 @@ function qpSelect(idx){
   renderChallengesFound(vn);
   renderDietMarked(vn);
   renderQuickPick();
+}
+
+// Auto-mark/unmark an organ based on whether any offender/nutrient/infection selection exists
+function _autoMarkOrgan(vn,oi){
+  var key="v"+vn+"_org_"+oi;
+  var any=false;
+  if(S.offenderTags){
+    if((S.offenderTags["v"+vn+"_orgoff_"+oi]||[]).length) any=true;
+    if(!any && (S.offenderTags["v"+vn+"_orgnut_"+oi]||[]).length) any=true;
+    if(!any){ INFECTION_TYPES.forEach(function(t){ if((S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t]||[]).length) any=true; }); }
+  }
+  if(any) S.marks[key]="red"; else delete S.marks[key];
+  updateMskMainHL(vn);
 }
 
 function qpGoto(depth){
@@ -4078,9 +4194,19 @@ function _collectVisitSummary(vn){
       data.challenges.push({section:"MSK — "+sect.sec, label:m+" ("+side+")", tags:[]});
     });
   });
-  // Organs
+  // Organs (with offender/nutrient/infection detail)
   MSK_ORGANS.forEach(function(o,oi){
-    if(S.marks["v"+vn+"_org_"+oi]) data.challenges.push({section:"Organ Indicators", label:o, tags:[]});
+    if(!S.marks["v"+vn+"_org_"+oi]) return;
+    var tagBits=[];
+    var offs=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+oi])||[];
+    if(offs.length) tagBits.push("Offenders: "+offs.join(", "));
+    INFECTION_TYPES.forEach(function(t){
+      var rx=(S.offenderTags&&S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t])||[];
+      if(rx.length) tagBits.push(t+": "+rx.join(", "));
+    });
+    var nuts=(S.offenderTags&&S.offenderTags["v"+vn+"_orgnut_"+oi])||[];
+    if(nuts.length) tagBits.push("Nutrients: "+nuts.join(", "));
+    data.challenges.push({section:"Organ Indicators", label:o, tags:tagBits});
   });
   // Supplements + doses
   if(!S.suppDoses) S.suppDoses={};
