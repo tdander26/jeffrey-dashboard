@@ -1664,8 +1664,8 @@ function updateDietHL(vn){
   el.classList.toggle("has-marks",on);
   var cnt=document.getElementById("cnt_diet_"+vn);
   if(cnt){
-    if(on) cnt.innerHTML='<span class="marked-n green">'+n+' prescribed</span> · '+DIET_RECS.length+' options';
-    else cnt.textContent=DIET_RECS.length+" options";
+    if(on) cnt.innerHTML='<span class="marked-n green">'+n+' selected</span> · '+ALL_DIET_ITEMS.length+' options';
+    else cnt.textContent=ALL_DIET_ITEMS.length+" options";
   }
 }
 function updateAllHL(){
@@ -1945,6 +1945,11 @@ var MSK_ORGANS=[
 var DIET_RECS=[
   "Anti-fungal","Low Histamine","Low FODMAP","Bear Diet","Carnivore","Dysglycemia Diet"
 ];
+var FOOD_SENSITIVITIES=[
+  "Gluten","Casein","Nightshades","Lactose","Fructose","Maltose","Chocolate","Coffee"
+];
+// Combined flat list for marks storage: indices 0-5 = diets, 6-13 = foods
+var ALL_DIET_ITEMS=DIET_RECS.concat(FOOD_SENSITIVITIES);
 
 // ── ORGAN NUTRIENT/OFFENDER DATA ──────────────────────────────
 // Each entry corresponds to MSK_ORGANS[index]. {n: nutrients[], o: offenders[]}
@@ -2103,19 +2108,26 @@ function renderSuppMarked(vn) {
 // ────────────────────────────────────────────────────────────────
 function renderDietMarked(vn) {
   var div = document.getElementById("diet_marked_"+vn); if(!div) return;
-  var pills = [];
+  var dietPills = [], foodPills = [];
   DIET_RECS.forEach(function(d,di){
-    var key = "v"+vn+"_diet_"+di;
-    if(S.marks[key]) {
-      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
+    if(S.marks["v"+vn+"_diet_"+di]) {
+      dietPills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
         '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(d)+
-        _pillX("removeDiet("+vn+","+di+")")+
-        '</span>');
+        _pillX("removeDiet("+vn+","+di+")")+'</span>');
     }
   });
-  div.innerHTML = pills.length
-    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">🥗 Diet recommendations</div>'+pills.join('')
-    : '';
+  FOOD_SENSITIVITIES.forEach(function(f,fi){
+    var idx=DIET_RECS.length+fi;
+    if(S.marks["v"+vn+"_diet_"+idx]) {
+      foodPills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>🚫 '+escHtml(f)+
+        _pillX("removeDiet("+vn+","+idx+")")+'</span>');
+    }
+  });
+  var html='';
+  if(dietPills.length) html+='<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">🥗 Diet recommendations</div>'+dietPills.join('');
+  if(foodPills.length) html+='<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin:'+(dietPills.length?'8':'0')+'px 0 5px">🚫 Food sensitivities</div>'+foodPills.join('');
+  div.innerHTML=html;
 }
 function renderAllDietMarked(){ for(var v=1;v<=18;v++) renderDietMarked(v); }
 
@@ -2345,7 +2357,7 @@ function buildVisitCard(vn){
 
     var dietCard=document.createElement("button"); dietCard.type="button"; dietCard.className="sec-card supp"; dietCard.id="diet_hdr_"+vn;
     dietCard.innerHTML='<div class="sec-card-title">🥗 Diet Recommendations</div>'+
-      '<div class="sec-card-count" id="cnt_diet_'+vn+'">'+DIET_RECS.length+' options</div>';
+      '<div class="sec-card-count" id="cnt_diet_'+vn+'">'+ALL_DIET_ITEMS.length+' options</div>';
     dietCard.addEventListener("click",function(){
       openMacroModal(vn);
       _qpPath=[{type:"dietroot",label:"🥗 Diet Recommendations",children:true}];
@@ -2776,12 +2788,12 @@ function buildPrintView(){
     if(any) suppRows.push({label:supp,marks:rm});
   });
 
-  // ── diet recommendations ───────────────────────────────────
+  // ── diet recommendations + food sensitivities ───────────────
   var dietRows=[];
-  DIET_RECS.forEach(function(d,di){
+  ALL_DIET_ITEMS.forEach(function(d,di){
     var rm={},any=false;
     for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_diet_"+di]; if(cn){ rm[v]=cn; any=true; } }
-    if(any) dietRows.push({label:d,marks:rm});
+    if(any) dietRows.push({label:(di>=DIET_RECS.length?"🚫 ":"")+d,marks:rm});
   });
 
   var hasAnyData=symRows.length||Object.keys(secData).length||Object.keys(mskSecData).length||orgRows.length||suppRows.length||dietRows.length;
@@ -3526,7 +3538,7 @@ function _qpChildren(path){
     roots.push({type:"mskroot",label:"💪 MSK — Muscle Testing",children:true,sub:MSK_SECTIONS.length+" regions"});
     roots.push({type:"organroot",label:"🫀 Organ Indicators",children:true,sub:MSK_ORGANS.length+" organs"});
     roots.push({type:"supproot",label:"💊 Supplements",children:true,sub:SUPPLEMENTS.length+" items"});
-    roots.push({type:"dietroot",label:"🥗 Diet Recommendations",children:true,sub:DIET_RECS.length+" options"});
+    roots.push({type:"dietroot",label:"🥗 Diet Recommendations",children:true,sub:ALL_DIET_ITEMS.length+" options"});
     return roots;
   }
   var last=path[path.length-1];
@@ -3639,7 +3651,16 @@ function _qpChildren(path){
   }
   // DIET ROOT → diets
   if(last.type==="dietroot"){
+    return [
+      {type:"diet_diets",label:"🍽 Diets",children:true,sub:DIET_RECS.length+" options"},
+      {type:"diet_foods",label:"🚫 Food Sensitivities",children:true,sub:FOOD_SENSITIVITIES.length+" items"}
+    ];
+  }
+  if(last.type==="diet_diets"){
     return DIET_RECS.map(function(d,di){ return {type:"leaf_diet",label:d,idx:di}; });
+  }
+  if(last.type==="diet_foods"){
+    return FOOD_SENSITIVITIES.map(function(f,fi){ return {type:"leaf_diet",label:f,idx:DIET_RECS.length+fi}; });
   }
   return [];
 }
@@ -4095,12 +4116,12 @@ function buildPositiveFindingsView(){
     });
   });
 
-  // Diet recommendations: pivot per visit
+  // Diet recommendations + food sensitivities: pivot per visit
   var dietBEV=[];
-  DIET_RECS.forEach(function(d,di){
+  ALL_DIET_ITEMS.forEach(function(d,di){
     var marks={}, any=false;
     for(var v=1;v<=maxV;v++){ var c=S.marks["v"+v+"_diet_"+di]; if(c){ marks[v]=c; any=true; } }
-    if(any) dietBEV.push({label:d,marks:marks});
+    if(any) dietBEV.push({label:(di>=DIET_RECS.length?"🚫 ":"")+d,marks:marks});
   });
 
   var totalRows=0; Object.keys(secRows).forEach(function(k){ totalRows+=secRows[k].length; });
@@ -4323,10 +4344,12 @@ function _collectVisitSummary(vn){
     var k="v"+vn+"_supp_"+si;
     if(S.marks[k]) data.supps.push({name:name, dose:S.suppDoses[k]||""});
   });
-  // Diet recommendations
+  // Diet recommendations + food sensitivities
   DIET_RECS.forEach(function(d,di){
-    var k="v"+vn+"_diet_"+di;
-    if(S.marks[k]) data.diets.push(d);
+    if(S.marks["v"+vn+"_diet_"+di]) data.diets.push(d);
+  });
+  FOOD_SENSITIVITIES.forEach(function(f,fi){
+    if(S.marks["v"+vn+"_diet_"+(DIET_RECS.length+fi)]) data.diets.push("🚫 "+f);
   });
   return data;
 }
