@@ -125,7 +125,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .phase-tab{padding:8px 18px;border-radius:9px;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;background:white;color:#64748b}
 .phase-tab.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
 .phase-content{display:none}.phase-content.active{display:block}
-.visits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:14px}
+.visits-grid{display:flex;flex-direction:column;gap:14px}
 
 /* VISIT CARD */
 .visit-card{background:white;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9}
@@ -641,6 +641,32 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   </div>
 </div>
 
+<!-- DOSE EDITOR MODAL -->
+<div class="modal-overlay" id="doseModal">
+  <div class="modal-card" style="max-width:460px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="doseTitle">Set dosing</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="doseSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeDoseEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Quick pick</label>
+      <div id="doseQuickPicks" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px"></div>
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Custom</label>
+      <input type="text" id="doseInput" placeholder='e.g. "2 caps BID with meals"' style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin:6px 0 14px" onkeydown="if(event.key==='Enter')saveDoseEditor()">
+      <div style="display:flex;gap:8px;justify-content:space-between">
+        <button class="btn btn-light" style="background:#fee2e2;color:#991b1b" onclick="clearDoseEditor()">Clear dose</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="closeDoseEditor()">Cancel</button>
+          <button class="btn btn-green" onclick="saveDoseEditor()">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- A6: SUGGEST POPOVER -->
 <div class="suggest-pop" id="suggestPop">
   <div class="suggest-pop-title" id="suggestPopTitle">Suggested supplements</div>
@@ -740,6 +766,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div class="fg"><label>Date of Collection</label><input type="date" id="fi_collection" oninput="autoSave()"></div>
       <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
+      <div class="fg"><label>Email</label><input type="email"        id="fi_email"    placeholder="patient@example.com" oninput="autoSave()"></div>
       <div class="fg"><label>Status</label>
         <select id="fi_status" onchange="autoSave()">
           <option value="active">Active</option>
@@ -910,7 +937,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{}};
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{},suppDoses:{}};
 }
 var S = blankState();
 
@@ -1824,6 +1851,18 @@ var MSK_ORGANS=[
   "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus"
 ];
 
+// Wire items that should use the organ list as their selectable tags.
+// Pituitary: TL Glabella + Endo Organ → provider selects which endocrine organ was tested.
+(function _wireOrganTagPopups(){
+  FIELDS.forEach(function(sec){
+    sec.items.forEach(function(it){
+      if(/^Pituitary:/.test(it.lbl)){
+        it.tagPopup={options:MSK_ORGANS.slice(),hasCustom:false};
+      }
+    });
+  });
+})();
+
 // MSK + organs: always red.
 function onMskClick(key){
   if(S.marks[key]){ delete S.marks[key]; }
@@ -1854,17 +1893,80 @@ function filterSupps(){ /* no-op: supplements moved to macro modal */ }
 function renderSuppMarked(vn) {
   var div = document.getElementById("supp_marked_"+vn); if(!div) return;
   var pills = [];
+  if(!S.suppDoses) S.suppDoses={};
   SUPPLEMENTS.forEach(function(supp,si){
     var key = "v"+vn+"_supp_"+si;
     if(S.marks[key]) {
-      pills.push('<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(supp)+'</span>');
+      var dose = S.suppDoses[key] || "";
+      var doseHtml = dose
+        ? '<span style="padding:1px 6px;border-radius:8px;background:#166534;color:white;font-size:10px;font-weight:800;letter-spacing:.04em">'+escHtml(dose)+'</span>'
+        : '<span style="padding:1px 6px;border-radius:8px;background:#f0fdf4;color:#166534;font-size:10px;font-weight:700;border:1px dashed #86efac">+ dose</span>';
+      pills.push('<span class="supp-pill" onclick="openDoseEditor('+vn+','+si+')" style="display:inline-flex;align-items:center;gap:5px;padding:3px 4px 3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px;cursor:pointer" title="Click to set dose">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(supp)+doseHtml+'</span>');
     }
   });
   div.innerHTML = pills.length
     ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">💊 Prescribed this visit</div>'+pills.join('')
     : '';
+  // Also refresh the Challenges found row next to it
+  renderChallengesFound(vn);
 }
+
+// ────────────────────────────────────────────────────────────────
+//  CHALLENGES FOUND — read-only pill list derived from marks + tags
+// ────────────────────────────────────────────────────────────────
+function renderChallengesFound(vn) {
+  var div = document.getElementById("chall_marked_"+vn); if(!div) return;
+  var pills = [];
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      // Did this finding get marked?
+      var markedLabel = null;
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          if(S.marks[mkKey(vn,si,ii,oi)]){
+            markedLabel = item.lbl + " (" + opt + ")";
+          }
+        });
+      } else if(S.marks[mkKey(vn,si,ii)]){
+        markedLabel = item.lbl;
+      }
+      // Collect any offender / tag selections
+      var tagBits=[];
+      var ofKey="v"+vn+"_of_"+si+"_"+ii;
+      var tgKey="v"+vn+"_tag_"+si+"_"+ii;
+      if(S.offenderTags && S.offenderTags[ofKey] && S.offenderTags[ofKey].length) tagBits=tagBits.concat(S.offenderTags[ofKey]);
+      if(S.offenderTags && S.offenderTags[tgKey] && S.offenderTags[tgKey].length) tagBits=tagBits.concat(S.offenderTags[tgKey]);
+      if(!markedLabel && !tagBits.length) return;
+      var label = markedLabel || item.lbl;
+      if(tagBits.length) label += " — " + tagBits.join(", ");
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>'+escHtml(label)+'</span>');
+    });
+  });
+  // MSK marks
+  MSK_SECTIONS.forEach(function(sect,si){
+    sect.muscles.forEach(function(m,mi){
+      var hasR = !!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_R"];
+      var hasL = !!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_L"];
+      if(!hasR && !hasL) return;
+      var side = hasR && hasL ? "R+L" : (hasR ? "R" : "L");
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#f5f3ff;border:1px solid #c4b5fd;font-size:11px;font-weight:600;color:#5b21b6;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;display:inline-block"></span>'+escHtml(m)+" ("+side+")</span>");
+    });
+  });
+  // Organs
+  MSK_ORGANS.forEach(function(org,oi){
+    if(S.marks["v"+vn+"_org_"+oi]){
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fdf2f8;border:1px solid #f9a8d4;font-size:11px;font-weight:600;color:#9d174d;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#be185d;display:inline-block"></span>'+escHtml(org)+'</span>');
+    }
+  });
+  div.innerHTML = pills.length
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">⚠️ Challenges found</div>'+pills.join('')
+    : '';
+}
+function renderAllChallenges(){ for(var v=1;v<=18;v++) renderChallengesFound(v); }
 
 function renderAllSuppMarked() {
   for(var v=1; v<=18; v++) renderSuppMarked(v);
@@ -1982,10 +2084,22 @@ function buildVisitCard(vn){
   // Snippet chips build after append so the container exists
   setTimeout(function(){ buildSnippetChips(vn); renderLabsBadge(vn); },0);
 
-  // Prescribed supplements summary (read-only pills; edit via the Supplements section card → macro modal)
+  // Challenges found (read-only pills derived from marks + offender/tag selections)
+  var challMarked=document.createElement("div"); challMarked.id="chall_marked_"+vn;
+  challMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(challMarked);
+
+  // Prescribed supplements summary (click a pill to edit dose)
   var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn;
   suppMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
   div.appendChild(suppMarked);
+
+  // Per-visit action bar: print summary / email summary
+  var actBar=document.createElement("div");
+  actBar.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end";
+  actBar.innerHTML='<button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 12px" onclick="printVisitSummary('+vn+')">🖨 Print Visit Summary</button>'+
+    '<button class="btn btn-light" style="background:#dbeafe;color:#1e40af;font-size:11px;padding:6px 12px" onclick="emailVisitSummary('+vn+')">✉️ Email to Patient</button>';
+  div.appendChild(actBar);
 
   return div;
 }
@@ -2056,7 +2170,7 @@ function renderSymTable(){
 // ════════════════════════════════════════════════════════════════
 //  PATIENT INFO
 // ════════════════════════════════════════════════════════════════
-var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_status:"status"};
+var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_email:"email",fi_status:"status"};
 
 function loadPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
@@ -2112,7 +2226,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
-  renderAllCompliance(); renderAllLabsBadges();
+  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -2818,10 +2932,27 @@ function copyPriorVisit(vn){
 //  A4: SNIPPET CHIPS
 // ════════════════════════════════════════════════════════════════
 var DEFAULT_SNIPPETS=[
-  "Improved","No change","Resolved","Flare-up","Adherent","Non-adherent",
-  "Emotional component","Diet compliance good","Diet compliance poor",
-  "+1 week follow-up","+2 week follow-up","Homework given","Reviewed labs"
+  "Reviewed labs","+2 week follow-up","+3 week follow-up","+4 week follow-up"
 ];
+// One-time migration: prior build shipped a larger default snippet list.
+// If the stored snippets are the old default AND the user hasn't customized them,
+// reset to the new minimal list.
+(function _migrateSnippets(){
+  var OLD_DEFAULTS=[
+    "Improved","No change","Resolved","Flare-up","Adherent","Non-adherent",
+    "Emotional component","Diet compliance good","Diet compliance poor",
+    "+1 week follow-up","+2 week follow-up","Homework given","Reviewed labs"
+  ];
+  try{
+    var raw=_LS.getItem("mhw_snippets");
+    if(!raw) return;
+    var arr=JSON.parse(raw);
+    if(!Array.isArray(arr)) return;
+    if(arr.length===OLD_DEFAULTS.length && arr.every(function(v,i){return v===OLD_DEFAULTS[i];})){
+      _LS.setItem("mhw_snippets",JSON.stringify(DEFAULT_SNIPPETS.slice()));
+    }
+  }catch(e){}
+})();
 function getSnippets(){
   try{ var s=JSON.parse(_LS.getItem("mhw_snippets")||"null"); return Array.isArray(s)?s:DEFAULT_SNIPPETS.slice(); }
   catch(e){ return DEFAULT_SNIPPETS.slice(); }
@@ -3542,6 +3673,264 @@ function doPrintFindings(){
   document.title=(rawName||"Patient")+" — Findings Over Time";
   window.print();
   document.title=origTitle;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DOSE EDITOR
+// ════════════════════════════════════════════════════════════════
+var DOSE_QUICK=[
+  "QD","BID","TID","QID","QHS","QAM","PRN",
+  "1 cap QD","1 cap BID","1 cap TID","2 caps QD","2 caps BID","2 caps TID",
+  "½ tsp QD","1 tsp QD","1 tsp BID","1 tbsp QD",
+  "With meals","Between meals","Before bed","Empty stomach"
+];
+var _doseCtx=null;
+function openDoseEditor(vn, suppIdx){
+  _doseCtx={vn:vn, suppIdx:suppIdx};
+  var name=SUPPLEMENTS[suppIdx]||"Supplement";
+  document.getElementById("doseTitle").textContent="💊 "+name;
+  document.getElementById("doseSub").textContent="Visit "+vn+" — set dosing instructions";
+  if(!S.suppDoses) S.suppDoses={};
+  var key="v"+vn+"_supp_"+suppIdx;
+  var cur=S.suppDoses[key]||"";
+  document.getElementById("doseInput").value=cur;
+  // Build quick picks
+  var qp=document.getElementById("doseQuickPicks"); qp.innerHTML="";
+  DOSE_QUICK.forEach(function(d){
+    var b=document.createElement("button");
+    b.type="button";
+    b.textContent=d;
+    b.style.cssText="padding:5px 11px;border-radius:14px;border:1.5px solid #e2e8f0;background:white;font-size:12px;font-weight:700;color:#374151;cursor:pointer";
+    b.addEventListener("click",function(){
+      var inp=document.getElementById("doseInput");
+      inp.value=d;
+      inp.focus();
+    });
+    qp.appendChild(b);
+  });
+  document.getElementById("doseModal").classList.add("open");
+  setTimeout(function(){ document.getElementById("doseInput").focus(); },50);
+}
+function closeDoseEditor(){ document.getElementById("doseModal").classList.remove("open"); _doseCtx=null; }
+function saveDoseEditor(){
+  if(!_doseCtx) return;
+  var key="v"+_doseCtx.vn+"_supp_"+_doseCtx.suppIdx;
+  var v=document.getElementById("doseInput").value.trim();
+  if(!S.suppDoses) S.suppDoses={};
+  if(v) S.suppDoses[key]=v; else delete S.suppDoses[key];
+  autoSave();
+  renderSuppMarked(_doseCtx.vn);
+  closeDoseEditor();
+}
+function clearDoseEditor(){
+  if(!_doseCtx) return;
+  var key="v"+_doseCtx.vn+"_supp_"+_doseCtx.suppIdx;
+  if(S.suppDoses) delete S.suppDoses[key];
+  autoSave();
+  renderSuppMarked(_doseCtx.vn);
+  closeDoseEditor();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PER-VISIT SUMMARY (print + email)
+// ════════════════════════════════════════════════════════════════
+function _collectVisitSummary(vn){
+  var pi=S.patientInfo||{};
+  var data={
+    patientName: pi.name||"Patient",
+    dob: pi.dob||"",
+    mrn: pi.mrn||"",
+    provider: pi.provider||"",
+    visitDate: S.visitDates[vn]||"",
+    visitNum: vn,
+    challenges: [],
+    supps: [],
+    notes: (S.visitNotes[vn]||"").trim(),
+    dietGrade: (S.compliance||{})[vn+"_diet"]||"",
+    suppGrade: (S.compliance||{})[vn+"_supp"]||"",
+    labsReviewed: labsWasReviewed(vn)
+  };
+  // Challenges
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      var markedLabel=null;
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          if(S.marks[mkKey(vn,si,ii,oi)]) markedLabel=item.lbl+" ("+opt+")";
+        });
+      } else if(S.marks[mkKey(vn,si,ii)]) {
+        markedLabel=item.lbl;
+      }
+      var tagBits=[];
+      var ofKey="v"+vn+"_of_"+si+"_"+ii;
+      var tgKey="v"+vn+"_tag_"+si+"_"+ii;
+      if(S.offenderTags && S.offenderTags[ofKey] && S.offenderTags[ofKey].length) tagBits=tagBits.concat(S.offenderTags[ofKey]);
+      if(S.offenderTags && S.offenderTags[tgKey] && S.offenderTags[tgKey].length) tagBits=tagBits.concat(S.offenderTags[tgKey]);
+      if(markedLabel || tagBits.length){
+        data.challenges.push({section:sec.sec, label:markedLabel||item.lbl, tags:tagBits});
+      }
+    });
+  });
+  // MSK
+  MSK_SECTIONS.forEach(function(sect,si){
+    sect.muscles.forEach(function(m,mi){
+      var hasR=!!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_R"];
+      var hasL=!!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_L"];
+      if(!hasR && !hasL) return;
+      var side=hasR&&hasL?"R+L":(hasR?"R":"L");
+      data.challenges.push({section:"MSK — "+sect.sec, label:m+" ("+side+")", tags:[]});
+    });
+  });
+  // Organs
+  MSK_ORGANS.forEach(function(o,oi){
+    if(S.marks["v"+vn+"_org_"+oi]) data.challenges.push({section:"Organ Indicators", label:o, tags:[]});
+  });
+  // Supplements + doses
+  if(!S.suppDoses) S.suppDoses={};
+  SUPPLEMENTS.forEach(function(name,si){
+    var k="v"+vn+"_supp_"+si;
+    if(S.marks[k]) data.supps.push({name:name, dose:S.suppDoses[k]||""});
+  });
+  return data;
+}
+
+function _buildVisitSummaryHtml(vn){
+  var d=_collectVisitSummary(vn);
+  var h='<div class="pv-header"><div class="pv-title">🏥 Momentum Health &amp; Wellness — Visit '+d.visitNum+' Summary</div>';
+  var meta=[];
+  if(d.patientName) meta.push('<strong>Patient:</strong> '+escHtml(d.patientName));
+  if(d.dob)         meta.push('<strong>DOB:</strong> '+escHtml(d.dob));
+  if(d.mrn)         meta.push('<strong>MRN:</strong> '+escHtml(d.mrn));
+  if(d.provider)    meta.push('<strong>Provider:</strong> '+escHtml(d.provider));
+  if(d.visitDate)   meta.push('<strong>Visit Date:</strong> '+escHtml(d.visitDate));
+  h+='<div class="pv-meta">'+meta.join(' &nbsp;|&nbsp; ')+'</div></div>';
+
+  // Compliance + labs
+  var comp=[];
+  if(d.dietGrade) comp.push('🥗 Diet compliance: <strong>'+d.dietGrade+'</strong>');
+  if(d.suppGrade) comp.push('💊 Supplement compliance: <strong>'+d.suppGrade+'</strong>');
+  if(d.labsReviewed) comp.push('🧪 <strong>Labs reviewed this visit</strong>');
+  if(comp.length){
+    h+='<div class="pv-section"><div class="pv-section-title">Compliance &amp; Labs</div><p style="font-size:12px;color:#374151;line-height:1.6">'+comp.join(' &nbsp;|&nbsp; ')+'</p></div>';
+  }
+
+  // Challenges
+  h+='<div class="pv-section"><div class="pv-section-title">Challenges Found</div>';
+  if(!d.challenges.length){
+    h+='<p style="font-size:11px;color:#94a3b8;font-style:italic">No findings documented.</p>';
+  } else {
+    var bySec={};
+    d.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
+    Object.keys(bySec).forEach(function(sn){
+      h+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">'+escHtml(sn)+'</div>';
+      h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.5">';
+      bySec[sn].forEach(function(c){
+        h+='<li>'+escHtml(c.label)+(c.tags.length?' <em style="color:#92400e">— '+escHtml(c.tags.join(", "))+'</em>':'')+'</li>';
+      });
+      h+='</ul></div>';
+    });
+  }
+  h+='</div>';
+
+  // Supplements + doses
+  h+='<div class="pv-section"><div class="pv-section-title">Supplements Prescribed</div>';
+  if(!d.supps.length){
+    h+='<p style="font-size:11px;color:#94a3b8;font-style:italic">No supplements prescribed at this visit.</p>';
+  } else {
+    h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.6">';
+    d.supps.forEach(function(s){
+      h+='<li><strong>'+escHtml(s.name)+'</strong>'+(s.dose?' — '+escHtml(s.dose):' <em style="color:#94a3b8">(no dose set)</em>')+'</li>';
+    });
+    h+='</ul>';
+  }
+  h+='</div>';
+
+  // Notes
+  if(d.notes){
+    h+='<div class="pv-section"><div class="pv-section-title">Provider Notes</div>';
+    h+='<p style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap">'+escHtml(d.notes)+'</p></div>';
+  }
+
+  h+='<div class="pv-footer"><span>Momentum Health &amp; Wellness | Applied Kinesiology</span><span>Printed: '+new Date().toLocaleDateString()+'</span></div>';
+  return h;
+}
+
+function printVisitSummary(vn){
+  var content=document.getElementById("pv-content");
+  var hdr=document.getElementById("pv-meta");
+  var origContent=content.innerHTML, origMeta=hdr.innerHTML;
+  content.innerHTML=_buildVisitSummaryHtml(vn);
+  var origTitle=document.title;
+  var pi=S.patientInfo||{};
+  document.title=(pi.name||"Patient")+" — Visit "+vn+" Summary";
+  window.print();
+  document.title=origTitle;
+  // Restore so the main print view isn't left modified
+  content.innerHTML=origContent;
+  hdr.innerHTML=origMeta;
+}
+
+function _plainVisitSummary(vn){
+  var d=_collectVisitSummary(vn);
+  var lines=[];
+  lines.push("MOMENTUM HEALTH & WELLNESS — VISIT "+d.visitNum+" SUMMARY");
+  lines.push("");
+  if(d.patientName) lines.push("Patient: "+d.patientName);
+  if(d.visitDate)   lines.push("Visit date: "+d.visitDate);
+  if(d.provider)    lines.push("Provider: "+d.provider);
+  lines.push("");
+  var cmp=[];
+  if(d.dietGrade) cmp.push("Diet compliance: "+d.dietGrade);
+  if(d.suppGrade) cmp.push("Supplement compliance: "+d.suppGrade);
+  if(d.labsReviewed) cmp.push("Labs reviewed this visit");
+  if(cmp.length){ lines.push("COMPLIANCE & LABS"); cmp.forEach(function(l){lines.push("  • "+l);}); lines.push(""); }
+  if(d.challenges.length){
+    lines.push("CHALLENGES FOUND");
+    var bySec={};
+    d.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
+    Object.keys(bySec).forEach(function(sn){
+      lines.push("  "+sn+":");
+      bySec[sn].forEach(function(c){
+        lines.push("    - "+c.label+(c.tags.length?" — "+c.tags.join(", "):""));
+      });
+    });
+    lines.push("");
+  }
+  if(d.supps.length){
+    lines.push("SUPPLEMENTS PRESCRIBED");
+    d.supps.forEach(function(s){
+      lines.push("  • "+s.name+(s.dose?" — "+s.dose:""));
+    });
+    lines.push("");
+  }
+  if(d.notes){
+    lines.push("PROVIDER NOTES");
+    lines.push(d.notes);
+    lines.push("");
+  }
+  lines.push("— Momentum Health & Wellness");
+  return lines.join("\n");
+}
+
+function emailVisitSummary(vn){
+  var pi=S.patientInfo||{};
+  var to=pi.email||"";
+  if(!to){
+    var ans=prompt("No patient email on file. Enter an address to send this summary to, or Cancel to fill in the patient's Email field first.");
+    if(!ans) return;
+    to=ans.trim();
+  }
+  var d=_collectVisitSummary(vn);
+  var subject="Visit "+vn+" Summary"+(d.visitDate?" — "+d.visitDate:"")+(d.patientName?" — "+d.patientName:"");
+  var body=_plainVisitSummary(vn);
+  var mailto="mailto:"+encodeURIComponent(to)+
+    "?subject="+encodeURIComponent(subject)+
+    "&body="+encodeURIComponent(body);
+  // mailto has URL length limits; warn if huge
+  if(mailto.length>7500){
+    if(!confirm("This summary is very long and may be truncated by your email client. Continue anyway?")) return;
+  }
+  window.location.href=mailto;
 }
 
 // ════════════════════════════════════════════════════════════════
