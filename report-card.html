@@ -86,7 +86,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .backup-red{background:#fee2e2;color:#dc2626}
 
 /* ── COLOR BAR ── */
-#colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:12px 18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#colorBar{background:white;border-radius:10px;padding:8px 14px;margin-bottom:10px;border:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
 .cb-label{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
 .cb-colors{display:flex;gap:8px;flex-wrap:wrap}
 .cb-btn{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:9px;border:3px solid transparent;cursor:pointer;font-size:12px;font-weight:700;transition:all .18s;background:#f8fafc;color:#374151;user-select:none}
@@ -327,6 +327,24 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   .cb-btn{padding:6px 11px;font-size:11px}
   .pt-grid{grid-template-columns:1fr}
 }
+
+/* ══════════════════════════════════════
+   CLICKABLE SECTION CARDS (GUT, MSK, Supplements, etc.)
+══════════════════════════════════════ */
+.sec-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:10px}
+.sec-card{position:relative;padding:12px 14px;border:2px solid #e2e8f0;border-radius:10px;background:white;cursor:pointer;transition:all .15s;text-align:left;font:inherit;color:#374151}
+.sec-card:hover{border-color:#7c3aed;background:#faf5ff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(124,58,237,.12)}
+.sec-card-title{font-size:12px;font-weight:800;color:#1a1a2e;line-height:1.25}
+.sec-card-count{font-size:10px;color:#94a3b8;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
+.sec-card-count .marked-n{color:#ef4444;font-weight:800}
+.sec-card-count .marked-n.green{color:#16a34a}
+.sec-card.has-marks{border-color:#fecaca;background:#fef2f2}
+.sec-card.has-marks:hover{border-color:#ef4444;background:#fef2f2}
+.sec-card.has-marks .sec-card-title{color:#991b1b}
+.sec-card.msk.has-marks{border-color:#c4b5fd;background:#f5f3ff}
+.sec-card.msk.has-marks .sec-card-title{color:#5b21b6}
+.sec-card.supp.has-marks{border-color:#86efac;background:#f0fdf4}
+.sec-card.supp.has-marks .sec-card-title{color:#166534}
 
 /* ══════════════════════════════════════
    A1: DENSE iPAD LAYOUT
@@ -713,21 +731,6 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     </div>
   </div>
 
-  <div id="colorBar">
-    <span class="cb-label">Active Color</span>
-    <div class="cb-colors">
-      <div class="cb-btn active" id="cb_red"    onclick="setColor('red')">   <div class="cb-dot" style="background:#ef4444"></div>Red — No Progress</div>
-      <div class="cb-btn"        id="cb_yellow" onclick="setColor('yellow')"><div class="cb-dot" style="background:#eab308"></div>Yellow — Any Progress</div>
-      <div class="cb-btn"        id="cb_blue"   onclick="setColor('blue')">  <div class="cb-dot" style="background:#3b82f6"></div>Blue — 80% Better</div>
-      <div class="cb-btn"        id="cb_green"  onclick="setColor('green')"> <div class="cb-dot" style="background:#22c55e"></div>Green — 100% Resolution</div>
-    </div>
-    <button class="cb-clr" onclick="clearMode()">✕ Clear Mode</button>
-  </div>
-
-  <div class="hipaa-bar">
-    🔒 <strong>HIPAA Notice:</strong> Data stored locally in your browser only. No external servers. Use on an encrypted, access-controlled device.
-  </div>
-
   <div class="card">
     <div class="card-title">👤 Patient Information</div>
     <div class="field-row">
@@ -748,8 +751,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   </div>
 
   <div class="card">
-    <div class="card-title">📊 Subjective Symptom Tracking</div>
-    <div class="sym-hint">Enter complaint label, select a color above, then click week cells. Gaps auto-fill with the previous color. ✕ = actual visit. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+      <div class="card-title" style="margin-bottom:0">📊 Subjective Symptom Tracking</div>
+      <div id="colorBar">
+        <span class="cb-label">Active Color</span>
+        <div class="cb-colors">
+          <div class="cb-btn active" id="cb_red"    onclick="setColor('red')"><div class="cb-dot" style="background:#ef4444"></div>Red</div>
+          <div class="cb-btn"        id="cb_yellow" onclick="setColor('yellow')"><div class="cb-dot" style="background:#eab308"></div>Yellow</div>
+          <div class="cb-btn"        id="cb_blue"   onclick="setColor('blue')"><div class="cb-dot" style="background:#3b82f6"></div>Blue</div>
+          <div class="cb-btn"        id="cb_green"  onclick="setColor('green')"><div class="cb-dot" style="background:#22c55e"></div>Green</div>
+        </div>
+      </div>
+    </div>
+    <div class="sym-hint">Select a color above, then click week cells. Gaps auto-fill with the previous color. ✕ = actual visit. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
     <div class="sym-scroll">
       <table class="sym-table">
         <thead><tr>
@@ -1479,43 +1493,69 @@ function renderMark(key){
 function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
 
 // ════════════════════════════════════════════════════════════════
-//  SECTION HIGHLIGHTS
+//  SECTION CARD HIGHLIGHTS + COUNTS
 // ════════════════════════════════════════════════════════════════
-function applyHL(el,on){
-  if(!el) return;
-  el.style.background=on?"#fef9c3":"";
-  el.style.color=on?"#713f12":"";
-  el.style.borderColor=on?"#fde68a":"";
-}
 function updateVsecHL(vn,si){
   var el=document.getElementById("vsec_hdr_"+vn+"_"+si); if(!el) return;
-  var on=false, p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_", p3="v"+vn+"_tag_"+si+"_";
-  for(var k in S.marks){ if(k.indexOf(p1)===0){on=true;break;} }
-  if(!on&&S.offenderTags){ for(var k in S.offenderTags){ if((k.indexOf(p2)===0||k.indexOf(p3)===0)&&S.offenderTags[k].length){on=true;break;} } }
-  applyHL(el,on);
+  var p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_", p3="v"+vn+"_tag_"+si+"_";
+  var markedN=0;
+  for(var k in S.marks){ if(k.indexOf(p1)===0) markedN++; }
+  var tagsN=0;
+  if(S.offenderTags){ for(var k in S.offenderTags){ if((k.indexOf(p2)===0||k.indexOf(p3)===0)&&S.offenderTags[k].length) tagsN+=S.offenderTags[k].length; } }
+  var total=(FIELDS[si]?FIELDS[si].items.length:0);
+  var on=(markedN+tagsN)>0;
+  el.classList.toggle("has-marks",on);
+  var cnt=document.getElementById("cnt_vsec_"+vn+"_"+si);
+  if(cnt){
+    if(on) cnt.innerHTML='<span class="marked-n">'+(markedN+tagsN)+' marked</span> · '+total+' item'+(total===1?'':'s');
+    else cnt.textContent=total+' item'+(total===1?'':'s');
+  }
 }
-function updateMskSecHL(vn,si){
-  var el=document.getElementById("msk_sec_hdr_"+vn+"_"+si); if(!el) return;
-  var on=false, p="v"+vn+"_msk_"+si+"_";
-  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
-  applyHL(el,on);
-}
+// Kept for compatibility with existing callers (per-region hl no longer used)
+function updateMskSecHL(vn,si){ updateMskMainHL(vn); }
 function updateMskMainHL(vn){
-  var el=document.getElementById("msk_main_"+vn); if(!el) return;
-  var on=false;
-  for(var k in S.marks){ if(k.indexOf("v"+vn+"_msk_")===0||k.indexOf("v"+vn+"_org_")===0){on=true;break;} }
-  applyHL(el,on);
+  // MSK card
+  var m=document.getElementById("msk_main_"+vn);
+  if(m){
+    var mskN=0;
+    for(var k in S.marks){ if(k.indexOf("v"+vn+"_msk_")===0) mskN++; }
+    var onMsk=mskN>0;
+    m.classList.toggle("has-marks",onMsk);
+    var cnt=document.getElementById("cnt_msk_"+vn);
+    if(cnt){
+      if(onMsk) cnt.innerHTML='<span class="marked-n">'+mskN+' marked</span> · '+MSK_SECTIONS.length+' regions';
+      else cnt.textContent=MSK_SECTIONS.length+" regions";
+    }
+  }
+  // Organ card
+  var o=document.getElementById("org_main_"+vn);
+  if(o){
+    var orgN=0;
+    for(var k in S.marks){ if(k.indexOf("v"+vn+"_org_")===0) orgN++; }
+    var onOrg=orgN>0;
+    o.classList.toggle("has-marks",onOrg);
+    var cnt=document.getElementById("cnt_org_"+vn);
+    if(cnt){
+      if(onOrg) cnt.innerHTML='<span class="marked-n">'+orgN+' marked</span> · '+MSK_ORGANS.length+' organs';
+      else cnt.textContent=MSK_ORGANS.length+" organs";
+    }
+  }
 }
 function updateSuppHL(vn){
   var el=document.getElementById("supp_hdr_"+vn); if(!el) return;
-  var on=false, p="v"+vn+"_supp_";
-  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
-  applyHL(el,on);
+  var n=0;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_supp_")===0) n++; }
+  var on=n>0;
+  el.classList.toggle("has-marks",on);
+  var cnt=document.getElementById("cnt_supp_"+vn);
+  if(cnt){
+    if(on) cnt.innerHTML='<span class="marked-n green">'+n+' prescribed</span> · '+SUPPLEMENTS.length+' items';
+    else cnt.textContent=SUPPLEMENTS.length+" items";
+  }
 }
 function updateAllHL(){
   for(var v=1;v<=18;v++){
     FIELDS.forEach(function(sec,si){ updateVsecHL(v,si); });
-    MSK_SECTIONS.forEach(function(sect,si){ updateMskSecHL(v,si); });
     updateMskMainHL(v); updateSuppHL(v);
   }
 }
@@ -1807,57 +1847,23 @@ function renderAllMskCells(){
 }
 
 // ────────────────────────────────────────────────────────────────
-//  SUPPLEMENTS
+//  SUPPLEMENTS — prescribed summary (read-only on visit card)
 // ────────────────────────────────────────────────────────────────
-function filterSupps(vn, query) {
-  var q = (query||"").trim().toLowerCase();
-  var brandsDiv = document.getElementById("supp_brands_"+vn); if(!brandsDiv) return;
-  SUPP_BRANDS.forEach(function(brand, bi) {
-    var brandId = "supp_brand_"+vn+"_"+bi;
-    var body = document.getElementById(brandId+"_body");
-    var hdr  = document.getElementById(brandId+"_hdr");
-    if(!body||!hdr) return;
-    var brandMatch = q && brand.brand.toLowerCase().indexOf(q)>=0;
-    var visibleCount = 0;
-    body.querySelectorAll(".supp-row").forEach(function(row) {
-      var name = row.dataset.name||"";
-      var si = parseInt(row.dataset.si);
-      var marked = !!(S.marks["v"+vn+"_supp_"+si]);
-      var match = !q || brandMatch || name.indexOf(q)>=0 || marked;
-      row.style.display = match ? "" : "none";
-      if(match) visibleCount++;
-    });
-    // Show/hide brand entirely
-    hdr.style.display = (!q || visibleCount>0) ? "" : "none";
-    // Auto-expand on search
-    if(q && visibleCount>0) {
-      body.classList.add("open");
-      var arr=document.getElementById(brandId+"_arr");
-      if(arr) arr.style.transform="rotate(90deg)";
-    }
-    // Update count badge
-    var cnt=document.getElementById(brandId+"_count");
-    if(cnt) cnt.textContent = q ? visibleCount : brand.items.length;
-  });
-}
+function filterSupps(){ /* no-op: supplements moved to macro modal */ }
 
 function renderSuppMarked(vn) {
   var div = document.getElementById("supp_marked_"+vn); if(!div) return;
   var pills = [];
   SUPPLEMENTS.forEach(function(supp,si){
     var key = "v"+vn+"_supp_"+si;
-    var color = S.marks[key];
-    if(color) {
-      var hex = COLOR_MAP[color]||"#94a3b8";
-      pills.push('<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:'+hex+'22;border:1px solid '+hex+'55;font-size:11px;font-weight:600;color:'+hex+';margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:'+hex+';display:inline-block"></span>'+escHtml(supp)+'</span>');
+    if(S.marks[key]) {
+      pills.push('<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(supp)+'</span>');
     }
   });
   div.innerHTML = pills.length
-    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Prescribed this visit</div>'+pills.join('')+'<div style="border-top:1px solid #f1f5f9;margin:8px 0 4px"></div>'
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">💊 Prescribed this visit</div>'+pills.join('')
     : '';
-  // Also refresh grid visibility
-  filterSupps(vn, (document.querySelector("#supp_body_"+vn+" input")||{}).value||"");
 }
 
 function renderAllSuppMarked() {
@@ -1905,87 +1911,54 @@ function buildVisitCard(vn){
     '<button class="copy-fwd-btn" id="cpf'+vn+'" onclick="copyPriorVisit('+vn+')"'+(vn===1?' disabled title="No prior visit"':' title="Copy marks from Visit '+(vn-1)+'"')+'>⇲ Copy V'+(vn-1)+'</button>'+
     '<button class="macro-open-btn" onclick="openMacroModal('+vn+')">⚡ Macros</button>'+
     '</div></div>';
-  // Dense multi-column grid for objective finding sections (iPad landscape)
-  var secGrid=document.createElement("div"); secGrid.className="dense-vsec-grid";
+  // Clickable section cards — each opens the Macro modal drilled into that section.
+  var secGrid=document.createElement("div"); secGrid.className="sec-card-grid";
   FIELDS.forEach(function(sec,si){
-    var secId="vsec_"+vn+"_"+si;
-    var sd=document.createElement("div"); sd.className="vsec";
-
-    // Collapsible section header
-    var t=document.createElement("div"); t.className="vsec-title vsec-toggle"; t.id="vsec_hdr_"+vn+"_"+si;
-    t.innerHTML=sec.sec+'<span class="vsec-arrow" id="'+secId+'_arr">▶</span>';
-    t.addEventListener("click",(function(id){ return function(){
-      var body=document.getElementById(id+"_body");
-      var arr=document.getElementById(id+"_arr");
-      var open=body.classList.toggle("open");
-      arr.classList.toggle("open",open);
-    }; })(secId));
-    sd.appendChild(t);
-
-    // Collapsible body
-    var body=document.createElement("div"); body.className="vsec-body"; body.id=secId+"_body";
-    sec.items.forEach(function(item,ii){
-      var itemWrap=document.createElement("div"); itemWrap.style.marginBottom="2px";
-      var row=document.createElement("div"); row.className="vfield";
-      var hasPanel=(sec.hasOffenders||item.tagPopup||item.thenNow);
-      var lbl=document.createElement("span"); lbl.className="vfield-label"+(hasPanel?" vfield-tappable":""); lbl.textContent=item.lbl+(hasPanel?" +":"");
-      if(hasPanel){
-        var panelKey=(sec.hasOffenders?"v"+vn+"_of_"+si+"_"+ii:"v"+vn+"_tag_"+si+"_"+ii);
-        var panelSafe=panelKey.replace(/[^a-z0-9]/gi,"_");
-        lbl.addEventListener("click",(function(sk){ return function(e){ e.stopPropagation(); toggleTagPanel(sk); }; })(panelSafe));
-      }
-      row.appendChild(lbl);
-      var od=document.createElement("div"); od.className="vfield-opts";
-      if(item.opts){
-        item.opts.forEach(function(opt,oi){
-          var key=mkKey(vn,si,ii,oi);
-          var w=document.createElement("div"); w.className="mwrap";
-          var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
-          c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
-          var ol=document.createElement("span"); ol.className="opt-lbl"; ol.textContent=opt;
-          w.appendChild(c); w.appendChild(ol); od.appendChild(w);
-        });
-      } else {
-        var key=mkKey(vn,si,ii);
-        var w=document.createElement("div"); w.className="mwrap";
-        var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
-        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
-        w.appendChild(c); od.appendChild(w);
-      }
-      // A6: Suggest trigger (hidden unless current macro library has supplements for this finding)
-      (function(secName,itemLbl){
-        var sug=findingSupplementSuggestions(secName,itemLbl);
-        if(!sug.length) return;
-        var s=document.createElement("span");
-        s.className="suggest-trigger";
-        s.textContent="↳";
-        s.title="Suggested supplements ("+sug.length+")";
-        s.style.cssText="margin-left:6px;cursor:pointer;color:#7c3aed;font-size:12px;font-weight:900;padding:0 4px;border-radius:4px;flex-shrink:0";
-        s.addEventListener("click",function(e){
-          e.stopPropagation();
-          openSuggestPop(s,vn,secName,itemLbl);
-        });
-        od.appendChild(s);
-      })(sec.sec,item.lbl);
-      row.appendChild(od); itemWrap.appendChild(row);
-      // Inline tag pill panels (iPad-friendly, no popup)
-      if(sec.hasOffenders){
-        var ofKey="v"+vn+"_of_"+si+"_"+ii;
-        buildTagPanel(itemWrap, ofKey, OFFENDER_OPTIONS, false, false);
-      }
-      if(item.tagPopup){
-        var tpKey="v"+vn+"_tag_"+si+"_"+ii;
-        buildTagPanel(itemWrap, tpKey, item.tagPopup.options, item.tagPopup.hasCustom, false);
-      }
-      if(item.thenNow){
-        var tnKey="v"+vn+"_tag_"+si+"_"+ii;
-        buildTagPanel(itemWrap, tnKey, [], false, true);
-      }
-      body.appendChild(itemWrap);
-    });
-    sd.appendChild(body);
-    secGrid.appendChild(sd);
+    var card=document.createElement("button");
+    card.type="button";
+    card.className="sec-card";
+    card.id="vsec_hdr_"+vn+"_"+si;  // keep id for updateVsecHL compatibility
+    card.innerHTML='<div class="sec-card-title">'+escHtml(sec.sec)+'</div>'+
+      '<div class="sec-card-count" id="cnt_vsec_'+vn+'_'+si+'">'+sec.items.length+' item'+(sec.items.length===1?'':'s')+'</div>';
+    card.addEventListener("click",(function(vvn,ssi){ return function(){
+      openMacroModal(vvn);
+      _qpPath=[{type:"section",label:FIELDS[ssi].sec,si:ssi,children:true}];
+      switchMacroTab("qp");
+    }; })(vn,si));
+    secGrid.appendChild(card);
   });
+  // MSK + Organs + Supplements cards (same grid)
+  (function(){
+    var mskCard=document.createElement("button"); mskCard.type="button"; mskCard.className="sec-card msk"; mskCard.id="msk_main_"+vn;
+    mskCard.innerHTML='<div class="sec-card-title">💪 MSK — Muscle Testing</div>'+
+      '<div class="sec-card-count" id="cnt_msk_'+vn+'">'+MSK_SECTIONS.length+' regions</div>';
+    mskCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"mskroot",label:"💪 MSK — Muscle Testing",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(mskCard);
+
+    var orgCard=document.createElement("button"); orgCard.type="button"; orgCard.className="sec-card msk"; orgCard.id="org_main_"+vn;
+    orgCard.innerHTML='<div class="sec-card-title">🫀 Organ Indicators</div>'+
+      '<div class="sec-card-count" id="cnt_org_'+vn+'">'+MSK_ORGANS.length+' organs</div>';
+    orgCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"organroot",label:"🫀 Organ Indicators",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(orgCard);
+
+    var suppCard=document.createElement("button"); suppCard.type="button"; suppCard.className="sec-card supp"; suppCard.id="supp_hdr_"+vn;
+    suppCard.innerHTML='<div class="sec-card-title">💊 Supplements</div>'+
+      '<div class="sec-card-count" id="cnt_supp_'+vn+'">'+SUPPLEMENTS.length+' items</div>';
+    suppCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"supproot",label:"💊 Supplements",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(suppCard);
+  })();
   div.appendChild(secGrid);
 
   var no=document.createElement("div"); no.className="visit-notes";
@@ -2009,148 +1982,10 @@ function buildVisitCard(vn){
   // Snippet chips build after append so the container exists
   setTimeout(function(){ buildSnippetChips(vn); renderLabsBadge(vn); },0);
 
-  // MSK section
-  var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle"; mskToggle.id="msk_main_"+vn;
-  mskToggle.innerHTML='<span class="msk-toggle-label">💪 MSK — Muscle Testing</span><span class="msk-toggle-arrow" id="msk_arrow_'+vn+'">▶</span>';
-  mskToggle.addEventListener("click",(function(v){ return function(){ toggleMsk(v); }; })(vn));
-  div.appendChild(mskToggle);
-
-  var mskBody=document.createElement("div"); mskBody.className="msk-body"; mskBody.id="msk_body_"+vn;
-
-  // Build muscle sections — each collapsible
-  MSK_SECTIONS.forEach(function(sect,si){
-    var secId="msk_sec_"+vn+"_"+si;
-    var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.id="msk_sec_hdr_"+vn+"_"+si;
-    sh.innerHTML='<span>'+sect.sec+'</span>'+
-      '<span class="msk-sec-tile" title="Full-screen picker" data-si="'+si+'" data-vn="'+vn+'" style="font-size:11px;color:#7c3aed;font-weight:900;padding:2px 6px;border:1px solid #ddd6fe;border-radius:5px;background:white;margin-right:4px">⊞</span>'+
-      '<span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
-    sh.addEventListener("click",(function(id,ssi,vvn){ return function(e){
-      if(e.target.classList && e.target.classList.contains("msk-sec-tile")){
-        e.stopPropagation();
-        openMskRegionPicker(vvn, ssi);
-        return;
-      }
-      var body=document.getElementById(id+"_body");
-      var arr=document.getElementById(id+"_arr");
-      var open=body.classList.toggle("open");
-      arr.classList.toggle("open",open);
-    }; })(secId,si,vn));
-    mskBody.appendChild(sh);
-
-    var secBody=document.createElement("div"); secBody.className="msk-sec-body"; secBody.id=secId+"_body";
-    var grid=document.createElement("div"); grid.className="msk-grid";
-    sect.muscles.forEach(function(muscle,mi){
-      var rKey="v"+vn+"_msk_"+si+"_"+mi+"_R", lKey="v"+vn+"_msk_"+si+"_"+mi+"_L";
-      var row=document.createElement("div"); row.className="msk-row";
-      var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=muscle; lbl.textContent=muscle;
-      var cells=document.createElement("div"); cells.className="msk-cells";
-      ["R","L"].forEach(function(side){
-        var key=side==="R"?rKey:lKey;
-        var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
-        var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
-        var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
-        wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
-      });
-      row.appendChild(lbl); row.appendChild(cells); grid.appendChild(row);
-    });
-    secBody.appendChild(grid);
-    mskBody.appendChild(secBody);
-  });
-
-  // Organs section — also collapsible
-  var orgSecId="msk_org_"+vn;
-  var oh=document.createElement("div"); oh.className="msk-sec-hdr msk-org-hdr";
-  oh.innerHTML='<span>🫀 Organ Indicators</span><span class="msk-sec-arrow" id="'+orgSecId+'_arr">▶</span>';
-  oh.addEventListener("click",(function(id){ return function(){
-    var body=document.getElementById(id+"_body");
-    var arr=document.getElementById(id+"_arr");
-    var open=body.classList.toggle("open");
-    arr.classList.toggle("open",open);
-  }; })(orgSecId));
-  mskBody.appendChild(oh);
-
-  var orgSecBody=document.createElement("div"); orgSecBody.className="msk-sec-body"; orgSecBody.id=orgSecId+"_body";
-  var orgGrid=document.createElement("div"); orgGrid.className="msk-grid";
-  MSK_ORGANS.forEach(function(organ,oi){
-    var key="v"+vn+"_org_"+oi;
-    var row=document.createElement("div"); row.className="msk-row";
-    var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=organ; lbl.textContent=organ;
-    var cells=document.createElement("div"); cells.className="msk-cells";
-    var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
-    var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-    c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
-    var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent="RL";
-    wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
-    row.appendChild(lbl); row.appendChild(cells); orgGrid.appendChild(row);
-  });
-  orgSecBody.appendChild(orgGrid);
-  mskBody.appendChild(orgSecBody);
-  div.appendChild(mskBody);
-
-  // ── Supplements section ──────────────────────────────────────
-  var suppToggle=document.createElement("div"); suppToggle.className="supp-toggle"; suppToggle.id="supp_hdr_"+vn;
-  suppToggle.innerHTML='<span class="supp-toggle-label">💊 Supplements</span><span class="supp-toggle-arrow" id="supp_arrow_'+vn+'">▶</span>';
-  suppToggle.addEventListener("click",(function(v){ return function(){
-    var body=document.getElementById("supp_body_"+v);
-    var arr=document.getElementById("supp_arrow_"+v);
-    var open=body.classList.toggle("open");
-    arr.classList.toggle("open",open);
-  }; })(vn));
-  div.appendChild(suppToggle);
-
-  var suppBody=document.createElement("div"); suppBody.className="supp-body"; suppBody.id="supp_body_"+vn;
-
-  // Prescribed summary
-  var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn; suppBody.appendChild(suppMarked);
-
-  // Search bar
-  var suppSearch=document.createElement("input"); suppSearch.type="text";
-  suppSearch.placeholder="\uD83D\uDD0D Search all "+SUPPLEMENTS.length+" supplements...";
-  suppSearch.style.cssText="width:100%;padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:20px;font-size:12px;outline:none;margin-bottom:8px;box-sizing:border-box;color:#374151";
-  suppSearch.addEventListener("input",(function(v2){ return function(){ filterSupps(v2, suppSearch.value); }; })(vn));
-  suppBody.appendChild(suppSearch);
-
-  // Brand groups
-  var suppBrandsDiv=document.createElement("div"); suppBrandsDiv.id="supp_brands_"+vn;
-  SUPP_BRANDS.forEach(function(brand,bi){
-    var brandId="supp_brand_"+vn+"_"+bi;
-    // Brand header
-    var hdr=document.createElement("div"); hdr.className="supp-brand-hdr"; hdr.id=brandId+"_hdr";
-    hdr.dataset.brand=brand.brand.toLowerCase();
-    hdr.innerHTML='<span class="supp-brand-name">'+escHtml(brand.brand)+'</span>'+
-      '<span class="supp-brand-count" id="'+brandId+'_count">'+brand.items.length+'</span>'+
-      '<span class="supp-brand-tile" title="Full-screen picker" data-bi="'+bi+'" data-vn="'+vn+'" style="font-size:11px;color:#7c3aed;font-weight:900;padding:2px 6px;border:1px solid #ddd6fe;border-radius:5px;background:white;margin-right:4px">⊞</span>'+
-      '<span class="supp-brand-arrow" id="'+brandId+'_arr">\u25B6</span>';
-    hdr.addEventListener("click",(function(bid,bbi,vvn){ return function(e){
-      // Tile button → picker modal
-      if(e.target.classList && e.target.classList.contains("supp-brand-tile")){
-        e.stopPropagation();
-        openSuppBrandPicker(vvn, bbi);
-        return;
-      }
-      e.stopPropagation();
-      var body=document.getElementById(bid+"_body");
-      var arr=document.getElementById(bid+"_arr");
-      var open=body.classList.toggle("open");
-      arr.style.transform=open?"rotate(90deg)":"";
-    }; })(brandId,bi,vn));
-    suppBrandsDiv.appendChild(hdr);
-    // Brand body
-    var body=document.createElement("div"); body.className="supp-brand-body"; body.id=brandId+"_body";
-    brand.items.forEach(function(item){
-      var si=item.idx;
-      var key="v"+vn+"_supp_"+si;
-      var row=document.createElement("div"); row.className="supp-row"; row.dataset.name=item.name.toLowerCase(); row.dataset.si=si;
-      var lbl=document.createElement("span"); lbl.className="supp-label"; lbl.textContent=item.name;
-      var c=document.createElement("div"); c.className="supp-cell"; c.id="sc2_"+key;
-      c.addEventListener("click",(function(k,v2){ return function(e){ e.stopPropagation(); onSuppClick(k); renderSuppMarked(v2); updateSuppHL(v2); }; })(key,vn));
-      row.appendChild(lbl); row.appendChild(c); body.appendChild(row);
-    });
-    suppBrandsDiv.appendChild(body);
-  });
-  suppBody.appendChild(suppBrandsDiv);
-  div.appendChild(suppBody);
+  // Prescribed supplements summary (read-only pills; edit via the Supplements section card → macro modal)
+  var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn;
+  suppMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(suppMarked);
 
   return div;
 }
@@ -3227,6 +3062,12 @@ function _qpChildren(path){
         out.push({type:"leaf_tag",label:opt,si:last.si,ii:last.ii,tag:opt,sub:"tag"});
       });
     }
+    // Then / Now: the provider picks exactly 2 organs as the "then → now" pair
+    if(item.thenNow){
+      MSK_ORGANS.forEach(function(organ){
+        out.push({type:"leaf_thennow",label:organ,si:last.si,ii:last.ii,tag:organ,sub:"then/now (pick 2)"});
+      });
+    }
     return out;
   }
   // MSK ROOT → regions
@@ -3292,6 +3133,11 @@ function _qpIsMarked(it){
     var sel=(S.offenderTags&&S.offenderTags[key])||[];
     return sel.indexOf(it.tag)>=0;
   }
+  if(it.type==="leaf_thennow"){
+    var key="v"+vn+"_tag_"+it.si+"_"+it.ii;
+    var sel=(S.offenderTags&&S.offenderTags[key])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
   return false;
 }
 
@@ -3334,6 +3180,19 @@ function qpSelect(idx){
     var sel=(S.offenderTags[key]||[]).slice();
     var i=sel.indexOf(it.tag);
     if(i>=0) sel.splice(i,1); else sel.push(it.tag);
+    S.offenderTags[key]=sel;
+    renderOffenderTags(key); updateVsecHL(vn,it.si);
+  } else if(it.type==="leaf_thennow"){
+    // Then/Now: up to 2 organs
+    var key="v"+vn+"_tag_"+it.si+"_"+it.ii;
+    if(!S.offenderTags) S.offenderTags={};
+    var sel=(S.offenderTags[key]||[]).slice();
+    var i=sel.indexOf(it.tag);
+    if(i>=0){ sel.splice(i,1); }
+    else {
+      if(sel.length>=2){ showToast("Then / Now is limited to 2 organs — deselect one first"); autoSave(); renderQuickPick(); return; }
+      sel.push(it.tag);
+    }
     S.offenderTags[key]=sel;
     renderOffenderTags(key); updateVsecHL(vn,it.si);
   }
