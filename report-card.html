@@ -295,9 +295,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
 /* PRINT */
 #printView{display:none}
-@page{size:landscape;margin:12mm}
+@page{size:landscape;margin:18mm 16mm}
 @media print{
-  @page{size:landscape;margin:12mm}
+  @page{size:landscape;margin:18mm 16mm}
   body{background:white!important}
   #pwOverlay,#dash,#app,#toast{display:none!important}
   #printView{display:block!important}
@@ -453,6 +453,38 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .compl-pill.active[data-grade="F"]{background:#ef4444;border-color:#dc2626}
 
 /* ══════════════════════════════════════
+   PICKER MODAL (brand / region full-screen tile picker)
+══════════════════════════════════════ */
+.pk-search{width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;margin-bottom:10px;box-sizing:border-box}
+.pk-search:focus{border-color:#7c3aed}
+.pk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.pk-tile{position:relative;padding:12px 14px;padding-right:32px;border:2px solid #e2e8f0;border-radius:10px;background:white;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:all .15s;text-align:left;user-select:none}
+.pk-tile:hover{border-color:#7c3aed;background:#faf5ff;color:#5b21b6;transform:translateY(-1px)}
+.pk-tile.marked{border-color:#22c55e;background:#f0fdf4;color:#166534}
+.pk-tile.marked::after{content:"✓";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#22c55e;font-weight:900;font-size:16px}
+.pk-tile.red.marked{border-color:#ef4444;background:#fef2f2;color:#991b1b}
+.pk-tile.red.marked::after{color:#ef4444}
+.pk-tile[data-side]{padding-right:42px}
+.pk-tile .pk-side{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:#94a3b8;font-weight:800}
+
+/* ══════════════════════════════════════
+   SETTINGS MODAL
+══════════════════════════════════════ */
+.settings-btn{background:rgba(255,255,255,.15);color:white;border:none;cursor:pointer;padding:8px 12px;border-radius:8px;font-size:16px;transition:all .2s}
+.settings-btn:hover{background:rgba(255,255,255,.25);transform:rotate(30deg)}
+.settings-section{margin-bottom:18px}
+.settings-section h4{font-size:12px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
+.settings-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.settings-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:14px;background:#f1f5f9;border:1px solid #e2e8f0;font-size:12px;color:#374151}
+.settings-chip .del{color:#ef4444;font-weight:900;cursor:pointer;font-size:13px;padding:0 2px}
+.settings-chip .del:hover{color:#dc2626}
+.settings-input-row{display:flex;gap:6px}
+.settings-input-row input{flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none}
+.settings-input-row input:focus{border-color:#7c3aed}
+.settings-input-row button{padding:8px 16px;border:none;border-radius:8px;background:#7c3aed;color:white;font-size:13px;font-weight:700;cursor:pointer}
+.settings-input-row button:hover{background:#6d28d9}
+
+/* ══════════════════════════════════════
    REVIEWED LABS BADGE
 ══════════════════════════════════════ */
 .labs-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;margin-left:6px}
@@ -530,6 +562,62 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="closeMacroBuilder()">Cancel</button>
         <button class="btn btn-blue" onclick="saveMacroFromVisit()">💾 Save macro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BRAND / REGION PICKER MODAL -->
+<div class="modal-overlay" id="pickerModal">
+  <div class="modal-card" style="max-width:900px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="pickerTitle">Picker</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="pickerSub">Tap to toggle</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="qp-visit-badge" id="pickerVn">V—</span>
+        <button class="modal-close" onclick="closePicker()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <input type="text" class="pk-search" id="pkSearch" placeholder="🔍 Search..." oninput="renderPicker()">
+      <div class="pk-grid" id="pkGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-hdr">
+      <div class="modal-title">⚙️ Settings</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <h4>Visit-note snippet chips</h4>
+        <div class="settings-list" id="settingsSnippets"></div>
+        <div class="settings-input-row">
+          <input type="text" id="settingsNewSnippet" placeholder="New snippet..." onkeydown="if(event.key==='Enter')addSettingsSnippet()">
+          <button onclick="addSettingsSnippet()">+ Add</button>
+        </div>
+        <button style="margin-top:8px;padding:6px 12px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;font-size:11px;font-weight:700;color:#64748b;cursor:pointer" onclick="resetSnippets()">Reset to defaults</button>
+      </div>
+      <div class="settings-section">
+        <h4>Idle auto-lock</h4>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151">
+          Lock after
+          <input type="number" id="settingsIdleMin" min="1" max="120" style="width:70px;padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;outline:none" onchange="setIdleMinutes(this.value)">
+          minutes idle
+        </div>
+      </div>
+      <div class="settings-section">
+        <h4>Change access password</h4>
+        <div class="settings-input-row">
+          <input type="password" id="settingsNewPw" placeholder="New password...">
+          <button onclick="changeAccessPw()">Save</button>
+        </div>
       </div>
     </div>
   </div>
@@ -620,6 +708,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <button class="btn btn-light" onclick="doPrintFindings()">🖨 Print Findings Over Time</button>
       <button class="btn btn-light" style="background:rgba(168,85,247,.22);color:white" onclick="openMacroModal()">⚡ Macros</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
+      <button class="settings-btn" title="Settings" onclick="openSettings()">⚙️</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
@@ -1367,10 +1456,10 @@ function switchPhase(n){
 // ════════════════════════════════════════════════════════════════
 function mkKey(v,si,ii,oi){ return "v"+v+"_"+si+"_"+ii+(oi!==undefined?"_"+oi:""); }
 
+// Objective findings: always red. Subjective symptom grid still uses activeColor.
 function onCellClick(key){
-  if(activeColor===null){ delete S.marks[key]; }
-  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
-  else{ S.marks[key]=activeColor; }
+  if(S.marks[key]){ delete S.marks[key]; }
+  else{ S.marks[key]="red"; }
   renderMark(key);
   // parse vn and si from key "v{vn}_{si}_{ii}..."
   var m=key.match(/^v(\d+)_(\d+)_/); if(m) updateVsecHL(parseInt(m[1]),parseInt(m[2]));
@@ -1695,10 +1784,10 @@ var MSK_ORGANS=[
   "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus"
 ];
 
+// MSK + organs: always red.
 function onMskClick(key){
-  if(activeColor===null){ delete S.marks[key]; }
-  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
-  else { S.marks[key]=activeColor; }
+  if(S.marks[key]){ delete S.marks[key]; }
+  else { S.marks[key]="red"; }
   renderMskCell(key);
   var m=key.match(/^v(\d+)_msk_(\d+)_/); if(m){ updateMskSecHL(parseInt(m[1]),parseInt(m[2])); updateMskMainHL(parseInt(m[1])); }
   var m2=key.match(/^v(\d+)_org_/); if(m2) updateMskMainHL(parseInt(m2[1]));
@@ -1775,10 +1864,10 @@ function renderAllSuppMarked() {
   for(var v=1; v<=18; v++) renderSuppMarked(v);
 }
 
+// Supplements: always green (prescribed = good thing).
 function onSuppClick(key){
-  if(activeColor===null){ delete S.marks[key]; }
-  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
-  else { S.marks[key]=activeColor; }
+  if(S.marks[key]){ delete S.marks[key]; }
+  else { S.marks[key]="green"; }
   renderSuppCell(key);
   var m=key.match(/^v(\d+)_supp_/); if(m) updateSuppHL(parseInt(m[1]));
   autoSave();
@@ -1932,13 +2021,20 @@ function buildVisitCard(vn){
   MSK_SECTIONS.forEach(function(sect,si){
     var secId="msk_sec_"+vn+"_"+si;
     var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.id="msk_sec_hdr_"+vn+"_"+si;
-    sh.innerHTML='<span>'+sect.sec+'</span><span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
-    sh.addEventListener("click",(function(id){ return function(){
+    sh.innerHTML='<span>'+sect.sec+'</span>'+
+      '<span class="msk-sec-tile" title="Full-screen picker" data-si="'+si+'" data-vn="'+vn+'" style="font-size:11px;color:#7c3aed;font-weight:900;padding:2px 6px;border:1px solid #ddd6fe;border-radius:5px;background:white;margin-right:4px">⊞</span>'+
+      '<span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
+    sh.addEventListener("click",(function(id,ssi,vvn){ return function(e){
+      if(e.target.classList && e.target.classList.contains("msk-sec-tile")){
+        e.stopPropagation();
+        openMskRegionPicker(vvn, ssi);
+        return;
+      }
       var body=document.getElementById(id+"_body");
       var arr=document.getElementById(id+"_arr");
       var open=body.classList.toggle("open");
       arr.classList.toggle("open",open);
-    }; })(secId));
+    }; })(secId,si,vn));
     mskBody.appendChild(sh);
 
     var secBody=document.createElement("div"); secBody.className="msk-sec-body"; secBody.id=secId+"_body";
@@ -2024,14 +2120,21 @@ function buildVisitCard(vn){
     hdr.dataset.brand=brand.brand.toLowerCase();
     hdr.innerHTML='<span class="supp-brand-name">'+escHtml(brand.brand)+'</span>'+
       '<span class="supp-brand-count" id="'+brandId+'_count">'+brand.items.length+'</span>'+
+      '<span class="supp-brand-tile" title="Full-screen picker" data-bi="'+bi+'" data-vn="'+vn+'" style="font-size:11px;color:#7c3aed;font-weight:900;padding:2px 6px;border:1px solid #ddd6fe;border-radius:5px;background:white;margin-right:4px">⊞</span>'+
       '<span class="supp-brand-arrow" id="'+brandId+'_arr">\u25B6</span>';
-    hdr.addEventListener("click",(function(bid){ return function(e){
+    hdr.addEventListener("click",(function(bid,bbi,vvn){ return function(e){
+      // Tile button → picker modal
+      if(e.target.classList && e.target.classList.contains("supp-brand-tile")){
+        e.stopPropagation();
+        openSuppBrandPicker(vvn, bbi);
+        return;
+      }
       e.stopPropagation();
       var body=document.getElementById(bid+"_body");
       var arr=document.getElementById(bid+"_arr");
       var open=body.classList.toggle("open");
       arr.style.transform=open?"rotate(90deg)":"";
-    }; })(brandId));
+    }; })(brandId,bi,vn));
     suppBrandsDiv.appendChild(hdr);
     // Brand body
     var body=document.createElement("div"); body.className="supp-brand-body"; body.id=brandId+"_body";
@@ -2633,6 +2736,145 @@ function setToday(inputId){
 }
 
 // ════════════════════════════════════════════════════════════════
+//  BRAND / REGION PICKER MODAL
+// ════════════════════════════════════════════════════════════════
+var _pickerCtx=null;  // {kind:'supp'|'msk', vn, bi/si}
+function openSuppBrandPicker(vn, bi){
+  _pickerCtx={kind:"supp", vn:vn, bi:bi};
+  var brand=SUPP_BRANDS[bi];
+  document.getElementById("pickerTitle").textContent="💊 "+brand.brand;
+  document.getElementById("pickerSub").textContent="Tap to toggle — green = prescribed this visit";
+  document.getElementById("pickerVn").textContent="V"+vn;
+  document.getElementById("pkSearch").value="";
+  document.getElementById("pkSearch").placeholder="🔍 Search "+brand.items.length+" "+brand.brand+" items...";
+  document.getElementById("pickerModal").classList.add("open");
+  renderPicker();
+}
+function openMskRegionPicker(vn, si){
+  _pickerCtx={kind:"msk", vn:vn, si:si};
+  var sect=MSK_SECTIONS[si];
+  document.getElementById("pickerTitle").textContent="💪 "+sect.sec;
+  document.getElementById("pickerSub").textContent="Tap R / L / Both to mark — red = weakness";
+  document.getElementById("pickerVn").textContent="V"+vn;
+  document.getElementById("pkSearch").value="";
+  document.getElementById("pkSearch").placeholder="🔍 Search "+sect.muscles.length+" muscles...";
+  document.getElementById("pickerModal").classList.add("open");
+  renderPicker();
+}
+function closePicker(){ document.getElementById("pickerModal").classList.remove("open"); _pickerCtx=null; }
+
+function renderPicker(){
+  if(!_pickerCtx) return;
+  var grid=document.getElementById("pkGrid");
+  var q=(document.getElementById("pkSearch").value||"").trim().toLowerCase();
+  var html="";
+  if(_pickerCtx.kind==="supp"){
+    var brand=SUPP_BRANDS[_pickerCtx.bi];
+    brand.items.forEach(function(it){
+      if(q && it.name.toLowerCase().indexOf(q)<0) return;
+      var key="v"+_pickerCtx.vn+"_supp_"+it.idx;
+      var marked=!!S.marks[key];
+      html+='<button class="pk-tile'+(marked?" marked":"")+'" onclick="pkToggleSupp('+it.idx+')">'+escHtml(it.name)+'</button>';
+    });
+  } else if(_pickerCtx.kind==="msk"){
+    var sect=MSK_SECTIONS[_pickerCtx.si];
+    sect.muscles.forEach(function(m,mi){
+      if(q && m.toLowerCase().indexOf(q)<0) return;
+      var kR="v"+_pickerCtx.vn+"_msk_"+_pickerCtx.si+"_"+mi+"_R";
+      var kL="v"+_pickerCtx.vn+"_msk_"+_pickerCtx.si+"_"+mi+"_L";
+      var mR=!!S.marks[kR], mL=!!S.marks[kL];
+      html+='<div style="display:flex;gap:4px">';
+      html+='<button class="pk-tile red'+(mR?" marked":"")+'" style="flex:1" onclick="pkToggleMsk('+_pickerCtx.si+','+mi+',\'R\')"><span style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:.08em">R</span><br>'+escHtml(m)+'</button>';
+      html+='<button class="pk-tile red'+(mL?" marked":"")+'" style="flex:1" onclick="pkToggleMsk('+_pickerCtx.si+','+mi+',\'L\')"><span style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:.08em">L</span><br>'+escHtml(m)+'</button>';
+      html+='<button class="pk-tile red'+(mR&&mL?" marked":"")+'" style="flex:0 0 68px" onclick="pkToggleMskBoth('+_pickerCtx.si+','+mi+')"><span style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:.08em">R+L</span><br>Both</button>';
+      html+='</div>';
+    });
+    // MSK uses a 1-column stacked layout (each muscle is its own row of 3 tiles)
+    grid.style.gridTemplateColumns="1fr";
+    grid.innerHTML=html||'<div style="padding:14px;color:#94a3b8;font-size:12px;text-align:center">No muscles match.</div>';
+    return;
+  }
+  grid.style.gridTemplateColumns="";
+  grid.innerHTML=html||'<div style="padding:14px;color:#94a3b8;font-size:12px;text-align:center">No items match.</div>';
+}
+
+function pkToggleSupp(idx){
+  var vn=_pickerCtx.vn;
+  var k="v"+vn+"_supp_"+idx;
+  if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+  renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn); autoSave();
+  renderPicker();
+}
+function pkToggleMsk(si,mi,side){
+  var vn=_pickerCtx.vn;
+  var k="v"+vn+"_msk_"+si+"_"+mi+"_"+side;
+  if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+  renderMskCell(k); updateMskSecHL(vn,si); updateMskMainHL(vn); autoSave();
+  renderPicker();
+}
+function pkToggleMskBoth(si,mi){
+  var vn=_pickerCtx.vn;
+  ["R","L"].forEach(function(side){
+    var k="v"+vn+"_msk_"+si+"_"+mi+"_"+side;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+    renderMskCell(k);
+  });
+  updateMskSecHL(vn,si); updateMskMainHL(vn); autoSave();
+  renderPicker();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SETTINGS MODAL
+// ════════════════════════════════════════════════════════════════
+function openSettings(){
+  renderSettingsSnippets();
+  document.getElementById("settingsIdleMin").value=IDLE_MINUTES;
+  document.getElementById("settingsNewPw").value="";
+  document.getElementById("settingsModal").classList.add("open");
+}
+function closeSettings(){ document.getElementById("settingsModal").classList.remove("open"); }
+function renderSettingsSnippets(){
+  var list=document.getElementById("settingsSnippets");
+  var arr=getSnippets();
+  list.innerHTML=arr.map(function(s,i){
+    return '<span class="settings-chip">'+escHtml(s)+'<span class="del" onclick="removeSettingsSnippet('+i+')">✕</span></span>';
+  }).join("");
+}
+function addSettingsSnippet(){
+  var inp=document.getElementById("settingsNewSnippet");
+  var v=inp.value.trim(); if(!v) return;
+  var arr=getSnippets();
+  if(arr.indexOf(v)<0){ arr.push(v); saveSnippets(arr); }
+  inp.value="";
+  renderSettingsSnippets();
+  for(var v2=1;v2<=18;v2++) buildSnippetChips(v2);
+}
+function removeSettingsSnippet(idx){
+  var arr=getSnippets(); arr.splice(idx,1); saveSnippets(arr);
+  renderSettingsSnippets();
+  for(var v=1;v<=18;v++) buildSnippetChips(v);
+}
+function resetSnippets(){
+  if(!confirm("Reset snippets to defaults?")) return;
+  saveSnippets(DEFAULT_SNIPPETS.slice());
+  renderSettingsSnippets();
+  for(var v=1;v<=18;v++) buildSnippetChips(v);
+}
+function setIdleMinutes(v){
+  var n=parseInt(v,10); if(!n||n<1) return;
+  IDLE_MINUTES=n;
+  _LS.setItem("mhw_idle_min",String(n));
+  resetIdleTimer();
+}
+function changeAccessPw(){
+  var v=document.getElementById("settingsNewPw").value;
+  if(!v||v.length<4){ alert("Password must be at least 4 characters."); return; }
+  _LS.setItem("mhw_pw",v);
+  document.getElementById("settingsNewPw").value="";
+  showToast("✓ Password updated");
+}
+
+// ════════════════════════════════════════════════════════════════
 //  COMPLIANCE LETTER GRADES + LABS BADGE
 // ════════════════════════════════════════════════════════════════
 var COMPL_GRADES=["A","B","C","D","F"];
@@ -3061,31 +3303,30 @@ function qpSelect(idx){
     renderQuickPick();
     return;
   }
-  // Leaf: apply / toggle
+  // Leaf: apply / toggle. Objective + MSK + organs are always red; supplements are always green.
   var vn=_currentMacroVn;
-  var color=activeColor||"red";
   if(it.type==="leaf_field"){
     var k=(it.oi!==undefined)?mkKey(vn,it.si,it.ii,it.oi):mkKey(vn,it.si,it.ii);
-    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
     renderMark(k); updateVsecHL(vn,it.si);
   } else if(it.type==="leaf_msk"){
     var k="v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+it.side;
-    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
     renderMskCell(k); updateMskSecHL(vn,it.si); updateMskMainHL(vn);
   } else if(it.type==="leaf_msk_both"){
     ["R","L"].forEach(function(side){
       var k="v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+side;
-      if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+      if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
       renderMskCell(k);
     });
     updateMskSecHL(vn,it.si); updateMskMainHL(vn);
   } else if(it.type==="leaf_organ"){
     var k="v"+vn+"_org_"+it.oi;
-    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
     renderMskCell(k); updateMskMainHL(vn);
   } else if(it.type==="leaf_supp"){
     var k="v"+vn+"_supp_"+it.idx;
-    if(S.marks[k]===color) delete S.marks[k]; else S.marks[k]=color;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
     renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn);
   } else if(it.type==="leaf_offender" || it.type==="leaf_tag"){
     var key=(it.type==="leaf_offender")?"v"+vn+"_of_"+it.si+"_"+it.ii:"v"+vn+"_tag_"+it.si+"_"+it.ii;
@@ -3143,7 +3384,7 @@ function applyMacro(macroId){
   flat.applies.forEach(function(a){
     var key=_resolveFieldKey(vn,a.section,a.item,a.opt);
     if(!key){ skipped++; return; }
-    S.marks[key]=a.mark||"red";
+    S.marks[key]="red";
     renderMark(key);
     var mk=key.match(/^v(\d+)_(\d+)_/); if(mk) updateVsecHL(parseInt(mk[1]),parseInt(mk[2]));
     // Flash preview
@@ -3154,7 +3395,7 @@ function applyMacro(macroId){
   // Supplements: map by name → SUPPLEMENTS index
   flat.supplements.forEach(function(s){
     var name=s.name||s; var idx=SUPPLEMENTS.indexOf(name); if(idx<0) return;
-    var skey="v"+vn+"_supp_"+idx; S.marks[skey]=s.mark||"red";
+    var skey="v"+vn+"_supp_"+idx; S.marks[skey]="green";
     renderSuppCell(skey);
   });
   renderSuppMarked(vn); updateSuppHL(vn);
@@ -3317,7 +3558,7 @@ document.addEventListener("click",function(e){
 //  A7: SESSION AUTO-LOCK
 // ════════════════════════════════════════════════════════════════
 var _idleTimer=null;
-var IDLE_MINUTES=10;
+var IDLE_MINUTES=parseInt(_LS.getItem("mhw_idle_min")||"10",10)||10;
 function resetIdleTimer(){
   clearTimeout(_idleTimer);
   _idleTimer=setTimeout(function(){
