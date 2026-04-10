@@ -1617,10 +1617,22 @@ function updateSuppHL(vn){
     else cnt.textContent=SUPPLEMENTS.length+" items";
   }
 }
+function updateDietHL(vn){
+  var el=document.getElementById("diet_hdr_"+vn); if(!el) return;
+  var n=0;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_diet_")===0) n++; }
+  var on=n>0;
+  el.classList.toggle("has-marks",on);
+  var cnt=document.getElementById("cnt_diet_"+vn);
+  if(cnt){
+    if(on) cnt.innerHTML='<span class="marked-n green">'+n+' prescribed</span> · '+DIET_RECS.length+' options';
+    else cnt.textContent=DIET_RECS.length+" options";
+  }
+}
 function updateAllHL(){
   for(var v=1;v<=18;v++){
     FIELDS.forEach(function(sec,si){ updateVsecHL(v,si); });
-    updateMskMainHL(v); updateSuppHL(v);
+    updateMskMainHL(v); updateSuppHL(v); updateDietHL(v);
   }
 }
 
@@ -1888,13 +1900,25 @@ var MSK_ORGANS=[
   "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus"
 ];
 
+// Diet recommendations — click a diet in the macro drill-down to mark it
+// for the current visit. Stored in S.marks as v{n}_diet_{idx}, always green
+// (prescribed = positive action, same as supplements).
+var DIET_RECS=[
+  "Anti-fungal","Low Histamine","Low FODMAP","Bear Diet","Carnivore","Dysglycemia Diet"
+];
+
 // Wire items that should use the organ list as their selectable tags.
 // Pituitary: TL Glabella + Endo Organ → provider selects which endocrine organ was tested.
+// Two Organ → provider picks exactly 2 organs (reuses the thenNow flag: same
+// UX as Sleep → Then / Now, capped at 2 selections).
 (function _wireOrganTagPopups(){
   FIELDS.forEach(function(sec){
     sec.items.forEach(function(it){
       if(/^Pituitary:/.test(it.lbl)){
         it.tagPopup={options:MSK_ORGANS.slice(),hasCustom:false};
+      }
+      if(it.lbl==="Two Organ"){
+        it.thenNow=true;
       }
     });
   });
@@ -1945,9 +1969,29 @@ function renderSuppMarked(vn) {
   div.innerHTML = pills.length
     ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">💊 Prescribed this visit</div>'+pills.join('')
     : '';
-  // Also refresh the Challenges found row next to it
+  // Also refresh the Challenges found row and Diet row next to it
   renderChallengesFound(vn);
+  renderDietMarked(vn);
 }
+
+// ────────────────────────────────────────────────────────────────
+//  DIET RECOMMENDATIONS — read-only pill list on visit card
+// ────────────────────────────────────────────────────────────────
+function renderDietMarked(vn) {
+  var div = document.getElementById("diet_marked_"+vn); if(!div) return;
+  var pills = [];
+  DIET_RECS.forEach(function(d,di){
+    var key = "v"+vn+"_diet_"+di;
+    if(S.marks[key]) {
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(d)+'</span>');
+    }
+  });
+  div.innerHTML = pills.length
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">🥗 Diet recommendations</div>'+pills.join('')
+    : '';
+}
+function renderAllDietMarked(){ for(var v=1;v<=18;v++) renderDietMarked(v); }
 
 // ────────────────────────────────────────────────────────────────
 //  CHALLENGES FOUND — read-only pill list derived from marks + tags
@@ -2097,6 +2141,16 @@ function buildVisitCard(vn){
       switchMacroTab("qp");
     });
     secGrid.appendChild(suppCard);
+
+    var dietCard=document.createElement("button"); dietCard.type="button"; dietCard.className="sec-card supp"; dietCard.id="diet_hdr_"+vn;
+    dietCard.innerHTML='<div class="sec-card-title">🥗 Diet Recommendations</div>'+
+      '<div class="sec-card-count" id="cnt_diet_'+vn+'">'+DIET_RECS.length+' options</div>';
+    dietCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"dietroot",label:"🥗 Diet Recommendations",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(dietCard);
   })();
   div.appendChild(secGrid);
 
@@ -2130,6 +2184,11 @@ function buildVisitCard(vn){
   var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn;
   suppMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
   div.appendChild(suppMarked);
+
+  // Diet recommendations summary
+  var dietMarked=document.createElement("div"); dietMarked.id="diet_marked_"+vn;
+  dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(dietMarked);
 
   // Per-visit action bar: print summary / email summary
   var actBar=document.createElement("div");
@@ -2263,7 +2322,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
-  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges();
+  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -2510,7 +2569,15 @@ function buildPrintView(){
     if(any) suppRows.push({label:supp,marks:rm});
   });
 
-  var hasAnyData=symRows.length||Object.keys(secData).length||Object.keys(mskSecData).length||orgRows.length||suppRows.length;
+  // ── diet recommendations ───────────────────────────────────
+  var dietRows=[];
+  DIET_RECS.forEach(function(d,di){
+    var rm={},any=false;
+    for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_diet_"+di]; if(cn){ rm[v]=cn; any=true; } }
+    if(any) dietRows.push({label:d,marks:rm});
+  });
+
+  var hasAnyData=symRows.length||Object.keys(secData).length||Object.keys(mskSecData).length||orgRows.length||suppRows.length||dietRows.length;
   var content=document.getElementById("pv-content");
 
   if(!hasAnyData){
@@ -2670,6 +2737,17 @@ function buildPrintView(){
   if(suppRows.length){
     html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#0369a1!important">SUPPLEMENTS PRESCRIBED</th></tr>';
     suppRows.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+=extraCells(null);
+      html+='</tr>';
+    });
+  }
+
+  // DIET RECOMMENDATIONS
+  if(dietRows.length){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#166534!important">🥗 DIET RECOMMENDATIONS</th></tr>';
+    dietRows.forEach(function(row){
       html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
       for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
       html+=extraCells(null);
@@ -3192,6 +3270,7 @@ function _qpChildren(path){
     roots.push({type:"mskroot",label:"💪 MSK — Muscle Testing",children:true,sub:MSK_SECTIONS.length+" regions"});
     roots.push({type:"organroot",label:"🫀 Organ Indicators",children:true,sub:MSK_ORGANS.length+" organs"});
     roots.push({type:"supproot",label:"💊 Supplements",children:true,sub:SUPPLEMENTS.length+" items"});
+    roots.push({type:"dietroot",label:"🥗 Diet Recommendations",children:true,sub:DIET_RECS.length+" options"});
     return roots;
   }
   var last=path[path.length-1];
@@ -3230,10 +3309,10 @@ function _qpChildren(path){
         out.push({type:"leaf_tag",label:opt,si:last.si,ii:last.ii,tag:opt,sub:"tag"});
       });
     }
-    // Then / Now: the provider picks exactly 2 organs as the "then → now" pair
+    // thenNow finding: provider picks exactly 2 organs (Sleep → Then/Now, Two Organ).
     if(item.thenNow){
       MSK_ORGANS.forEach(function(organ){
-        out.push({type:"leaf_thennow",label:organ,si:last.si,ii:last.ii,tag:organ,sub:"then/now (pick 2)"});
+        out.push({type:"leaf_thennow",label:organ,si:last.si,ii:last.ii,tag:organ,sub:"pick 2 organs"});
       });
     }
     return out;
@@ -3274,6 +3353,10 @@ function _qpChildren(path){
       return {type:"leaf_supp",label:it.name,idx:it.idx};
     });
   }
+  // DIET ROOT → diets
+  if(last.type==="dietroot"){
+    return DIET_RECS.map(function(d,di){ return {type:"leaf_diet",label:d,idx:di}; });
+  }
   return [];
 }
 
@@ -3291,6 +3374,7 @@ function _qpIsMarked(it){
   }
   if(it.type==="leaf_organ"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
   if(it.type==="leaf_supp"){ return !!S.marks["v"+vn+"_supp_"+it.idx]; }
+  if(it.type==="leaf_diet"){ return !!S.marks["v"+vn+"_diet_"+it.idx]; }
   if(it.type==="leaf_offender"){
     var key="v"+vn+"_of_"+it.si+"_"+it.ii;
     var sel=(S.offenderTags&&S.offenderTags[key])||[];
@@ -3342,6 +3426,10 @@ function qpSelect(idx){
     var k="v"+vn+"_supp_"+it.idx;
     if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
     renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn);
+  } else if(it.type==="leaf_diet"){
+    var k="v"+vn+"_diet_"+it.idx;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+    renderDietMarked(vn); updateDietHL(vn);
   } else if(it.type==="leaf_offender" || it.type==="leaf_tag"){
     var key=(it.type==="leaf_offender")?"v"+vn+"_of_"+it.si+"_"+it.ii:"v"+vn+"_tag_"+it.si+"_"+it.ii;
     if(!S.offenderTags) S.offenderTags={};
@@ -3642,7 +3730,16 @@ function buildPositiveFindingsView(){
     });
   });
 
+  // Diet recommendations: pivot per visit
+  var dietBEV=[];
+  DIET_RECS.forEach(function(d,di){
+    var marks={}, any=false;
+    for(var v=1;v<=maxV;v++){ var c=S.marks["v"+v+"_diet_"+di]; if(c){ marks[v]=c; any=true; } }
+    if(any) dietBEV.push({label:d,marks:marks});
+  });
+
   var totalRows=0; Object.keys(secRows).forEach(function(k){ totalRows+=secRows[k].length; });
+  totalRows+=dietBEV.length;
   var content=document.getElementById("pv-content");
   if(!totalRows){
     content.innerHTML='<p style="font-size:11px;color:#94a3b8;font-style:italic">No positive findings recorded yet.</p>';
@@ -3699,6 +3796,14 @@ function buildPositiveFindingsView(){
       html+='</tr>';
     });
   });
+  if(dietBEV.length){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#166534!important">🥗 DIET RECOMMENDATIONS</th></tr>';
+    dietBEV.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+='</tr>';
+    });
+  }
   html+='</tbody></table></div>';
   content.innerHTML=html;
 }
@@ -3782,6 +3887,7 @@ function _collectVisitSummary(vn){
     visitNum: vn,
     challenges: [],
     supps: [],
+    diets: [],
     notes: (S.visitNotes[vn]||"").trim(),
     dietGrade: (S.compliance||{})[vn+"_diet"]||"",
     suppGrade: (S.compliance||{})[vn+"_supp"]||"",
@@ -3827,6 +3933,11 @@ function _collectVisitSummary(vn){
   SUPPLEMENTS.forEach(function(name,si){
     var k="v"+vn+"_supp_"+si;
     if(S.marks[k]) data.supps.push({name:name, dose:S.suppDoses[k]||""});
+  });
+  // Diet recommendations
+  DIET_RECS.forEach(function(d,di){
+    var k="v"+vn+"_diet_"+di;
+    if(S.marks[k]) data.diets.push(d);
   });
   return data;
 }
@@ -3881,6 +3992,14 @@ function _buildVisitSummaryHtml(vn){
     h+='</ul>';
   }
   h+='</div>';
+
+  // Diet recommendations
+  if(d.diets.length){
+    h+='<div class="pv-section"><div class="pv-section-title">Diet Recommendations</div>';
+    h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.6">';
+    d.diets.forEach(function(dd){ h+='<li><strong>'+escHtml(dd)+'</strong></li>'; });
+    h+='</ul></div>';
+  }
 
   // Notes
   if(d.notes){
@@ -3938,6 +4057,11 @@ function _plainVisitSummary(vn){
     d.supps.forEach(function(s){
       lines.push("  • "+s.name+(s.dose?" — "+s.dose:""));
     });
+    lines.push("");
+  }
+  if(d.diets.length){
+    lines.push("DIET RECOMMENDATIONS");
+    d.diets.forEach(function(dd){ lines.push("  • "+dd); });
     lines.push("");
   }
   if(d.notes){
