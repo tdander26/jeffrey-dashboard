@@ -2428,6 +2428,29 @@ function buildAllVisits(){
 //  SYMPTOM TABLE
 // ════════════════════════════════════════════════════════════════
 function addSymRow(){ S.symRows++; renderSymTable(); autoSave(); }
+function removeSymRow(row){
+  if(S.symRows<=1) return;
+  var lbl=S.symLabels["r"+row]||"Row "+(row+1);
+  if(!confirm("Remove \""+lbl+"\"? Color data for this row will be lost.")) return;
+  // Shift labels and symptom data down for rows above the removed one
+  for(var r=row;r<S.symRows-1;r++){
+    S.symLabels["r"+r]=S.symLabels["r"+(r+1)]||"";
+    for(var w=1;w<=26;w++){
+      var from="r"+(r+1)+"_c"+w, to="r"+r+"_c"+w;
+      if(S.symptoms[from]) S.symptoms[to]=S.symptoms[from]; else delete S.symptoms[to];
+      if(S.symVisited[from]) S.symVisited[to]=S.symVisited[from]; else delete S.symVisited[to];
+    }
+  }
+  // Clear the last row's data
+  var last=S.symRows-1;
+  delete S.symLabels["r"+last];
+  for(var w=1;w<=26;w++){
+    delete S.symptoms["r"+last+"_c"+w];
+    delete S.symVisited["r"+last+"_c"+w];
+  }
+  S.symRows--;
+  renderSymTable(); autoSave();
+}
 
 function onSymCellClick(row,week){
   var key="r"+row+"_c"+week;
@@ -2465,7 +2488,17 @@ function renderSymTable(){
       var inp=document.createElement("input"); inp.type="text"; inp.placeholder="Complaint "+(row+1);
       inp.value=S.symLabels["r"+row]||"";
       inp.addEventListener("input",(function(rr){ return function(){ S.symLabels["r"+rr]=inp.value; autoSave(); }; })(row));
-      tdL.appendChild(inp); tr.appendChild(tdL);
+      tdL.style.position="relative";
+      tdL.appendChild(inp);
+      var delBtn=document.createElement("span");
+      delBtn.textContent="✕";
+      delBtn.title="Remove row";
+      delBtn.style.cssText="position:absolute;right:2px;top:50%;transform:translateY(-50%);color:#ef4444;opacity:.4;font-size:11px;font-weight:900;cursor:pointer;padding:2px 4px;border-radius:4px";
+      delBtn.addEventListener("click",(function(rr){ return function(e){ e.stopPropagation(); removeSymRow(rr); }; })(row));
+      delBtn.addEventListener("mouseenter",function(){ this.style.opacity="1"; this.style.background="#fee2e2"; });
+      delBtn.addEventListener("mouseleave",function(){ this.style.opacity=".4"; this.style.background="none"; });
+      tdL.appendChild(delBtn);
+      tr.appendChild(tdL);
       for(var w=1;w<=26;w++){
         (function(wk){
           var td=document.createElement("td"); td.style.padding="2px";
