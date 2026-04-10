@@ -2030,6 +2030,49 @@ function renderAllMskCells(){
 // ────────────────────────────────────────────────────────────────
 function filterSupps(){ /* no-op: supplements moved to macro modal */ }
 
+function _pillX(onclick){
+  return '<span onclick="event.stopPropagation();'+onclick+'" style="margin-left:4px;color:inherit;opacity:.5;font-weight:900;font-size:13px;cursor:pointer;line-height:1;padding:0 2px" title="Remove">✕</span>';
+}
+function removeSupp(vn,si){
+  var key="v"+vn+"_supp_"+si;
+  delete S.marks[key];
+  if(S.suppDoses) delete S.suppDoses[key];
+  autoSave(); renderSuppMarked(vn); updateSuppHL(vn);
+}
+function removeDiet(vn,di){
+  delete S.marks["v"+vn+"_diet_"+di];
+  autoSave(); renderDietMarked(vn); updateDietHL(vn);
+}
+function removeChallengeMark(vn,key){
+  delete S.marks[key];
+  autoSave(); renderChallengesFound(vn); updateAllHL();
+}
+function removeChallengeTag(vn,tagKey,tag){
+  if(!S.offenderTags||!S.offenderTags[tagKey]) return;
+  var sel=S.offenderTags[tagKey].filter(function(t){return t!==tag;});
+  if(sel.length) S.offenderTags[tagKey]=sel; else delete S.offenderTags[tagKey];
+  autoSave(); renderChallengesFound(vn); updateAllHL();
+}
+function removeChallengeMsk(vn,si,mi,side){
+  if(side==="R+L"){
+    delete S.marks["v"+vn+"_msk_"+si+"_"+mi+"_R"];
+    delete S.marks["v"+vn+"_msk_"+si+"_"+mi+"_L"];
+  } else {
+    delete S.marks["v"+vn+"_msk_"+si+"_"+mi+"_"+side];
+  }
+  autoSave(); renderChallengesFound(vn); updateMskMainHL(vn);
+}
+function removeChallengeOrg(vn,oi){
+  delete S.marks["v"+vn+"_org_"+oi];
+  // Also clear any offender/nutrient/infection sub-selections
+  if(S.offenderTags){
+    delete S.offenderTags["v"+vn+"_orgoff_"+oi];
+    delete S.offenderTags["v"+vn+"_orgnut_"+oi];
+    INFECTION_TYPES.forEach(function(t){ delete S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t]; });
+  }
+  autoSave(); renderChallengesFound(vn); updateMskMainHL(vn);
+}
+
 function renderSuppMarked(vn) {
   var div = document.getElementById("supp_marked_"+vn); if(!div) return;
   var pills = [];
@@ -2042,7 +2085,9 @@ function renderSuppMarked(vn) {
         ? '<span style="padding:1px 6px;border-radius:8px;background:#166534;color:white;font-size:10px;font-weight:800;letter-spacing:.04em">'+escHtml(dose)+'</span>'
         : '<span style="padding:1px 6px;border-radius:8px;background:#f0fdf4;color:#166534;font-size:10px;font-weight:700;border:1px dashed #86efac">+ dose</span>';
       pills.push('<span class="supp-pill" onclick="openDoseEditor('+vn+','+si+')" style="display:inline-flex;align-items:center;gap:5px;padding:3px 4px 3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px;cursor:pointer" title="Click to set dose">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(supp)+doseHtml+'</span>');
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(supp)+doseHtml+
+        _pillX("removeSupp("+vn+","+si+")")+
+        '</span>');
     }
   });
   div.innerHTML = pills.length
@@ -2063,7 +2108,9 @@ function renderDietMarked(vn) {
     var key = "v"+vn+"_diet_"+di;
     if(S.marks[key]) {
       pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(d)+'</span>');
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(d)+
+        _pillX("removeDiet("+vn+","+di+")")+
+        '</span>');
     }
   });
   div.innerHTML = pills.length
@@ -2134,28 +2181,36 @@ function renderChallengesFound(vn) {
   var pills = [];
   FIELDS.forEach(function(sec,si){
     sec.items.forEach(function(item,ii){
-      // Did this finding get marked?
-      var markedLabel = null;
+      // Marks on the finding itself
       if(item.opts){
         item.opts.forEach(function(opt,oi){
-          if(S.marks[mkKey(vn,si,ii,oi)]){
-            markedLabel = item.lbl + " (" + opt + ")";
+          var mk=mkKey(vn,si,ii,oi);
+          if(S.marks[mk]){
+            pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;margin:2px">'+
+              '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>'+escHtml(item.lbl+" ("+opt+")")+
+              _pillX("removeChallengeMark("+vn+",'"+mk+"')")+
+              '</span>');
           }
         });
       } else if(S.marks[mkKey(vn,si,ii)]){
-        markedLabel = item.lbl;
+        var mk=mkKey(vn,si,ii);
+        pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;margin:2px">'+
+          '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>'+escHtml(item.lbl)+
+          _pillX("removeChallengeMark("+vn+",'"+mk+"')")+
+          '</span>');
       }
-      // Collect any offender / tag selections
-      var tagBits=[];
+      // Offender / tag selections (each tag is a separate removable pill)
       var ofKey="v"+vn+"_of_"+si+"_"+ii;
       var tgKey="v"+vn+"_tag_"+si+"_"+ii;
-      if(S.offenderTags && S.offenderTags[ofKey] && S.offenderTags[ofKey].length) tagBits=tagBits.concat(S.offenderTags[ofKey]);
-      if(S.offenderTags && S.offenderTags[tgKey] && S.offenderTags[tgKey].length) tagBits=tagBits.concat(S.offenderTags[tgKey]);
-      if(!markedLabel && !tagBits.length) return;
-      var label = markedLabel || item.lbl;
-      if(tagBits.length) label += " — " + tagBits.join(", ");
-      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>'+escHtml(label)+'</span>');
+      var allTags=[];
+      if(S.offenderTags && S.offenderTags[ofKey]) S.offenderTags[ofKey].forEach(function(t){ allTags.push({key:ofKey,tag:t}); });
+      if(S.offenderTags && S.offenderTags[tgKey]) S.offenderTags[tgKey].forEach(function(t){ allTags.push({key:tgKey,tag:t}); });
+      allTags.forEach(function(entry){
+        pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef9c3;border:1px solid #fde68a;font-size:11px;font-weight:600;color:#92400e;margin:2px">'+
+          '<span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block"></span>'+escHtml(item.lbl+" → "+entry.tag)+
+          _pillX("removeChallengeTag("+vn+",'"+entry.key+"','"+entry.tag.replace(/'/g,"\\'")+"')")+
+          '</span>');
+      });
     });
   });
   // MSK marks
@@ -2166,7 +2221,9 @@ function renderChallengesFound(vn) {
       if(!hasR && !hasL) return;
       var side = hasR && hasL ? "R+L" : (hasR ? "R" : "L");
       pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#f5f3ff;border:1px solid #c4b5fd;font-size:11px;font-weight:600;color:#5b21b6;margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;display:inline-block"></span>'+escHtml(m)+" ("+side+")</span>");
+        '<span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;display:inline-block"></span>'+escHtml(m)+" ("+side+")"+
+        _pillX("removeChallengeMsk("+vn+","+si+","+mi+",'"+side+"')")+
+        '</span>');
     });
   });
   // Organs (with offender/nutrient/infection detail)
@@ -2183,7 +2240,9 @@ function renderChallengesFound(vn) {
     if(nuts.length) detail.push("rx: "+nuts.join(", "));
     var sub=detail.length?' <em style="color:#92400e;font-size:10px">— '+escHtml(detail.join(" | "))+'</em>':"";
     pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fdf2f8;border:1px solid #f9a8d4;font-size:11px;font-weight:600;color:#9d174d;margin:2px">'+
-      '<span style="width:8px;height:8px;border-radius:50%;background:#be185d;display:inline-block"></span>'+escHtml(org)+sub+'</span>');
+      '<span style="width:8px;height:8px;border-radius:50%;background:#be185d;display:inline-block"></span>'+escHtml(org)+sub+
+      _pillX("removeChallengeOrg("+vn+","+oi+")")+
+      '</span>');
   });
   div.innerHTML = pills.length
     ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">⚠️ Challenges found</div>'+pills.join('')
