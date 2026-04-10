@@ -121,7 +121,13 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .sym-add:hover{text-decoration:underline}
 
 /* PHASE TABS */
-.phase-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.phase-tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.vjump-strip{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.vjump-btn{width:32px;height:28px;border-radius:7px;border:1.5px solid #e2e8f0;background:white;font-size:11px;font-weight:800;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;padding:0}
+.vjump-btn:hover{border-color:#7c3aed;color:#7c3aed;background:#faf5ff}
+.vjump-btn.has-date{border-color:#3b82f6;color:#1d4ed8;background:#eff6ff}
+.vjump-btn.latest{border-color:#22c55e;color:white;background:#22c55e}
+.vjump-btn.empty{opacity:.4}
 .phase-tab{padding:8px 18px;border-radius:9px;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;background:white;color:#64748b}
 .phase-tab.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
 .phase-content{display:none}.phase-content.active{display:block}
@@ -886,6 +892,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <div class="phase-tab"        onclick="switchPhase(2)">Phase 2 — Visits 7–12</div>
     <div class="phase-tab"        onclick="switchPhase(3)">Phase 3 — Visits 13–18</div>
   </div>
+  <div class="vjump-strip" id="vjumpStrip"></div>
   <div id="phase1" class="phase-content active"><div class="visits-grid" id="pg1"></div></div>
   <div id="phase2" class="phase-content">       <div class="visits-grid" id="pg2"></div></div>
   <div id="phase3" class="phase-content">       <div class="visits-grid" id="pg3"></div></div>
@@ -1663,6 +1670,29 @@ function clearMode(){
 function switchPhase(n){
   document.querySelectorAll(".phase-tab").forEach(function(t,i){ t.classList.toggle("active",i===n-1); });
   document.querySelectorAll(".phase-content").forEach(function(c,i){ c.classList.toggle("active",i===n-1); });
+}
+
+function renderVJumpStrip(){
+  var strip=document.getElementById("vjumpStrip"); if(!strip) return;
+  var latest=0;
+  for(var v=1;v<=18;v++){ if(S.visitDates[v]) latest=v; }
+  var html="";
+  for(var v=1;v<=18;v++){
+    var hasDate=!!S.visitDates[v];
+    var isLatest=(v===latest && latest>0);
+    var cls="vjump-btn"+(isLatest?" latest":(hasDate?" has-date":" empty"));
+    html+='<button type="button" class="'+cls+'" onclick="jumpToVisit('+v+')" title="'+(hasDate?"Visit "+v+" — "+S.visitDates[v]:"Visit "+v+" (no date)")+'">'+v+'</button>';
+  }
+  strip.innerHTML=html;
+}
+
+function jumpToVisit(vn){
+  // Switch to the correct phase
+  var phase=vn<=6?1:(vn<=12?2:3);
+  switchPhase(phase);
+  // Scroll to the visit card
+  var card=document.getElementById("vc"+vn);
+  if(card) card.scrollIntoView({behavior:"smooth",block:"start"});
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2646,6 +2676,7 @@ function loadPatientInfo(){
   var n=S.patientInfo.name;
   document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
 }
+var _lastDupWarn="";
 function collectPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -2653,6 +2684,23 @@ function collectPatientInfo(){
   });
   var n=S.patientInfo.name;
   document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
+  // Duplicate detection: warn if name or MRN matches another patient
+  if(n && n!==_lastDupWarn){
+    var lo=n.toLowerCase().trim();
+    var mrn=(S.patientInfo.mrn||"").trim().toLowerCase();
+    var idx=loadIndex();
+    for(var i=0;i<idx.length;i++){
+      if(idx[i].id===currentPatientId) continue;
+      var match=false;
+      if(lo && (idx[i].name||"").toLowerCase().trim()===lo) match=true;
+      if(!match && mrn && (idx[i].mrn||"").toLowerCase().trim()===mrn) match=true;
+      if(match){
+        _lastDupWarn=n;
+        showToast("⚠️ Possible duplicate: \""+idx[i].name+"\" already exists");
+        break;
+      }
+    }
+  }
 }
 
 function loadVisitDates(){
@@ -2668,6 +2716,17 @@ function loadVisitDates(){
             S.patientInfo.start=el.value;
             var se=document.getElementById("fi_start"); if(se) se.value=el.value;
           }
+          // Date validation warnings
+          if(el.value){
+            var d=new Date(el.value+"T00:00:00");
+            var today=new Date(); today.setHours(0,0,0,0);
+            if(d>today) showToast("⚠️ Visit "+n+" date is in the future");
+            else if(n>1 && S.visitDates[n-1] && new Date(S.visitDates[n-1]+"T00:00:00")>d)
+              showToast("⚠️ Visit "+n+" date is before Visit "+(n-1));
+            else if(S.patientInfo.start && new Date(S.patientInfo.start+"T00:00:00")>d)
+              showToast("⚠️ Visit "+n+" date is before Case Start date");
+          }
+          renderVJumpStrip();
           autoSave();
         }; })(vn));
       }
@@ -2691,7 +2750,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
-  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked(); renderAllFollowUp();
+  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked(); renderAllFollowUp(); renderVJumpStrip();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -3418,27 +3477,26 @@ function copyPriorVisit(vn){
   if(conflicts>0) msg+="\n\nVisit "+vn+" already has "+conflicts+" mark"+(conflicts===1?"":"s")+" — they will be overwritten.";
   if(!confirm(msg)) return;
 
-  // Clear existing target-visit marks/tags/notes of matching keys we will copy
+  // Clear existing target-visit marks + ALL tag keys for this visit
   Object.keys(S.marks).forEach(function(k){ if(k.indexOf(toPfx)===0) delete S.marks[k]; });
   if(S.offenderTags){
     Object.keys(S.offenderTags).forEach(function(k){
-      if(k.indexOf("v"+vn+"_of_")===0 || k.indexOf("v"+vn+"_tag_")===0) delete S.offenderTags[k];
+      if(k.indexOf(toPfx)===0) delete S.offenderTags[k];
     });
   }
 
   // Copy marks
   Object.keys(S.marks).forEach(function(k){
     if(k.indexOf(fromPfx)===0){
-      var nk=toPfx+k.slice(fromPfx.length);
-      S.marks[nk]=S.marks[k];
+      S.marks[toPfx+k.slice(fromPfx.length)]=S.marks[k];
     }
   });
-  // Copy offender / tag panels
+  // Copy ALL offender/tag/organ keys (of_, tag_, orgoff_, orgnut_, orgrx_, orgoffnut_)
   if(S.offenderTags){
     Object.keys(S.offenderTags).forEach(function(k){
-      var mOf=k.match(/^v(\d+)_of_(.+)$/), mTg=k.match(/^v(\d+)_tag_(.+)$/);
-      if(mOf && parseInt(mOf[1])===prev) S.offenderTags["v"+vn+"_of_"+mOf[2]]=S.offenderTags[k].slice();
-      if(mTg && parseInt(mTg[1])===prev) S.offenderTags["v"+vn+"_tag_"+mTg[2]]=S.offenderTags[k].slice();
+      if(k.indexOf(fromPfx)===0 && S.offenderTags[k].length){
+        S.offenderTags[toPfx+k.slice(fromPfx.length)]=S.offenderTags[k].slice();
+      }
     });
   }
   // Copy compliance grades
