@@ -378,8 +378,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .modal-card{background:white;border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.3)}
 .modal-hdr{padding:14px 20px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .modal-title{font-size:15px;font-weight:800;color:#1a1a2e}
-.modal-close{background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:14px;font-weight:900;cursor:pointer;color:#64748b;flex-shrink:0}
-.modal-close:hover{background:#e2e8f0;color:#1a1a2e}
+.modal-close{background:#f1f5f9;border:none;border-radius:50%;width:40px;height:40px;font-size:18px;font-weight:900;cursor:pointer;color:#64748b;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover,.modal-close:active{background:#ef4444;color:white;transform:scale(1.05)}
+.modal-card{position:relative}
+.modal-done-bar{padding:12px 20px;border-top:2px solid #f1f5f9;background:#f8fafc;display:flex;justify-content:flex-end;gap:8px}
+.modal-done-btn{padding:10px 22px;border-radius:9px;border:none;background:#22c55e;color:white;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s}
+.modal-done-btn:hover,.modal-done-btn:active{background:#16a34a;transform:translateY(-1px)}
 .modal-body{padding:16px 20px;overflow-y:auto;flex:1}
 .macro-cat{font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
 .macro-cat:first-child{margin-top:0}
@@ -561,11 +565,14 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <button class="mac-tab" id="macTabSaved" onclick="switchMacroTab('saved')">⭐ Saved Macros</button>
     </div>
     <div class="modal-body" id="macroModalBody"></div>
-    <div style="padding:10px 20px;border-top:2px solid #f1f5f9;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap" id="macroModalFooter">
-      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="openMacroBuilder()">+ Save current visit as macro</button>
-      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="exportMacros()">⬇ Export library</button>
-      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="document.getElementById('macroImportFile').click()">⬆ Import library</button>
-      <input type="file" id="macroImportFile" accept=".json" style="display:none" onchange="importMacros(this)">
+    <div style="padding:10px 20px;border-top:2px solid #f1f5f9;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;align-items:center" id="macroModalFooter">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 10px" onclick="openMacroBuilder()">+ Save as macro</button>
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 10px" onclick="exportMacros()">⬇ Export</button>
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 10px" onclick="document.getElementById('macroImportFile').click()">⬆ Import</button>
+        <input type="file" id="macroImportFile" accept=".json" style="display:none" onchange="importMacros(this)">
+      </div>
+      <button class="modal-done-btn" onclick="closeMacroModal()">✓ Done</button>
     </div>
   </div>
 </div>
@@ -3667,6 +3674,47 @@ document.addEventListener("click",function(e){
   var pop=document.getElementById("suggestPop");
   if(pop && pop.classList.contains("open") && !pop.contains(e.target) && !(e.target.classList && e.target.classList.contains("suggest-trigger")))
     pop.classList.remove("open");
+});
+
+// ════════════════════════════════════════════════════════════════
+//  MODAL DISMISS — click-outside + Escape for every .modal-overlay
+// ════════════════════════════════════════════════════════════════
+// Each modal has a close function. If click lands on the overlay backdrop
+// itself (not on the .modal-card or any descendant), close the topmost one.
+var _MODAL_CLOSERS={
+  macroModal: closeMacroModal,
+  macroBuilderModal: closeMacroBuilder,
+  pickerModal: closePicker,
+  settingsModal: closeSettings,
+  emailModal: closeEmailModal,
+  doseModal: closeDoseEditor
+};
+function _closeTopmostModal(){
+  // Close only the topmost open modal (handles stacked overlays — e.g.
+  // macroBuilderModal opened from within macroModal).
+  var order=["macroBuilderModal","doseModal","emailModal","settingsModal","pickerModal","macroModal"];
+  for(var i=0;i<order.length;i++){
+    var el=document.getElementById(order[i]);
+    if(el && el.classList.contains("open")){
+      var fn=_MODAL_CLOSERS[order[i]];
+      if(fn) fn();
+      return true;
+    }
+  }
+  return false;
+}
+document.addEventListener("click",function(e){
+  // Click outside the modal-card, on the overlay backdrop itself → close.
+  if(e.target && e.target.classList && e.target.classList.contains("modal-overlay") && e.target.classList.contains("open")){
+    var id=e.target.id;
+    var fn=_MODAL_CLOSERS[id];
+    if(fn) fn();
+  }
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape" || e.key==="Esc"){
+    if(_closeTopmostModal()) e.preventDefault();
+  }
 });
 
 // ════════════════════════════════════════════════════════════════
