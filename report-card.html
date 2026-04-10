@@ -517,6 +517,21 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .settings-input-row button:hover{background:#6d28d9}
 
 /* ══════════════════════════════════════
+   FOLLOW-UP PICKER (inline on visit card)
+══════════════════════════════════════ */
+.fu-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 0}
+.fu-chip{padding:5px 10px;border-radius:14px;border:1.5px solid #e2e8f0;background:white;font-size:11px;font-weight:700;color:#374151;cursor:pointer;transition:all .12s;white-space:nowrap}
+.fu-chip:hover{border-color:#3b82f6;background:#eff6ff}
+.fu-chip.active{background:#3b82f6;color:white;border-color:#2563eb}
+.fu-custom{display:flex;align-items:center;gap:4px}
+.fu-custom input[type=number]{width:48px;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;text-align:center;outline:none;font-weight:700}
+.fu-custom input[type=number]:focus{border-color:#3b82f6}
+.fu-custom select{padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;outline:none;font-weight:700;background:white;color:#374151}
+.fu-custom select:focus{border-color:#3b82f6}
+.fu-custom button{padding:4px 10px;border-radius:7px;border:1.5px solid #3b82f6;background:#3b82f6;color:white;font-size:11px;font-weight:800;cursor:pointer}
+.fu-result{font-size:12px;font-weight:700;color:#1d4ed8;padding:4px 10px;border-radius:10px;background:#dbeafe;border:1px solid #93c5fd}
+
+/* ══════════════════════════════════════
    REVIEWED LABS BADGE
 ══════════════════════════════════════ */
 .labs-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;margin-left:6px}
@@ -981,7 +996,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{},suppDoses:{}};
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{},suppDoses:{},followUp:{}};
 }
 var S = blankState();
 
@@ -2001,6 +2016,60 @@ function renderDietMarked(vn) {
 function renderAllDietMarked(){ for(var v=1;v<=18;v++) renderDietMarked(v); }
 
 // ────────────────────────────────────────────────────────────────
+//  FOLLOW-UP INTERVAL — inline chip picker per visit
+// ────────────────────────────────────────────────────────────────
+var FU_PRESETS=["+1 week","+2 weeks","+3 weeks","+4 weeks","+6 weeks","+8 weeks","+12 weeks"];
+function _fuChipsHtml(vn){
+  if(!S.followUp) S.followUp={};
+  var cur=S.followUp[vn]||"";
+  var h="";
+  FU_PRESETS.forEach(function(p){
+    h+='<button type="button" class="fu-chip'+(cur===p?" active":"")+'" onclick="setFollowUp('+vn+',\''+p.replace(/'/g,"\\'")+'\')">'+p+'</button>';
+  });
+  // Custom: number + unit
+  h+='<span class="fu-custom">'+
+    '<input type="number" id="fuN'+vn+'" min="1" max="52" value="1" style="width:44px">'+
+    '<select id="fuU'+vn+'">'+
+      '<option value="days">days</option>'+
+      '<option value="weeks" selected>weeks</option>'+
+      '<option value="months">months</option>'+
+    '</select>'+
+    '<button type="button" onclick="setFollowUpCustom('+vn+')">Set</button>'+
+  '</span>';
+  if(cur && FU_PRESETS.indexOf(cur)<0){
+    h+=' <span class="fu-result">'+escHtml(cur)+' <span style="cursor:pointer" onclick="clearFollowUp('+vn+')">✕</span></span>';
+  }
+  return h;
+}
+function setFollowUp(vn,val){
+  if(!S.followUp) S.followUp={};
+  if(S.followUp[vn]===val){ delete S.followUp[vn]; }
+  else { S.followUp[vn]=val; }
+  autoSave();
+  _rerenderFU(vn);
+}
+function setFollowUpCustom(vn){
+  var n=parseInt((document.getElementById("fuN"+vn)||{}).value,10);
+  var u=(document.getElementById("fuU"+vn)||{}).value||"weeks";
+  if(!n||n<1) return;
+  var label="+"+n+" "+u;
+  if(!S.followUp) S.followUp={};
+  S.followUp[vn]=label;
+  autoSave();
+  _rerenderFU(vn);
+}
+function clearFollowUp(vn){
+  if(S.followUp) delete S.followUp[vn];
+  autoSave();
+  _rerenderFU(vn);
+}
+function _rerenderFU(vn){
+  var bar=document.getElementById("fuBar"+vn);
+  if(bar) bar.innerHTML=_fuChipsHtml(vn);
+}
+function renderAllFollowUp(){ for(var v=1;v<=18;v++) _rerenderFU(v); }
+
+// ────────────────────────────────────────────────────────────────
 //  CHALLENGES FOUND — read-only pill list derived from marks + tags
 // ────────────────────────────────────────────────────────────────
 function renderChallengesFound(vn) {
@@ -2197,6 +2266,14 @@ function buildVisitCard(vn){
   dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
   div.appendChild(dietMarked);
 
+  // Follow-up interval inline picker
+  var fuWrap=document.createElement("div"); fuWrap.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  fuWrap.innerHTML='<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">📅 Follow-up</div>'+
+    '<div class="fu-bar" id="fuBar'+vn+'">'+
+      _fuChipsHtml(vn)+
+    '</div>';
+  div.appendChild(fuWrap);
+
   // Per-visit action bar: print summary / email summary
   var actBar=document.createElement("div");
   actBar.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end";
@@ -2329,7 +2406,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
-  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked();
+  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked(); renderAllFollowUp();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -2760,6 +2837,20 @@ function buildPrintView(){
       html+=extraCells(null);
       html+='</tr>';
     });
+  }
+
+  // FOLLOW-UP
+  var anyFU=false;
+  if(S.followUp){ for(var v=1;v<=maxV;v++){ if(S.followUp[v]){ anyFU=true; break; } } }
+  if(anyFU){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#1d4ed8!important">📅 FOLLOW-UP</th></tr>';
+    html+='<tr><td class="row-lbl sub-lbl">Interval</td>';
+    for(var v=1;v<=maxV;v++){
+      var fu=(S.followUp&&S.followUp[v])||"";
+      html+=fu?'<td><span style="font-size:8px;font-weight:700;color:#1d4ed8;white-space:nowrap">'+escHtml(fu)+'</span></td>':'<td></td>';
+    }
+    html+=extraCells(null);
+    html+='</tr>';
   }
 
   html+='</tbody></table>';
@@ -3460,7 +3551,9 @@ function qpSelect(idx){
     renderOffenderTags(key); updateVsecHL(vn,it.si);
   }
   autoSave();
-  // Re-render the drill-down level so the ✓ checkmark updates live
+  // Re-render the visit card summary pills + drill-down ✓ state live
+  renderChallengesFound(vn);
+  renderDietMarked(vn);
   renderQuickPick();
 }
 
@@ -3852,6 +3945,18 @@ function buildPositiveFindingsView(){
       html+='</tr>';
     });
   }
+  // Follow-up row
+  var anyFU2=false;
+  if(S.followUp){ for(var v=1;v<=maxV;v++){ if(S.followUp[v]){ anyFU2=true; break; } } }
+  if(anyFU2){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#1d4ed8!important">📅 FOLLOW-UP</th></tr>';
+    html+='<tr><td class="row-lbl sub-lbl">Interval</td>';
+    for(var v=1;v<=maxV;v++){
+      var fu2=(S.followUp&&S.followUp[v])||"";
+      html+=fu2?'<td><span style="font-size:8px;font-weight:700;color:#1d4ed8;white-space:nowrap">'+escHtml(fu2)+'</span></td>':'<td></td>';
+    }
+    html+='</tr>';
+  }
   html+='</tbody></table></div>';
   content.innerHTML=html;
 }
@@ -3936,6 +4041,7 @@ function _collectVisitSummary(vn){
     challenges: [],
     supps: [],
     diets: [],
+    followUp: (S.followUp&&S.followUp[vn])||"",
     notes: (S.visitNotes[vn]||"").trim(),
     dietGrade: (S.compliance||{})[vn+"_diet"]||"",
     suppGrade: (S.compliance||{})[vn+"_supp"]||"",
@@ -4049,6 +4155,12 @@ function _buildVisitSummaryHtml(vn){
     h+='</ul></div>';
   }
 
+  // Follow-up
+  if(d.followUp){
+    h+='<div class="pv-section"><div class="pv-section-title">📅 Follow-Up</div>';
+    h+='<p style="font-size:14px;font-weight:800;color:#1d4ed8">'+escHtml(d.followUp)+'</p></div>';
+  }
+
   // Notes
   if(d.notes){
     h+='<div class="pv-section"><div class="pv-section-title">Provider Notes</div>';
@@ -4110,6 +4222,10 @@ function _plainVisitSummary(vn){
   if(d.diets.length){
     lines.push("DIET RECOMMENDATIONS");
     d.diets.forEach(function(dd){ lines.push("  • "+dd); });
+    lines.push("");
+  }
+  if(d.followUp){
+    lines.push("FOLLOW-UP: "+d.followUp);
     lines.push("");
   }
   if(d.notes){
