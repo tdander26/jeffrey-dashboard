@@ -1991,6 +1991,19 @@ var INFECTION_NUTRIENTS={
 };
 var INFECTION_TYPES=["Bacteria","Fungus","Virus","Parasite"];
 
+// Offender → nutrient mapping. When an offender with a nested nutrient
+// list is selected, the provider can drill into these for targeted support.
+// Key = offender label (matched case-insensitively against organ offender lists).
+var OFFENDER_NUTRIENTS={
+  "histamine":["5-MTHF","Betaine (TMG)","Betaine HCl","Luteolin (broccoli, carrot, parsley, peppermint, thyme, basil, celery, chamomile)","Quercetin","Hesperidin","Stinging nettle","Spleen tissue","Vitamin A","Vitamin C (camu camu)","Vitamin B6 (P5P)","CYP450","Methylation nutrients","EFAs","Bile salts","Betaine","Calcium"]
+};
+// Normalize: match any offender label containing these keys
+function _offenderHasNutrients(offLabel){
+  var lo=offLabel.toLowerCase();
+  for(var k in OFFENDER_NUTRIENTS){ if(lo.indexOf(k)>=0) return OFFENDER_NUTRIENTS[k]; }
+  return null;
+}
+
 // Wire items that should use the organ list as their selectable tags.
 // Pituitary: TL Glabella + Endo Organ → provider selects which endocrine organ was tested.
 // Two Organ → provider picks exactly 2 organs (reuses the thenNow flag: same
@@ -2069,8 +2082,11 @@ function removeChallengeMsk(vn,si,mi,side){
 }
 function removeChallengeOrg(vn,oi){
   delete S.marks["v"+vn+"_org_"+oi];
-  // Also clear any offender/nutrient/infection sub-selections
+  // Also clear any offender/nutrient/infection/offender-nutrient sub-selections
   if(S.offenderTags){
+    // Clear offender-nutrient sub-keys first
+    var pfx="v"+vn+"_orgoffnut_"+oi+"_";
+    Object.keys(S.offenderTags).forEach(function(k){ if(k.indexOf(pfx)===0) delete S.offenderTags[k]; });
     delete S.offenderTags["v"+vn+"_orgoff_"+oi];
     delete S.offenderTags["v"+vn+"_orgnut_"+oi];
     INFECTION_TYPES.forEach(function(t){ delete S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t]; });
@@ -2238,12 +2254,18 @@ function renderChallengesFound(vn) {
         '</span>');
     });
   });
-  // Organs (with offender/nutrient/infection detail)
+  // Organs (with offender/nutrient/infection/offender-nutrient detail)
   MSK_ORGANS.forEach(function(org,oi){
     if(!S.marks["v"+vn+"_org_"+oi]) return;
     var detail=[];
     var offs=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+oi])||[];
-    if(offs.length) detail.push("off: "+offs.join(", "));
+    if(offs.length){
+      var offParts=offs.map(function(o){
+        var subNuts=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoffnut_"+oi+"_"+o])||[];
+        return subNuts.length? o+" ["+subNuts.join(", ")+"]" : o;
+      });
+      detail.push("off: "+offParts.join(", "));
+    }
     INFECTION_TYPES.forEach(function(t){
       var rx=(S.offenderTags&&S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t])||[];
       if(rx.length) detail.push(t+": "+rx.join(", "));
@@ -3651,10 +3673,23 @@ function _qpChildren(path){
       {type:"organ_nutrients_group",label:"💊 Nutrients ("+info.n.length+")",oi:last.oi,children:true,sub:info.n.length+" options"}
     ];
   }
-  // ORGAN OFFENDERS → leaf toggles
+  // ORGAN OFFENDERS → leaf toggles (or drillable if offender has nested nutrients)
   if(last.type==="organ_offenders_group"){
     var info=ORGAN_INFO[last.oi]||{n:[],o:[]};
-    return info.o.map(function(off){ return {type:"leaf_orgoff",label:off,oi:last.oi,tag:off}; });
+    return info.o.map(function(off){
+      var nested=_offenderHasNutrients(off);
+      if(nested) return {type:"orgoff_with_nutrients",label:off,oi:last.oi,tag:off,children:true,sub:nested.length+" nutrients"};
+      return {type:"leaf_orgoff",label:off,oi:last.oi,tag:off};
+    });
+  }
+  // DRILLABLE OFFENDER → toggle the offender itself + show nested nutrient leaves
+  if(last.type==="orgoff_with_nutrients"){
+    var nested=_offenderHasNutrients(last.tag)||[];
+    var out=[{type:"leaf_orgoff",label:"✓ Mark: "+last.tag,oi:last.oi,tag:last.tag,sub:"toggle offender"}];
+    nested.forEach(function(nut){
+      out.push({type:"leaf_orgoffnut",label:nut,oi:last.oi,offTag:last.tag,tag:nut,sub:"nutrient for "+last.tag});
+    });
+    return out;
   }
   // ORGAN INFECTION → 4 types
   if(last.type==="organ_infection_group"){
@@ -3712,6 +3747,14 @@ function _qpIsMarked(it){
   }
   if(it.type==="leaf_organ"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
   if(it.type==="leaf_orgoff"){
+    var sel=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+it.oi])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="leaf_orgoffnut"){
+    var sel=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoffnut_"+it.oi+"_"+it.offTag])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="orgoff_with_nutrients"){
     var sel=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+it.oi])||[];
     return sel.indexOf(it.tag)>=0;
   }
@@ -3778,6 +3821,19 @@ function qpSelect(idx){
     var k="v"+vn+"_org_"+it.oi;
     if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
     renderMskCell(k); updateMskMainHL(vn);
+  } else if(it.type==="leaf_orgoffnut"){
+    // Toggle a nutrient nested under a specific offender
+    var tagKey="v"+vn+"_orgoffnut_"+it.oi+"_"+it.offTag;
+    if(!S.offenderTags) S.offenderTags={};
+    var sel=(S.offenderTags[tagKey]||[]).slice();
+    var idx=sel.indexOf(it.tag);
+    if(idx>=0) sel.splice(idx,1); else sel.push(it.tag);
+    S.offenderTags[tagKey]=sel;
+    // Auto-mark the offender itself if any nutrient is selected
+    var offKey="v"+vn+"_orgoff_"+it.oi;
+    var offSel=(S.offenderTags[offKey]||[]).slice();
+    if(sel.length && offSel.indexOf(it.offTag)<0){ offSel.push(it.offTag); S.offenderTags[offKey]=offSel; }
+    _autoMarkOrgan(vn,it.oi);
   } else if(it.type==="leaf_orgoff"||it.type==="leaf_orgnut"||it.type==="leaf_orginfnut"){
     // Toggle organ offender / nutrient / antimicrobial selection
     var tagKey;
@@ -3836,6 +3892,11 @@ function _autoMarkOrgan(vn,oi){
     if((S.offenderTags["v"+vn+"_orgoff_"+oi]||[]).length) any=true;
     if(!any && (S.offenderTags["v"+vn+"_orgnut_"+oi]||[]).length) any=true;
     if(!any){ INFECTION_TYPES.forEach(function(t){ if((S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t]||[]).length) any=true; }); }
+    // Check offender-nutrient sub-selections (e.g. Histamine → Quercetin)
+    if(!any){
+      var pfx="v"+vn+"_orgoffnut_"+oi+"_";
+      for(var k in S.offenderTags){ if(k.indexOf(pfx)===0 && S.offenderTags[k].length){ any=true; break; } }
+    }
   }
   if(any) S.marks[key]="red"; else delete S.marks[key];
   updateMskMainHL(vn);
@@ -4357,12 +4418,18 @@ function _collectVisitSummary(vn){
       data.challenges.push({section:"MSK — "+sect.sec, label:m+" ("+side+")", tags:[]});
     });
   });
-  // Organs (with offender/nutrient/infection detail)
+  // Organs (with offender/nutrient/infection/offender-nutrient detail)
   MSK_ORGANS.forEach(function(o,oi){
     if(!S.marks["v"+vn+"_org_"+oi]) return;
     var tagBits=[];
     var offs=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoff_"+oi])||[];
-    if(offs.length) tagBits.push("Offenders: "+offs.join(", "));
+    if(offs.length){
+      var offParts=offs.map(function(off){
+        var subNuts=(S.offenderTags&&S.offenderTags["v"+vn+"_orgoffnut_"+oi+"_"+off])||[];
+        return subNuts.length? off+" ["+subNuts.join(", ")+"]" : off;
+      });
+      tagBits.push("Offenders: "+offParts.join(", "));
+    }
     INFECTION_TYPES.forEach(function(t){
       var rx=(S.offenderTags&&S.offenderTags["v"+vn+"_orgrx_"+oi+"_"+t])||[];
       if(rx.length) tagBits.push(t+": "+rx.join(", "));
