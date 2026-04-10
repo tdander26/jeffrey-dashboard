@@ -830,6 +830,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <div class="hbtns">
       <button class="btn btn-light" onclick="backToDash()">← Patients</button>
       <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
+      <button class="btn btn-light" onclick="previewPatientSummary()">📋 Summary</button>
       <button class="btn btn-light" onclick="previewTimeline()">📊 Timeline</button>
       <button class="btn btn-light" onclick="previewFindings()">📊 Findings</button>
       <button class="btn btn-light" style="background:rgba(168,85,247,.22);color:white" onclick="openMacroModal()">⚡ Macros</button>
@@ -850,7 +851,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
       <div class="fg"><label>Email</label><input type="email"        id="fi_email"    placeholder="patient@example.com" oninput="autoSave()"></div>
       <div class="fg"><label>Status</label>
-        <select id="fi_status" onchange="autoSave()">
+        <select id="fi_status" onchange="onStatusChange(); autoSave()">
           <option value="active">Active</option>
           <option value="discharged">Discharged</option>
           <option value="on-hold">On Hold</option>
@@ -1020,7 +1021,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{},suppDoses:{},followUp:{}};
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},visitAssessment:{},visitPlan:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{},suppDoses:{},followUp:{},statusHistory:[],labTracking:{}};
 }
 var S = blankState();
 
@@ -1927,7 +1928,7 @@ function updateDietHL(vn){
 function updateAllHL(){
   for(var v=1;v<=18;v++){
     FIELDS.forEach(function(sec,si){ updateVsecHL(v,si); });
-    updateMskMainHL(v); updateSuppHL(v); updateDietHL(v);
+    updateMskMainHL(v); updateSuppHL(v); updateDietHL(v); updateLabHL(v);
   }
 }
 
@@ -2198,6 +2199,21 @@ var MSK_ORGANS=[
 // Diet recommendations — click a diet in the macro drill-down to mark it
 // for the current visit. Stored in S.marks as v{n}_diet_{idx}, always green
 // (prescribed = positive action, same as supplements).
+// Lab categories for the Lab tracking section card
+var LAB_CATEGORIES={
+  "Blood Chemistry":["CBC","CMP","Lipid Panel","HbA1c","Fasting Glucose","Fasting Insulin","Homocysteine","Ferritin","Iron Panel","hs-CRP","ESR","Uric Acid"],
+  "Thyroid":["TSH","Free T3","Free T4","Reverse T3","Thyroid Antibodies (TPO/TG)"],
+  "Hormones":["DHEA-S","Cortisol (AM)","Cortisol (4-point)","Testosterone (Total/Free)","Estradiol","Progesterone","Pregnenolone"],
+  "Vitamins & Minerals":["Vitamin D (25-OH)","Vitamin B12","Folate","RBC Magnesium","Zinc","Copper","Selenium","Iodine"],
+  "GI / Stool":["Comprehensive Stool Analysis","SIBO Breath Test","Zonulin","Calprotectin","Secretory IgA"],
+  "Food Sensitivity":["IgG Food Panel","IgE Allergy Panel","Wheat/Gluten Reactivity"],
+  "Immune / Inflammatory":["ANA","Cytokine Panel","Immunoglobulins (IgA/IgG/IgM)","NK Cell Activity"],
+  "Toxins / Metals":["Heavy Metal Panel","Organic Acids (OAT)","Glyphosate","Mycotoxins"],
+  "Other":["Urinalysis","Genetic Panel (MTHFR/COMT)","Omega-3 Index","CoQ10"]
+};
+var LAB_NAMES=[];
+Object.keys(LAB_CATEGORIES).forEach(function(cat){ LAB_CATEGORIES[cat].forEach(function(l){ LAB_NAMES.push(l); }); });
+
 var DIET_RECS=[
   "Anti-fungal","Low Histamine","Low FODMAP","Bear Diet","Carnivore","Dysglycemia Diet"
 ];
@@ -2402,6 +2418,40 @@ function renderDietMarked(vn) {
   div.innerHTML=html;
 }
 function renderAllDietMarked(){ for(var v=1;v<=18;v++) renderDietMarked(v); }
+
+// ────────────────────────────────────────────────────────────────
+//  LAB TRACKING — pill list + HL + count on visit card
+// ────────────────────────────────────────────────────────────────
+function updateLabHL(vn){
+  var el=document.getElementById("lab_hdr_"+vn); if(!el) return;
+  var n=0;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_lab_")===0) n++; }
+  el.classList.toggle("has-marks",n>0);
+  var cnt=document.getElementById("cnt_lab_"+vn);
+  if(cnt){
+    if(n) cnt.innerHTML='<span class="marked-n green">'+n+' ordered</span> · '+LAB_NAMES.length+' tests';
+    else cnt.textContent=LAB_NAMES.length+" tests";
+  }
+}
+function renderLabMarked(vn){
+  var div=document.getElementById("lab_marked_"+vn); if(!div) return;
+  var pills=[];
+  LAB_NAMES.forEach(function(lab,li){
+    if(S.marks["v"+vn+"_lab_"+li]){
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#dbeafe;border:1px solid #93c5fd;font-size:11px;font-weight:600;color:#1e40af;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#3b82f6;display:inline-block"></span>'+escHtml(lab)+
+        _pillX("removeLab("+vn+","+li+")")+'</span>');
+    }
+  });
+  div.innerHTML=pills.length
+    ?'<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">🧪 Labs ordered this visit</div>'+pills.join('')
+    :'';
+}
+function removeLab(vn,li){
+  delete S.marks["v"+vn+"_lab_"+li];
+  autoSave(); renderLabMarked(vn); updateLabHL(vn);
+}
+function renderAllLabMarked(){ for(var v=1;v<=18;v++) renderLabMarked(v); }
 
 // ────────────────────────────────────────────────────────────────
 //  FOLLOW-UP INTERVAL — inline chip picker per visit
@@ -2642,6 +2692,16 @@ function buildVisitCard(vn){
       switchMacroTab("qp");
     });
     secGrid.appendChild(dietCard);
+
+    var labCard=document.createElement("button"); labCard.type="button"; labCard.className="sec-card msk"; labCard.id="lab_hdr_"+vn;
+    labCard.innerHTML='<div class="sec-card-title">🧪 Labs</div>'+
+      '<div class="sec-card-count" id="cnt_lab_'+vn+'">'+LAB_NAMES.length+' tests</div>';
+    labCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"labroot",label:"🧪 Labs",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(labCard);
   })();
   div.appendChild(secGrid);
 
@@ -2652,6 +2712,10 @@ function buildVisitCard(vn){
     '<textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>'+
     '<button class="mic-btn" id="mic'+vn+'" title="Dictate" onclick="toggleDictation('+vn+')">🎤</button>'+
     '</div>'+
+    '<label style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:8px;display:block">Assessment</label>'+
+    '<textarea id="va'+vn+'" placeholder="Clinical assessment..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:36px;outline:none;font-family:inherit;box-sizing:border-box"></textarea>'+
+    '<label style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;display:block">Plan</label>'+
+    '<textarea id="vp'+vn+'" placeholder="Treatment plan, next steps..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:36px;outline:none;font-family:inherit;box-sizing:border-box"></textarea>'+
     '<div class="compl-bar">'+
       '<div class="compl-group">'+
         '<span class="compl-label">🥗 Diet</span>'+
@@ -2684,6 +2748,10 @@ function buildVisitCard(vn){
   var dietMarked=document.createElement("div"); dietMarked.id="diet_marked_"+vn;
   dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
   div.appendChild(dietMarked);
+
+  var labMarked=document.createElement("div"); labMarked.id="lab_marked_"+vn;
+  labMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(labMarked);
 
   // Per-visit action bar: print summary / email summary
   var actBar=document.createElement("div");
@@ -2805,6 +2873,16 @@ function loadPatientInfo(){
   var n=S.patientInfo.name;
   document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
 }
+function onStatusChange(){
+  var el=document.getElementById("fi_status"); if(!el) return;
+  var newStatus=el.value;
+  var oldStatus=S.patientInfo.status||"active";
+  if(newStatus===oldStatus) return;
+  if(!S.statusHistory) S.statusHistory=[];
+  S.statusHistory.push({from:oldStatus,to:newStatus,date:new Date().toISOString().split("T")[0]});
+  S.patientInfo.status=newStatus;
+}
+
 var _lastDupWarn="";
 function collectPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
@@ -2861,6 +2939,10 @@ function loadVisitDates(){
       }
       var ne=document.getElementById("vn"+vn);
       if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; renderLabsBadge(n); autoSave(); }; })(vn)); }
+      var ae=document.getElementById("va"+vn);
+      if(ae){ ae.value=(S.visitAssessment&&S.visitAssessment[vn])||""; ae.addEventListener("input",(function(n){ return function(){ if(!S.visitAssessment)S.visitAssessment={}; S.visitAssessment[n]=ae.value; autoSave(); }; })(vn)); }
+      var pe=document.getElementById("vp"+vn);
+      if(pe){ pe.value=(S.visitPlan&&S.visitPlan[vn])||""; pe.addEventListener("input",(function(n){ return function(){ if(!S.visitPlan)S.visitPlan={}; S.visitPlan[n]=pe.value; autoSave(); }; })(vn)); }
     })(v);
   }
 }
@@ -2879,7 +2961,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
-  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked(); renderAllFollowUp(); renderVJumpStrip();
+  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked(); renderAllLabMarked(); renderAllFollowUp(); renderVJumpStrip();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -3393,6 +3475,110 @@ function previewVisitSummary(vn){
   _openPreview("📋 Visit "+vn+" Summary",html,"visit");
 }
 
+function previewPatientSummary(){
+  var pi=S.patientInfo||{};
+  var h='<div class="pv-header"><div class="pv-title">📋 Patient Summary</div><div class="pv-meta">'+_patientMetaHtml()+'</div></div>';
+
+  // Find latest visit with a date
+  var lastV=0;
+  for(var v=1;v<=18;v++){ if(S.visitDates[v]) lastV=v; }
+
+  // Active subjective complaints with current color
+  var symItems=[];
+  for(var r=0;r<S.symRows;r++){
+    var lbl=(S.symLabels["r"+r]||"").trim();
+    if(!lbl||lbl==="Complaint "+(r+1)) continue;
+    var cur=null;
+    for(var w=1;w<=26;w++){ var c=S.symptoms["r"+r+"_c"+w]; if(c) cur=c; }
+    var clr=cur||"red";
+    var hex=(COLOR_MAP[clr]||{}).hex||"#94a3b8";
+    symItems.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;background:'+hex+'18;border:1px solid '+hex+'44;font-size:12px;font-weight:600;color:'+hex+';margin:2px">'+
+      '<span style="width:10px;height:10px;border-radius:50%;background:'+hex+';display:inline-block"></span>'+escHtml(lbl)+' — '+(COLOR_MAP[clr]||{}).label+'</span>');
+  }
+  h+='<div class="pv-section"><div class="pv-section-title">Subjective Complaints</div>';
+  h+=symItems.length?symItems.join(''):'<p style="font-size:12px;color:#94a3b8;font-style:italic">None tracked.</p>';
+  h+='</div>';
+
+  // Compliance trend (last 3 visits with dates)
+  var compVisits=[];
+  for(var v=lastV;v>=1&&compVisits.length<3;v--){
+    if(!S.visitDates[v]) continue;
+    var dG=(S.compliance||{})[v+"_diet"]||"—";
+    var sG=(S.compliance||{})[v+"_supp"]||"—";
+    compVisits.push({v:v,date:S.visitDates[v],diet:dG,supp:sG});
+  }
+  compVisits.reverse();
+  if(compVisits.length){
+    h+='<div class="pv-section"><div class="pv-section-title">Compliance Trend (Last '+compVisits.length+' Visits)</div>';
+    h+='<table style="border-collapse:collapse;font-size:12px;width:auto">';
+    h+='<thead><tr style="border-bottom:2px solid #e2e8f0;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;font-weight:800"><th style="padding:4px 12px">Visit</th><th style="padding:4px 12px">Date</th><th style="padding:4px 12px">🥗 Diet</th><th style="padding:4px 12px">💊 Supp</th></tr></thead><tbody>';
+    compVisits.forEach(function(cv){
+      h+='<tr style="border-bottom:1px solid #f1f5f9"><td style="padding:6px 12px;font-weight:700">V'+cv.v+'</td><td style="padding:6px 12px;color:#64748b">'+escHtml(cv.date)+'</td><td style="padding:6px 12px;font-weight:800;text-align:center">'+cv.diet+'</td><td style="padding:6px 12px;font-weight:800;text-align:center">'+cv.supp+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+
+  // Challenges from last visit
+  if(lastV>0){
+    var lastD=_collectVisitSummary(lastV);
+    if(lastD.challenges.length){
+      h+='<div class="pv-section"><div class="pv-section-title">Challenges — Visit '+lastV+' ('+escHtml(S.visitDates[lastV]||"")+')</div>';
+      var bySec={};
+      lastD.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
+      Object.keys(bySec).forEach(function(sn){
+        h+='<div style="margin-bottom:6px"><span style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em">'+escHtml(sn)+'</span>';
+        h+='<ul style="margin:2px 0 0 16px;font-size:12px;color:#374151;line-height:1.5">';
+        bySec[sn].forEach(function(c){
+          h+='<li>'+escHtml(c.label)+(c.tags.length?' <em style="color:#92400e">— '+escHtml(c.tags.join(", "))+'</em>':'')+'</li>';
+        });
+        h+='</ul></div>';
+      });
+      h+='</div>';
+    }
+
+    // Supplements from last visit
+    if(lastD.supps.length){
+      h+='<div class="pv-section"><div class="pv-section-title">Current Supplements — Visit '+lastV+'</div>';
+      h+='<ul style="margin:0 0 0 16px;font-size:12px;color:#374151;line-height:1.6">';
+      lastD.supps.forEach(function(s){
+        h+='<li><strong>'+escHtml(s.name)+'</strong>'+(s.dose?' — '+escHtml(s.dose):'')+'</li>';
+      });
+      h+='</ul></div>';
+    }
+
+    // Diet from last visit
+    if(lastD.diets.length){
+      h+='<div class="pv-section"><div class="pv-section-title">Diet Recommendations — Visit '+lastV+'</div>';
+      h+='<ul style="margin:0 0 0 16px;font-size:12px;color:#374151;line-height:1.6">';
+      lastD.diets.forEach(function(d){ h+='<li><strong>'+escHtml(d)+'</strong></li>'; });
+      h+='</ul></div>';
+    }
+
+    // Follow-up
+    var fu=(S.followUp&&S.followUp[lastV])||"";
+    if(fu) h+='<div class="pv-section"><div class="pv-section-title">📅 Follow-Up</div><p style="font-size:14px;font-weight:800;color:#1d4ed8">'+escHtml(fu)+'</p></div>';
+
+    // Notes from last visit
+    if(lastD.notes){
+      h+='<div class="pv-section"><div class="pv-section-title">Provider Notes — Visit '+lastV+'</div>';
+      h+='<p style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap">'+escHtml(lastD.notes)+'</p></div>';
+    }
+  }
+
+  // Case stats
+  var totalVisits=0;
+  for(var v=1;v<=18;v++){ if(S.visitDates[v]) totalVisits++; }
+  h+='<div class="pv-section"><div class="pv-section-title">Case Overview</div>';
+  h+='<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:#374151">';
+  h+='<div><strong>Total visits:</strong> '+totalVisits+'</div>';
+  if(pi.start) h+='<div><strong>Case start:</strong> '+escHtml(pi.start)+'</div>';
+  if(lastV && S.visitDates[lastV]) h+='<div><strong>Last seen:</strong> '+escHtml(S.visitDates[lastV])+'</div>';
+  h+='<div><strong>Status:</strong> '+escHtml((pi.status||"active").charAt(0).toUpperCase()+(pi.status||"active").slice(1))+'</div>';
+  h+='</div></div>';
+
+  _openPreview("📋 Patient Summary — "+(pi.name||"Patient"),h,"visit");
+}
+
 // Keep legacy print functions for backward compat
 function doPrint(){ previewTimeline(); }
 function doPrintFindings(){ previewFindings(); }
@@ -3878,6 +4064,7 @@ function _qpChildren(path){
     roots.push({type:"organroot",label:"🫀 Organ Indicators",children:true,sub:MSK_ORGANS.length+" organs"});
     roots.push({type:"supproot",label:"💊 Supplements",children:true,sub:SUPPLEMENTS.length+" items"});
     roots.push({type:"dietroot",label:"🥗 Diet Recommendations",children:true,sub:ALL_DIET_ITEMS.length+" options"});
+    roots.push({type:"labroot",label:"🧪 Labs",children:true,sub:LAB_NAMES.length+" tests"});
     return roots;
   }
   var last=path[path.length-1];
@@ -4014,6 +4201,19 @@ function _qpChildren(path){
   if(last.type==="diet_foods"){
     return FOOD_SENSITIVITIES.map(function(f,fi){ return {type:"leaf_diet",label:f,idx:DIET_RECS.length+fi}; });
   }
+  // LAB ROOT → categories
+  if(last.type==="labroot"){
+    return Object.keys(LAB_CATEGORIES).map(function(cat){
+      return {type:"lab_category",label:cat,cat:cat,children:true,sub:LAB_CATEGORIES[cat].length+" tests"};
+    });
+  }
+  // LAB CATEGORY → individual tests
+  if(last.type==="lab_category"){
+    return LAB_CATEGORIES[last.cat].map(function(lab){
+      var idx=LAB_NAMES.indexOf(lab);
+      return {type:"leaf_lab",label:lab,idx:idx};
+    });
+  }
   return [];
 }
 
@@ -4058,6 +4258,7 @@ function _qpIsMarked(it){
   if(it.type==="organ_detail"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
   if(it.type==="leaf_supp"){ return !!S.marks["v"+vn+"_supp_"+it.idx]; }
   if(it.type==="leaf_diet"){ return !!S.marks["v"+vn+"_diet_"+it.idx]; }
+  if(it.type==="leaf_lab"){ return !!S.marks["v"+vn+"_lab_"+it.idx]; }
   if(it.type==="leaf_offender"){
     var key="v"+vn+"_of_"+it.si+"_"+it.ii;
     var sel=(S.offenderTags&&S.offenderTags[key])||[];
@@ -4139,6 +4340,10 @@ function qpSelect(idx){
     var k="v"+vn+"_diet_"+it.idx;
     if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
     renderDietMarked(vn); updateDietHL(vn);
+  } else if(it.type==="leaf_lab"){
+    var k="v"+vn+"_lab_"+it.idx;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+    renderLabMarked(vn); updateLabHL(vn);
   } else if(it.type==="leaf_offender" || it.type==="leaf_tag"){
     var key=(it.type==="leaf_offender")?"v"+vn+"_of_"+it.si+"_"+it.ii:"v"+vn+"_tag_"+it.si+"_"+it.ii;
     if(!S.offenderTags) S.offenderTags={};
@@ -4665,8 +4870,11 @@ function _collectVisitSummary(vn){
     challenges: [],
     supps: [],
     diets: [],
+    labs: [],
     followUp: (S.followUp&&S.followUp[vn])||"",
     notes: (S.visitNotes[vn]||"").trim(),
+    assessment: (S.visitAssessment&&S.visitAssessment[vn]||"").trim(),
+    plan: (S.visitPlan&&S.visitPlan[vn]||"").trim(),
     dietGrade: (S.compliance||{})[vn+"_diet"]||"",
     suppGrade: (S.compliance||{})[vn+"_supp"]||"",
     labsReviewed: labsWasReviewed(vn)
@@ -4735,6 +4943,10 @@ function _collectVisitSummary(vn){
   FOOD_SENSITIVITIES.forEach(function(f,fi){
     if(S.marks["v"+vn+"_diet_"+(DIET_RECS.length+fi)]) data.diets.push("🚫 "+f);
   });
+  // Labs ordered
+  LAB_NAMES.forEach(function(lab,li){
+    if(S.marks["v"+vn+"_lab_"+li]) data.labs.push(lab);
+  });
   return data;
 }
 
@@ -4797,16 +5009,32 @@ function _buildVisitSummaryHtml(vn){
     h+='</ul></div>';
   }
 
+  // Labs ordered
+  if(d.labs.length){
+    h+='<div class="pv-section"><div class="pv-section-title">🧪 Labs Ordered</div>';
+    h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.6">';
+    d.labs.forEach(function(l){ h+='<li>'+escHtml(l)+'</li>'; });
+    h+='</ul></div>';
+  }
+
   // Follow-up
   if(d.followUp){
     h+='<div class="pv-section"><div class="pv-section-title">📅 Follow-Up</div>';
     h+='<p style="font-size:14px;font-weight:800;color:#1d4ed8">'+escHtml(d.followUp)+'</p></div>';
   }
 
-  // Notes
+  // Notes / Assessment / Plan
   if(d.notes){
     h+='<div class="pv-section"><div class="pv-section-title">Provider Notes</div>';
     h+='<p style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap">'+escHtml(d.notes)+'</p></div>';
+  }
+  if(d.assessment){
+    h+='<div class="pv-section"><div class="pv-section-title">Assessment</div>';
+    h+='<p style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap">'+escHtml(d.assessment)+'</p></div>';
+  }
+  if(d.plan){
+    h+='<div class="pv-section"><div class="pv-section-title">Plan</div>';
+    h+='<p style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap">'+escHtml(d.plan)+'</p></div>';
   }
 
   h+='<div class="pv-footer"><span>Momentum Health &amp; Wellness | Applied Kinesiology</span><span>Printed: '+new Date().toLocaleDateString()+'</span></div>';
@@ -4853,6 +5081,11 @@ function _plainVisitSummary(vn){
     d.diets.forEach(function(dd){ lines.push("  • "+dd); });
     lines.push("");
   }
+  if(d.labs.length){
+    lines.push("LABS ORDERED");
+    d.labs.forEach(function(l){ lines.push("  • "+l); });
+    lines.push("");
+  }
   if(d.followUp){
     lines.push("FOLLOW-UP: "+d.followUp);
     lines.push("");
@@ -4860,6 +5093,16 @@ function _plainVisitSummary(vn){
   if(d.notes){
     lines.push("PROVIDER NOTES");
     lines.push(d.notes);
+    lines.push("");
+  }
+  if(d.assessment){
+    lines.push("ASSESSMENT");
+    lines.push(d.assessment);
+    lines.push("");
+  }
+  if(d.plan){
+    lines.push("PLAN");
+    lines.push(d.plan);
     lines.push("");
   }
   lines.push("— Momentum Health & Wellness");
