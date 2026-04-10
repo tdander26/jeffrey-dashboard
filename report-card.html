@@ -1142,6 +1142,9 @@ function renderStats() {
   var stageCount = {red:0, yellow:0, blue:0, green:0};
   var symAgg = {};
   var findingCounts = {};
+  var suppCounts = {};       // suppName → {count, pts:{}, ptSymOutcomes:[{hasB,hasG}]}
+  var offenderCounts = {};   // offender string → count of patients
+  var organCounts = {};      // organ name → count of patients
 
   idx.forEach(function(pt) {
     var isActive = (!pt.status || pt.status === "active");
@@ -1232,11 +1235,61 @@ function renderStats() {
       if (!findingCounts[fkey]) findingCounts[fkey] = {count:0, section:sec.sec, label:flbl, pts:{}};
       findingCounts[fkey].pts[pt.id] = true;
     });
+
+    // Supplement usage — per patient, did they reach 80%+ on any symptom?
+    var ptHasB=false, ptHasG=false;
+    Object.keys(symAgg).forEach(function(lkey){
+      var last=symAgg[lkey].patients[symAgg[lkey].patients.length-1];
+      if(last && last.ptId===pt.id){ if(last.hasB) ptHasB=true; if(last.hasG) ptHasG=true; }
+    });
+    SUPPLEMENTS.forEach(function(name,si){
+      var prescribed=false;
+      for(var v=1;v<=18;v++){ if(marks["v"+v+"_supp_"+si]){ prescribed=true; break; } }
+      if(prescribed){
+        if(!suppCounts[name]) suppCounts[name]={count:0,pts:{},bCount:0,gCount:0};
+        suppCounts[name].count++;
+        suppCounts[name].pts[pt.id]=true;
+        if(ptHasB) suppCounts[name].bCount++;
+        if(ptHasG) suppCounts[name].gCount++;
+      }
+    });
+
+    // Offender collection (from organ offender tags)
+    var offTags=data.offenderTags||{};
+    Object.keys(offTags).forEach(function(k){
+      if(k.indexOf("_orgoff_")<0) return;
+      (offTags[k]||[]).forEach(function(off){
+        if(!offenderCounts[off]) offenderCounts[off]={count:0,pts:{}};
+        offenderCounts[off].pts[pt.id]=true;
+      });
+    });
+    // Also collect FIELDS offenders (v{n}_of_{si}_{ii})
+    Object.keys(offTags).forEach(function(k){
+      var m=k.match(/^v\d+_of_/);
+      if(!m) return;
+      (offTags[k]||[]).forEach(function(off){
+        if(!offenderCounts[off]) offenderCounts[off]={count:0,pts:{}};
+        offenderCounts[off].pts[pt.id]=true;
+      });
+    });
+
+    // Organ indicator collection
+    MSK_ORGANS.forEach(function(org,oi){
+      var flagged=false;
+      for(var v=1;v<=18;v++){ if(marks["v"+v+"_org_"+oi]){ flagged=true; break; } }
+      if(flagged){
+        if(!organCounts[org]) organCounts[org]={count:0,pts:{}};
+        organCounts[org].pts[pt.id]=true;
+      }
+    });
   });
 
+  // Finalize counts
   Object.keys(findingCounts).forEach(function(k) {
     findingCounts[k].count = Object.keys(findingCounts[k].pts).length;
   });
+  Object.keys(offenderCounts).forEach(function(k){ offenderCounts[k].count=Object.keys(offenderCounts[k].pts).length; });
+  Object.keys(organCounts).forEach(function(k){ organCounts[k].count=Object.keys(organCounts[k].pts).length; });
 
   var html = "";
 
@@ -1398,7 +1451,83 @@ function renderStats() {
   }
   html += '</div>';
 
-  // Row 4: Recent Activity
+  // Row 5: Supplement → Outcome Correlation
+  var suppList=Object.keys(suppCounts).map(function(k){return {name:k,c:suppCounts[k]};});
+  suppList.sort(function(a,b){return b.c.count-a.c.count;});
+  if(suppList.length){
+    html+='<div class="stats-section">';
+    html+='<div class="stats-section-title">💊 Supplement → Outcome Correlation <span style="font-size:11px;font-weight:500;color:#94a3b8;margin-left:8px">Of patients prescribed each supplement, what % reached 80%+ on any symptom?</span></div>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    html+='<thead><tr style="border-bottom:2px solid #e2e8f0;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;font-weight:800">';
+    html+='<th style="text-align:left;padding:6px 8px">Supplement</th>';
+    html+='<th style="text-align:center;padding:6px 4px;width:50px">Pts</th>';
+    html+='<th style="text-align:center;padding:6px 4px;width:80px">% → 80%</th>';
+    html+='<th style="text-align:center;padding:6px 4px;width:80px">% → 100%</th>';
+    html+='<th style="text-align:left;padding:6px 8px;min-width:100px">Efficacy</th>';
+    html+='</tr></thead><tbody>';
+    suppList.slice(0,15).forEach(function(s){
+      var pctB=s.c.count?Math.round(s.c.bCount/s.c.count*100):0;
+      var pctG=s.c.count?Math.round(s.c.gCount/s.c.count*100):0;
+      html+='<tr style="border-bottom:1px solid #f1f5f9">';
+      html+='<td style="padding:6px 8px;font-weight:600;color:#374151">'+escHtml(s.name)+'</td>';
+      html+='<td style="text-align:center;padding:6px 4px;color:#64748b">'+s.c.count+'</td>';
+      html+='<td style="text-align:center;padding:6px 4px"><span style="padding:2px 8px;border-radius:10px;font-weight:800;font-size:11px;'+(pctB>=60?'background:#dcfce7;color:#166534':pctB>=30?'background:#fef9c3;color:#92400e':'background:#fee2e2;color:#991b1b')+'">'+pctB+'%</span></td>';
+      html+='<td style="text-align:center;padding:6px 4px"><span style="padding:2px 8px;border-radius:10px;font-weight:800;font-size:11px;'+(pctG>=40?'background:#dcfce7;color:#166534':pctG>=15?'background:#fef9c3;color:#92400e':'background:#f1f5f9;color:#94a3b8')+'">'+pctG+'%</span></td>';
+      var barW=Math.max(4,pctB);
+      var barC=pctB>=60?'#22c55e':pctB>=30?'#eab308':'#ef4444';
+      html+='<td style="padding:6px 8px"><div style="background:#f1f5f9;border-radius:4px;height:12px;overflow:hidden"><div style="width:'+barW+'%;background:'+barC+';height:100%;border-radius:4px"></div></div></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+
+  // Row 6: Top Offenders Across Practice
+  var offList=Object.keys(offenderCounts).map(function(k){return {name:k,count:offenderCounts[k].count};});
+  offList.sort(function(a,b){return b.count-a.count;});
+  if(offList.length){
+    html+='<div class="stats-section">';
+    html+='<div class="stats-section-title">⚠️ Top Offenders Across Practice</div>';
+    var maxOff=offList[0].count||1;
+    offList.slice(0,10).forEach(function(f){
+      var pct=Math.round(f.count/maxOff*100);
+      html+='<div class="finding-bar-wrap"><div class="finding-label">'+escHtml(f.name)+'</div>';
+      html+='<div class="finding-bar"><div class="finding-bar-fill" style="width:'+pct+'%;background:#f59e0b"></div></div>';
+      html+='<div class="finding-count">'+f.count+' pt'+(f.count!==1?'s':'')+'</div></div>';
+    });
+    html+='</div>';
+  }
+
+  // Row 7: Most Prescribed Supplements
+  if(suppList.length){
+    html+='<div class="stats-section">';
+    html+='<div class="stats-section-title">💊 Most Prescribed Supplements</div>';
+    var maxS=suppList[0].c.count||1;
+    suppList.slice(0,10).forEach(function(s){
+      var pct=Math.round(s.c.count/maxS*100);
+      html+='<div class="finding-bar-wrap"><div class="finding-label">'+escHtml(s.name)+'</div>';
+      html+='<div class="finding-bar"><div class="finding-bar-fill" style="width:'+pct+'%;background:#22c55e"></div></div>';
+      html+='<div class="finding-count">'+s.c.count+' pt'+(s.c.count!==1?'s':'')+'</div></div>';
+    });
+    html+='</div>';
+  }
+
+  // Row 8: Organ Indicator Frequency
+  var orgList=Object.keys(organCounts).map(function(k){return {name:k,count:organCounts[k].count};});
+  orgList.sort(function(a,b){return b.count-a.count;});
+  if(orgList.length){
+    html+='<div class="stats-section">';
+    html+='<div class="stats-section-title">🫀 Organ Indicator Frequency</div>';
+    var maxO=orgList[0].count||1;
+    orgList.slice(0,10).forEach(function(o){
+      var pct=Math.round(o.count/maxO*100);
+      html+='<div class="finding-bar-wrap"><div class="finding-label">'+escHtml(o.name)+'</div>';
+      html+='<div class="finding-bar"><div class="finding-bar-fill" style="width:'+pct+'%;background:#be185d"></div></div>';
+      html+='<div class="finding-count">'+o.count+' pt'+(o.count!==1?'s':'')+'</div></div>';
+    });
+    html+='</div>';
+  }
+
+  // Row 9: Recent Activity
   html += '<div class="stats-section">';
   html += '<div class="stats-section-title">\u{1F550} Recent Activity</div>';
   var recent = idx.slice().sort(function(a,b){return (b.modified||"").localeCompare(a.modified||"");}).slice(0,5);
