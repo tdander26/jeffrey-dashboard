@@ -517,6 +517,21 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .settings-input-row button:hover{background:#6d28d9}
 
 /* ══════════════════════════════════════
+   TIMELINE / FINDINGS PREVIEW OVERLAY
+══════════════════════════════════════ */
+.preview-overlay{position:fixed;inset:0;z-index:9800;background:rgba(15,23,42,.7);display:none;flex-direction:column}
+.preview-overlay.open{display:flex}
+.preview-toolbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1e293b;color:white;gap:10px}
+.preview-toolbar .pv-title{font-size:14px;font-weight:800}
+.preview-toolbar button{padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer}
+.preview-toolbar .pv-print{background:#3b82f6;color:white}
+.preview-toolbar .pv-print:hover{background:#2563eb}
+.preview-toolbar .pv-close{background:#475569;color:white}
+.preview-toolbar .pv-close:hover{background:#64748b}
+.preview-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:white;padding:16px}
+@media print{.preview-overlay{display:none!important}}
+
+/* ══════════════════════════════════════
    FOLLOW-UP PICKER (inline on visit card)
 ══════════════════════════════════════ */
 .fu-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 0}
@@ -740,6 +755,18 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 </div>
 
 <!-- PRINT VIEW -->
+<!-- TIMELINE / FINDINGS PREVIEW OVERLAY -->
+<div class="preview-overlay" id="previewOverlay">
+  <div class="preview-toolbar">
+    <span class="pv-title" id="previewTitle">Preview</span>
+    <div style="display:flex;gap:8px">
+      <button class="pv-print" id="previewPrintBtn" onclick="previewDoPrint()">🖨 Print</button>
+      <button class="pv-close" onclick="closePreview()">✕ Close</button>
+    </div>
+  </div>
+  <div class="preview-scroll" id="previewContent"></div>
+</div>
+
 <div id="printView">
   <div class="pv-header">
     <div class="pv-title">🏥 Momentum Health &amp; Wellness — Patient Progress Report</div>
@@ -807,8 +834,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <div class="hbtns">
       <button class="btn btn-light" onclick="backToDash()">← Patients</button>
       <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
-      <button class="btn btn-light" onclick="doPrint()">🖨 Print Timeline</button>
-      <button class="btn btn-light" onclick="doPrintFindings()">🖨 Print Findings Over Time</button>
+      <button class="btn btn-light" onclick="previewTimeline()">📊 Timeline</button>
+      <button class="btn btn-light" onclick="previewFindings()">📊 Findings</button>
       <button class="btn btn-light" style="background:rgba(168,85,247,.22);color:white" onclick="openMacroModal()">⚡ Macros</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
       <button class="settings-btn" title="Settings" onclick="openSettings()">⚙️</button>
@@ -2322,7 +2349,7 @@ function buildVisitCard(vn){
   // Per-visit action bar: print summary / email summary
   var actBar=document.createElement("div");
   actBar.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end";
-  actBar.innerHTML='<button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 12px" onclick="printVisitSummary('+vn+')">🖨 Print Visit Summary</button>'+
+  actBar.innerHTML='<button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 12px" onclick="previewVisitSummary('+vn+')">📋 Visit Summary</button>'+
     '<button class="btn btn-light" style="background:#dbeafe;color:#1e40af;font-size:11px;padding:6px 12px" onclick="emailVisitSummary('+vn+')">✉️ Email to Patient</button>';
   div.appendChild(actBar);
 
@@ -2908,28 +2935,58 @@ function buildPrintView(){
   return;
 }
 
-function doPrint(){
-  buildPrintView();
-  var pi=S.patientInfo;
-  var rawName=(pi.name||"").trim();
-  var lastName="", firstName="";
-  if(rawName.indexOf(",")>-1){
-    var parts=rawName.split(",");
-    lastName=(parts[0]||"").trim();
-    firstName=(parts[1]||"").trim();
-  } else {
-    var words=rawName.split(/\s+/);
-    lastName=words.length>1?words[words.length-1]:"";
-    firstName=words.length>1?words.slice(0,words.length-1).join(" "):words[0]||"";
-  }
-  var colDate=(pi.collection||"").trim();
-  var namePart=lastName&&firstName?(lastName+", "+firstName):(rawName||"Patient");
-  var titleStr=colDate?(namePart+" "+colDate):namePart;
+// ── PREVIEW SYSTEM ────────────────────────────────────────────
+// Reusable on-screen preview overlay. Content is rendered into
+// #previewContent. The user can scroll, review, then print or close.
+var _previewMode=null; // 'timeline'|'findings'|'visit'
+function _openPreview(title,html,mode){
+  _previewMode=mode;
+  document.getElementById("previewTitle").textContent=title;
+  document.getElementById("previewContent").innerHTML=html;
+  document.getElementById("previewOverlay").classList.add("open");
+  document.getElementById("previewContent").scrollTop=0;
+}
+function closePreview(){
+  document.getElementById("previewOverlay").classList.remove("open");
+  _previewMode=null;
+}
+function previewDoPrint(){
+  // Copy preview content into the hidden #printView, then print.
+  var pvc=document.getElementById("pv-content");
+  pvc.innerHTML=document.getElementById("previewContent").innerHTML;
+  var pi=S.patientInfo||{};
   var origTitle=document.title;
-  document.title=titleStr;
+  if(_previewMode==="timeline"){
+    var rawName=(pi.name||"").trim();
+    document.title=rawName||"Patient";
+  } else if(_previewMode==="findings"){
+    document.title=(pi.name||"Patient")+" — Findings Over Time";
+  } else if(_previewMode==="visit"){
+    document.title=(pi.name||"Patient")+" — Visit Summary";
+  }
+  closePreview();
   window.print();
   document.title=origTitle;
 }
+
+function previewTimeline(){
+  buildPrintView();
+  var html=document.getElementById("pv-content").innerHTML;
+  _openPreview("📊 Timeline Preview",html,"timeline");
+}
+function previewFindings(){
+  buildPositiveFindingsView();
+  var html=document.getElementById("pv-content").innerHTML;
+  _openPreview("📊 Findings Over Time",html,"findings");
+}
+function previewVisitSummary(vn){
+  var html=_buildVisitSummaryHtml(vn);
+  _openPreview("📋 Visit "+vn+" Summary",html,"visit");
+}
+
+// Keep legacy print functions for backward compat
+function doPrint(){ previewTimeline(); }
+function doPrintFindings(){ previewFindings(); }
 
 // ════════════════════════════════════════════════════════════════
 //  TODAY BUTTON
@@ -3899,8 +3956,10 @@ var _MODAL_CLOSERS={
   doseModal: closeDoseEditor
 };
 function _closeTopmostModal(){
-  // Close only the topmost open modal (handles stacked overlays — e.g.
-  // macroBuilderModal opened from within macroModal).
+  // Check preview overlay first (highest z-index)
+  var pov=document.getElementById("previewOverlay");
+  if(pov && pov.classList.contains("open")){ closePreview(); return true; }
+  // Then close the topmost open modal
   var order=["macroBuilderModal","doseModal","emailModal","settingsModal","pickerModal","macroModal"];
   for(var i=0;i<order.length;i++){
     var el=document.getElementById(order[i]);
@@ -4297,20 +4356,7 @@ function _buildVisitSummaryHtml(vn){
   return h;
 }
 
-function printVisitSummary(vn){
-  var content=document.getElementById("pv-content");
-  var hdr=document.getElementById("pv-meta");
-  var origContent=content.innerHTML, origMeta=hdr.innerHTML;
-  content.innerHTML=_buildVisitSummaryHtml(vn);
-  var origTitle=document.title;
-  var pi=S.patientInfo||{};
-  document.title=(pi.name||"Patient")+" — Visit "+vn+" Summary";
-  window.print();
-  document.title=origTitle;
-  // Restore so the main print view isn't left modified
-  content.innerHTML=origContent;
-  hdr.innerHTML=origMeta;
-}
+function printVisitSummary(vn){ previewVisitSummary(vn); }
 
 function _plainVisitSummary(vn){
   var d=_collectVisitSummary(vn);
