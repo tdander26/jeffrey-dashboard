@@ -486,6 +486,16 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .pk-tile .pk-side{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:#94a3b8;font-weight:800}
 
 /* ══════════════════════════════════════
+   EMAIL PREVIEW MODAL
+══════════════════════════════════════ */
+.em-lbl{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;display:block;margin:10px 0 4px}
+.em-lbl:first-child{margin-top:0}
+.em-input{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;font-family:inherit}
+.em-input:focus{border-color:#3b82f6}
+.em-hint{font-size:11px;color:#64748b;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;margin:10px 0}
+.em-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px}
+
+/* ══════════════════════════════════════
    SETTINGS MODAL
 ══════════════════════════════════════ */
 .settings-btn{background:rgba(255,255,255,.15);color:white;border:none;cursor:pointer;padding:8px 12px;border-radius:8px;font-size:16px;transition:all .2s}
@@ -636,6 +646,33 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
           <input type="password" id="settingsNewPw" placeholder="New password...">
           <button onclick="changeAccessPw()">Save</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL PREVIEW MODAL -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal-card" style="max-width:620px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">✉️ Email Visit Summary</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="emailSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeEmailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="em-lbl">To</label>
+      <input type="email" id="emTo" class="em-input">
+      <label class="em-lbl">Subject</label>
+      <input type="text" id="emSubject" class="em-input">
+      <label class="em-lbl">Message</label>
+      <textarea id="emBody" class="em-input" style="min-height:260px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.5"></textarea>
+      <div class="em-hint">💡 If "Open in Email App" doesn't launch your mail client, use <strong>Copy Summary</strong> and paste it into Superhuman / Gmail / Outlook.</div>
+      <div class="em-actions">
+        <button class="btn btn-green" onclick="emailOpenMailApp()">📧 Open in Email App</button>
+        <button class="btn btn-blue" onclick="emailCopySummary()">📋 Copy Summary</button>
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="emailOpenSuperhuman()">🪄 Open Superhuman</button>
       </div>
     </div>
   </div>
@@ -3912,25 +3949,71 @@ function _plainVisitSummary(vn){
   return lines.join("\n");
 }
 
+var _emailCtx=null;
+
 function emailVisitSummary(vn){
   var pi=S.patientInfo||{};
-  var to=pi.email||"";
-  if(!to){
-    var ans=prompt("No patient email on file. Enter an address to send this summary to, or Cancel to fill in the patient's Email field first.");
-    if(!ans) return;
-    to=ans.trim();
-  }
   var d=_collectVisitSummary(vn);
   var subject="Visit "+vn+" Summary"+(d.visitDate?" — "+d.visitDate:"")+(d.patientName?" — "+d.patientName:"");
   var body=_plainVisitSummary(vn);
-  var mailto="mailto:"+encodeURIComponent(to)+
-    "?subject="+encodeURIComponent(subject)+
+  _emailCtx={vn:vn};
+  document.getElementById("emailSub").textContent=
+    "Visit "+vn+(d.visitDate?" · "+d.visitDate:"")+(d.patientName?" · "+d.patientName:"");
+  document.getElementById("emTo").value=pi.email||"";
+  document.getElementById("emSubject").value=subject;
+  document.getElementById("emBody").value=body;
+  document.getElementById("emailModal").classList.add("open");
+  setTimeout(function(){
+    var ta=document.getElementById("emBody"); if(ta) ta.scrollTop=0;
+    if(!pi.email) { var to=document.getElementById("emTo"); if(to) to.focus(); }
+  },50);
+}
+function closeEmailModal(){
+  document.getElementById("emailModal").classList.remove("open");
+  _emailCtx=null;
+}
+function emailOpenMailApp(){
+  var to=document.getElementById("emTo").value.trim();
+  var subj=document.getElementById("emSubject").value;
+  var body=document.getElementById("emBody").value;
+  if(!to){ alert("Enter a recipient email first."); return; }
+  var url="mailto:"+encodeURIComponent(to)+
+    "?subject="+encodeURIComponent(subj)+
     "&body="+encodeURIComponent(body);
-  // mailto has URL length limits; warn if huge
-  if(mailto.length>7500){
-    if(!confirm("This summary is very long and may be truncated by your email client. Continue anyway?")) return;
+  // <a>-click is more reliable than window.location.href for protocol handoff.
+  var a=document.createElement("a");
+  a.href=url;
+  a.rel="noopener";
+  document.body.appendChild(a);
+  try{ a.click(); }catch(e){}
+  setTimeout(function(){ if(a.parentNode) a.parentNode.removeChild(a); },500);
+  showToast("📧 Opening email app…");
+}
+function emailCopySummary(){
+  var to=document.getElementById("emTo").value.trim();
+  var subj=document.getElementById("emSubject").value;
+  var body=document.getElementById("emBody").value;
+  var combined=(to?"To: "+to+"\n":"")+(subj?"Subject: "+subj+"\n":"")+"\n"+body;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(combined).then(function(){
+      showToast("📋 Summary copied — paste into your email app");
+    },function(){ _emailFallbackCopy(combined); });
+  } else {
+    _emailFallbackCopy(combined);
   }
-  window.location.href=mailto;
+}
+function _emailFallbackCopy(text){
+  var ta=document.createElement("textarea");
+  ta.value=text;
+  ta.style.cssText="position:fixed;top:-9999px;left:-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand("copy"); showToast("📋 Summary copied"); }
+  catch(e){ alert("Couldn't copy automatically. Select the Message field and copy manually."); }
+  document.body.removeChild(ta);
+}
+function emailOpenSuperhuman(){
+  window.open("https://mail.superhuman.com/","_blank","noopener");
 }
 
 // ════════════════════════════════════════════════════════════════
