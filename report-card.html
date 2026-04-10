@@ -1305,7 +1305,74 @@ function renderStats() {
   }
   html += '</div>';
 
-  // Row 3: Top Findings
+  // Row 3: Symptom Resolution Leaderboard
+  if(symKeys.length){
+    // Build sorted leaderboard by avg weeks to 80% (blue milestone)
+    var board=symKeys.map(function(lkey){
+      var agg=symAgg[lkey], n=agg.patients.length;
+      var bVals=agg.patients.filter(function(p){return p.wB!==null;}).map(function(p){return p.wB;});
+      var gVals=agg.patients.filter(function(p){return p.wG!==null;}).map(function(p){return p.wG;});
+      var avgB=bVals.length?bVals.reduce(function(a,b){return a+b;},0)/bVals.length:null;
+      var avgG=gVals.length?gVals.reduce(function(a,b){return a+b;},0)/gVals.length:null;
+      var pctB=Math.round(bVals.length/n*100);
+      var pctG=Math.round(gVals.length/n*100);
+      return {label:agg.label, n:n, avgB:avgB, avgG:avgG, pctB:pctB, pctG:pctG};
+    }).filter(function(r){return r.n>=1;});
+    // Sort: symptoms that HAVE reached 80% by avg weeks (fast first), then never-reached at bottom
+    board.sort(function(a,b){
+      if(a.avgB!==null && b.avgB!==null) return a.avgB-b.avgB;
+      if(a.avgB!==null) return -1;
+      if(b.avgB!==null) return 1;
+      return b.n-a.n;
+    });
+    var maxWk=0;
+    board.forEach(function(r){ if(r.avgB!==null && r.avgB>maxWk) maxWk=r.avgB; if(r.avgG!==null && r.avgG>maxWk) maxWk=r.avgG; });
+    maxWk=Math.max(maxWk,1);
+
+    html+='<div class="stats-section">';
+    html+='<div class="stats-section-title">\u{1F3C6} Resolution Leaderboard <span style="font-size:11px;font-weight:500;color:#94a3b8;margin-left:8px">Avg weeks to 80% better — fastest at top</span></div>';
+    html+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
+    html+='<thead><tr style="border-bottom:2px solid #e2e8f0;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;font-weight:800">';
+    html+='<th style="text-align:left;padding:6px 8px">Symptom</th>';
+    html+='<th style="text-align:center;padding:6px 4px;width:50px">Cases</th>';
+    html+='<th style="text-align:center;padding:6px 4px;width:70px">% → 80%</th>';
+    html+='<th style="text-align:center;padding:6px 4px;width:80px">Avg wks</th>';
+    html+='<th style="text-align:left;padding:6px 8px;min-width:120px">Speed</th>';
+    html+='</tr></thead><tbody>';
+    board.forEach(function(r){
+      var isStalled=r.pctB<30 && r.n>=3;
+      var rowBg=isStalled?'background:#fef2f2':'';
+      html+='<tr style="border-bottom:1px solid #f1f5f9;'+rowBg+'">';
+      html+='<td style="padding:8px;font-weight:700;color:#374151">'+escHtml(r.label)+(isStalled?' <span style="color:#ef4444;font-size:10px;font-weight:800">⚠ STALLED</span>':'')+'</td>';
+      html+='<td style="text-align:center;padding:8px 4px;color:#64748b">'+r.n+'</td>';
+      html+='<td style="text-align:center;padding:8px 4px"><span style="padding:2px 8px;border-radius:10px;font-weight:800;font-size:11px;'+
+        (r.pctB>=70?'background:#dcfce7;color:#166534':r.pctB>=40?'background:#fef9c3;color:#92400e':'background:#fee2e2;color:#991b1b')+'">'+r.pctB+'%</span></td>';
+      html+='<td style="text-align:center;padding:8px 4px;font-weight:800;color:'+(r.avgB!==null?(r.avgB<=4?'#16a34a':r.avgB<=8?'#ca8a04':'#dc2626'):'#94a3b8')+'">'+(r.avgB!==null?(Math.round(r.avgB*10)/10)+'w':'—')+'</td>';
+      // Speed bar
+      var barW=r.avgB!==null?Math.max(8,Math.round(r.avgB/maxWk*100)):0;
+      var barColor=r.avgB!==null?(r.avgB<=4?'#22c55e':r.avgB<=8?'#eab308':'#ef4444'):'#e2e8f0';
+      html+='<td style="padding:8px"><div style="background:#f1f5f9;border-radius:4px;height:14px;position:relative;overflow:hidden">';
+      if(r.avgB!==null) html+='<div style="width:'+barW+'%;background:'+barColor+';height:100%;border-radius:4px;transition:width .3s"></div>';
+      else html+='<div style="width:100%;background:#f1f5f9;height:100%"></div>';
+      html+='</div></td>';
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+
+    // Problem symptoms callout
+    var problems=board.filter(function(r){return r.pctB<30 && r.n>=3;});
+    if(problems.length){
+      html+='<div style="margin-top:14px;padding:12px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px">';
+      html+='<div style="font-size:12px;font-weight:800;color:#991b1b;margin-bottom:6px">\u26A0\uFE0F Problem Areas — '+problems.length+' symptom'+(problems.length===1?'':'s')+' with <30% reaching 80%</div>';
+      problems.forEach(function(r){
+        html+='<div style="font-size:12px;color:#991b1b;padding:2px 0">\u2022 <strong>'+escHtml(r.label)+'</strong> — '+r.n+' cases, only '+r.pctB+'% reaching 80%'+(r.avgB!==null?' (avg '+Math.round(r.avgB*10)/10+'w when they do)':'')+'</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  }
+
+  // Row 4: Top Findings
   html += '<div class="stats-section">';
   html += '<div class="stats-section-title">\u{1F50D} Top Objective Findings</div>';
   var findingsList = Object.keys(findingCounts).map(function(k){return findingCounts[k];});
@@ -1375,6 +1442,35 @@ function symMilestone(emoji, label, pct, avgWks, avgVis) {
 }
 
 
+// Mini symptom progress bar for patient cards on the Patients tab
+function _ptSymBar(ptId){
+  var raw=null;
+  try{ raw=_LS.getItem(PT_PREFIX+ptId); }catch(e){}
+  if(!raw) return '';
+  var data; try{ data=JSON.parse(raw); }catch(e){ return ''; }
+  if(!data) return '';
+  var counts={red:0,yellow:0,blue:0,green:0};
+  var symRows=data.symRows||4, symLabels=data.symLabels||{}, symptoms=data.symptoms||{};
+  for(var r=0;r<symRows;r++){
+    var lbl=(symLabels["r"+r]||"").trim();
+    if(!lbl||lbl==="Complaint "+(r+1)) continue;
+    var cur=null;
+    for(var w=1;w<=26;w++){ var c=symptoms["r"+r+"_c"+w]; if(c) cur=c; }
+    counts[cur||"red"]++;
+  }
+  var total=counts.red+counts.yellow+counts.blue+counts.green;
+  if(!total) return '';
+  var pR=Math.round(counts.red/total*100), pY=Math.round(counts.yellow/total*100),
+      pB=Math.round(counts.blue/total*100), pG=Math.round(counts.green/total*100);
+  return '<div style="height:6px;border-radius:3px;overflow:hidden;background:#f1f5f9;margin-top:6px;display:flex" title="'+
+    counts.red+' no progress, '+counts.yellow+' any progress, '+counts.blue+' 80%, '+counts.green+' resolved">'+
+    (pR?'<div style="width:'+pR+'%;background:#ef4444"></div>':'')+
+    (pY?'<div style="width:'+pY+'%;background:#eab308"></div>':'')+
+    (pB?'<div style="width:'+pB+'%;background:#3b82f6"></div>':'')+
+    (pG?'<div style="width:'+pG+'%;background:#22c55e"></div>':'')+
+    '</div>';
+}
+
 // ════════════════════════════════════════════════════════════════
 //  DASHBOARD
 // ════════════════════════════════════════════════════════════════
@@ -1435,6 +1531,7 @@ function renderDash() {
       getStatusBadgeHtml(pt.status)+
       visitBadge+
       (mod?'<div class="pt-modified">Last updated: '+mod+'</div>':'')+
+      _ptSymBar(pt.id)+
       '<button class="pt-del" title="Delete patient" onclick="deletePatient(event,\''+pt.id+'\')">✕</button>';
     card.addEventListener("click",function(){ openPatient(pt.id); });
     grid.appendChild(card);
