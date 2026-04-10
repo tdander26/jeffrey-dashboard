@@ -293,34 +293,39 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .recent-name{font-weight:700;font-size:14px;color:#1a1a2e;flex:1;min-width:120px}
 .recent-meta{font-size:11px;color:#64748b}
 
-/* PRINT */
+/* PRINT + PREVIEW content styles (shared between print and on-screen preview) */
+.pv-header{margin-bottom:16px;border-bottom:3px solid #1a1a2e;padding-bottom:10px}
+.pv-title{font-size:18px;font-weight:900;color:#1a1a2e}
+.pv-meta{font-size:11px;color:#374151;margin-top:4px}
+.pv-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.pv-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700}
+.pv-leg-dot{width:14px;height:14px;border-radius:3px}
+.pv-section{margin-bottom:20px}
+.pv-section-title{font-size:13px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 0;border-bottom:2px solid #e2e8f0}
+.pv-note{font-size:10px;color:#64748b;font-style:italic;margin-bottom:8px}
+.tl-table{border-collapse:collapse;width:100%;font-size:9px}
+.tl-table th{background:#1a1a2e;color:white;padding:4px 3px;text-align:center;font-size:9px;white-space:nowrap;font-weight:700}
+.tl-table th.row-hdr{text-align:left;min-width:160px;padding-left:6px;font-size:10px}
+.tl-table th.sec-hdr{background:#374151;text-align:left;padding-left:6px;font-size:9px;color:white}
+.tl-table td{border:1px solid #e5e7eb;padding:1px 2px;text-align:center;vertical-align:middle}
+.tl-table td.row-lbl{text-align:left;padding:3px 6px;font-size:9px;white-space:nowrap;background:#f9fafb;font-weight:600}
+.tl-table td.row-lbl.sub-lbl{padding-left:12px;font-weight:500}
+.tl-block{width:28px;height:16px;border-radius:2px;display:inline-block;margin:1px auto}
+.tl-empty{width:28px;height:16px;display:inline-block}
+.pv-footer{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between}
+
+/* PRINT — visibility rules only */
 #printView{display:none}
 @page{size:landscape;margin:18mm 16mm}
 @media print{
   @page{size:landscape;margin:18mm 16mm}
   body{background:white!important}
-  #pwOverlay,#dash,#app,#toast{display:none!important}
+  #pwOverlay,#dash,#app,#toast,.preview-overlay{display:none!important}
   #printView{display:block!important}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .pv-header{margin-bottom:16px;border-bottom:3px solid #1a1a2e;padding-bottom:10px}
-  .pv-title{font-size:18px;font-weight:900;color:#1a1a2e}
-  .pv-meta{font-size:11px;color:#374151;margin-top:4px}
-  .pv-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
-  .pv-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700}
-  .pv-leg-dot{width:14px;height:14px;border-radius:3px}
-  .pv-section{margin-bottom:20px}
-  .pv-section-title{font-size:13px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 0;border-bottom:2px solid #e2e8f0}
-  .pv-note{font-size:10px;color:#64748b;font-style:italic;margin-bottom:8px}
-  .tl-table{border-collapse:collapse;width:100%;font-size:9px}
-  .tl-table th{background:#1a1a2e!important;color:white!important;padding:4px 3px;text-align:center;font-size:9px;white-space:nowrap;font-weight:700}
-  .tl-table th.row-hdr{text-align:left;min-width:160px;padding-left:6px;font-size:10px}
-  .tl-table th.sec-hdr{background:#374151!important;text-align:left;padding-left:6px;font-size:9px}
-  .tl-table td{border:1px solid #e5e7eb;padding:1px 2px;text-align:center;vertical-align:middle}
-  .tl-table td.row-lbl{text-align:left;padding:3px 6px;font-size:9px;white-space:nowrap;background:#f9fafb!important;font-weight:600}
-  .tl-table td.row-lbl.sub-lbl{padding-left:12px;font-weight:500}
-  .tl-block{width:28px;height:16px;border-radius:2px;display:inline-block;margin:1px auto}
-  .tl-empty{width:28px;height:16px;display:inline-block}
-  .pv-footer{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between}
+  .tl-table th{background:#1a1a2e!important;color:white!important}
+  .tl-table th.sec-hdr{background:#374151!important;color:white!important}
+  .tl-table td.row-lbl{background:#f9fafb!important}
 }
 @media(max-width:600px){
   .visits-grid{grid-template-columns:1fr}
@@ -522,7 +527,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .preview-overlay{position:fixed;inset:0;z-index:9800;background:rgba(15,23,42,.7);display:none;flex-direction:column}
 .preview-overlay.open{display:flex}
 .preview-toolbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1e293b;color:white;gap:10px}
-.preview-toolbar .pv-title{font-size:14px;font-weight:800}
+.preview-toolbar .pvt-label{font-size:14px;font-weight:800}
 .preview-toolbar button{padding:8px 16px;border-radius:8px;border:none;font-size:13px;font-weight:700;cursor:pointer}
 .preview-toolbar .pv-print{background:#3b82f6;color:white}
 .preview-toolbar .pv-print:hover{background:#2563eb}
@@ -758,7 +763,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 <!-- TIMELINE / FINDINGS PREVIEW OVERLAY -->
 <div class="preview-overlay" id="previewOverlay">
   <div class="preview-toolbar">
-    <span class="pv-title" id="previewTitle">Preview</span>
+    <span class="pvt-label" id="previewTitle">Preview</span>
     <div style="display:flex;gap:8px">
       <button class="pv-print" id="previewPrintBtn" onclick="previewDoPrint()">🖨 Print</button>
       <button class="pv-close" onclick="closePreview()">✕ Close</button>
@@ -2951,9 +2956,12 @@ function closePreview(){
   _previewMode=null;
 }
 function previewDoPrint(){
-  // Copy preview content into the hidden #printView, then print.
-  var pvc=document.getElementById("pv-content");
-  pvc.innerHTML=document.getElementById("previewContent").innerHTML;
+  // Replace the entire #printView content with just the preview HTML.
+  // Each view (timeline, findings, visit summary) already includes its
+  // own header and footer, so we don't need the permanent printView shell.
+  var pv=document.getElementById("printView");
+  var origPV=pv.innerHTML;
+  pv.innerHTML=document.getElementById("previewContent").innerHTML;
   var pi=S.patientInfo||{};
   var origTitle=document.title;
   if(_previewMode==="timeline"){
@@ -2967,6 +2975,8 @@ function previewDoPrint(){
   closePreview();
   window.print();
   document.title=origTitle;
+  // Restore the original printView shell
+  pv.innerHTML=origPV;
 }
 
 function previewTimeline(){
