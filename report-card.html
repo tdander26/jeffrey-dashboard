@@ -327,6 +327,96 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   .cb-btn{padding:6px 11px;font-size:11px}
   .pt-grid{grid-template-columns:1fr}
 }
+
+/* ══════════════════════════════════════
+   A1: DENSE iPAD LAYOUT
+══════════════════════════════════════ */
+@media(min-width:1024px){
+  #app{max-width:1400px}
+  .card{padding:14px 20px;margin-bottom:12px}
+  .card-title{margin-bottom:10px}
+  .field-row .fg{min-width:130px}
+  .field-row .fg input,.field-row .fg select{padding:7px 10px;font-size:13px}
+  .visits-grid{grid-template-columns:1fr;gap:10px}
+  .visit-card{padding:14px 16px}
+  .dense-vsec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 14px}
+  .visit-card .vsec{margin-bottom:3px}
+  .visit-card .vfield{min-height:26px}
+}
+@media(min-width:1280px){
+  .dense-vsec-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* ══════════════════════════════════════
+   A2: MACRO SYSTEM
+══════════════════════════════════════ */
+.macro-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 10px;margin-bottom:8px;background:linear-gradient(135deg,#fdf4ff,#faf5ff);border:1px solid #e9d5ff;border-radius:8px}
+.macro-bar-label{font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.macro-pill{padding:4px 11px;border-radius:14px;border:1.5px solid #c4b5fd;background:white;color:#5b21b6;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.macro-pill:hover{background:#7c3aed;color:white;border-color:#7c3aed;transform:translateY(-1px)}
+.macro-pill.outline{background:transparent;border-style:dashed}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:9700;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-card{background:white;border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.modal-hdr{padding:14px 20px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-title{font-size:15px;font-weight:800;color:#1a1a2e}
+.modal-close{background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:14px;font-weight:900;cursor:pointer;color:#64748b;flex-shrink:0}
+.modal-close:hover{background:#e2e8f0;color:#1a1a2e}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.macro-cat{font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
+.macro-cat:first-child{margin-top:0}
+.macro-list{display:flex;flex-wrap:wrap;gap:6px}
+.macro-item{padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:8px;background:white;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;text-align:left}
+.macro-item:hover{border-color:#7c3aed;background:#faf5ff;color:#5b21b6}
+.macro-item .mac-meta{font-size:10px;color:#94a3b8;font-weight:500}
+.macro-item .mac-del{margin-left:6px;color:#ef4444;opacity:.5;font-size:12px}
+.macro-item .mac-del:hover{opacity:1}
+.macro-preview-flash{animation:macroFlash 1.4s ease-out}
+@keyframes macroFlash{0%{box-shadow:0 0 0 4px #fde047}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ══════════════════════════════════════
+   A3: COPY FORWARD BUTTON
+══════════════════════════════════════ */
+.copy-fwd-btn{padding:4px 9px;border:2px solid #22c55e;border-radius:6px;background:white;color:#16a34a;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:6px}
+.copy-fwd-btn:hover{background:#22c55e;color:white}
+.copy-fwd-btn:disabled{opacity:.35;cursor:not-allowed;border-color:#cbd5e1;color:#94a3b8;background:white}
+.macro-open-btn{padding:4px 9px;border:2px solid #7c3aed;border-radius:6px;background:white;color:#7c3aed;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:6px}
+.macro-open-btn:hover{background:#7c3aed;color:white}
+
+/* ══════════════════════════════════════
+   A4: SNIPPET CHIPS
+══════════════════════════════════════ */
+.snippet-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.snippet-chip{padding:3px 10px;border-radius:14px;border:1px solid #e2e8f0;background:#f8fafc;font-size:11px;font-weight:600;color:#475569;cursor:pointer;transition:all .12s;user-select:none}
+.snippet-chip:hover{background:#1a1a2e;color:white;border-color:#1a1a2e}
+.snippet-chip.add{border-style:dashed;color:#94a3b8;background:transparent}
+
+/* ══════════════════════════════════════
+   A5: VOICE DICTATION
+══════════════════════════════════════ */
+.notes-editor-wrap{position:relative}
+.notes-editor-wrap textarea{padding-right:38px!important}
+.mic-btn{position:absolute;right:6px;bottom:6px;width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;color:#3b82f6;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:5}
+.mic-btn:hover{background:#3b82f6;color:white;border-color:#3b82f6}
+.mic-btn.recording{background:#ef4444;color:white;border-color:#ef4444;animation:micPulse 1.2s infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+
+/* ══════════════════════════════════════
+   A6: SUGGEST POPOVER
+══════════════════════════════════════ */
+.suggest-pop{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 12px 32px rgba(0,0,0,.2);z-index:9600;max-width:300px;display:none}
+.suggest-pop.open{display:block}
+.suggest-pop-title{font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.suggest-supp-row{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;color:#374151}
+.suggest-supp-row:hover{background:#faf5ff}
+.suggest-supp-row .check{width:14px;height:14px;border:2px solid #cbd5e1;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:900}
+.suggest-supp-row .check.on{background:#22c55e;border-color:#22c55e}
+
+/* ══════════════════════════════════════
+   A7: AUTO-LOCK
+══════════════════════════════════════ */
+.lock-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:none;align-items:center;justify-content:center;z-index:9800}
+.lock-overlay.open{display:flex}
 </style>
 </head>
 <body>
@@ -347,6 +437,57 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
 <!-- TOAST -->
 <div id="toast">✓ Saved</div>
+
+<!-- A2: MACRO MODAL -->
+<div class="modal-overlay" id="macroModal">
+  <div class="modal-card">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">⚡ Macros</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="macroModalSub">Tap a macro to apply it to the current visit</div>
+      </div>
+      <button class="modal-close" onclick="closeMacroModal()">✕</button>
+    </div>
+    <div class="modal-body" id="macroModalBody"></div>
+    <div style="padding:10px 20px;border-top:2px solid #f1f5f9;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap">
+      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="openMacroBuilder()">+ Save current visit as macro</button>
+      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="exportMacros()">⬇ Export library</button>
+      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="document.getElementById('macroImportFile').click()">⬆ Import library</button>
+      <input type="file" id="macroImportFile" accept=".json" style="display:none" onchange="importMacros(this)">
+    </div>
+  </div>
+</div>
+
+<!-- A2: MACRO BUILDER MODAL -->
+<div class="modal-overlay" id="macroBuilderModal">
+  <div class="modal-card" style="max-width:480px">
+    <div class="modal-hdr">
+      <div class="modal-title">Save current visit as macro</div>
+      <button class="modal-close" onclick="closeMacroBuilder()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Macro name</label>
+      <input type="text" id="mbName" placeholder="e.g. Vagal dysfunction pattern" style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin:6px 0 12px">
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Category</label>
+      <select id="mbCategory" style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin:6px 0 12px">
+        <option>Gut</option><option>Autonomic</option><option>Hormonal</option><option>TMJ</option>
+        <option>Sleep</option><option>Blood Sugar</option><option>MSK</option><option>Brain</option>
+        <option>Recurrent Injury</option><option>Protocols</option><option>Other</option>
+      </select>
+      <div id="mbPreview" style="font-size:11px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;max-height:180px;overflow-y:auto;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="closeMacroBuilder()">Cancel</button>
+        <button class="btn btn-blue" onclick="saveMacroFromVisit()">💾 Save macro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- A6: SUGGEST POPOVER -->
+<div class="suggest-pop" id="suggestPop">
+  <div class="suggest-pop-title" id="suggestPopTitle">Suggested supplements</div>
+  <div id="suggestPopBody"></div>
+</div>
 
 <!-- OFFENDER POPUP -->
 <div id="offenderPopup">
@@ -424,6 +565,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <button class="btn btn-light" onclick="backToDash()">← Patients</button>
       <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
       <button class="btn btn-light" onclick="doPrint()">🖨 Print Timeline</button>
+      <button class="btn btn-light" onclick="doPrintFindings()">🖨 Print Findings Over Time</button>
+      <button class="btn btn-light" style="background:rgba(168,85,247,.22);color:white" onclick="openMacroModal()">⚡ Macros</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
@@ -492,6 +635,45 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 </div>
 
 <script>
+// ════════════════════════════════════════════════════════════════
+//  SAFE STORAGE SHIM
+//  Falls back to in-memory map when localStorage is blocked
+//  (Safari private mode, data: URLs, preview iframes, etc.)
+// ════════════════════════════════════════════════════════════════
+var _LS=(function(){
+  var mem={}, ok=false;
+  try{
+    var t="__mhw_probe__";
+    window.localStorage.setItem(t,"1");
+    window.localStorage.removeItem(t);
+    ok=true;
+  }catch(e){ ok=false; }
+  if(ok){
+    return {
+      getItem:function(k){ try{return window.localStorage.getItem(k);}catch(e){return mem[k]===undefined?null:mem[k];} },
+      setItem:function(k,v){ try{window.localStorage.setItem(k,v);}catch(e){mem[k]=String(v);} },
+      removeItem:function(k){ try{window.localStorage.removeItem(k);}catch(e){delete mem[k];} },
+      _memOnly:false
+    };
+  }
+  return {
+    getItem:function(k){ return mem[k]===undefined?null:mem[k]; },
+    setItem:function(k,v){ mem[k]=String(v); },
+    removeItem:function(k){ delete mem[k]; },
+    _memOnly:true
+  };
+})();
+// Warn once if running in memory-only mode
+if(_LS._memOnly){
+  setTimeout(function(){
+    var b=document.createElement("div");
+    b.style.cssText="position:fixed;bottom:10px;left:10px;z-index:9999;background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:8px 14px;border-radius:8px;font:600 12px/1.4 sans-serif;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.15)";
+    b.innerHTML="⚠️ <strong>Preview mode:</strong> browser storage is blocked, so patient data will not persist between reloads. Open the file directly to save records.";
+    document.body.appendChild(b);
+    setTimeout(function(){ b.style.transition="opacity .6s"; b.style.opacity="0"; setTimeout(function(){b.remove();},700); },9000);
+  },400);
+}
+
 // ════════════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════════════
@@ -582,7 +764,7 @@ var S = blankState();
 // ════════════════════════════════════════════════════════════════
 function checkPw() {
   try {
-    var pw=localStorage.getItem("mhw_pw")||DEFAULT_PW;
+    var pw=_LS.getItem("mhw_pw")||DEFAULT_PW;
     var val=document.getElementById("pwInput").value;
     var errEl=document.getElementById("pwError");
     if(!val){ errEl.textContent="⚠️ Please enter the password."; errEl.style.display="block"; return; }
@@ -616,10 +798,10 @@ function logout() {
 //  PATIENT INDEX
 // ════════════════════════════════════════════════════════════════
 function loadIndex() {
-  try { return JSON.parse(localStorage.getItem(INDEX_KEY)||"[]"); } catch(e){ return []; }
+  try { return JSON.parse(_LS.getItem(INDEX_KEY)||"[]"); } catch(e){ return []; }
 }
 function saveIndex(idx) {
-  localStorage.setItem(INDEX_KEY,JSON.stringify(idx));
+  _LS.setItem(INDEX_KEY,JSON.stringify(idx));
 }
 
 function countVisits() {
@@ -703,7 +885,7 @@ function renderStats() {
     else onHoldCount++;
 
     var raw = null;
-    try { raw = localStorage.getItem(PT_PREFIX + pt.id); } catch(e) {}
+    try { raw = _LS.getItem(PT_PREFIX + pt.id); } catch(e) {}
     if (!raw) return;
     var data = null;
     try { data = JSON.parse(raw); } catch(e) { return; }
@@ -1009,7 +1191,7 @@ function newPatient() {
   S.patientInfo.status="active";
   // Save empty record so it appears in index
   updateIndex(id,S.patientInfo);
-  localStorage.setItem(PT_PREFIX+id,JSON.stringify(S));
+  _LS.setItem(PT_PREFIX+id,JSON.stringify(S));
   showApp();
 }
 
@@ -1017,7 +1199,7 @@ function openPatient(id) {
   currentPatientId=id;
   S=blankState();
   try{
-    var raw=localStorage.getItem(PT_PREFIX+id);
+    var raw=_LS.getItem(PT_PREFIX+id);
     if(raw) S=Object.assign(blankState(),JSON.parse(raw));
   }catch(e){}
   showApp();
@@ -1031,8 +1213,8 @@ function deletePatient(e,id) {
   if(!confirm("Delete "+name+"?\n\nThis cannot be undone.")) return;
   idx=idx.filter(function(p){ return p.id!==id; });
   saveIndex(idx);
-  localStorage.removeItem(PT_PREFIX+id);
-  localStorage.removeItem("mhw_export_"+id);
+  _LS.removeItem(PT_PREFIX+id);
+  _LS.removeItem("mhw_export_"+id);
   renderDash();
 }
 
@@ -1050,7 +1232,7 @@ function updateBackupStatus() {
   var el = document.getElementById("backupStatus");
   if (!el || !currentPatientId) return;
   var exportKey = "mhw_export_" + currentPatientId;
-  var lastExport = localStorage.getItem(exportKey);
+  var lastExport = _LS.getItem(exportKey);
   var html = "";
   if (!lastExport) {
     html = '<span class="backup-status backup-red">⚠️ Never exported — backup recommended</span>';
@@ -1575,11 +1757,15 @@ function toggleMsk(vn){
 function buildVisitCard(vn){
   var div=document.createElement("div"); div.className="visit-card"; div.id="vc"+vn;
   div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
-    '<div style="display:flex;align-items:center;gap:6px">'+
+    '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
     '<span style="font-size:10px;color:#94a3b8">Date</span>'+
     '<input type="date" class="vdi" id="vd'+vn+'">'+
     '<button class="today-btn" onclick="setToday(\'vd'+vn+'\')">Today</button>'+
+    '<button class="copy-fwd-btn" id="cpf'+vn+'" onclick="copyPriorVisit('+vn+')"'+(vn===1?' disabled title="No prior visit"':' title="Copy marks from Visit '+(vn-1)+'"')+'>⇲ Copy V'+(vn-1)+'</button>'+
+    '<button class="macro-open-btn" onclick="openMacroModal('+vn+')">⚡ Macros</button>'+
     '</div></div>';
+  // Dense multi-column grid for objective finding sections (iPad landscape)
+  var secGrid=document.createElement("div"); secGrid.className="dense-vsec-grid";
   FIELDS.forEach(function(sec,si){
     var secId="vsec_"+vn+"_"+si;
     var sd=document.createElement("div"); sd.className="vsec";
@@ -1625,6 +1811,21 @@ function buildVisitCard(vn){
         c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
         w.appendChild(c); od.appendChild(w);
       }
+      // A6: Suggest trigger (hidden unless current macro library has supplements for this finding)
+      (function(secName,itemLbl){
+        var sug=findingSupplementSuggestions(secName,itemLbl);
+        if(!sug.length) return;
+        var s=document.createElement("span");
+        s.className="suggest-trigger";
+        s.textContent="↳";
+        s.title="Suggested supplements ("+sug.length+")";
+        s.style.cssText="margin-left:6px;cursor:pointer;color:#7c3aed;font-size:12px;font-weight:900;padding:0 4px;border-radius:4px;flex-shrink:0";
+        s.addEventListener("click",function(e){
+          e.stopPropagation();
+          openSuggestPop(s,vn,secName,itemLbl);
+        });
+        od.appendChild(s);
+      })(sec.sec,item.lbl);
       row.appendChild(od); itemWrap.appendChild(row);
       // Inline tag pill panels (iPad-friendly, no popup)
       if(sec.hasOffenders){
@@ -1642,11 +1843,20 @@ function buildVisitCard(vn){
       body.appendChild(itemWrap);
     });
     sd.appendChild(body);
-    div.appendChild(sd);
+    secGrid.appendChild(sd);
   });
+  div.appendChild(secGrid);
+
   var no=document.createElement("div"); no.className="visit-notes";
-  no.innerHTML='<label>Visit Notes</label><textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>';
+  no.innerHTML='<label>Visit Notes</label>'+
+    '<div class="snippet-chips" id="sch'+vn+'"></div>'+
+    '<div class="notes-editor-wrap">'+
+    '<textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>'+
+    '<button class="mic-btn" id="mic'+vn+'" title="Dictate" onclick="toggleDictation('+vn+')">🎤</button>'+
+    '</div>';
   div.appendChild(no);
+  // Snippet chips build after append so the container exists
+  setTimeout(function(){ buildSnippetChips(vn); },0);
 
   // MSK section
   var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle"; mskToggle.id="msk_main_"+vn;
@@ -1894,7 +2104,7 @@ function loadVisitDates(){
 function saveAll(){
   if(!currentPatientId) return;
   collectPatientInfo();
-  localStorage.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
+  _LS.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
   updateIndex(currentPatientId,S.patientInfo);
   var t=document.getElementById("toast"); t.style.opacity="1";
   setTimeout(function(){ t.style.opacity="0"; },1600);
@@ -1920,7 +2130,7 @@ function bulkExport(){
   var idx=loadIndex();
   var patients={};
   idx.forEach(function(pt){
-    var raw=localStorage.getItem(PT_PREFIX+pt.id);
+    var raw=_LS.getItem(PT_PREFIX+pt.id);
     if(raw){ try{ patients[pt.id]=JSON.parse(raw); }catch(e){} }
   });
   var payload={
@@ -1963,13 +2173,13 @@ function bulkImport(input){
       payload.index.forEach(function(pt){
         existingMap[pt.id]=pt; // upsert into index
         if(payload.patients[pt.id]){
-          localStorage.setItem(PT_PREFIX+pt.id, JSON.stringify(payload.patients[pt.id]));
+          _LS.setItem(PT_PREFIX+pt.id, JSON.stringify(payload.patients[pt.id]));
         }
       });
 
       // Save merged index
       var mergedIdx=Object.values(existingMap);
-      localStorage.setItem(INDEX_KEY, JSON.stringify(mergedIdx));
+      _LS.setItem(INDEX_KEY, JSON.stringify(mergedIdx));
 
       input.value="";
       renderDash(); renderStats();
@@ -1991,7 +2201,7 @@ function exportData(){
   a.download="momentum_"+name+"_"+date+".json"; a.click();
   // Save export timestamp
   if(currentPatientId){
-    localStorage.setItem("mhw_export_"+currentPatientId, new Date().toISOString());
+    _LS.setItem("mhw_export_"+currentPatientId, new Date().toISOString());
     updateBackupStatus();
   }
 }
@@ -2326,6 +2536,510 @@ function setToday(inputId){
   el.value=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
   var vn=parseInt(inputId.replace("vd","")); if(vn) S.visitDates[vn]=el.value;
   autoSave();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A3: COPY FORWARD FROM PRIOR VISIT
+// ════════════════════════════════════════════════════════════════
+function copyPriorVisit(vn){
+  if(vn<=1) return;
+  var prev=vn-1;
+  var fromPfx="v"+prev+"_", toPfx="v"+vn+"_";
+  var copied=0, conflicts=0;
+  // Dry count for confirm prompt
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf(fromPfx)===0) copied++; });
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf(toPfx)===0) conflicts++; });
+  if(copied===0){ showToast("Nothing to copy from V"+prev); return; }
+  var msg="Copy "+copied+" mark"+(copied===1?"":"s")+" from Visit "+prev+" into Visit "+vn+"?";
+  if(conflicts>0) msg+="\n\nVisit "+vn+" already has "+conflicts+" mark"+(conflicts===1?"":"s")+" — they will be overwritten.";
+  if(!confirm(msg)) return;
+
+  // Clear existing target-visit marks/tags/notes of matching keys we will copy
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf(toPfx)===0) delete S.marks[k]; });
+  if(S.offenderTags){
+    Object.keys(S.offenderTags).forEach(function(k){
+      if(k.indexOf("v"+vn+"_of_")===0 || k.indexOf("v"+vn+"_tag_")===0) delete S.offenderTags[k];
+    });
+  }
+
+  // Copy marks
+  Object.keys(S.marks).forEach(function(k){
+    if(k.indexOf(fromPfx)===0){
+      var nk=toPfx+k.slice(fromPfx.length);
+      S.marks[nk]=S.marks[k];
+    }
+  });
+  // Copy offender / tag panels
+  if(S.offenderTags){
+    Object.keys(S.offenderTags).forEach(function(k){
+      var mOf=k.match(/^v(\d+)_of_(.+)$/), mTg=k.match(/^v(\d+)_tag_(.+)$/);
+      if(mOf && parseInt(mOf[1])===prev) S.offenderTags["v"+vn+"_of_"+mOf[2]]=S.offenderTags[k].slice();
+      if(mTg && parseInt(mTg[1])===prev) S.offenderTags["v"+vn+"_tag_"+mTg[2]]=S.offenderTags[k].slice();
+    });
+  }
+  // Re-render the affected cells for this visit
+  Object.keys(S.marks).forEach(function(k){
+    if(k.indexOf(toPfx)!==0) return;
+    if(k.indexOf("_msk_")>=0||k.indexOf("_org_")>=0) renderMskCell(k);
+    else if(k.indexOf("_supp_")>=0) renderSuppCell(k);
+    else renderMark(k);
+  });
+  renderAllOffenderTags(); renderSuppMarked(vn); updateAllHL();
+  autoSave();
+  showToast("✓ Copied V"+prev+" → V"+vn);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A4: SNIPPET CHIPS
+// ════════════════════════════════════════════════════════════════
+var DEFAULT_SNIPPETS=[
+  "Improved","No change","Resolved","Flare-up","Adherent","Non-adherent",
+  "Emotional component","Diet compliance good","Diet compliance poor",
+  "+1 week follow-up","+2 week follow-up","Homework given","Reviewed labs"
+];
+function getSnippets(){
+  try{ var s=JSON.parse(_LS.getItem("mhw_snippets")||"null"); return Array.isArray(s)?s:DEFAULT_SNIPPETS.slice(); }
+  catch(e){ return DEFAULT_SNIPPETS.slice(); }
+}
+function saveSnippets(arr){ _LS.setItem("mhw_snippets",JSON.stringify(arr)); }
+function buildSnippetChips(vn){
+  var c=document.getElementById("sch"+vn); if(!c) return;
+  c.innerHTML="";
+  var snippets=getSnippets();
+  snippets.forEach(function(s){
+    var b=document.createElement("span"); b.className="snippet-chip"; b.textContent=s;
+    b.addEventListener("click",function(e){
+      e.stopPropagation();
+      var ta=document.getElementById("vn"+vn); if(!ta) return;
+      var cur=ta.value.trim();
+      ta.value=(cur?cur+" ":"")+"- "+s+". ";
+      S.visitNotes[vn]=ta.value; ta.focus(); autoSave();
+    });
+    c.appendChild(b);
+  });
+  var add=document.createElement("span"); add.className="snippet-chip add"; add.textContent="+ Snippet";
+  add.addEventListener("click",function(e){
+    e.stopPropagation();
+    var n=prompt("New snippet text:"); if(!n) return;
+    n=n.trim(); if(!n) return;
+    var arr=getSnippets(); if(arr.indexOf(n)<0){ arr.push(n); saveSnippets(arr); }
+    for(var v=1;v<=18;v++) buildSnippetChips(v);
+  });
+  c.appendChild(add);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A5: VOICE DICTATION (Web Speech API)
+// ════════════════════════════════════════════════════════════════
+var _speechRec=null, _speechVn=null;
+function _getSpeech(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  return SR?new SR():null;
+}
+function toggleDictation(vn){
+  var btn=document.getElementById("mic"+vn);
+  if(_speechRec && _speechVn===vn){ try{ _speechRec.stop(); }catch(e){} _speechRec=null; _speechVn=null; if(btn) btn.classList.remove("recording"); return; }
+  if(_speechRec){ try{ _speechRec.stop(); }catch(e){} _speechRec=null; }
+  var rec=_getSpeech();
+  if(!rec){ alert("Speech recognition isn't supported in this browser. Use Safari on iPadOS 14.5+ or Chrome."); return; }
+  rec.continuous=true; rec.interimResults=false; rec.lang="en-US";
+  rec.onresult=function(e){
+    var ta=document.getElementById("vn"+vn); if(!ta) return;
+    var txt="";
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) txt+=e.results[i][0].transcript+" ";
+    }
+    if(!txt) return;
+    var cur=ta.value.trim();
+    ta.value=(cur?cur+" ":"")+txt.trim();
+    S.visitNotes[vn]=ta.value; autoSave();
+  };
+  rec.onend=function(){
+    if(_speechVn===vn){ _speechRec=null; _speechVn=null; if(btn) btn.classList.remove("recording"); }
+  };
+  rec.onerror=function(){ if(btn) btn.classList.remove("recording"); _speechRec=null; _speechVn=null; };
+  try{ rec.start(); }catch(e){ alert("Couldn't start dictation: "+e.message); return; }
+  _speechRec=rec; _speechVn=vn; if(btn) btn.classList.add("recording");
+}
+// Hide mic buttons if unsupported
+(function(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    var st=document.createElement("style");
+    st.textContent=".mic-btn{display:none!important}.notes-editor-wrap textarea{padding-right:9px!important}";
+    document.head.appendChild(st);
+  }
+})();
+
+// ════════════════════════════════════════════════════════════════
+//  A2: MACRO SYSTEM
+// ════════════════════════════════════════════════════════════════
+var DEFAULT_MACROS=[
+  { id:"vagal_basic", label:"Vagal pattern (basic)", category:"Autonomic",
+    applies:[{section:"AUTONOMIC CHALLENGES",item:"Vagus Challenge",mark:"red"},
+             {section:"AUTONOMIC CHALLENGES",item:"HRV",mark:"red"}],
+    note:"Vagal challenge noted — recommend diaphragmatic breathing homework." },
+  { id:"icv_hv_pattern", label:"ICV + HV open pattern", category:"Gut",
+    applies:[{section:"GUT — INTESTINE",item:"ICV",opt:"Open",mark:"red"},
+             {section:"GUT — INTESTINE",item:"HV",opt:"Open",mark:"red"}],
+    note:"ICV + HV open pattern." },
+  { id:"hpa_axis", label:"HPA axis workup", category:"Hormonal",
+    includes:["vagal_basic"],
+    applies:[{section:"HORMONAL CHALLENGES",item:"Pituitary: TL Glabella + endo org.",mark:"red"}],
+    note:"HPA axis workup applied." }
+];
+function getMacros(){
+  try{ var m=JSON.parse(_LS.getItem("mhw_macros")||"null"); return Array.isArray(m)?m:DEFAULT_MACROS.slice(); }
+  catch(e){ return DEFAULT_MACROS.slice(); }
+}
+function saveMacros(arr){ _LS.setItem("mhw_macros",JSON.stringify(arr)); }
+
+// Build a lookup from section+item+opt → (si, ii, oi) from current FIELDS
+function _resolveFieldKey(vn, sectionName, itemLabel, optLabel){
+  for(var si=0;si<FIELDS.length;si++){
+    if(FIELDS[si].sec!==sectionName) continue;
+    for(var ii=0;ii<FIELDS[si].items.length;ii++){
+      var it=FIELDS[si].items[ii];
+      if(it.lbl!==itemLabel) continue;
+      if(it.opts && optLabel){
+        for(var oi=0;oi<it.opts.length;oi++){ if(it.opts[oi]===optLabel) return mkKey(vn,si,ii,oi); }
+        return null;
+      }
+      return mkKey(vn,si,ii);
+    }
+  }
+  return null;
+}
+
+// Recursively flatten a macro (including nested `includes`) into a flat list of applies/supplements/note
+function _flattenMacro(macroId, macros, visited){
+  visited=visited||{};
+  if(visited[macroId]) return {applies:[],supplements:[],notes:[]};
+  visited[macroId]=true;
+  var m=null;
+  for(var i=0;i<macros.length;i++){ if(macros[i].id===macroId){ m=macros[i]; break; } }
+  if(!m) return {applies:[],supplements:[],notes:[]};
+  var out={applies:(m.applies||[]).slice(),supplements:(m.supplements||[]).slice(),notes:m.note?[m.note]:[]};
+  (m.includes||[]).forEach(function(childId){
+    var sub=_flattenMacro(childId,macros,visited);
+    out.applies=out.applies.concat(sub.applies);
+    out.supplements=out.supplements.concat(sub.supplements);
+    out.notes=out.notes.concat(sub.notes);
+  });
+  return out;
+}
+
+var _currentMacroVn=null;
+function openMacroModal(vn){
+  if(!currentPatientId){ alert("Open a patient first."); return; }
+  if(typeof vn==="number") _currentMacroVn=vn;
+  else if(!_currentMacroVn){
+    // Fall back to active phase's first visit
+    var activePhase=0;
+    document.querySelectorAll(".phase-tab").forEach(function(t,i){ if(t.classList.contains("active")) activePhase=i; });
+    _currentMacroVn=activePhase*6+1;
+  }
+  var body=document.getElementById("macroModalBody");
+  document.getElementById("macroModalSub").textContent="Tap a macro to apply it to Visit "+_currentMacroVn;
+  var macros=getMacros();
+  if(!macros.length){ body.innerHTML='<p style="color:#94a3b8;font-size:13px">No macros yet. Build some with "Save current visit as macro".</p>'; }
+  else {
+    var byCat={};
+    macros.forEach(function(m){ var c=m.category||"Other"; (byCat[c]=byCat[c]||[]).push(m); });
+    var html="";
+    Object.keys(byCat).sort().forEach(function(c){
+      html+='<div class="macro-cat">'+escHtml(c)+'</div><div class="macro-list">';
+      byCat[c].forEach(function(m){
+        var nApp=(m.applies||[]).length, nInc=(m.includes||[]).length, nSupp=(m.supplements||[]).length;
+        var meta=[]; if(nApp) meta.push(nApp+" mark"+(nApp===1?"":"s"));
+        if(nInc) meta.push(nInc+" nested"); if(nSupp) meta.push(nSupp+" supp");
+        html+='<button class="macro-item" onclick="applyMacro(\''+m.id+'\')">'+
+          '<span>'+escHtml(m.label)+'</span>'+
+          (meta.length?'<span class="mac-meta">'+meta.join(" · ")+'</span>':'')+
+          '<span class="mac-del" onclick="event.stopPropagation();deleteMacro(\''+m.id+'\')" title="Delete">✕</span>'+
+          '</button>';
+      });
+      html+='</div>';
+    });
+    body.innerHTML=html;
+  }
+  document.getElementById("macroModal").classList.add("open");
+}
+function closeMacroModal(){ document.getElementById("macroModal").classList.remove("open"); }
+
+function applyMacro(macroId){
+  if(!_currentMacroVn) return;
+  var vn=_currentMacroVn;
+  var flat=_flattenMacro(macroId,getMacros());
+  var applied=0, skipped=0;
+  flat.applies.forEach(function(a){
+    var key=_resolveFieldKey(vn,a.section,a.item,a.opt);
+    if(!key){ skipped++; return; }
+    S.marks[key]=a.mark||"red";
+    renderMark(key);
+    var mk=key.match(/^v(\d+)_(\d+)_/); if(mk) updateVsecHL(parseInt(mk[1]),parseInt(mk[2]));
+    // Flash preview
+    var cell=document.getElementById("mc_"+key);
+    if(cell){ cell.classList.add("macro-preview-flash"); setTimeout(function(){ cell.classList.remove("macro-preview-flash"); },1500); }
+    applied++;
+  });
+  // Supplements: map by name → SUPPLEMENTS index
+  flat.supplements.forEach(function(s){
+    var name=s.name||s; var idx=SUPPLEMENTS.indexOf(name); if(idx<0) return;
+    var skey="v"+vn+"_supp_"+idx; S.marks[skey]=s.mark||"red";
+    renderSuppCell(skey);
+  });
+  renderSuppMarked(vn); updateSuppHL(vn);
+  // Notes: append
+  if(flat.notes.length){
+    var ta=document.getElementById("vn"+vn);
+    var cur=(ta?ta.value:S.visitNotes[vn])||"";
+    var addition=flat.notes.map(function(n){ return "- "+n; }).join("\n");
+    var joined=(cur?cur.trim()+"\n":"")+addition;
+    S.visitNotes[vn]=joined; if(ta) ta.value=joined;
+  }
+  autoSave();
+  closeMacroModal();
+  showToast("⚡ Applied "+applied+" mark"+(applied===1?"":"s")+(skipped?" ("+skipped+" skipped)":""));
+}
+
+function deleteMacro(id){
+  if(!confirm("Delete this macro?")) return;
+  var arr=getMacros().filter(function(m){ return m.id!==id; });
+  saveMacros(arr); openMacroModal(_currentMacroVn);
+}
+
+function openMacroBuilder(){
+  if(!_currentMacroVn){ alert("Open a patient visit first."); return; }
+  var vn=_currentMacroVn;
+  // Build preview of current visit's marks + offender tags + supplements + notes
+  var applies=[], suppsOut=[], lines=[];
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var k=mkKey(vn,si,ii,oi); if(S.marks[k]){
+            applies.push({section:sec.sec,item:item.lbl,opt:opt,mark:S.marks[k]});
+            lines.push(sec.sec+" → "+item.lbl+" ("+opt+") ["+S.marks[k]+"]");
+          }
+        });
+      } else {
+        var k=mkKey(vn,si,ii); if(S.marks[k]){
+          applies.push({section:sec.sec,item:item.lbl,mark:S.marks[k]});
+          lines.push(sec.sec+" → "+item.lbl+" ["+S.marks[k]+"]");
+        }
+      }
+    });
+  });
+  SUPPLEMENTS.forEach(function(supp,si){
+    var k="v"+vn+"_supp_"+si; if(S.marks[k]){
+      suppsOut.push({name:supp,mark:S.marks[k]});
+      lines.push("Supplement → "+supp+" ["+S.marks[k]+"]");
+    }
+  });
+  var note=(S.visitNotes[vn]||"").trim();
+  var pv=document.getElementById("mbPreview");
+  if(!applies.length && !suppsOut.length && !note){
+    pv.innerHTML='<em style="color:#ef4444">Nothing marked on Visit '+vn+' yet.</em>';
+  } else {
+    pv.innerHTML="<strong>Visit "+vn+" will be saved as a macro with:</strong><br>"+
+      (lines.length?"<ul style='margin:6px 0 0 16px'>"+lines.map(function(l){return "<li>"+escHtml(l)+"</li>";}).join("")+"</ul>":"")+
+      (note?"<div style='margin-top:6px;padding-top:6px;border-top:1px dashed #e2e8f0'><strong>Note:</strong> "+escHtml(note)+"</div>":"");
+  }
+  document.getElementById("mbName").value="";
+  document.getElementById("macroModal").classList.remove("open");
+  document.getElementById("macroBuilderModal").classList.add("open");
+  // Stash for save
+  document.getElementById("macroBuilderModal").dataset.applies=JSON.stringify(applies);
+  document.getElementById("macroBuilderModal").dataset.supps=JSON.stringify(suppsOut);
+  document.getElementById("macroBuilderModal").dataset.note=note;
+}
+function closeMacroBuilder(){ document.getElementById("macroBuilderModal").classList.remove("open"); }
+function saveMacroFromVisit(){
+  var name=document.getElementById("mbName").value.trim();
+  if(!name){ alert("Please enter a name."); return; }
+  var cat=document.getElementById("mbCategory").value;
+  var modal=document.getElementById("macroBuilderModal");
+  var applies=JSON.parse(modal.dataset.applies||"[]");
+  var supps=JSON.parse(modal.dataset.supps||"[]");
+  var note=modal.dataset.note||"";
+  if(!applies.length && !supps.length && !note){ alert("Nothing to save — mark something on the visit first."); return; }
+  var arr=getMacros();
+  arr.push({id:"m_"+Date.now(),label:name,category:cat,applies:applies,supplements:supps,note:note});
+  saveMacros(arr); closeMacroBuilder();
+  showToast("✓ Macro saved: "+name);
+}
+function exportMacros(){
+  var blob=new Blob([JSON.stringify(getMacros(),null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="momentum_macros_"+(new Date().toISOString().split("T")[0])+".json"; a.click();
+  showToast("✓ Macros exported");
+}
+function importMacros(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var arr=JSON.parse(e.target.result);
+      if(!Array.isArray(arr)) throw new Error("Not a macro library file");
+      if(!confirm("Replace current macro library with "+arr.length+" imported macros?")) return;
+      saveMacros(arr); openMacroModal(_currentMacroVn);
+      showToast("✓ Imported "+arr.length+" macros");
+    }catch(err){ alert("Import failed: "+err.message); }
+    input.value="";
+  };
+  r.readAsText(f);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A6: FINDING → SUPPLEMENT SUGGEST (driven by macros)
+// ════════════════════════════════════════════════════════════════
+// Reverse-lookup: which macros contain this (section,item) and what supplements do they prescribe?
+function findingSupplementSuggestions(sectionName, itemLabel){
+  var macros=getMacros(); var out={};
+  macros.forEach(function(m){
+    var flat=_flattenMacro(m.id,macros);
+    var hit=flat.applies.some(function(a){ return a.section===sectionName && a.item===itemLabel; });
+    if(!hit) return;
+    flat.supplements.forEach(function(s){
+      var name=s.name||s; if(!out[name]) out[name]={name:name,count:0}; out[name].count++;
+    });
+  });
+  return Object.keys(out).map(function(k){ return out[k]; }).sort(function(a,b){ return b.count-a.count; });
+}
+function openSuggestPop(anchor, vn, sectionName, itemLabel){
+  var pop=document.getElementById("suggestPop");
+  var body=document.getElementById("suggestPopBody");
+  document.getElementById("suggestPopTitle").textContent="Suggested for "+itemLabel;
+  var sug=findingSupplementSuggestions(sectionName,itemLabel);
+  if(!sug.length){
+    body.innerHTML='<div style="font-size:11px;color:#94a3b8">No suggestions yet. Build a macro that links this finding to supplements.</div>';
+  } else {
+    body.innerHTML=sug.map(function(s){
+      var idx=SUPPLEMENTS.indexOf(s.name);
+      var onCls=idx>=0 && S.marks["v"+vn+"_supp_"+idx] ? "on" : "";
+      return '<div class="suggest-supp-row" onclick="toggleSuggestSupp('+vn+',\''+s.name.replace(/'/g,"\\'")+'\',this)">'+
+        '<div class="check '+onCls+'">'+(onCls?'✓':'')+'</div>'+escHtml(s.name)+
+        (s.count>1?'<span style="margin-left:auto;font-size:10px;color:#94a3b8">×'+s.count+'</span>':'')+
+        '</div>';
+    }).join('');
+  }
+  var rect=anchor.getBoundingClientRect();
+  pop.style.left=Math.min(rect.right+6,window.innerWidth-320)+"px";
+  pop.style.top=rect.top+"px";
+  pop.classList.add("open");
+}
+function toggleSuggestSupp(vn, name, row){
+  var idx=SUPPLEMENTS.indexOf(name); if(idx<0) return;
+  var key="v"+vn+"_supp_"+idx;
+  if(S.marks[key]){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor||"red"; }
+  renderSuppCell(key); renderSuppMarked(vn); updateSuppHL(vn); autoSave();
+  var check=row.querySelector(".check");
+  if(S.marks[key]){ check.classList.add("on"); check.textContent="✓"; }
+  else { check.classList.remove("on"); check.textContent=""; }
+}
+document.addEventListener("click",function(e){
+  var pop=document.getElementById("suggestPop");
+  if(pop && pop.classList.contains("open") && !pop.contains(e.target) && !(e.target.classList && e.target.classList.contains("suggest-trigger")))
+    pop.classList.remove("open");
+});
+
+// ════════════════════════════════════════════════════════════════
+//  A7: SESSION AUTO-LOCK
+// ════════════════════════════════════════════════════════════════
+var _idleTimer=null;
+var IDLE_MINUTES=10;
+function resetIdleTimer(){
+  clearTimeout(_idleTimer);
+  _idleTimer=setTimeout(function(){
+    if(document.getElementById("pwOverlay").style.display!=="none") return;
+    logout();
+    showToast("🔒 Locked after "+IDLE_MINUTES+" min idle");
+  }, IDLE_MINUTES*60*1000);
+}
+["click","keydown","touchstart","pointermove"].forEach(function(ev){
+  document.addEventListener(ev,resetIdleTimer,{passive:true});
+});
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden) return;
+  resetIdleTimer();
+});
+resetIdleTimer();
+
+// ════════════════════════════════════════════════════════════════
+//  A8: POSITIVE FINDINGS BIRD'S-EYE PRINT
+// ════════════════════════════════════════════════════════════════
+function buildPositiveFindingsView(){
+  var pi=S.patientInfo, meta=[];
+  if(pi.name)     meta.push("<strong>Patient:</strong> "+escHtml(pi.name));
+  if(pi.dob)      meta.push("<strong>DOB:</strong> "+pi.dob);
+  if(pi.start)    meta.push("<strong>Case Start:</strong> "+pi.start);
+  if(pi.provider) meta.push("<strong>Provider:</strong> "+escHtml(pi.provider));
+  if(pi.mrn)      meta.push("<strong>MRN:</strong> "+escHtml(pi.mrn));
+  document.getElementById("pv-meta").innerHTML="<strong>Positive Findings Over Time</strong> &nbsp;|&nbsp; "+meta.join(" &nbsp;|&nbsp; ");
+  document.getElementById("pv-date").textContent="Printed: "+new Date().toLocaleDateString();
+
+  // Determine max visit with any data
+  var maxV=0;
+  for(var v=1;v<=18;v++){
+    if(S.visitDates[v]){ maxV=v; continue; }
+    for(var k in S.marks){ if(k.indexOf("v"+v+"_")===0){ maxV=v; break; } }
+  }
+  maxV=Math.max(maxV,1);
+
+  // Pivot: section → [{label, marksByVisit}]
+  var secRows={};
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var marks={}, any=false;
+          for(var v=1;v<=maxV;v++){ var c=S.marks[mkKey(v,si,ii,oi)]; if(c){ marks[v]=c; any=true; } }
+          if(any){ (secRows[sec.sec]=secRows[sec.sec]||[]).push({label:item.lbl+" ("+opt+")",marks:marks}); }
+        });
+      } else {
+        var marks={}, any=false;
+        for(var v=1;v<=maxV;v++){ var c=S.marks[mkKey(v,si,ii)]; if(c){ marks[v]=c; any=true; } }
+        if(any){ (secRows[sec.sec]=secRows[sec.sec]||[]).push({label:item.lbl,marks:marks}); }
+      }
+    });
+  });
+
+  var totalRows=0; Object.keys(secRows).forEach(function(k){ totalRows+=secRows[k].length; });
+  var content=document.getElementById("pv-content");
+  if(!totalRows){
+    content.innerHTML='<p style="font-size:11px;color:#94a3b8;font-style:italic">No positive findings recorded yet.</p>';
+    return;
+  }
+  var html='<div class="pv-section"><div class="pv-section-title">Positive Findings — Bird\'s-Eye View</div>';
+  html+='<p class="pv-note">Each row is a finding that was marked on at least one visit. Cells show the color on that visit so you can scan across to see progression (red → yellow → blue → green) or persistence. Blank = not marked.</p>';
+  html+='<table class="tl-table"><thead><tr><th class="row-hdr">Finding</th>';
+  for(var v=1;v<=maxV;v++){
+    html+='<th>V'+v;
+    if(S.visitDates[v]) html+='<br><span style="font-size:7px;font-weight:600;opacity:.85">'+S.visitDates[v]+'</span>';
+    html+='</th>';
+  }
+  html+='</tr></thead><tbody>';
+  Object.keys(secRows).forEach(function(sn){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">'+escHtml(sn)+'</th></tr>';
+    secRows[sn].forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+='</tr>';
+    });
+  });
+  html+='</tbody></table></div>';
+  content.innerHTML=html;
+}
+function doPrintFindings(){
+  buildPositiveFindingsView();
+  var pi=S.patientInfo;
+  var rawName=(pi.name||"").trim();
+  var origTitle=document.title;
+  document.title=(rawName||"Patient")+" — Findings Over Time";
+  window.print();
+  document.title=origTitle;
 }
 
 // ════════════════════════════════════════════════════════════════
