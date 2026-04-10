@@ -773,22 +773,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 </div>
 
 <div id="printView">
-  <div class="pv-header">
-    <div class="pv-title">🏥 Momentum Health &amp; Wellness — Patient Progress Report</div>
-    <div class="pv-meta" id="pv-meta"></div>
-    <div class="pv-legend">
-      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#ef4444"></div>Red — No Progress</div>
-      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#eab308"></div>Yellow — Any Progress</div>
-      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#3b82f6"></div>Blue — 80% Better</div>
-      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#22c55e"></div>Green — 100% Resolution</div>
-      <div class="pv-leg-item"><div class="pv-leg-dot" style="background:#1a1a2e"></div>✕ = Actual Visit &nbsp; □ = Continued Status</div>
-    </div>
-  </div>
   <div id="pv-content"></div>
-  <div class="pv-footer">
-    <span>Momentum Health &amp; Wellness | Applied Kinesiology Clinical Documentation</span>
-    <span id="pv-date"></span>
-  </div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -2603,7 +2588,7 @@ function calcWeekNum(startDate, visitDate) {
   return Math.max(1, Math.min(26, weekNum));
 }
 
-function buildPrintView(){
+function _patientMetaHtml(){
   var pi=S.patientInfo, meta=[];
   if(pi.name)     meta.push("<strong>Patient:</strong> "+escHtml(pi.name));
   if(pi.dob)      meta.push("<strong>DOB:</strong> "+pi.dob);
@@ -2611,8 +2596,9 @@ function buildPrintView(){
   if(pi.provider) meta.push("<strong>Provider:</strong> "+escHtml(pi.provider));
   if(pi.mrn)      meta.push("<strong>MRN:</strong> "+escHtml(pi.mrn));
   if(pi.status)   meta.push("<strong>Status:</strong> "+escHtml(pi.status.charAt(0).toUpperCase()+pi.status.slice(1)));
-  document.getElementById("pv-meta").innerHTML=meta.join(" &nbsp;|&nbsp; ");
-  document.getElementById("pv-date").textContent="Printed: "+new Date().toLocaleDateString();
+  return meta.join(" &nbsp;|&nbsp; ");
+}
+function buildPrintView(){
 
   // ── determine max visit with any data ──────────────────────
   var maxV=0;
@@ -2934,7 +2920,8 @@ function buildPrintView(){
   if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter Visit 1 date to align subjective symptoms with visit columns (V1 date = Week 1 anchor).</p>';
   else if(!pi.start&&S.visitDates[1]) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">ℹ️ Week 1 anchored to Visit 1 date ('+S.visitDates[1]+').</p>';
 
-  content.innerHTML=symPreamble+html;
+  var hdr='<div class="pv-header"><div class="pv-title">📊 Patient Progress Timeline</div><div class="pv-meta">'+_patientMetaHtml()+'</div></div>';
+  content.innerHTML=hdr+symPreamble+html;
 
   // (no more code below — old branches removed)
   return;
@@ -4021,14 +4008,6 @@ resetIdleTimer();
 //  A8: POSITIVE FINDINGS BIRD'S-EYE PRINT
 // ════════════════════════════════════════════════════════════════
 function buildPositiveFindingsView(){
-  var pi=S.patientInfo, meta=[];
-  if(pi.name)     meta.push("<strong>Patient:</strong> "+escHtml(pi.name));
-  if(pi.dob)      meta.push("<strong>DOB:</strong> "+pi.dob);
-  if(pi.start)    meta.push("<strong>Case Start:</strong> "+pi.start);
-  if(pi.provider) meta.push("<strong>Provider:</strong> "+escHtml(pi.provider));
-  if(pi.mrn)      meta.push("<strong>MRN:</strong> "+escHtml(pi.mrn));
-  document.getElementById("pv-meta").innerHTML="<strong>Positive Findings Over Time</strong> &nbsp;|&nbsp; "+meta.join(" &nbsp;|&nbsp; ");
-  document.getElementById("pv-date").textContent="Printed: "+new Date().toLocaleDateString();
 
   // Determine max visit with any data
   var maxV=0;
@@ -4143,7 +4122,8 @@ function buildPositiveFindingsView(){
     html+='</tr>';
   }
   html+='</tbody></table></div>';
-  content.innerHTML=html;
+  var hdr='<div class="pv-header"><div class="pv-title">📊 Positive Findings Over Time</div><div class="pv-meta">'+_patientMetaHtml()+'</div></div>';
+  content.innerHTML=hdr+html;
 }
 function doPrintFindings(){
   buildPositiveFindingsView();
