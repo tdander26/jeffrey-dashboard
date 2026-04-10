@@ -86,7 +86,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .backup-red{background:#fee2e2;color:#dc2626}
 
 /* ── COLOR BAR ── */
-#colorBar{position:sticky;top:0;z-index:500;background:white;border-radius:14px;padding:12px 18px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);border:2px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#colorBar{background:white;border-radius:10px;padding:8px 14px;margin-bottom:10px;border:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px}
 .cb-label{font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
 .cb-colors{display:flex;gap:8px;flex-wrap:wrap}
 .cb-btn{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:9px;border:3px solid transparent;cursor:pointer;font-size:12px;font-weight:700;transition:all .18s;background:#f8fafc;color:#374151;user-select:none}
@@ -125,7 +125,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 .phase-tab{padding:8px 18px;border-radius:9px;border:2px solid #e2e8f0;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;background:white;color:#64748b}
 .phase-tab.active{background:#1a1a2e;color:white;border-color:#1a1a2e}
 .phase-content{display:none}.phase-content.active{display:block}
-.visits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:14px}
+.visits-grid{display:flex;flex-direction:column;gap:14px}
 
 /* VISIT CARD */
 .visit-card{background:white;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:2px solid #f1f5f9}
@@ -295,9 +295,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
 /* PRINT */
 #printView{display:none}
-@page{size:landscape;margin:12mm}
+@page{size:landscape;margin:18mm 16mm}
 @media print{
-  @page{size:landscape;margin:12mm}
+  @page{size:landscape;margin:18mm 16mm}
   body{background:white!important}
   #pwOverlay,#dash,#app,#toast{display:none!important}
   #printView{display:block!important}
@@ -327,6 +327,201 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   .cb-btn{padding:6px 11px;font-size:11px}
   .pt-grid{grid-template-columns:1fr}
 }
+
+/* ══════════════════════════════════════
+   CLICKABLE SECTION CARDS (GUT, MSK, Supplements, etc.)
+══════════════════════════════════════ */
+.sec-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-bottom:10px}
+.sec-card{position:relative;padding:12px 14px;border:2px solid #e2e8f0;border-radius:10px;background:white;cursor:pointer;transition:all .15s;text-align:left;font:inherit;color:#374151}
+.sec-card:hover{border-color:#7c3aed;background:#faf5ff;transform:translateY(-1px);box-shadow:0 4px 12px rgba(124,58,237,.12)}
+.sec-card-title{font-size:12px;font-weight:800;color:#1a1a2e;line-height:1.25}
+.sec-card-count{font-size:10px;color:#94a3b8;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.04em}
+.sec-card-count .marked-n{color:#ef4444;font-weight:800}
+.sec-card-count .marked-n.green{color:#16a34a}
+.sec-card.has-marks{border-color:#fecaca;background:#fef2f2}
+.sec-card.has-marks:hover{border-color:#ef4444;background:#fef2f2}
+.sec-card.has-marks .sec-card-title{color:#991b1b}
+.sec-card.msk.has-marks{border-color:#c4b5fd;background:#f5f3ff}
+.sec-card.msk.has-marks .sec-card-title{color:#5b21b6}
+.sec-card.supp.has-marks{border-color:#86efac;background:#f0fdf4}
+.sec-card.supp.has-marks .sec-card-title{color:#166534}
+
+/* ══════════════════════════════════════
+   A1: DENSE iPAD LAYOUT
+══════════════════════════════════════ */
+@media(min-width:1024px){
+  #app{max-width:1400px}
+  .card{padding:14px 20px;margin-bottom:12px}
+  .card-title{margin-bottom:10px}
+  .field-row .fg{min-width:130px}
+  .field-row .fg input,.field-row .fg select{padding:7px 10px;font-size:13px}
+  .visits-grid{grid-template-columns:1fr;gap:10px}
+  .visit-card{padding:14px 16px}
+  .dense-vsec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 14px}
+  .visit-card .vsec{margin-bottom:3px}
+  .visit-card .vfield{min-height:26px}
+}
+@media(min-width:1280px){
+  .dense-vsec-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* ══════════════════════════════════════
+   A2: MACRO SYSTEM
+══════════════════════════════════════ */
+.macro-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px 10px;margin-bottom:8px;background:linear-gradient(135deg,#fdf4ff,#faf5ff);border:1px solid #e9d5ff;border-radius:8px}
+.macro-bar-label{font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
+.macro-pill{padding:4px 11px;border-radius:14px;border:1.5px solid #c4b5fd;background:white;color:#5b21b6;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.macro-pill:hover{background:#7c3aed;color:white;border-color:#7c3aed;transform:translateY(-1px)}
+.macro-pill.outline{background:transparent;border-style:dashed}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:9700;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-card{background:white;border-radius:14px;max-width:760px;width:100%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.modal-hdr{padding:14px 20px;border-bottom:2px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-title{font-size:15px;font-weight:800;color:#1a1a2e}
+.modal-close{background:#f1f5f9;border:none;border-radius:50%;width:30px;height:30px;font-size:14px;font-weight:900;cursor:pointer;color:#64748b;flex-shrink:0}
+.modal-close:hover{background:#e2e8f0;color:#1a1a2e}
+.modal-body{padding:16px 20px;overflow-y:auto;flex:1}
+.macro-cat{font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.08em;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
+.macro-cat:first-child{margin-top:0}
+.macro-list{display:flex;flex-wrap:wrap;gap:6px}
+.macro-item{padding:6px 12px;border:1.5px solid #e2e8f0;border-radius:8px;background:white;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;text-align:left}
+.macro-item:hover{border-color:#7c3aed;background:#faf5ff;color:#5b21b6}
+.macro-item .mac-meta{font-size:10px;color:#94a3b8;font-weight:500}
+.macro-item .mac-del{margin-left:6px;color:#ef4444;opacity:.5;font-size:12px}
+.macro-item .mac-del:hover{opacity:1}
+.macro-preview-flash{animation:macroFlash 1.4s ease-out}
+@keyframes macroFlash{0%{box-shadow:0 0 0 4px #fde047}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ══════════════════════════════════════
+   A3: COPY FORWARD BUTTON
+══════════════════════════════════════ */
+.copy-fwd-btn{padding:4px 9px;border:2px solid #22c55e;border-radius:6px;background:white;color:#16a34a;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:6px}
+.copy-fwd-btn:hover{background:#22c55e;color:white}
+.copy-fwd-btn:disabled{opacity:.35;cursor:not-allowed;border-color:#cbd5e1;color:#94a3b8;background:white}
+.macro-open-btn{padding:4px 9px;border:2px solid #7c3aed;border-radius:6px;background:white;color:#7c3aed;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;margin-left:6px}
+.macro-open-btn:hover{background:#7c3aed;color:white}
+
+/* ══════════════════════════════════════
+   A4: SNIPPET CHIPS
+══════════════════════════════════════ */
+.snippet-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.snippet-chip{padding:3px 10px;border-radius:14px;border:1px solid #e2e8f0;background:#f8fafc;font-size:11px;font-weight:600;color:#475569;cursor:pointer;transition:all .12s;user-select:none}
+.snippet-chip:hover{background:#1a1a2e;color:white;border-color:#1a1a2e}
+.snippet-chip.add{border-style:dashed;color:#94a3b8;background:transparent}
+
+/* ══════════════════════════════════════
+   A5: VOICE DICTATION
+══════════════════════════════════════ */
+.notes-editor-wrap{position:relative}
+.notes-editor-wrap textarea{padding-right:38px!important}
+.mic-btn{position:absolute;right:6px;bottom:6px;width:28px;height:28px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;color:#3b82f6;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:5}
+.mic-btn:hover{background:#3b82f6;color:white;border-color:#3b82f6}
+.mic-btn.recording{background:#ef4444;color:white;border-color:#ef4444;animation:micPulse 1.2s infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+
+/* ══════════════════════════════════════
+   A6: SUGGEST POPOVER
+══════════════════════════════════════ */
+.suggest-pop{position:fixed;background:white;border:2px solid #e2e8f0;border-radius:12px;padding:12px;box-shadow:0 12px 32px rgba(0,0,0,.2);z-index:9600;max-width:300px;display:none}
+.suggest-pop.open{display:block}
+.suggest-pop-title{font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.suggest-supp-row{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;color:#374151}
+.suggest-supp-row:hover{background:#faf5ff}
+.suggest-supp-row .check{width:14px;height:14px;border:2px solid #cbd5e1;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:white;font-weight:900}
+.suggest-supp-row .check.on{background:#22c55e;border-color:#22c55e}
+
+/* ══════════════════════════════════════
+   MACRO MODAL — TABS + QUICK PICK DRILL-DOWN
+══════════════════════════════════════ */
+.mac-tabs{display:flex;gap:4px;padding:0 20px 0 20px;border-bottom:2px solid #f1f5f9}
+.mac-tab{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:13px;font-weight:700;color:#64748b;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s}
+.mac-tab.active{color:#7c3aed;border-bottom-color:#7c3aed}
+.mac-tab:hover:not(.active){color:#374151}
+.qp-crumbs{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:11px;color:#64748b;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9}
+.qp-crumb{padding:3px 8px;border-radius:12px;background:#f1f5f9;color:#374151;cursor:pointer;font-weight:600}
+.qp-crumb:hover{background:#e2e8f0}
+.qp-crumb-sep{color:#cbd5e1;font-weight:900}
+.qp-crumb.current{background:#ede9fe;color:#5b21b6;cursor:default}
+.qp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.qp-item{padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;background:white;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:all .15s;text-align:left;display:flex;flex-direction:column;gap:3px}
+.qp-item:hover{border-color:#7c3aed;background:#faf5ff;color:#5b21b6;transform:translateY(-1px)}
+.qp-item.has-children::after{content:"▸";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#94a3b8}
+.qp-item{position:relative;padding-right:26px}
+.qp-item .qp-sub{font-size:10px;font-weight:500;color:#94a3b8;text-transform:uppercase;letter-spacing:.04em}
+.qp-item.marked{border-color:#22c55e;background:#f0fdf4;color:#166534}
+.qp-item.marked::before{content:"✓";position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#22c55e;font-weight:900;font-size:14px}
+.qp-item.marked{padding-left:28px}
+.qp-empty{font-size:12px;color:#94a3b8;padding:16px;text-align:center;background:#f8fafc;border-radius:10px}
+.qp-visit-badge{background:#ede9fe;color:#5b21b6;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:800;white-space:nowrap}
+
+/* ══════════════════════════════════════
+   COMPLIANCE LETTER GRADES (per visit)
+══════════════════════════════════════ */
+.compl-bar{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid #f1f5f9;margin-top:8px}
+.compl-group{display:flex;align-items:center;gap:5px}
+.compl-label{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.06em}
+.compl-pills{display:flex;gap:2px}
+.compl-pill{width:22px;height:22px;border:1.5px solid #e2e8f0;border-radius:5px;background:white;font-size:11px;font-weight:900;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;padding:0;font-family:inherit}
+.compl-pill:hover{border-color:#94a3b8;background:#f8fafc}
+.compl-pill.active{color:white;transform:scale(1.08)}
+.compl-pill.active[data-grade="A"]{background:#22c55e;border-color:#16a34a}
+.compl-pill.active[data-grade="B"]{background:#84cc16;border-color:#65a30d}
+.compl-pill.active[data-grade="C"]{background:#eab308;border-color:#ca8a04}
+.compl-pill.active[data-grade="D"]{background:#f97316;border-color:#ea580c}
+.compl-pill.active[data-grade="F"]{background:#ef4444;border-color:#dc2626}
+
+/* ══════════════════════════════════════
+   PICKER MODAL (brand / region full-screen tile picker)
+══════════════════════════════════════ */
+.pk-search{width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;margin-bottom:10px;box-sizing:border-box}
+.pk-search:focus{border-color:#7c3aed}
+.pk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.pk-tile{position:relative;padding:12px 14px;padding-right:32px;border:2px solid #e2e8f0;border-radius:10px;background:white;font-size:13px;font-weight:700;color:#374151;cursor:pointer;transition:all .15s;text-align:left;user-select:none}
+.pk-tile:hover{border-color:#7c3aed;background:#faf5ff;color:#5b21b6;transform:translateY(-1px)}
+.pk-tile.marked{border-color:#22c55e;background:#f0fdf4;color:#166534}
+.pk-tile.marked::after{content:"✓";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#22c55e;font-weight:900;font-size:16px}
+.pk-tile.red.marked{border-color:#ef4444;background:#fef2f2;color:#991b1b}
+.pk-tile.red.marked::after{color:#ef4444}
+.pk-tile[data-side]{padding-right:42px}
+.pk-tile .pk-side{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:9px;color:#94a3b8;font-weight:800}
+
+/* ══════════════════════════════════════
+   EMAIL PREVIEW MODAL
+══════════════════════════════════════ */
+.em-lbl{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;display:block;margin:10px 0 4px}
+.em-lbl:first-child{margin-top:0}
+.em-input{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;font-family:inherit}
+.em-input:focus{border-color:#3b82f6}
+.em-hint{font-size:11px;color:#64748b;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 10px;margin:10px 0}
+.em-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:4px}
+
+/* ══════════════════════════════════════
+   SETTINGS MODAL
+══════════════════════════════════════ */
+.settings-btn{background:rgba(255,255,255,.15);color:white;border:none;cursor:pointer;padding:8px 12px;border-radius:8px;font-size:16px;transition:all .2s}
+.settings-btn:hover{background:rgba(255,255,255,.25);transform:rotate(30deg)}
+.settings-section{margin-bottom:18px}
+.settings-section h4{font-size:12px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #f1f5f9}
+.settings-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.settings-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;border-radius:14px;background:#f1f5f9;border:1px solid #e2e8f0;font-size:12px;color:#374151}
+.settings-chip .del{color:#ef4444;font-weight:900;cursor:pointer;font-size:13px;padding:0 2px}
+.settings-chip .del:hover{color:#dc2626}
+.settings-input-row{display:flex;gap:6px}
+.settings-input-row input{flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none}
+.settings-input-row input:focus{border-color:#7c3aed}
+.settings-input-row button{padding:8px 16px;border:none;border-radius:8px;background:#7c3aed;color:white;font-size:13px;font-weight:700;cursor:pointer}
+.settings-input-row button:hover{background:#6d28d9}
+
+/* ══════════════════════════════════════
+   REVIEWED LABS BADGE
+══════════════════════════════════════ */
+.labs-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:800;background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;margin-left:6px}
+
+/* ══════════════════════════════════════
+   A7: AUTO-LOCK
+══════════════════════════════════════ */
+.lock-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a2e,#0f3460);display:none;align-items:center;justify-content:center;z-index:9800}
+.lock-overlay.open{display:flex}
 </style>
 </head>
 <body>
@@ -347,6 +542,173 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
 <!-- TOAST -->
 <div id="toast">✓ Saved</div>
+
+<!-- A2: MACRO MODAL -->
+<div class="modal-overlay" id="macroModal">
+  <div class="modal-card">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">⚡ Macros</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="macroModalSub">Drill into a section and tap to mark findings on the current visit</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="qp-visit-badge" id="macroModalVn">V—</span>
+        <button class="modal-close" onclick="closeMacroModal()">✕</button>
+      </div>
+    </div>
+    <div class="mac-tabs">
+      <button class="mac-tab active" id="macTabQP" onclick="switchMacroTab('qp')">🔍 Quick Pick</button>
+      <button class="mac-tab" id="macTabSaved" onclick="switchMacroTab('saved')">⭐ Saved Macros</button>
+    </div>
+    <div class="modal-body" id="macroModalBody"></div>
+    <div style="padding:10px 20px;border-top:2px solid #f1f5f9;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap" id="macroModalFooter">
+      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="openMacroBuilder()">+ Save current visit as macro</button>
+      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="exportMacros()">⬇ Export library</button>
+      <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="document.getElementById('macroImportFile').click()">⬆ Import library</button>
+      <input type="file" id="macroImportFile" accept=".json" style="display:none" onchange="importMacros(this)">
+    </div>
+  </div>
+</div>
+
+<!-- A2: MACRO BUILDER MODAL -->
+<div class="modal-overlay" id="macroBuilderModal">
+  <div class="modal-card" style="max-width:480px">
+    <div class="modal-hdr">
+      <div class="modal-title">Save current visit as macro</div>
+      <button class="modal-close" onclick="closeMacroBuilder()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Macro name</label>
+      <input type="text" id="mbName" placeholder="e.g. Vagal dysfunction pattern" style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin:6px 0 12px">
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Category</label>
+      <select id="mbCategory" style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin:6px 0 12px">
+        <option>Gut</option><option>Autonomic</option><option>Hormonal</option><option>TMJ</option>
+        <option>Sleep</option><option>Blood Sugar</option><option>MSK</option><option>Brain</option>
+        <option>Recurrent Injury</option><option>Protocols</option><option>Other</option>
+      </select>
+      <div id="mbPreview" style="font-size:11px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;max-height:180px;overflow-y:auto;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="closeMacroBuilder()">Cancel</button>
+        <button class="btn btn-blue" onclick="saveMacroFromVisit()">💾 Save macro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BRAND / REGION PICKER MODAL -->
+<div class="modal-overlay" id="pickerModal">
+  <div class="modal-card" style="max-width:900px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="pickerTitle">Picker</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="pickerSub">Tap to toggle</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="qp-visit-badge" id="pickerVn">V—</span>
+        <button class="modal-close" onclick="closePicker()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <input type="text" class="pk-search" id="pkSearch" placeholder="🔍 Search..." oninput="renderPicker()">
+      <div class="pk-grid" id="pkGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-card" style="max-width:560px">
+    <div class="modal-hdr">
+      <div class="modal-title">⚙️ Settings</div>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-section">
+        <h4>Visit-note snippet chips</h4>
+        <div class="settings-list" id="settingsSnippets"></div>
+        <div class="settings-input-row">
+          <input type="text" id="settingsNewSnippet" placeholder="New snippet..." onkeydown="if(event.key==='Enter')addSettingsSnippet()">
+          <button onclick="addSettingsSnippet()">+ Add</button>
+        </div>
+        <button style="margin-top:8px;padding:6px 12px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;font-size:11px;font-weight:700;color:#64748b;cursor:pointer" onclick="resetSnippets()">Reset to defaults</button>
+      </div>
+      <div class="settings-section">
+        <h4>Idle auto-lock</h4>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#374151">
+          Lock after
+          <input type="number" id="settingsIdleMin" min="1" max="120" style="width:70px;padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;outline:none" onchange="setIdleMinutes(this.value)">
+          minutes idle
+        </div>
+      </div>
+      <div class="settings-section">
+        <h4>Change access password</h4>
+        <div class="settings-input-row">
+          <input type="password" id="settingsNewPw" placeholder="New password...">
+          <button onclick="changeAccessPw()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL PREVIEW MODAL -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal-card" style="max-width:620px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">✉️ Email Visit Summary</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="emailSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeEmailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label class="em-lbl">To</label>
+      <input type="email" id="emTo" class="em-input">
+      <label class="em-lbl">Subject</label>
+      <input type="text" id="emSubject" class="em-input">
+      <label class="em-lbl">Message</label>
+      <textarea id="emBody" class="em-input" style="min-height:260px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.5"></textarea>
+      <div class="em-hint">💡 If "Open in Email App" doesn't launch your mail client, use <strong>Copy Summary</strong> and paste it into Superhuman / Gmail / Outlook.</div>
+      <div class="em-actions">
+        <button class="btn btn-green" onclick="emailOpenMailApp()">📧 Open in Email App</button>
+        <button class="btn btn-blue" onclick="emailCopySummary()">📋 Copy Summary</button>
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="emailOpenSuperhuman()">🪄 Open Superhuman</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DOSE EDITOR MODAL -->
+<div class="modal-overlay" id="doseModal">
+  <div class="modal-card" style="max-width:460px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="doseTitle">Set dosing</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="doseSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeDoseEditor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Quick pick</label>
+      <div id="doseQuickPicks" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px"></div>
+      <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em">Custom</label>
+      <input type="text" id="doseInput" placeholder='e.g. "2 caps BID with meals"' style="width:100%;padding:10px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin:6px 0 14px" onkeydown="if(event.key==='Enter')saveDoseEditor()">
+      <div style="display:flex;gap:8px;justify-content:space-between">
+        <button class="btn btn-light" style="background:#fee2e2;color:#991b1b" onclick="clearDoseEditor()">Clear dose</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="closeDoseEditor()">Cancel</button>
+          <button class="btn btn-green" onclick="saveDoseEditor()">💾 Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- A6: SUGGEST POPOVER -->
+<div class="suggest-pop" id="suggestPop">
+  <div class="suggest-pop-title" id="suggestPopTitle">Suggested supplements</div>
+  <div id="suggestPopBody"></div>
+</div>
 
 <!-- OFFENDER POPUP -->
 <div id="offenderPopup">
@@ -424,24 +786,12 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <button class="btn btn-light" onclick="backToDash()">← Patients</button>
       <button class="btn btn-light" onclick="exportData()">⬇ Export</button>
       <button class="btn btn-light" onclick="doPrint()">🖨 Print Timeline</button>
+      <button class="btn btn-light" onclick="doPrintFindings()">🖨 Print Findings Over Time</button>
+      <button class="btn btn-light" style="background:rgba(168,85,247,.22);color:white" onclick="openMacroModal()">⚡ Macros</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
+      <button class="settings-btn" title="Settings" onclick="openSettings()">⚙️</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
-  </div>
-
-  <div id="colorBar">
-    <span class="cb-label">Active Color</span>
-    <div class="cb-colors">
-      <div class="cb-btn active" id="cb_red"    onclick="setColor('red')">   <div class="cb-dot" style="background:#ef4444"></div>Red — No Progress</div>
-      <div class="cb-btn"        id="cb_yellow" onclick="setColor('yellow')"><div class="cb-dot" style="background:#eab308"></div>Yellow — Any Progress</div>
-      <div class="cb-btn"        id="cb_blue"   onclick="setColor('blue')">  <div class="cb-dot" style="background:#3b82f6"></div>Blue — 80% Better</div>
-      <div class="cb-btn"        id="cb_green"  onclick="setColor('green')"> <div class="cb-dot" style="background:#22c55e"></div>Green — 100% Resolution</div>
-    </div>
-    <button class="cb-clr" onclick="clearMode()">✕ Clear Mode</button>
-  </div>
-
-  <div class="hipaa-bar">
-    🔒 <strong>HIPAA Notice:</strong> Data stored locally in your browser only. No external servers. Use on an encrypted, access-controlled device.
   </div>
 
   <div class="card">
@@ -453,6 +803,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <div class="fg"><label>Date of Collection</label><input type="date" id="fi_collection" oninput="autoSave()"></div>
       <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
+      <div class="fg"><label>Email</label><input type="email"        id="fi_email"    placeholder="patient@example.com" oninput="autoSave()"></div>
       <div class="fg"><label>Status</label>
         <select id="fi_status" onchange="autoSave()">
           <option value="active">Active</option>
@@ -464,8 +815,19 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   </div>
 
   <div class="card">
-    <div class="card-title">📊 Subjective Symptom Tracking</div>
-    <div class="sym-hint">Enter complaint label, select a color above, then click week cells. Gaps auto-fill with the previous color. ✕ = actual visit. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+      <div class="card-title" style="margin-bottom:0">📊 Subjective Symptom Tracking</div>
+      <div id="colorBar">
+        <span class="cb-label">Active Color</span>
+        <div class="cb-colors">
+          <div class="cb-btn active" id="cb_red"    onclick="setColor('red')"><div class="cb-dot" style="background:#ef4444"></div>Red</div>
+          <div class="cb-btn"        id="cb_yellow" onclick="setColor('yellow')"><div class="cb-dot" style="background:#eab308"></div>Yellow</div>
+          <div class="cb-btn"        id="cb_blue"   onclick="setColor('blue')"><div class="cb-dot" style="background:#3b82f6"></div>Blue</div>
+          <div class="cb-btn"        id="cb_green"  onclick="setColor('green')"><div class="cb-dot" style="background:#22c55e"></div>Green</div>
+        </div>
+      </div>
+    </div>
+    <div class="sym-hint">Select a color above, then click week cells. Gaps auto-fill with the previous color. ✕ = actual visit. <span class="sym-add" onclick="addSymRow()">+ Add Row</span></div>
     <div class="sym-scroll">
       <table class="sym-table">
         <thead><tr>
@@ -492,6 +854,45 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 </div>
 
 <script>
+// ════════════════════════════════════════════════════════════════
+//  SAFE STORAGE SHIM
+//  Falls back to in-memory map when localStorage is blocked
+//  (Safari private mode, data: URLs, preview iframes, etc.)
+// ════════════════════════════════════════════════════════════════
+var _LS=(function(){
+  var mem={}, ok=false;
+  try{
+    var t="__mhw_probe__";
+    window.localStorage.setItem(t,"1");
+    window.localStorage.removeItem(t);
+    ok=true;
+  }catch(e){ ok=false; }
+  if(ok){
+    return {
+      getItem:function(k){ try{return window.localStorage.getItem(k);}catch(e){return mem[k]===undefined?null:mem[k];} },
+      setItem:function(k,v){ try{window.localStorage.setItem(k,v);}catch(e){mem[k]=String(v);} },
+      removeItem:function(k){ try{window.localStorage.removeItem(k);}catch(e){delete mem[k];} },
+      _memOnly:false
+    };
+  }
+  return {
+    getItem:function(k){ return mem[k]===undefined?null:mem[k]; },
+    setItem:function(k,v){ mem[k]=String(v); },
+    removeItem:function(k){ delete mem[k]; },
+    _memOnly:true
+  };
+})();
+// Warn once if running in memory-only mode
+if(_LS._memOnly){
+  setTimeout(function(){
+    var b=document.createElement("div");
+    b.style.cssText="position:fixed;bottom:10px;left:10px;z-index:9999;background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:8px 14px;border-radius:8px;font:600 12px/1.4 sans-serif;max-width:340px;box-shadow:0 4px 16px rgba(0,0,0,.15)";
+    b.innerHTML="⚠️ <strong>Preview mode:</strong> browser storage is blocked, so patient data will not persist between reloads. Open the file directly to save records.";
+    document.body.appendChild(b);
+    setTimeout(function(){ b.style.transition="opacity .6s"; b.style.opacity="0"; setTimeout(function(){b.remove();},700); },9000);
+  },400);
+}
+
 // ════════════════════════════════════════════════════════════════
 //  CONFIG
 // ════════════════════════════════════════════════════════════════
@@ -573,7 +974,7 @@ var FIELDS = [
 //  PATIENT RECORD STATE
 // ════════════════════════════════════════════════════════════════
 function blankState() {
-  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{}};
+  return {patientInfo:{status:"active",collection:""},symptoms:{},symLabels:{},symRows:4,visitDates:{},visitNotes:{},marks:{},symVisited:{},offenderTags:{},compliance:{},labsReviewed:{},suppDoses:{}};
 }
 var S = blankState();
 
@@ -582,7 +983,7 @@ var S = blankState();
 // ════════════════════════════════════════════════════════════════
 function checkPw() {
   try {
-    var pw=localStorage.getItem("mhw_pw")||DEFAULT_PW;
+    var pw=_LS.getItem("mhw_pw")||DEFAULT_PW;
     var val=document.getElementById("pwInput").value;
     var errEl=document.getElementById("pwError");
     if(!val){ errEl.textContent="⚠️ Please enter the password."; errEl.style.display="block"; return; }
@@ -616,10 +1017,10 @@ function logout() {
 //  PATIENT INDEX
 // ════════════════════════════════════════════════════════════════
 function loadIndex() {
-  try { return JSON.parse(localStorage.getItem(INDEX_KEY)||"[]"); } catch(e){ return []; }
+  try { return JSON.parse(_LS.getItem(INDEX_KEY)||"[]"); } catch(e){ return []; }
 }
 function saveIndex(idx) {
-  localStorage.setItem(INDEX_KEY,JSON.stringify(idx));
+  _LS.setItem(INDEX_KEY,JSON.stringify(idx));
 }
 
 function countVisits() {
@@ -703,7 +1104,7 @@ function renderStats() {
     else onHoldCount++;
 
     var raw = null;
-    try { raw = localStorage.getItem(PT_PREFIX + pt.id); } catch(e) {}
+    try { raw = _LS.getItem(PT_PREFIX + pt.id); } catch(e) {}
     if (!raw) return;
     var data = null;
     try { data = JSON.parse(raw); } catch(e) { return; }
@@ -1009,7 +1410,7 @@ function newPatient() {
   S.patientInfo.status="active";
   // Save empty record so it appears in index
   updateIndex(id,S.patientInfo);
-  localStorage.setItem(PT_PREFIX+id,JSON.stringify(S));
+  _LS.setItem(PT_PREFIX+id,JSON.stringify(S));
   showApp();
 }
 
@@ -1017,7 +1418,7 @@ function openPatient(id) {
   currentPatientId=id;
   S=blankState();
   try{
-    var raw=localStorage.getItem(PT_PREFIX+id);
+    var raw=_LS.getItem(PT_PREFIX+id);
     if(raw) S=Object.assign(blankState(),JSON.parse(raw));
   }catch(e){}
   showApp();
@@ -1031,8 +1432,8 @@ function deletePatient(e,id) {
   if(!confirm("Delete "+name+"?\n\nThis cannot be undone.")) return;
   idx=idx.filter(function(p){ return p.id!==id; });
   saveIndex(idx);
-  localStorage.removeItem(PT_PREFIX+id);
-  localStorage.removeItem("mhw_export_"+id);
+  _LS.removeItem(PT_PREFIX+id);
+  _LS.removeItem("mhw_export_"+id);
   renderDash();
 }
 
@@ -1050,7 +1451,7 @@ function updateBackupStatus() {
   var el = document.getElementById("backupStatus");
   if (!el || !currentPatientId) return;
   var exportKey = "mhw_export_" + currentPatientId;
-  var lastExport = localStorage.getItem(exportKey);
+  var lastExport = _LS.getItem(exportKey);
   var html = "";
   if (!lastExport) {
     html = '<span class="backup-status backup-red">⚠️ Never exported — backup recommended</span>';
@@ -1133,10 +1534,10 @@ function switchPhase(n){
 // ════════════════════════════════════════════════════════════════
 function mkKey(v,si,ii,oi){ return "v"+v+"_"+si+"_"+ii+(oi!==undefined?"_"+oi:""); }
 
+// Objective findings: always red. Subjective symptom grid still uses activeColor.
 function onCellClick(key){
-  if(activeColor===null){ delete S.marks[key]; }
-  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
-  else{ S.marks[key]=activeColor; }
+  if(S.marks[key]){ delete S.marks[key]; }
+  else{ S.marks[key]="red"; }
   renderMark(key);
   // parse vn and si from key "v{vn}_{si}_{ii}..."
   var m=key.match(/^v(\d+)_(\d+)_/); if(m) updateVsecHL(parseInt(m[1]),parseInt(m[2]));
@@ -1156,44 +1557,82 @@ function renderMark(key){
 function renderAllMarks(){ Object.keys(S.marks).forEach(function(k){ renderMark(k); }); }
 
 // ════════════════════════════════════════════════════════════════
-//  SECTION HIGHLIGHTS
+//  SECTION CARD HIGHLIGHTS + COUNTS
 // ════════════════════════════════════════════════════════════════
-function applyHL(el,on){
-  if(!el) return;
-  el.style.background=on?"#fef9c3":"";
-  el.style.color=on?"#713f12":"";
-  el.style.borderColor=on?"#fde68a":"";
-}
 function updateVsecHL(vn,si){
   var el=document.getElementById("vsec_hdr_"+vn+"_"+si); if(!el) return;
-  var on=false, p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_", p3="v"+vn+"_tag_"+si+"_";
-  for(var k in S.marks){ if(k.indexOf(p1)===0){on=true;break;} }
-  if(!on&&S.offenderTags){ for(var k in S.offenderTags){ if((k.indexOf(p2)===0||k.indexOf(p3)===0)&&S.offenderTags[k].length){on=true;break;} } }
-  applyHL(el,on);
+  var p1="v"+vn+"_"+si+"_", p2="v"+vn+"_of_"+si+"_", p3="v"+vn+"_tag_"+si+"_";
+  var markedN=0;
+  for(var k in S.marks){ if(k.indexOf(p1)===0) markedN++; }
+  var tagsN=0;
+  if(S.offenderTags){ for(var k in S.offenderTags){ if((k.indexOf(p2)===0||k.indexOf(p3)===0)&&S.offenderTags[k].length) tagsN+=S.offenderTags[k].length; } }
+  var total=(FIELDS[si]?FIELDS[si].items.length:0);
+  var on=(markedN+tagsN)>0;
+  el.classList.toggle("has-marks",on);
+  var cnt=document.getElementById("cnt_vsec_"+vn+"_"+si);
+  if(cnt){
+    if(on) cnt.innerHTML='<span class="marked-n">'+(markedN+tagsN)+' marked</span> · '+total+' item'+(total===1?'':'s');
+    else cnt.textContent=total+' item'+(total===1?'':'s');
+  }
 }
-function updateMskSecHL(vn,si){
-  var el=document.getElementById("msk_sec_hdr_"+vn+"_"+si); if(!el) return;
-  var on=false, p="v"+vn+"_msk_"+si+"_";
-  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
-  applyHL(el,on);
-}
+// Kept for compatibility with existing callers (per-region hl no longer used)
+function updateMskSecHL(vn,si){ updateMskMainHL(vn); }
 function updateMskMainHL(vn){
-  var el=document.getElementById("msk_main_"+vn); if(!el) return;
-  var on=false;
-  for(var k in S.marks){ if(k.indexOf("v"+vn+"_msk_")===0||k.indexOf("v"+vn+"_org_")===0){on=true;break;} }
-  applyHL(el,on);
+  // MSK card
+  var m=document.getElementById("msk_main_"+vn);
+  if(m){
+    var mskN=0;
+    for(var k in S.marks){ if(k.indexOf("v"+vn+"_msk_")===0) mskN++; }
+    var onMsk=mskN>0;
+    m.classList.toggle("has-marks",onMsk);
+    var cnt=document.getElementById("cnt_msk_"+vn);
+    if(cnt){
+      if(onMsk) cnt.innerHTML='<span class="marked-n">'+mskN+' marked</span> · '+MSK_SECTIONS.length+' regions';
+      else cnt.textContent=MSK_SECTIONS.length+" regions";
+    }
+  }
+  // Organ card
+  var o=document.getElementById("org_main_"+vn);
+  if(o){
+    var orgN=0;
+    for(var k in S.marks){ if(k.indexOf("v"+vn+"_org_")===0) orgN++; }
+    var onOrg=orgN>0;
+    o.classList.toggle("has-marks",onOrg);
+    var cnt=document.getElementById("cnt_org_"+vn);
+    if(cnt){
+      if(onOrg) cnt.innerHTML='<span class="marked-n">'+orgN+' marked</span> · '+MSK_ORGANS.length+' organs';
+      else cnt.textContent=MSK_ORGANS.length+" organs";
+    }
+  }
 }
 function updateSuppHL(vn){
   var el=document.getElementById("supp_hdr_"+vn); if(!el) return;
-  var on=false, p="v"+vn+"_supp_";
-  for(var k in S.marks){ if(k.indexOf(p)===0){on=true;break;} }
-  applyHL(el,on);
+  var n=0;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_supp_")===0) n++; }
+  var on=n>0;
+  el.classList.toggle("has-marks",on);
+  var cnt=document.getElementById("cnt_supp_"+vn);
+  if(cnt){
+    if(on) cnt.innerHTML='<span class="marked-n green">'+n+' prescribed</span> · '+SUPPLEMENTS.length+' items';
+    else cnt.textContent=SUPPLEMENTS.length+" items";
+  }
+}
+function updateDietHL(vn){
+  var el=document.getElementById("diet_hdr_"+vn); if(!el) return;
+  var n=0;
+  for(var k in S.marks){ if(k.indexOf("v"+vn+"_diet_")===0) n++; }
+  var on=n>0;
+  el.classList.toggle("has-marks",on);
+  var cnt=document.getElementById("cnt_diet_"+vn);
+  if(cnt){
+    if(on) cnt.innerHTML='<span class="marked-n green">'+n+' prescribed</span> · '+DIET_RECS.length+' options';
+    else cnt.textContent=DIET_RECS.length+" options";
+  }
 }
 function updateAllHL(){
   for(var v=1;v<=18;v++){
     FIELDS.forEach(function(sec,si){ updateVsecHL(v,si); });
-    MSK_SECTIONS.forEach(function(sect,si){ updateMskSecHL(v,si); });
-    updateMskMainHL(v); updateSuppHL(v);
+    updateMskMainHL(v); updateSuppHL(v); updateDietHL(v);
   }
 }
 
@@ -1461,10 +1900,34 @@ var MSK_ORGANS=[
   "Sinus","Small Intestine","Stomach","Testes","Thyroid","Uterus"
 ];
 
+// Diet recommendations — click a diet in the macro drill-down to mark it
+// for the current visit. Stored in S.marks as v{n}_diet_{idx}, always green
+// (prescribed = positive action, same as supplements).
+var DIET_RECS=[
+  "Anti-fungal","Low Histamine","Low FODMAP","Bear Diet","Carnivore","Dysglycemia Diet"
+];
+
+// Wire items that should use the organ list as their selectable tags.
+// Pituitary: TL Glabella + Endo Organ → provider selects which endocrine organ was tested.
+// Two Organ → provider picks exactly 2 organs (reuses the thenNow flag: same
+// UX as Sleep → Then / Now, capped at 2 selections).
+(function _wireOrganTagPopups(){
+  FIELDS.forEach(function(sec){
+    sec.items.forEach(function(it){
+      if(/^Pituitary:/.test(it.lbl)){
+        it.tagPopup={options:MSK_ORGANS.slice(),hasCustom:false};
+      }
+      if(it.lbl==="Two Organ"){
+        it.thenNow=true;
+      }
+    });
+  });
+})();
+
+// MSK + organs: always red.
 function onMskClick(key){
-  if(activeColor===null){ delete S.marks[key]; }
-  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
-  else { S.marks[key]=activeColor; }
+  if(S.marks[key]){ delete S.marks[key]; }
+  else { S.marks[key]="red"; }
   renderMskCell(key);
   var m=key.match(/^v(\d+)_msk_(\d+)_/); if(m){ updateMskSecHL(parseInt(m[1]),parseInt(m[2])); updateMskMainHL(parseInt(m[1])); }
   var m2=key.match(/^v(\d+)_org_/); if(m2) updateMskMainHL(parseInt(m2[1]));
@@ -1484,67 +1947,116 @@ function renderAllMskCells(){
 }
 
 // ────────────────────────────────────────────────────────────────
-//  SUPPLEMENTS
+//  SUPPLEMENTS — prescribed summary (read-only on visit card)
 // ────────────────────────────────────────────────────────────────
-function filterSupps(vn, query) {
-  var q = (query||"").trim().toLowerCase();
-  var brandsDiv = document.getElementById("supp_brands_"+vn); if(!brandsDiv) return;
-  SUPP_BRANDS.forEach(function(brand, bi) {
-    var brandId = "supp_brand_"+vn+"_"+bi;
-    var body = document.getElementById(brandId+"_body");
-    var hdr  = document.getElementById(brandId+"_hdr");
-    if(!body||!hdr) return;
-    var brandMatch = q && brand.brand.toLowerCase().indexOf(q)>=0;
-    var visibleCount = 0;
-    body.querySelectorAll(".supp-row").forEach(function(row) {
-      var name = row.dataset.name||"";
-      var si = parseInt(row.dataset.si);
-      var marked = !!(S.marks["v"+vn+"_supp_"+si]);
-      var match = !q || brandMatch || name.indexOf(q)>=0 || marked;
-      row.style.display = match ? "" : "none";
-      if(match) visibleCount++;
-    });
-    // Show/hide brand entirely
-    hdr.style.display = (!q || visibleCount>0) ? "" : "none";
-    // Auto-expand on search
-    if(q && visibleCount>0) {
-      body.classList.add("open");
-      var arr=document.getElementById(brandId+"_arr");
-      if(arr) arr.style.transform="rotate(90deg)";
-    }
-    // Update count badge
-    var cnt=document.getElementById(brandId+"_count");
-    if(cnt) cnt.textContent = q ? visibleCount : brand.items.length;
-  });
-}
+function filterSupps(){ /* no-op: supplements moved to macro modal */ }
 
 function renderSuppMarked(vn) {
   var div = document.getElementById("supp_marked_"+vn); if(!div) return;
   var pills = [];
+  if(!S.suppDoses) S.suppDoses={};
   SUPPLEMENTS.forEach(function(supp,si){
     var key = "v"+vn+"_supp_"+si;
-    var color = S.marks[key];
-    if(color) {
-      var hex = COLOR_MAP[color]||"#94a3b8";
-      pills.push('<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:12px;background:'+hex+'22;border:1px solid '+hex+'55;font-size:11px;font-weight:600;color:'+hex+';margin:2px">'+
-        '<span style="width:8px;height:8px;border-radius:50%;background:'+hex+';display:inline-block"></span>'+escHtml(supp)+'</span>');
+    if(S.marks[key]) {
+      var dose = S.suppDoses[key] || "";
+      var doseHtml = dose
+        ? '<span style="padding:1px 6px;border-radius:8px;background:#166534;color:white;font-size:10px;font-weight:800;letter-spacing:.04em">'+escHtml(dose)+'</span>'
+        : '<span style="padding:1px 6px;border-radius:8px;background:#f0fdf4;color:#166534;font-size:10px;font-weight:700;border:1px dashed #86efac">+ dose</span>';
+      pills.push('<span class="supp-pill" onclick="openDoseEditor('+vn+','+si+')" style="display:inline-flex;align-items:center;gap:5px;padding:3px 4px 3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px;cursor:pointer" title="Click to set dose">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(supp)+doseHtml+'</span>');
     }
   });
   div.innerHTML = pills.length
-    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">Prescribed this visit</div>'+pills.join('')+'<div style="border-top:1px solid #f1f5f9;margin:8px 0 4px"></div>'
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">💊 Prescribed this visit</div>'+pills.join('')
     : '';
-  // Also refresh grid visibility
-  filterSupps(vn, (document.querySelector("#supp_body_"+vn+" input")||{}).value||"");
+  // Also refresh the Challenges found row and Diet row next to it
+  renderChallengesFound(vn);
+  renderDietMarked(vn);
 }
+
+// ────────────────────────────────────────────────────────────────
+//  DIET RECOMMENDATIONS — read-only pill list on visit card
+// ────────────────────────────────────────────────────────────────
+function renderDietMarked(vn) {
+  var div = document.getElementById("diet_marked_"+vn); if(!div) return;
+  var pills = [];
+  DIET_RECS.forEach(function(d,di){
+    var key = "v"+vn+"_diet_"+di;
+    if(S.marks[key]) {
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#dcfce7;border:1px solid #86efac;font-size:11px;font-weight:600;color:#166534;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+escHtml(d)+'</span>');
+    }
+  });
+  div.innerHTML = pills.length
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">🥗 Diet recommendations</div>'+pills.join('')
+    : '';
+}
+function renderAllDietMarked(){ for(var v=1;v<=18;v++) renderDietMarked(v); }
+
+// ────────────────────────────────────────────────────────────────
+//  CHALLENGES FOUND — read-only pill list derived from marks + tags
+// ────────────────────────────────────────────────────────────────
+function renderChallengesFound(vn) {
+  var div = document.getElementById("chall_marked_"+vn); if(!div) return;
+  var pills = [];
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      // Did this finding get marked?
+      var markedLabel = null;
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          if(S.marks[mkKey(vn,si,ii,oi)]){
+            markedLabel = item.lbl + " (" + opt + ")";
+          }
+        });
+      } else if(S.marks[mkKey(vn,si,ii)]){
+        markedLabel = item.lbl;
+      }
+      // Collect any offender / tag selections
+      var tagBits=[];
+      var ofKey="v"+vn+"_of_"+si+"_"+ii;
+      var tgKey="v"+vn+"_tag_"+si+"_"+ii;
+      if(S.offenderTags && S.offenderTags[ofKey] && S.offenderTags[ofKey].length) tagBits=tagBits.concat(S.offenderTags[ofKey]);
+      if(S.offenderTags && S.offenderTags[tgKey] && S.offenderTags[tgKey].length) tagBits=tagBits.concat(S.offenderTags[tgKey]);
+      if(!markedLabel && !tagBits.length) return;
+      var label = markedLabel || item.lbl;
+      if(tagBits.length) label += " — " + tagBits.join(", ");
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fef2f2;border:1px solid #fecaca;font-size:11px;font-weight:600;color:#991b1b;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block"></span>'+escHtml(label)+'</span>');
+    });
+  });
+  // MSK marks
+  MSK_SECTIONS.forEach(function(sect,si){
+    sect.muscles.forEach(function(m,mi){
+      var hasR = !!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_R"];
+      var hasL = !!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_L"];
+      if(!hasR && !hasL) return;
+      var side = hasR && hasL ? "R+L" : (hasR ? "R" : "L");
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#f5f3ff;border:1px solid #c4b5fd;font-size:11px;font-weight:600;color:#5b21b6;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#7c3aed;display:inline-block"></span>'+escHtml(m)+" ("+side+")</span>");
+    });
+  });
+  // Organs
+  MSK_ORGANS.forEach(function(org,oi){
+    if(S.marks["v"+vn+"_org_"+oi]){
+      pills.push('<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;background:#fdf2f8;border:1px solid #f9a8d4;font-size:11px;font-weight:600;color:#9d174d;margin:2px">'+
+        '<span style="width:8px;height:8px;border-radius:50%;background:#be185d;display:inline-block"></span>'+escHtml(org)+'</span>');
+    }
+  });
+  div.innerHTML = pills.length
+    ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">⚠️ Challenges found</div>'+pills.join('')
+    : '';
+}
+function renderAllChallenges(){ for(var v=1;v<=18;v++) renderChallengesFound(v); }
 
 function renderAllSuppMarked() {
   for(var v=1; v<=18; v++) renderSuppMarked(v);
 }
 
+// Supplements: always green (prescribed = good thing).
 function onSuppClick(key){
-  if(activeColor===null){ delete S.marks[key]; }
-  else if(S.marks[key]===activeColor){ delete S.marks[key]; }
-  else { S.marks[key]=activeColor; }
+  if(S.marks[key]){ delete S.marks[key]; }
+  else { S.marks[key]="green"; }
   renderSuppCell(key);
   var m=key.match(/^v(\d+)_supp_/); if(m) updateSuppHL(parseInt(m[1]));
   autoSave();
@@ -1575,207 +2087,115 @@ function toggleMsk(vn){
 function buildVisitCard(vn){
   var div=document.createElement("div"); div.className="visit-card"; div.id="vc"+vn;
   div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
-    '<div style="display:flex;align-items:center;gap:6px">'+
+    '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
     '<span style="font-size:10px;color:#94a3b8">Date</span>'+
     '<input type="date" class="vdi" id="vd'+vn+'">'+
     '<button class="today-btn" onclick="setToday(\'vd'+vn+'\')">Today</button>'+
+    '<button class="copy-fwd-btn" id="cpf'+vn+'" onclick="copyPriorVisit('+vn+')"'+(vn===1?' disabled title="No prior visit"':' title="Copy marks from Visit '+(vn-1)+'"')+'>⇲ Copy V'+(vn-1)+'</button>'+
+    '<button class="macro-open-btn" onclick="openMacroModal('+vn+')">⚡ Macros</button>'+
     '</div></div>';
+  // Clickable section cards — each opens the Macro modal drilled into that section.
+  var secGrid=document.createElement("div"); secGrid.className="sec-card-grid";
   FIELDS.forEach(function(sec,si){
-    var secId="vsec_"+vn+"_"+si;
-    var sd=document.createElement("div"); sd.className="vsec";
-
-    // Collapsible section header
-    var t=document.createElement("div"); t.className="vsec-title vsec-toggle"; t.id="vsec_hdr_"+vn+"_"+si;
-    t.innerHTML=sec.sec+'<span class="vsec-arrow" id="'+secId+'_arr">▶</span>';
-    t.addEventListener("click",(function(id){ return function(){
-      var body=document.getElementById(id+"_body");
-      var arr=document.getElementById(id+"_arr");
-      var open=body.classList.toggle("open");
-      arr.classList.toggle("open",open);
-    }; })(secId));
-    sd.appendChild(t);
-
-    // Collapsible body
-    var body=document.createElement("div"); body.className="vsec-body"; body.id=secId+"_body";
-    sec.items.forEach(function(item,ii){
-      var itemWrap=document.createElement("div"); itemWrap.style.marginBottom="2px";
-      var row=document.createElement("div"); row.className="vfield";
-      var hasPanel=(sec.hasOffenders||item.tagPopup||item.thenNow);
-      var lbl=document.createElement("span"); lbl.className="vfield-label"+(hasPanel?" vfield-tappable":""); lbl.textContent=item.lbl+(hasPanel?" +":"");
-      if(hasPanel){
-        var panelKey=(sec.hasOffenders?"v"+vn+"_of_"+si+"_"+ii:"v"+vn+"_tag_"+si+"_"+ii);
-        var panelSafe=panelKey.replace(/[^a-z0-9]/gi,"_");
-        lbl.addEventListener("click",(function(sk){ return function(e){ e.stopPropagation(); toggleTagPanel(sk); }; })(panelSafe));
-      }
-      row.appendChild(lbl);
-      var od=document.createElement("div"); od.className="vfield-opts";
-      if(item.opts){
-        item.opts.forEach(function(opt,oi){
-          var key=mkKey(vn,si,ii,oi);
-          var w=document.createElement("div"); w.className="mwrap";
-          var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
-          c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
-          var ol=document.createElement("span"); ol.className="opt-lbl"; ol.textContent=opt;
-          w.appendChild(c); w.appendChild(ol); od.appendChild(w);
-        });
-      } else {
-        var key=mkKey(vn,si,ii);
-        var w=document.createElement("div"); w.className="mwrap";
-        var c=document.createElement("div"); c.className="mcell"; c.id="mc_"+key;
-        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onCellClick(k); }; })(key));
-        w.appendChild(c); od.appendChild(w);
-      }
-      row.appendChild(od); itemWrap.appendChild(row);
-      // Inline tag pill panels (iPad-friendly, no popup)
-      if(sec.hasOffenders){
-        var ofKey="v"+vn+"_of_"+si+"_"+ii;
-        buildTagPanel(itemWrap, ofKey, OFFENDER_OPTIONS, false, false);
-      }
-      if(item.tagPopup){
-        var tpKey="v"+vn+"_tag_"+si+"_"+ii;
-        buildTagPanel(itemWrap, tpKey, item.tagPopup.options, item.tagPopup.hasCustom, false);
-      }
-      if(item.thenNow){
-        var tnKey="v"+vn+"_tag_"+si+"_"+ii;
-        buildTagPanel(itemWrap, tnKey, [], false, true);
-      }
-      body.appendChild(itemWrap);
-    });
-    sd.appendChild(body);
-    div.appendChild(sd);
+    var card=document.createElement("button");
+    card.type="button";
+    card.className="sec-card";
+    card.id="vsec_hdr_"+vn+"_"+si;  // keep id for updateVsecHL compatibility
+    card.innerHTML='<div class="sec-card-title">'+escHtml(sec.sec)+'</div>'+
+      '<div class="sec-card-count" id="cnt_vsec_'+vn+'_'+si+'">'+sec.items.length+' item'+(sec.items.length===1?'':'s')+'</div>';
+    card.addEventListener("click",(function(vvn,ssi){ return function(){
+      openMacroModal(vvn);
+      _qpPath=[{type:"section",label:FIELDS[ssi].sec,si:ssi,children:true}];
+      switchMacroTab("qp");
+    }; })(vn,si));
+    secGrid.appendChild(card);
   });
+  // MSK + Organs + Supplements cards (same grid)
+  (function(){
+    var mskCard=document.createElement("button"); mskCard.type="button"; mskCard.className="sec-card msk"; mskCard.id="msk_main_"+vn;
+    mskCard.innerHTML='<div class="sec-card-title">💪 MSK — Muscle Testing</div>'+
+      '<div class="sec-card-count" id="cnt_msk_'+vn+'">'+MSK_SECTIONS.length+' regions</div>';
+    mskCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"mskroot",label:"💪 MSK — Muscle Testing",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(mskCard);
+
+    var orgCard=document.createElement("button"); orgCard.type="button"; orgCard.className="sec-card msk"; orgCard.id="org_main_"+vn;
+    orgCard.innerHTML='<div class="sec-card-title">🫀 Organ Indicators</div>'+
+      '<div class="sec-card-count" id="cnt_org_'+vn+'">'+MSK_ORGANS.length+' organs</div>';
+    orgCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"organroot",label:"🫀 Organ Indicators",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(orgCard);
+
+    var suppCard=document.createElement("button"); suppCard.type="button"; suppCard.className="sec-card supp"; suppCard.id="supp_hdr_"+vn;
+    suppCard.innerHTML='<div class="sec-card-title">💊 Supplements</div>'+
+      '<div class="sec-card-count" id="cnt_supp_'+vn+'">'+SUPPLEMENTS.length+' items</div>';
+    suppCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"supproot",label:"💊 Supplements",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(suppCard);
+
+    var dietCard=document.createElement("button"); dietCard.type="button"; dietCard.className="sec-card supp"; dietCard.id="diet_hdr_"+vn;
+    dietCard.innerHTML='<div class="sec-card-title">🥗 Diet Recommendations</div>'+
+      '<div class="sec-card-count" id="cnt_diet_'+vn+'">'+DIET_RECS.length+' options</div>';
+    dietCard.addEventListener("click",function(){
+      openMacroModal(vn);
+      _qpPath=[{type:"dietroot",label:"🥗 Diet Recommendations",children:true}];
+      switchMacroTab("qp");
+    });
+    secGrid.appendChild(dietCard);
+  })();
+  div.appendChild(secGrid);
+
   var no=document.createElement("div"); no.className="visit-notes";
-  no.innerHTML='<label>Visit Notes</label><textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>';
+  no.innerHTML='<label style="display:flex;align-items:center;gap:6px">Visit Notes <span id="labsBadge'+vn+'"></span></label>'+
+    '<div class="snippet-chips" id="sch'+vn+'"></div>'+
+    '<div class="notes-editor-wrap">'+
+    '<textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>'+
+    '<button class="mic-btn" id="mic'+vn+'" title="Dictate" onclick="toggleDictation('+vn+')">🎤</button>'+
+    '</div>'+
+    '<div class="compl-bar">'+
+      '<div class="compl-group">'+
+        '<span class="compl-label">🥗 Diet</span>'+
+        '<div class="compl-pills" id="diet'+vn+'">'+_complPillsHtml(vn,"diet")+'</div>'+
+      '</div>'+
+      '<div class="compl-group">'+
+        '<span class="compl-label">💊 Supp</span>'+
+        '<div class="compl-pills" id="supp'+vn+'">'+_complPillsHtml(vn,"supp")+'</div>'+
+      '</div>'+
+    '</div>';
   div.appendChild(no);
+  // Snippet chips build after append so the container exists
+  setTimeout(function(){ buildSnippetChips(vn); renderLabsBadge(vn); },0);
 
-  // MSK section
-  var mskToggle=document.createElement("div"); mskToggle.className="msk-toggle"; mskToggle.id="msk_main_"+vn;
-  mskToggle.innerHTML='<span class="msk-toggle-label">💪 MSK — Muscle Testing</span><span class="msk-toggle-arrow" id="msk_arrow_'+vn+'">▶</span>';
-  mskToggle.addEventListener("click",(function(v){ return function(){ toggleMsk(v); }; })(vn));
-  div.appendChild(mskToggle);
+  // Challenges found (read-only pills derived from marks + offender/tag selections)
+  var challMarked=document.createElement("div"); challMarked.id="chall_marked_"+vn;
+  challMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(challMarked);
 
-  var mskBody=document.createElement("div"); mskBody.className="msk-body"; mskBody.id="msk_body_"+vn;
+  // Prescribed supplements summary (click a pill to edit dose)
+  var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn;
+  suppMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(suppMarked);
 
-  // Build muscle sections — each collapsible
-  MSK_SECTIONS.forEach(function(sect,si){
-    var secId="msk_sec_"+vn+"_"+si;
-    var sh=document.createElement("div"); sh.className="msk-sec-hdr"; sh.id="msk_sec_hdr_"+vn+"_"+si;
-    sh.innerHTML='<span>'+sect.sec+'</span><span class="msk-sec-arrow" id="'+secId+'_arr">▶</span>';
-    sh.addEventListener("click",(function(id){ return function(){
-      var body=document.getElementById(id+"_body");
-      var arr=document.getElementById(id+"_arr");
-      var open=body.classList.toggle("open");
-      arr.classList.toggle("open",open);
-    }; })(secId));
-    mskBody.appendChild(sh);
+  // Diet recommendations summary
+  var dietMarked=document.createElement("div"); dietMarked.id="diet_marked_"+vn;
+  dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
+  div.appendChild(dietMarked);
 
-    var secBody=document.createElement("div"); secBody.className="msk-sec-body"; secBody.id=secId+"_body";
-    var grid=document.createElement("div"); grid.className="msk-grid";
-    sect.muscles.forEach(function(muscle,mi){
-      var rKey="v"+vn+"_msk_"+si+"_"+mi+"_R", lKey="v"+vn+"_msk_"+si+"_"+mi+"_L";
-      var row=document.createElement("div"); row.className="msk-row";
-      var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=muscle; lbl.textContent=muscle;
-      var cells=document.createElement("div"); cells.className="msk-cells";
-      ["R","L"].forEach(function(side){
-        var key=side==="R"?rKey:lKey;
-        var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
-        var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-        c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
-        var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent=side;
-        wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
-      });
-      row.appendChild(lbl); row.appendChild(cells); grid.appendChild(row);
-    });
-    secBody.appendChild(grid);
-    mskBody.appendChild(secBody);
-  });
-
-  // Organs section — also collapsible
-  var orgSecId="msk_org_"+vn;
-  var oh=document.createElement("div"); oh.className="msk-sec-hdr msk-org-hdr";
-  oh.innerHTML='<span>🫀 Organ Indicators</span><span class="msk-sec-arrow" id="'+orgSecId+'_arr">▶</span>';
-  oh.addEventListener("click",(function(id){ return function(){
-    var body=document.getElementById(id+"_body");
-    var arr=document.getElementById(id+"_arr");
-    var open=body.classList.toggle("open");
-    arr.classList.toggle("open",open);
-  }; })(orgSecId));
-  mskBody.appendChild(oh);
-
-  var orgSecBody=document.createElement("div"); orgSecBody.className="msk-sec-body"; orgSecBody.id=orgSecId+"_body";
-  var orgGrid=document.createElement("div"); orgGrid.className="msk-grid";
-  MSK_ORGANS.forEach(function(organ,oi){
-    var key="v"+vn+"_org_"+oi;
-    var row=document.createElement("div"); row.className="msk-row";
-    var lbl=document.createElement("span"); lbl.className="msk-label"; lbl.title=organ; lbl.textContent=organ;
-    var cells=document.createElement("div"); cells.className="msk-cells";
-    var wrap=document.createElement("div"); wrap.className="msk-cell-wrap";
-    var c=document.createElement("div"); c.className="msk-cell"; c.id="mc_"+key;
-    c.addEventListener("click",(function(k){ return function(e){ e.stopPropagation(); onMskClick(k); }; })(key));
-    var ol=document.createElement("span"); ol.className="msk-opt-lbl"; ol.textContent="RL";
-    wrap.appendChild(c); wrap.appendChild(ol); cells.appendChild(wrap);
-    row.appendChild(lbl); row.appendChild(cells); orgGrid.appendChild(row);
-  });
-  orgSecBody.appendChild(orgGrid);
-  mskBody.appendChild(orgSecBody);
-  div.appendChild(mskBody);
-
-  // ── Supplements section ──────────────────────────────────────
-  var suppToggle=document.createElement("div"); suppToggle.className="supp-toggle"; suppToggle.id="supp_hdr_"+vn;
-  suppToggle.innerHTML='<span class="supp-toggle-label">💊 Supplements</span><span class="supp-toggle-arrow" id="supp_arrow_'+vn+'">▶</span>';
-  suppToggle.addEventListener("click",(function(v){ return function(){
-    var body=document.getElementById("supp_body_"+v);
-    var arr=document.getElementById("supp_arrow_"+v);
-    var open=body.classList.toggle("open");
-    arr.classList.toggle("open",open);
-  }; })(vn));
-  div.appendChild(suppToggle);
-
-  var suppBody=document.createElement("div"); suppBody.className="supp-body"; suppBody.id="supp_body_"+vn;
-
-  // Prescribed summary
-  var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn; suppBody.appendChild(suppMarked);
-
-  // Search bar
-  var suppSearch=document.createElement("input"); suppSearch.type="text";
-  suppSearch.placeholder="\uD83D\uDD0D Search all "+SUPPLEMENTS.length+" supplements...";
-  suppSearch.style.cssText="width:100%;padding:7px 12px;border:1.5px solid #e2e8f0;border-radius:20px;font-size:12px;outline:none;margin-bottom:8px;box-sizing:border-box;color:#374151";
-  suppSearch.addEventListener("input",(function(v2){ return function(){ filterSupps(v2, suppSearch.value); }; })(vn));
-  suppBody.appendChild(suppSearch);
-
-  // Brand groups
-  var suppBrandsDiv=document.createElement("div"); suppBrandsDiv.id="supp_brands_"+vn;
-  SUPP_BRANDS.forEach(function(brand,bi){
-    var brandId="supp_brand_"+vn+"_"+bi;
-    // Brand header
-    var hdr=document.createElement("div"); hdr.className="supp-brand-hdr"; hdr.id=brandId+"_hdr";
-    hdr.dataset.brand=brand.brand.toLowerCase();
-    hdr.innerHTML='<span class="supp-brand-name">'+escHtml(brand.brand)+'</span>'+
-      '<span class="supp-brand-count" id="'+brandId+'_count">'+brand.items.length+'</span>'+
-      '<span class="supp-brand-arrow" id="'+brandId+'_arr">\u25B6</span>';
-    hdr.addEventListener("click",(function(bid){ return function(e){
-      e.stopPropagation();
-      var body=document.getElementById(bid+"_body");
-      var arr=document.getElementById(bid+"_arr");
-      var open=body.classList.toggle("open");
-      arr.style.transform=open?"rotate(90deg)":"";
-    }; })(brandId));
-    suppBrandsDiv.appendChild(hdr);
-    // Brand body
-    var body=document.createElement("div"); body.className="supp-brand-body"; body.id=brandId+"_body";
-    brand.items.forEach(function(item){
-      var si=item.idx;
-      var key="v"+vn+"_supp_"+si;
-      var row=document.createElement("div"); row.className="supp-row"; row.dataset.name=item.name.toLowerCase(); row.dataset.si=si;
-      var lbl=document.createElement("span"); lbl.className="supp-label"; lbl.textContent=item.name;
-      var c=document.createElement("div"); c.className="supp-cell"; c.id="sc2_"+key;
-      c.addEventListener("click",(function(k,v2){ return function(e){ e.stopPropagation(); onSuppClick(k); renderSuppMarked(v2); updateSuppHL(v2); }; })(key,vn));
-      row.appendChild(lbl); row.appendChild(c); body.appendChild(row);
-    });
-    suppBrandsDiv.appendChild(body);
-  });
-  suppBody.appendChild(suppBrandsDiv);
-  div.appendChild(suppBody);
+  // Per-visit action bar: print summary / email summary
+  var actBar=document.createElement("div");
+  actBar.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end";
+  actBar.innerHTML='<button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 12px" onclick="printVisitSummary('+vn+')">🖨 Print Visit Summary</button>'+
+    '<button class="btn btn-light" style="background:#dbeafe;color:#1e40af;font-size:11px;padding:6px 12px" onclick="emailVisitSummary('+vn+')">✉️ Email to Patient</button>';
+  div.appendChild(actBar);
 
   return div;
 }
@@ -1846,7 +2266,7 @@ function renderSymTable(){
 // ════════════════════════════════════════════════════════════════
 //  PATIENT INFO
 // ════════════════════════════════════════════════════════════════
-var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_status:"status"};
+var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_email:"email",fi_status:"status"};
 
 function loadPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
@@ -1883,7 +2303,7 @@ function loadVisitDates(){
         }; })(vn));
       }
       var ne=document.getElementById("vn"+vn);
-      if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; autoSave(); }; })(vn)); }
+      if(ne){ ne.value=S.visitNotes[vn]||""; ne.addEventListener("input",(function(n){ return function(){ S.visitNotes[n]=ne.value; renderLabsBadge(n); autoSave(); }; })(vn)); }
     })(v);
   }
 }
@@ -1894,7 +2314,7 @@ function loadVisitDates(){
 function saveAll(){
   if(!currentPatientId) return;
   collectPatientInfo();
-  localStorage.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
+  _LS.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
   updateIndex(currentPatientId,S.patientInfo);
   var t=document.getElementById("toast"); t.style.opacity="1";
   setTimeout(function(){ t.style.opacity="0"; },1600);
@@ -1902,6 +2322,7 @@ function saveAll(){
 
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
+  renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -1920,7 +2341,7 @@ function bulkExport(){
   var idx=loadIndex();
   var patients={};
   idx.forEach(function(pt){
-    var raw=localStorage.getItem(PT_PREFIX+pt.id);
+    var raw=_LS.getItem(PT_PREFIX+pt.id);
     if(raw){ try{ patients[pt.id]=JSON.parse(raw); }catch(e){} }
   });
   var payload={
@@ -1963,13 +2384,13 @@ function bulkImport(input){
       payload.index.forEach(function(pt){
         existingMap[pt.id]=pt; // upsert into index
         if(payload.patients[pt.id]){
-          localStorage.setItem(PT_PREFIX+pt.id, JSON.stringify(payload.patients[pt.id]));
+          _LS.setItem(PT_PREFIX+pt.id, JSON.stringify(payload.patients[pt.id]));
         }
       });
 
       // Save merged index
       var mergedIdx=Object.values(existingMap);
-      localStorage.setItem(INDEX_KEY, JSON.stringify(mergedIdx));
+      _LS.setItem(INDEX_KEY, JSON.stringify(mergedIdx));
 
       input.value="";
       renderDash(); renderStats();
@@ -1991,7 +2412,7 @@ function exportData(){
   a.download="momentum_"+name+"_"+date+".json"; a.click();
   // Save export timestamp
   if(currentPatientId){
-    localStorage.setItem("mhw_export_"+currentPatientId, new Date().toISOString());
+    _LS.setItem("mhw_export_"+currentPatientId, new Date().toISOString());
     updateBackupStatus();
   }
 }
@@ -2148,7 +2569,15 @@ function buildPrintView(){
     if(any) suppRows.push({label:supp,marks:rm});
   });
 
-  var hasAnyData=symRows.length||Object.keys(secData).length||Object.keys(mskSecData).length||orgRows.length||suppRows.length;
+  // ── diet recommendations ───────────────────────────────────
+  var dietRows=[];
+  DIET_RECS.forEach(function(d,di){
+    var rm={},any=false;
+    for(var v=1;v<=18;v++){ var cn=S.marks["v"+v+"_diet_"+di]; if(cn){ rm[v]=cn; any=true; } }
+    if(any) dietRows.push({label:d,marks:rm});
+  });
+
+  var hasAnyData=symRows.length||Object.keys(secData).length||Object.keys(mskSecData).length||orgRows.length||suppRows.length||dietRows.length;
   var content=document.getElementById("pv-content");
 
   if(!hasAnyData){
@@ -2217,6 +2646,37 @@ function buildPrintView(){
   }
   html+='</tr></thead><tbody>';
 
+  // ── Compliance + Labs Reviewed rows (top of timeline) ──
+  var _gc={A:"#22c55e",B:"#84cc16",C:"#eab308",D:"#f97316",F:"#ef4444"};
+  function _gCell(g){
+    if(!g) return '<td></td>';
+    var c=_gc[g]||"#64748b";
+    return '<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:'+c+';color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">'+g+'</span></td>';
+  }
+  var _anyC=false, _anyL=false;
+  if(S.compliance){ for(var v=1;v<=maxV;v++){ if(S.compliance[v+"_diet"]||S.compliance[v+"_supp"]){ _anyC=true; break; } } }
+  for(var v=1;v<=maxV;v++){ if(labsWasReviewed(v)){ _anyL=true; break; } }
+  if(_anyC||_anyL){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#0369a1!important">COMPLIANCE &amp; LABS</th></tr>';
+    if(_anyC){
+      html+='<tr><td class="row-lbl sub-lbl">🥗 Diet compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=_gCell((S.compliance||{})[v+"_diet"]);
+      html+=extraCells(null); html+='</tr>';
+      html+='<tr><td class="row-lbl sub-lbl">💊 Supplement compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=_gCell((S.compliance||{})[v+"_supp"]);
+      html+=extraCells(null); html+='</tr>';
+    }
+    if(_anyL){
+      html+='<tr><td class="row-lbl sub-lbl">🧪 Labs reviewed</td>';
+      for(var v=1;v<=maxV;v++){
+        html+=labsWasReviewed(v)
+          ?'<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:#1e40af;color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">✓</span></td>'
+          :'<td></td>';
+      }
+      html+=extraCells(null); html+='</tr>';
+    }
+  }
+
   // SUBJECTIVE — visit-mapped + extra weeks
   if(hasVisitDates&&(symRows.length||extraWeeks.length)){
     html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'">SUBJECTIVE COMPLAINTS</th></tr>';
@@ -2284,6 +2744,17 @@ function buildPrintView(){
     });
   }
 
+  // DIET RECOMMENDATIONS
+  if(dietRows.length){
+    html+='<tr><th class="sec-hdr" colspan="'+(totalCols+1)+'" style="background:#166534!important">🥗 DIET RECOMMENDATIONS</th></tr>';
+    dietRows.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+=extraCells(null);
+      html+='</tr>';
+    });
+  }
+
   html+='</tbody></table>';
   if(!hasVisitDates) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">💡 Enter Visit 1 date to align subjective symptoms with visit columns (V1 date = Week 1 anchor).</p>';
   else if(!pi.start&&S.visitDates[1]) html+='<p style="font-size:9px;color:#94a3b8;margin-top:8px;font-style:italic">ℹ️ Week 1 anchored to Visit 1 date ('+S.visitDates[1]+').</p>';
@@ -2326,6 +2797,1347 @@ function setToday(inputId){
   el.value=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
   var vn=parseInt(inputId.replace("vd","")); if(vn) S.visitDates[vn]=el.value;
   autoSave();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  BRAND / REGION PICKER MODAL
+// ════════════════════════════════════════════════════════════════
+var _pickerCtx=null;  // {kind:'supp'|'msk', vn, bi/si}
+function openSuppBrandPicker(vn, bi){
+  _pickerCtx={kind:"supp", vn:vn, bi:bi};
+  var brand=SUPP_BRANDS[bi];
+  document.getElementById("pickerTitle").textContent="💊 "+brand.brand;
+  document.getElementById("pickerSub").textContent="Tap to toggle — green = prescribed this visit";
+  document.getElementById("pickerVn").textContent="V"+vn;
+  document.getElementById("pkSearch").value="";
+  document.getElementById("pkSearch").placeholder="🔍 Search "+brand.items.length+" "+brand.brand+" items...";
+  document.getElementById("pickerModal").classList.add("open");
+  renderPicker();
+}
+function openMskRegionPicker(vn, si){
+  _pickerCtx={kind:"msk", vn:vn, si:si};
+  var sect=MSK_SECTIONS[si];
+  document.getElementById("pickerTitle").textContent="💪 "+sect.sec;
+  document.getElementById("pickerSub").textContent="Tap R / L / Both to mark — red = weakness";
+  document.getElementById("pickerVn").textContent="V"+vn;
+  document.getElementById("pkSearch").value="";
+  document.getElementById("pkSearch").placeholder="🔍 Search "+sect.muscles.length+" muscles...";
+  document.getElementById("pickerModal").classList.add("open");
+  renderPicker();
+}
+function closePicker(){ document.getElementById("pickerModal").classList.remove("open"); _pickerCtx=null; }
+
+function renderPicker(){
+  if(!_pickerCtx) return;
+  var grid=document.getElementById("pkGrid");
+  var q=(document.getElementById("pkSearch").value||"").trim().toLowerCase();
+  var html="";
+  if(_pickerCtx.kind==="supp"){
+    var brand=SUPP_BRANDS[_pickerCtx.bi];
+    brand.items.forEach(function(it){
+      if(q && it.name.toLowerCase().indexOf(q)<0) return;
+      var key="v"+_pickerCtx.vn+"_supp_"+it.idx;
+      var marked=!!S.marks[key];
+      html+='<button class="pk-tile'+(marked?" marked":"")+'" onclick="pkToggleSupp('+it.idx+')">'+escHtml(it.name)+'</button>';
+    });
+  } else if(_pickerCtx.kind==="msk"){
+    var sect=MSK_SECTIONS[_pickerCtx.si];
+    sect.muscles.forEach(function(m,mi){
+      if(q && m.toLowerCase().indexOf(q)<0) return;
+      var kR="v"+_pickerCtx.vn+"_msk_"+_pickerCtx.si+"_"+mi+"_R";
+      var kL="v"+_pickerCtx.vn+"_msk_"+_pickerCtx.si+"_"+mi+"_L";
+      var mR=!!S.marks[kR], mL=!!S.marks[kL];
+      html+='<div style="display:flex;gap:4px">';
+      html+='<button class="pk-tile red'+(mR?" marked":"")+'" style="flex:1" onclick="pkToggleMsk('+_pickerCtx.si+','+mi+',\'R\')"><span style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:.08em">R</span><br>'+escHtml(m)+'</button>';
+      html+='<button class="pk-tile red'+(mL?" marked":"")+'" style="flex:1" onclick="pkToggleMsk('+_pickerCtx.si+','+mi+',\'L\')"><span style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:.08em">L</span><br>'+escHtml(m)+'</button>';
+      html+='<button class="pk-tile red'+(mR&&mL?" marked":"")+'" style="flex:0 0 68px" onclick="pkToggleMskBoth('+_pickerCtx.si+','+mi+')"><span style="font-size:10px;color:#94a3b8;font-weight:800;letter-spacing:.08em">R+L</span><br>Both</button>';
+      html+='</div>';
+    });
+    // MSK uses a 1-column stacked layout (each muscle is its own row of 3 tiles)
+    grid.style.gridTemplateColumns="1fr";
+    grid.innerHTML=html||'<div style="padding:14px;color:#94a3b8;font-size:12px;text-align:center">No muscles match.</div>';
+    return;
+  }
+  grid.style.gridTemplateColumns="";
+  grid.innerHTML=html||'<div style="padding:14px;color:#94a3b8;font-size:12px;text-align:center">No items match.</div>';
+}
+
+function pkToggleSupp(idx){
+  var vn=_pickerCtx.vn;
+  var k="v"+vn+"_supp_"+idx;
+  if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+  renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn); autoSave();
+  renderPicker();
+}
+function pkToggleMsk(si,mi,side){
+  var vn=_pickerCtx.vn;
+  var k="v"+vn+"_msk_"+si+"_"+mi+"_"+side;
+  if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+  renderMskCell(k); updateMskSecHL(vn,si); updateMskMainHL(vn); autoSave();
+  renderPicker();
+}
+function pkToggleMskBoth(si,mi){
+  var vn=_pickerCtx.vn;
+  ["R","L"].forEach(function(side){
+    var k="v"+vn+"_msk_"+si+"_"+mi+"_"+side;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+    renderMskCell(k);
+  });
+  updateMskSecHL(vn,si); updateMskMainHL(vn); autoSave();
+  renderPicker();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  SETTINGS MODAL
+// ════════════════════════════════════════════════════════════════
+function openSettings(){
+  renderSettingsSnippets();
+  document.getElementById("settingsIdleMin").value=IDLE_MINUTES;
+  document.getElementById("settingsNewPw").value="";
+  document.getElementById("settingsModal").classList.add("open");
+}
+function closeSettings(){ document.getElementById("settingsModal").classList.remove("open"); }
+function renderSettingsSnippets(){
+  var list=document.getElementById("settingsSnippets");
+  var arr=getSnippets();
+  list.innerHTML=arr.map(function(s,i){
+    return '<span class="settings-chip">'+escHtml(s)+'<span class="del" onclick="removeSettingsSnippet('+i+')">✕</span></span>';
+  }).join("");
+}
+function addSettingsSnippet(){
+  var inp=document.getElementById("settingsNewSnippet");
+  var v=inp.value.trim(); if(!v) return;
+  var arr=getSnippets();
+  if(arr.indexOf(v)<0){ arr.push(v); saveSnippets(arr); }
+  inp.value="";
+  renderSettingsSnippets();
+  for(var v2=1;v2<=18;v2++) buildSnippetChips(v2);
+}
+function removeSettingsSnippet(idx){
+  var arr=getSnippets(); arr.splice(idx,1); saveSnippets(arr);
+  renderSettingsSnippets();
+  for(var v=1;v<=18;v++) buildSnippetChips(v);
+}
+function resetSnippets(){
+  if(!confirm("Reset snippets to defaults?")) return;
+  saveSnippets(DEFAULT_SNIPPETS.slice());
+  renderSettingsSnippets();
+  for(var v=1;v<=18;v++) buildSnippetChips(v);
+}
+function setIdleMinutes(v){
+  var n=parseInt(v,10); if(!n||n<1) return;
+  IDLE_MINUTES=n;
+  _LS.setItem("mhw_idle_min",String(n));
+  resetIdleTimer();
+}
+function changeAccessPw(){
+  var v=document.getElementById("settingsNewPw").value;
+  if(!v||v.length<4){ alert("Password must be at least 4 characters."); return; }
+  _LS.setItem("mhw_pw",v);
+  document.getElementById("settingsNewPw").value="";
+  showToast("✓ Password updated");
+}
+
+// ════════════════════════════════════════════════════════════════
+//  COMPLIANCE LETTER GRADES + LABS BADGE
+// ════════════════════════════════════════════════════════════════
+var COMPL_GRADES=["A","B","C","D","F"];
+function _complPillsHtml(vn,kind){
+  var key=vn+"_"+kind;
+  var cur=(S.compliance&&S.compliance[key])||"";
+  var out="";
+  COMPL_GRADES.forEach(function(g){
+    out+='<button class="compl-pill '+(cur===g?"active":"")+'" data-grade="'+g+'" onclick="setCompliance('+vn+',\''+kind+'\',\''+g+'\')">'+g+'</button>';
+  });
+  return out;
+}
+function setCompliance(vn,kind,grade){
+  if(!S.compliance) S.compliance={};
+  var key=vn+"_"+kind;
+  if(S.compliance[key]===grade) delete S.compliance[key]; // tap again to clear
+  else S.compliance[key]=grade;
+  // Re-render just this group
+  var groupEl=document.getElementById((kind==="diet"?"diet":"supp")+vn);
+  if(groupEl) groupEl.innerHTML=_complPillsHtml(vn,kind);
+  autoSave();
+}
+function renderAllCompliance(){
+  for(var v=1;v<=18;v++){
+    var d=document.getElementById("diet"+v); if(d) d.innerHTML=_complPillsHtml(v,"diet");
+    var s=document.getElementById("supp"+v); if(s) s.innerHTML=_complPillsHtml(v,"supp");
+  }
+}
+
+// Labs reviewed: derived from whether the notes contain the "Reviewed labs" snippet.
+// Also supports an explicit override via S.labsReviewed[vn]=true/false.
+function labsWasReviewed(vn){
+  if(S.labsReviewed && S.labsReviewed[vn]!==undefined) return !!S.labsReviewed[vn];
+  var n=(S.visitNotes[vn]||"").toLowerCase();
+  return n.indexOf("reviewed labs")>=0;
+}
+function renderLabsBadge(vn){
+  var el=document.getElementById("labsBadge"+vn); if(!el) return;
+  el.innerHTML=labsWasReviewed(vn)?'<span class="labs-badge">🧪 Labs reviewed</span>':'';
+}
+function renderAllLabsBadges(){ for(var v=1;v<=18;v++) renderLabsBadge(v); }
+
+// ════════════════════════════════════════════════════════════════
+//  A3: COPY FORWARD FROM PRIOR VISIT
+// ════════════════════════════════════════════════════════════════
+function copyPriorVisit(vn){
+  if(vn<=1) return;
+  var prev=vn-1;
+  var fromPfx="v"+prev+"_", toPfx="v"+vn+"_";
+  var copied=0, conflicts=0;
+  // Dry count for confirm prompt
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf(fromPfx)===0) copied++; });
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf(toPfx)===0) conflicts++; });
+  if(copied===0){ showToast("Nothing to copy from V"+prev); return; }
+  var msg="Copy "+copied+" mark"+(copied===1?"":"s")+" from Visit "+prev+" into Visit "+vn+"?";
+  if(conflicts>0) msg+="\n\nVisit "+vn+" already has "+conflicts+" mark"+(conflicts===1?"":"s")+" — they will be overwritten.";
+  if(!confirm(msg)) return;
+
+  // Clear existing target-visit marks/tags/notes of matching keys we will copy
+  Object.keys(S.marks).forEach(function(k){ if(k.indexOf(toPfx)===0) delete S.marks[k]; });
+  if(S.offenderTags){
+    Object.keys(S.offenderTags).forEach(function(k){
+      if(k.indexOf("v"+vn+"_of_")===0 || k.indexOf("v"+vn+"_tag_")===0) delete S.offenderTags[k];
+    });
+  }
+
+  // Copy marks
+  Object.keys(S.marks).forEach(function(k){
+    if(k.indexOf(fromPfx)===0){
+      var nk=toPfx+k.slice(fromPfx.length);
+      S.marks[nk]=S.marks[k];
+    }
+  });
+  // Copy offender / tag panels
+  if(S.offenderTags){
+    Object.keys(S.offenderTags).forEach(function(k){
+      var mOf=k.match(/^v(\d+)_of_(.+)$/), mTg=k.match(/^v(\d+)_tag_(.+)$/);
+      if(mOf && parseInt(mOf[1])===prev) S.offenderTags["v"+vn+"_of_"+mOf[2]]=S.offenderTags[k].slice();
+      if(mTg && parseInt(mTg[1])===prev) S.offenderTags["v"+vn+"_tag_"+mTg[2]]=S.offenderTags[k].slice();
+    });
+  }
+  // Copy compliance grades
+  if(S.compliance){
+    ["diet","supp"].forEach(function(kind){
+      var fromKey=prev+"_"+kind, toKey=vn+"_"+kind;
+      if(S.compliance[fromKey]) S.compliance[toKey]=S.compliance[fromKey];
+      else delete S.compliance[toKey];
+    });
+  }
+  // Re-render the affected cells for this visit
+  Object.keys(S.marks).forEach(function(k){
+    if(k.indexOf(toPfx)!==0) return;
+    if(k.indexOf("_msk_")>=0||k.indexOf("_org_")>=0) renderMskCell(k);
+    else if(k.indexOf("_supp_")>=0) renderSuppCell(k);
+    else renderMark(k);
+  });
+  renderAllOffenderTags(); renderSuppMarked(vn); updateAllHL();
+  var d=document.getElementById("diet"+vn); if(d) d.innerHTML=_complPillsHtml(vn,"diet");
+  var sp=document.getElementById("supp"+vn); if(sp) sp.innerHTML=_complPillsHtml(vn,"supp");
+  renderLabsBadge(vn);
+  autoSave();
+  showToast("✓ Copied V"+prev+" → V"+vn);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A4: SNIPPET CHIPS
+// ════════════════════════════════════════════════════════════════
+var DEFAULT_SNIPPETS=[
+  "Reviewed labs","+2 week follow-up","+3 week follow-up","+4 week follow-up"
+];
+// One-time migration: prior build shipped a larger default snippet list.
+// If the stored snippets are the old default AND the user hasn't customized them,
+// reset to the new minimal list.
+(function _migrateSnippets(){
+  var OLD_DEFAULTS=[
+    "Improved","No change","Resolved","Flare-up","Adherent","Non-adherent",
+    "Emotional component","Diet compliance good","Diet compliance poor",
+    "+1 week follow-up","+2 week follow-up","Homework given","Reviewed labs"
+  ];
+  try{
+    var raw=_LS.getItem("mhw_snippets");
+    if(!raw) return;
+    var arr=JSON.parse(raw);
+    if(!Array.isArray(arr)) return;
+    if(arr.length===OLD_DEFAULTS.length && arr.every(function(v,i){return v===OLD_DEFAULTS[i];})){
+      _LS.setItem("mhw_snippets",JSON.stringify(DEFAULT_SNIPPETS.slice()));
+    }
+  }catch(e){}
+})();
+function getSnippets(){
+  try{ var s=JSON.parse(_LS.getItem("mhw_snippets")||"null"); return Array.isArray(s)?s:DEFAULT_SNIPPETS.slice(); }
+  catch(e){ return DEFAULT_SNIPPETS.slice(); }
+}
+function saveSnippets(arr){ _LS.setItem("mhw_snippets",JSON.stringify(arr)); }
+function buildSnippetChips(vn){
+  var c=document.getElementById("sch"+vn); if(!c) return;
+  c.innerHTML="";
+  var snippets=getSnippets();
+  snippets.forEach(function(s){
+    var b=document.createElement("span"); b.className="snippet-chip"; b.textContent=s;
+    b.addEventListener("click",function(e){
+      e.stopPropagation();
+      var ta=document.getElementById("vn"+vn); if(!ta) return;
+      var cur=ta.value.trim();
+      ta.value=(cur?cur+" ":"")+"- "+s+". ";
+      S.visitNotes[vn]=ta.value; ta.focus(); renderLabsBadge(vn); autoSave();
+    });
+    c.appendChild(b);
+  });
+  var add=document.createElement("span"); add.className="snippet-chip add"; add.textContent="+ Snippet";
+  add.addEventListener("click",function(e){
+    e.stopPropagation();
+    var n=prompt("New snippet text:"); if(!n) return;
+    n=n.trim(); if(!n) return;
+    var arr=getSnippets(); if(arr.indexOf(n)<0){ arr.push(n); saveSnippets(arr); }
+    for(var v=1;v<=18;v++) buildSnippetChips(v);
+  });
+  c.appendChild(add);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A5: VOICE DICTATION (Web Speech API)
+// ════════════════════════════════════════════════════════════════
+var _speechRec=null, _speechVn=null;
+function _getSpeech(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  return SR?new SR():null;
+}
+function toggleDictation(vn){
+  var btn=document.getElementById("mic"+vn);
+  if(_speechRec && _speechVn===vn){ try{ _speechRec.stop(); }catch(e){} _speechRec=null; _speechVn=null; if(btn) btn.classList.remove("recording"); return; }
+  if(_speechRec){ try{ _speechRec.stop(); }catch(e){} _speechRec=null; }
+  var rec=_getSpeech();
+  if(!rec){ alert("Speech recognition isn't supported in this browser. Use Safari on iPadOS 14.5+ or Chrome."); return; }
+  rec.continuous=true; rec.interimResults=false; rec.lang="en-US";
+  rec.onresult=function(e){
+    var ta=document.getElementById("vn"+vn); if(!ta) return;
+    var txt="";
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) txt+=e.results[i][0].transcript+" ";
+    }
+    if(!txt) return;
+    var cur=ta.value.trim();
+    ta.value=(cur?cur+" ":"")+txt.trim();
+    S.visitNotes[vn]=ta.value; autoSave();
+  };
+  rec.onend=function(){
+    if(_speechVn===vn){ _speechRec=null; _speechVn=null; if(btn) btn.classList.remove("recording"); }
+  };
+  rec.onerror=function(){ if(btn) btn.classList.remove("recording"); _speechRec=null; _speechVn=null; };
+  try{ rec.start(); }catch(e){ alert("Couldn't start dictation: "+e.message); return; }
+  _speechRec=rec; _speechVn=vn; if(btn) btn.classList.add("recording");
+}
+// Hide mic buttons if unsupported
+(function(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    var st=document.createElement("style");
+    st.textContent=".mic-btn{display:none!important}.notes-editor-wrap textarea{padding-right:9px!important}";
+    document.head.appendChild(st);
+  }
+})();
+
+// ════════════════════════════════════════════════════════════════
+//  A2: MACRO SYSTEM
+// ════════════════════════════════════════════════════════════════
+var DEFAULT_MACROS=[
+  { id:"vagal_basic", label:"Vagal pattern (basic)", category:"Autonomic",
+    applies:[{section:"AUTONOMIC CHALLENGES",item:"Vagus Challenge",mark:"red"},
+             {section:"AUTONOMIC CHALLENGES",item:"HRV",mark:"red"}],
+    note:"Vagal challenge noted — recommend diaphragmatic breathing homework." },
+  { id:"icv_hv_pattern", label:"ICV + HV open pattern", category:"Gut",
+    applies:[{section:"GUT — INTESTINE",item:"ICV",opt:"Open",mark:"red"},
+             {section:"GUT — INTESTINE",item:"HV",opt:"Open",mark:"red"}],
+    note:"ICV + HV open pattern." },
+  { id:"hpa_axis", label:"HPA axis workup", category:"Hormonal",
+    includes:["vagal_basic"],
+    applies:[{section:"HORMONAL CHALLENGES",item:"Pituitary: TL Glabella + endo org.",mark:"red"}],
+    note:"HPA axis workup applied." }
+];
+function getMacros(){
+  try{ var m=JSON.parse(_LS.getItem("mhw_macros")||"null"); return Array.isArray(m)?m:DEFAULT_MACROS.slice(); }
+  catch(e){ return DEFAULT_MACROS.slice(); }
+}
+function saveMacros(arr){ _LS.setItem("mhw_macros",JSON.stringify(arr)); }
+
+// Build a lookup from section+item+opt → (si, ii, oi) from current FIELDS
+function _resolveFieldKey(vn, sectionName, itemLabel, optLabel){
+  for(var si=0;si<FIELDS.length;si++){
+    if(FIELDS[si].sec!==sectionName) continue;
+    for(var ii=0;ii<FIELDS[si].items.length;ii++){
+      var it=FIELDS[si].items[ii];
+      if(it.lbl!==itemLabel) continue;
+      if(it.opts && optLabel){
+        for(var oi=0;oi<it.opts.length;oi++){ if(it.opts[oi]===optLabel) return mkKey(vn,si,ii,oi); }
+        return null;
+      }
+      return mkKey(vn,si,ii);
+    }
+  }
+  return null;
+}
+
+// Recursively flatten a macro (including nested `includes`) into a flat list of applies/supplements/note
+function _flattenMacro(macroId, macros, visited){
+  visited=visited||{};
+  if(visited[macroId]) return {applies:[],supplements:[],notes:[]};
+  visited[macroId]=true;
+  var m=null;
+  for(var i=0;i<macros.length;i++){ if(macros[i].id===macroId){ m=macros[i]; break; } }
+  if(!m) return {applies:[],supplements:[],notes:[]};
+  var out={applies:(m.applies||[]).slice(),supplements:(m.supplements||[]).slice(),notes:m.note?[m.note]:[]};
+  (m.includes||[]).forEach(function(childId){
+    var sub=_flattenMacro(childId,macros,visited);
+    out.applies=out.applies.concat(sub.applies);
+    out.supplements=out.supplements.concat(sub.supplements);
+    out.notes=out.notes.concat(sub.notes);
+  });
+  return out;
+}
+
+var _currentMacroVn=null;
+var _macroTab="qp";            // 'qp' or 'saved'
+var _qpPath=[];                // hierarchical path: [{type,label,...},...]
+
+function openMacroModal(vn){
+  if(!currentPatientId){ alert("Open a patient first."); return; }
+  if(typeof vn==="number") _currentMacroVn=vn;
+  else if(!_currentMacroVn){
+    var activePhase=0;
+    document.querySelectorAll(".phase-tab").forEach(function(t,i){ if(t.classList.contains("active")) activePhase=i; });
+    _currentMacroVn=activePhase*6+1;
+  }
+  document.getElementById("macroModalVn").textContent="V"+_currentMacroVn;
+  document.getElementById("macroModal").classList.add("open");
+  _qpPath=[]; _macroTab="qp";
+  switchMacroTab("qp");
+}
+function closeMacroModal(){ document.getElementById("macroModal").classList.remove("open"); }
+
+function switchMacroTab(tab){
+  _macroTab=tab;
+  document.getElementById("macTabQP").classList.toggle("active",tab==="qp");
+  document.getElementById("macTabSaved").classList.toggle("active",tab==="saved");
+  if(tab==="qp") renderQuickPick();
+  else renderSavedMacros();
+}
+
+// ── QUICK PICK TREE ──────────────────────────────────────────────
+// Hierarchical drill-down built from FIELDS + MSK + SUPP_BRANDS.
+// Leaves are "mark" actions that apply the active color to the current visit.
+function renderQuickPick(){
+  var body=document.getElementById("macroModalBody");
+  document.getElementById("macroModalSub").textContent="Drill into a section and tap to mark findings on Visit "+_currentMacroVn+" (active color: "+(activeColor||"none")+")";
+
+  // Breadcrumbs
+  var crumbs='<div class="qp-crumbs"><span class="qp-crumb" onclick="qpGoto(0)">🏠 Root</span>';
+  _qpPath.forEach(function(p,i){
+    crumbs+='<span class="qp-crumb-sep">›</span>';
+    var isLast=(i===_qpPath.length-1);
+    crumbs+='<span class="qp-crumb '+(isLast?"current":"")+'" '+(isLast?"":"onclick=\"qpGoto("+(i+1)+")\"")+'>'+escHtml(p.label)+'</span>';
+  });
+  crumbs+='</div>';
+
+  var items=_qpChildren(_qpPath);
+  if(!items.length){
+    body.innerHTML=crumbs+'<div class="qp-empty">Nothing to show here.</div>';
+    return;
+  }
+  var gridHtml='<div class="qp-grid">';
+  items.forEach(function(it,idx){
+    var marked=_qpIsMarked(it);
+    var extra=it.sub?'<span class="qp-sub">'+escHtml(it.sub)+'</span>':'';
+    gridHtml+='<button class="qp-item '+(it.children?"has-children":"")+(marked?" marked":"")+'" onclick="qpSelect('+idx+')">'+
+      escHtml(it.label)+extra+'</button>';
+  });
+  gridHtml+='</div>';
+  body.innerHTML=crumbs+gridHtml;
+}
+
+function _qpChildren(path){
+  var vn=_currentMacroVn;
+  // ROOT
+  if(path.length===0){
+    var roots=[];
+    FIELDS.forEach(function(sec,si){
+      roots.push({type:"section",label:sec.sec,si:si,children:true,sub:(sec.items.length+" item"+(sec.items.length===1?"":"s"))});
+    });
+    roots.push({type:"mskroot",label:"💪 MSK — Muscle Testing",children:true,sub:MSK_SECTIONS.length+" regions"});
+    roots.push({type:"organroot",label:"🫀 Organ Indicators",children:true,sub:MSK_ORGANS.length+" organs"});
+    roots.push({type:"supproot",label:"💊 Supplements",children:true,sub:SUPPLEMENTS.length+" items"});
+    roots.push({type:"dietroot",label:"🥗 Diet Recommendations",children:true,sub:DIET_RECS.length+" options"});
+    return roots;
+  }
+  var last=path[path.length-1];
+  // SECTION → items
+  if(last.type==="section"){
+    var sec=FIELDS[last.si], out=[];
+    sec.items.forEach(function(item,ii){
+      var hasChildren=!!(item.opts||sec.hasOffenders||item.tagPopup||item.thenNow);
+      if(hasChildren){
+        out.push({type:"sec_item",label:item.lbl,si:last.si,ii:ii,children:true});
+      } else {
+        // Direct mark leaf
+        out.push({type:"leaf_field",label:item.lbl,si:last.si,ii:ii});
+      }
+    });
+    return out;
+  }
+  // SECTION ITEM → options, offenders, tag popup entries
+  if(last.type==="sec_item"){
+    var sec=FIELDS[last.si], item=sec.items[last.ii], out=[];
+    if(item.opts){
+      item.opts.forEach(function(opt,oi){
+        out.push({type:"leaf_field",label:opt,si:last.si,ii:last.ii,oi:oi,sub:item.lbl});
+      });
+    } else {
+      // A markable finding with no opts but with a tag panel — still allow direct mark
+      out.push({type:"leaf_field",label:"Mark "+item.lbl,si:last.si,ii:last.ii});
+    }
+    if(sec.hasOffenders){
+      OFFENDER_OPTIONS.forEach(function(opt){
+        out.push({type:"leaf_offender",label:opt,si:last.si,ii:last.ii,tag:opt,sub:"offender"});
+      });
+    }
+    if(item.tagPopup && item.tagPopup.options){
+      item.tagPopup.options.forEach(function(opt){
+        out.push({type:"leaf_tag",label:opt,si:last.si,ii:last.ii,tag:opt,sub:"tag"});
+      });
+    }
+    // thenNow finding: provider picks exactly 2 organs (Sleep → Then/Now, Two Organ).
+    if(item.thenNow){
+      MSK_ORGANS.forEach(function(organ){
+        out.push({type:"leaf_thennow",label:organ,si:last.si,ii:last.ii,tag:organ,sub:"pick 2 organs"});
+      });
+    }
+    return out;
+  }
+  // MSK ROOT → regions
+  if(last.type==="mskroot"){
+    return MSK_SECTIONS.map(function(s,si){
+      return {type:"mskregion",label:s.sec,si:si,children:true,sub:s.muscles.length+" muscles"};
+    });
+  }
+  // MSK REGION → muscles
+  if(last.type==="mskregion"){
+    return MSK_SECTIONS[last.si].muscles.map(function(m,mi){
+      return {type:"mskmuscle",label:m,si:last.si,mi:mi,children:true,sub:"R / L"};
+    });
+  }
+  // MSK MUSCLE → R / L / both
+  if(last.type==="mskmuscle"){
+    return [
+      {type:"leaf_msk",label:"R",si:last.si,mi:last.mi,side:"R",sub:last.label},
+      {type:"leaf_msk",label:"L",si:last.si,mi:last.mi,side:"L",sub:last.label},
+      {type:"leaf_msk_both",label:"R + L",si:last.si,mi:last.mi,sub:last.label}
+    ];
+  }
+  // ORGAN ROOT → organs
+  if(last.type==="organroot"){
+    return MSK_ORGANS.map(function(o,oi){ return {type:"leaf_organ",label:o,oi:oi}; });
+  }
+  // SUPP ROOT → brands
+  if(last.type==="supproot"){
+    return SUPP_BRANDS.map(function(b,bi){
+      return {type:"suppbrand",label:b.brand,bi:bi,children:true,sub:b.items.length+" item"+(b.items.length===1?"":"s")};
+    });
+  }
+  // SUPP BRAND → items
+  if(last.type==="suppbrand"){
+    return SUPP_BRANDS[last.bi].items.map(function(it){
+      return {type:"leaf_supp",label:it.name,idx:it.idx};
+    });
+  }
+  // DIET ROOT → diets
+  if(last.type==="dietroot"){
+    return DIET_RECS.map(function(d,di){ return {type:"leaf_diet",label:d,idx:di}; });
+  }
+  return [];
+}
+
+function _qpIsMarked(it){
+  var vn=_currentMacroVn;
+  if(it.type==="leaf_field"){
+    var k=(it.oi!==undefined)?mkKey(vn,it.si,it.ii,it.oi):mkKey(vn,it.si,it.ii);
+    return !!S.marks[k];
+  }
+  if(it.type==="leaf_msk"){
+    return !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+it.side];
+  }
+  if(it.type==="leaf_msk_both"){
+    return !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_R"] && !!S.marks["v"+vn+"_msk_"+it.si+"_"+it.mi+"_L"];
+  }
+  if(it.type==="leaf_organ"){ return !!S.marks["v"+vn+"_org_"+it.oi]; }
+  if(it.type==="leaf_supp"){ return !!S.marks["v"+vn+"_supp_"+it.idx]; }
+  if(it.type==="leaf_diet"){ return !!S.marks["v"+vn+"_diet_"+it.idx]; }
+  if(it.type==="leaf_offender"){
+    var key="v"+vn+"_of_"+it.si+"_"+it.ii;
+    var sel=(S.offenderTags&&S.offenderTags[key])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="leaf_tag"){
+    var key="v"+vn+"_tag_"+it.si+"_"+it.ii;
+    var sel=(S.offenderTags&&S.offenderTags[key])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  if(it.type==="leaf_thennow"){
+    var key="v"+vn+"_tag_"+it.si+"_"+it.ii;
+    var sel=(S.offenderTags&&S.offenderTags[key])||[];
+    return sel.indexOf(it.tag)>=0;
+  }
+  return false;
+}
+
+function qpSelect(idx){
+  var items=_qpChildren(_qpPath);
+  var it=items[idx]; if(!it) return;
+  if(it.children){
+    _qpPath.push(it);
+    renderQuickPick();
+    return;
+  }
+  // Leaf: apply / toggle. Objective + MSK + organs are always red; supplements are always green.
+  var vn=_currentMacroVn;
+  if(it.type==="leaf_field"){
+    var k=(it.oi!==undefined)?mkKey(vn,it.si,it.ii,it.oi):mkKey(vn,it.si,it.ii);
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+    renderMark(k); updateVsecHL(vn,it.si);
+  } else if(it.type==="leaf_msk"){
+    var k="v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+it.side;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+    renderMskCell(k); updateMskSecHL(vn,it.si); updateMskMainHL(vn);
+  } else if(it.type==="leaf_msk_both"){
+    ["R","L"].forEach(function(side){
+      var k="v"+vn+"_msk_"+it.si+"_"+it.mi+"_"+side;
+      if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+      renderMskCell(k);
+    });
+    updateMskSecHL(vn,it.si); updateMskMainHL(vn);
+  } else if(it.type==="leaf_organ"){
+    var k="v"+vn+"_org_"+it.oi;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="red";
+    renderMskCell(k); updateMskMainHL(vn);
+  } else if(it.type==="leaf_supp"){
+    var k="v"+vn+"_supp_"+it.idx;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+    renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn);
+  } else if(it.type==="leaf_diet"){
+    var k="v"+vn+"_diet_"+it.idx;
+    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+    renderDietMarked(vn); updateDietHL(vn);
+  } else if(it.type==="leaf_offender" || it.type==="leaf_tag"){
+    var key=(it.type==="leaf_offender")?"v"+vn+"_of_"+it.si+"_"+it.ii:"v"+vn+"_tag_"+it.si+"_"+it.ii;
+    if(!S.offenderTags) S.offenderTags={};
+    var sel=(S.offenderTags[key]||[]).slice();
+    var i=sel.indexOf(it.tag);
+    if(i>=0) sel.splice(i,1); else sel.push(it.tag);
+    S.offenderTags[key]=sel;
+    renderOffenderTags(key); updateVsecHL(vn,it.si);
+  } else if(it.type==="leaf_thennow"){
+    // Then/Now: up to 2 organs
+    var key="v"+vn+"_tag_"+it.si+"_"+it.ii;
+    if(!S.offenderTags) S.offenderTags={};
+    var sel=(S.offenderTags[key]||[]).slice();
+    var i=sel.indexOf(it.tag);
+    if(i>=0){ sel.splice(i,1); }
+    else {
+      if(sel.length>=2){ showToast("Then / Now is limited to 2 organs — deselect one first"); autoSave(); renderQuickPick(); return; }
+      sel.push(it.tag);
+    }
+    S.offenderTags[key]=sel;
+    renderOffenderTags(key); updateVsecHL(vn,it.si);
+  }
+  autoSave();
+  // Re-render the drill-down level so the ✓ checkmark updates live
+  renderQuickPick();
+}
+
+function qpGoto(depth){
+  _qpPath=_qpPath.slice(0,depth);
+  renderQuickPick();
+}
+
+// ── SAVED MACROS TAB ─────────────────────────────────────────────
+function renderSavedMacros(){
+  var body=document.getElementById("macroModalBody");
+  document.getElementById("macroModalSub").textContent="Tap a saved macro to apply it to Visit "+_currentMacroVn;
+  var macros=getMacros();
+  if(!macros.length){
+    body.innerHTML='<p style="color:#94a3b8;font-size:13px;padding:12px">No saved macros yet. Build one with "Save current visit as macro".</p>';
+    return;
+  }
+  var byCat={};
+  macros.forEach(function(m){ var c=m.category||"Other"; (byCat[c]=byCat[c]||[]).push(m); });
+  var html="";
+  Object.keys(byCat).sort().forEach(function(c){
+    html+='<div class="macro-cat">'+escHtml(c)+'</div><div class="macro-list">';
+    byCat[c].forEach(function(m){
+      var nApp=(m.applies||[]).length, nInc=(m.includes||[]).length, nSupp=(m.supplements||[]).length;
+      var meta=[]; if(nApp) meta.push(nApp+" mark"+(nApp===1?"":"s"));
+      if(nInc) meta.push(nInc+" nested"); if(nSupp) meta.push(nSupp+" supp");
+      html+='<button class="macro-item" onclick="applyMacro(\''+m.id+'\')">'+
+        '<span>'+escHtml(m.label)+'</span>'+
+        (meta.length?'<span class="mac-meta">'+meta.join(" · ")+'</span>':'')+
+        '<span class="mac-del" onclick="event.stopPropagation();deleteMacro(\''+m.id+'\')" title="Delete">✕</span>'+
+        '</button>';
+    });
+    html+='</div>';
+  });
+  body.innerHTML=html;
+}
+
+function applyMacro(macroId){
+  if(!_currentMacroVn) return;
+  var vn=_currentMacroVn;
+  var flat=_flattenMacro(macroId,getMacros());
+  var applied=0, skipped=0;
+  flat.applies.forEach(function(a){
+    var key=_resolveFieldKey(vn,a.section,a.item,a.opt);
+    if(!key){ skipped++; return; }
+    S.marks[key]="red";
+    renderMark(key);
+    var mk=key.match(/^v(\d+)_(\d+)_/); if(mk) updateVsecHL(parseInt(mk[1]),parseInt(mk[2]));
+    // Flash preview
+    var cell=document.getElementById("mc_"+key);
+    if(cell){ cell.classList.add("macro-preview-flash"); setTimeout(function(){ cell.classList.remove("macro-preview-flash"); },1500); }
+    applied++;
+  });
+  // Supplements: map by name → SUPPLEMENTS index
+  flat.supplements.forEach(function(s){
+    var name=s.name||s; var idx=SUPPLEMENTS.indexOf(name); if(idx<0) return;
+    var skey="v"+vn+"_supp_"+idx; S.marks[skey]="green";
+    renderSuppCell(skey);
+  });
+  renderSuppMarked(vn); updateSuppHL(vn);
+  // Notes: append
+  if(flat.notes.length){
+    var ta=document.getElementById("vn"+vn);
+    var cur=(ta?ta.value:S.visitNotes[vn])||"";
+    var addition=flat.notes.map(function(n){ return "- "+n; }).join("\n");
+    var joined=(cur?cur.trim()+"\n":"")+addition;
+    S.visitNotes[vn]=joined; if(ta) ta.value=joined;
+  }
+  autoSave();
+  closeMacroModal();
+  showToast("⚡ Applied "+applied+" mark"+(applied===1?"":"s")+(skipped?" ("+skipped+" skipped)":""));
+}
+
+function deleteMacro(id){
+  if(!confirm("Delete this macro?")) return;
+  var arr=getMacros().filter(function(m){ return m.id!==id; });
+  saveMacros(arr); renderSavedMacros();
+}
+
+function openMacroBuilder(){
+  if(!_currentMacroVn){ alert("Open a patient visit first."); return; }
+  var vn=_currentMacroVn;
+  // Build preview of current visit's marks + offender tags + supplements + notes
+  var applies=[], suppsOut=[], lines=[];
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var k=mkKey(vn,si,ii,oi); if(S.marks[k]){
+            applies.push({section:sec.sec,item:item.lbl,opt:opt,mark:S.marks[k]});
+            lines.push(sec.sec+" → "+item.lbl+" ("+opt+") ["+S.marks[k]+"]");
+          }
+        });
+      } else {
+        var k=mkKey(vn,si,ii); if(S.marks[k]){
+          applies.push({section:sec.sec,item:item.lbl,mark:S.marks[k]});
+          lines.push(sec.sec+" → "+item.lbl+" ["+S.marks[k]+"]");
+        }
+      }
+    });
+  });
+  SUPPLEMENTS.forEach(function(supp,si){
+    var k="v"+vn+"_supp_"+si; if(S.marks[k]){
+      suppsOut.push({name:supp,mark:S.marks[k]});
+      lines.push("Supplement → "+supp+" ["+S.marks[k]+"]");
+    }
+  });
+  var note=(S.visitNotes[vn]||"").trim();
+  var pv=document.getElementById("mbPreview");
+  if(!applies.length && !suppsOut.length && !note){
+    pv.innerHTML='<em style="color:#ef4444">Nothing marked on Visit '+vn+' yet.</em>';
+  } else {
+    pv.innerHTML="<strong>Visit "+vn+" will be saved as a macro with:</strong><br>"+
+      (lines.length?"<ul style='margin:6px 0 0 16px'>"+lines.map(function(l){return "<li>"+escHtml(l)+"</li>";}).join("")+"</ul>":"")+
+      (note?"<div style='margin-top:6px;padding-top:6px;border-top:1px dashed #e2e8f0'><strong>Note:</strong> "+escHtml(note)+"</div>":"");
+  }
+  document.getElementById("mbName").value="";
+  document.getElementById("macroModal").classList.remove("open");
+  document.getElementById("macroBuilderModal").classList.add("open");
+  // Stash for save
+  document.getElementById("macroBuilderModal").dataset.applies=JSON.stringify(applies);
+  document.getElementById("macroBuilderModal").dataset.supps=JSON.stringify(suppsOut);
+  document.getElementById("macroBuilderModal").dataset.note=note;
+}
+function closeMacroBuilder(){ document.getElementById("macroBuilderModal").classList.remove("open"); }
+function saveMacroFromVisit(){
+  var name=document.getElementById("mbName").value.trim();
+  if(!name){ alert("Please enter a name."); return; }
+  var cat=document.getElementById("mbCategory").value;
+  var modal=document.getElementById("macroBuilderModal");
+  var applies=JSON.parse(modal.dataset.applies||"[]");
+  var supps=JSON.parse(modal.dataset.supps||"[]");
+  var note=modal.dataset.note||"";
+  if(!applies.length && !supps.length && !note){ alert("Nothing to save — mark something on the visit first."); return; }
+  var arr=getMacros();
+  arr.push({id:"m_"+Date.now(),label:name,category:cat,applies:applies,supplements:supps,note:note});
+  saveMacros(arr); closeMacroBuilder();
+  showToast("✓ Macro saved: "+name);
+}
+function exportMacros(){
+  var blob=new Blob([JSON.stringify(getMacros(),null,2)],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="momentum_macros_"+(new Date().toISOString().split("T")[0])+".json"; a.click();
+  showToast("✓ Macros exported");
+}
+function importMacros(input){
+  var f=input.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(e){
+    try{
+      var arr=JSON.parse(e.target.result);
+      if(!Array.isArray(arr)) throw new Error("Not a macro library file");
+      if(!confirm("Replace current macro library with "+arr.length+" imported macros?")) return;
+      saveMacros(arr); switchMacroTab("saved");
+      showToast("✓ Imported "+arr.length+" macros");
+    }catch(err){ alert("Import failed: "+err.message); }
+    input.value="";
+  };
+  r.readAsText(f);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  A6: FINDING → SUPPLEMENT SUGGEST (driven by macros)
+// ════════════════════════════════════════════════════════════════
+// Reverse-lookup: which macros contain this (section,item) and what supplements do they prescribe?
+function findingSupplementSuggestions(sectionName, itemLabel){
+  var macros=getMacros(); var out={};
+  macros.forEach(function(m){
+    var flat=_flattenMacro(m.id,macros);
+    var hit=flat.applies.some(function(a){ return a.section===sectionName && a.item===itemLabel; });
+    if(!hit) return;
+    flat.supplements.forEach(function(s){
+      var name=s.name||s; if(!out[name]) out[name]={name:name,count:0}; out[name].count++;
+    });
+  });
+  return Object.keys(out).map(function(k){ return out[k]; }).sort(function(a,b){ return b.count-a.count; });
+}
+function openSuggestPop(anchor, vn, sectionName, itemLabel){
+  var pop=document.getElementById("suggestPop");
+  var body=document.getElementById("suggestPopBody");
+  document.getElementById("suggestPopTitle").textContent="Suggested for "+itemLabel;
+  var sug=findingSupplementSuggestions(sectionName,itemLabel);
+  if(!sug.length){
+    body.innerHTML='<div style="font-size:11px;color:#94a3b8">No suggestions yet. Build a macro that links this finding to supplements.</div>';
+  } else {
+    body.innerHTML=sug.map(function(s){
+      var idx=SUPPLEMENTS.indexOf(s.name);
+      var onCls=idx>=0 && S.marks["v"+vn+"_supp_"+idx] ? "on" : "";
+      return '<div class="suggest-supp-row" onclick="toggleSuggestSupp('+vn+',\''+s.name.replace(/'/g,"\\'")+'\',this)">'+
+        '<div class="check '+onCls+'">'+(onCls?'✓':'')+'</div>'+escHtml(s.name)+
+        (s.count>1?'<span style="margin-left:auto;font-size:10px;color:#94a3b8">×'+s.count+'</span>':'')+
+        '</div>';
+    }).join('');
+  }
+  var rect=anchor.getBoundingClientRect();
+  pop.style.left=Math.min(rect.right+6,window.innerWidth-320)+"px";
+  pop.style.top=rect.top+"px";
+  pop.classList.add("open");
+}
+function toggleSuggestSupp(vn, name, row){
+  var idx=SUPPLEMENTS.indexOf(name); if(idx<0) return;
+  var key="v"+vn+"_supp_"+idx;
+  if(S.marks[key]){ delete S.marks[key]; }
+  else { S.marks[key]=activeColor||"red"; }
+  renderSuppCell(key); renderSuppMarked(vn); updateSuppHL(vn); autoSave();
+  var check=row.querySelector(".check");
+  if(S.marks[key]){ check.classList.add("on"); check.textContent="✓"; }
+  else { check.classList.remove("on"); check.textContent=""; }
+}
+document.addEventListener("click",function(e){
+  var pop=document.getElementById("suggestPop");
+  if(pop && pop.classList.contains("open") && !pop.contains(e.target) && !(e.target.classList && e.target.classList.contains("suggest-trigger")))
+    pop.classList.remove("open");
+});
+
+// ════════════════════════════════════════════════════════════════
+//  A7: SESSION AUTO-LOCK
+// ════════════════════════════════════════════════════════════════
+var _idleTimer=null;
+var IDLE_MINUTES=parseInt(_LS.getItem("mhw_idle_min")||"10",10)||10;
+function resetIdleTimer(){
+  clearTimeout(_idleTimer);
+  _idleTimer=setTimeout(function(){
+    if(document.getElementById("pwOverlay").style.display!=="none") return;
+    logout();
+    showToast("🔒 Locked after "+IDLE_MINUTES+" min idle");
+  }, IDLE_MINUTES*60*1000);
+}
+["click","keydown","touchstart","pointermove"].forEach(function(ev){
+  document.addEventListener(ev,resetIdleTimer,{passive:true});
+});
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden) return;
+  resetIdleTimer();
+});
+resetIdleTimer();
+
+// ════════════════════════════════════════════════════════════════
+//  A8: POSITIVE FINDINGS BIRD'S-EYE PRINT
+// ════════════════════════════════════════════════════════════════
+function buildPositiveFindingsView(){
+  var pi=S.patientInfo, meta=[];
+  if(pi.name)     meta.push("<strong>Patient:</strong> "+escHtml(pi.name));
+  if(pi.dob)      meta.push("<strong>DOB:</strong> "+pi.dob);
+  if(pi.start)    meta.push("<strong>Case Start:</strong> "+pi.start);
+  if(pi.provider) meta.push("<strong>Provider:</strong> "+escHtml(pi.provider));
+  if(pi.mrn)      meta.push("<strong>MRN:</strong> "+escHtml(pi.mrn));
+  document.getElementById("pv-meta").innerHTML="<strong>Positive Findings Over Time</strong> &nbsp;|&nbsp; "+meta.join(" &nbsp;|&nbsp; ");
+  document.getElementById("pv-date").textContent="Printed: "+new Date().toLocaleDateString();
+
+  // Determine max visit with any data
+  var maxV=0;
+  for(var v=1;v<=18;v++){
+    if(S.visitDates[v]){ maxV=v; continue; }
+    for(var k in S.marks){ if(k.indexOf("v"+v+"_")===0){ maxV=v; break; } }
+  }
+  maxV=Math.max(maxV,1);
+
+  // Pivot: section → [{label, marksByVisit}]
+  var secRows={};
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          var marks={}, any=false;
+          for(var v=1;v<=maxV;v++){ var c=S.marks[mkKey(v,si,ii,oi)]; if(c){ marks[v]=c; any=true; } }
+          if(any){ (secRows[sec.sec]=secRows[sec.sec]||[]).push({label:item.lbl+" ("+opt+")",marks:marks}); }
+        });
+      } else {
+        var marks={}, any=false;
+        for(var v=1;v<=maxV;v++){ var c=S.marks[mkKey(v,si,ii)]; if(c){ marks[v]=c; any=true; } }
+        if(any){ (secRows[sec.sec]=secRows[sec.sec]||[]).push({label:item.lbl,marks:marks}); }
+      }
+    });
+  });
+
+  // Diet recommendations: pivot per visit
+  var dietBEV=[];
+  DIET_RECS.forEach(function(d,di){
+    var marks={}, any=false;
+    for(var v=1;v<=maxV;v++){ var c=S.marks["v"+v+"_diet_"+di]; if(c){ marks[v]=c; any=true; } }
+    if(any) dietBEV.push({label:d,marks:marks});
+  });
+
+  var totalRows=0; Object.keys(secRows).forEach(function(k){ totalRows+=secRows[k].length; });
+  totalRows+=dietBEV.length;
+  var content=document.getElementById("pv-content");
+  if(!totalRows){
+    content.innerHTML='<p style="font-size:11px;color:#94a3b8;font-style:italic">No positive findings recorded yet.</p>';
+    return;
+  }
+  var html='<div class="pv-section"><div class="pv-section-title">Positive Findings — Bird\'s-Eye View</div>';
+  html+='<p class="pv-note">Each row is a finding that was marked on at least one visit. Cells show the color on that visit so you can scan across to see progression (red → yellow → blue → green) or persistence. Blank = not marked. Top section shows compliance grades and labs-reviewed visits.</p>';
+  html+='<table class="tl-table"><thead><tr><th class="row-hdr">Finding</th>';
+  for(var v=1;v<=maxV;v++){
+    html+='<th>V'+v;
+    if(S.visitDates[v]) html+='<br><span style="font-size:7px;font-weight:600;opacity:.85">'+S.visitDates[v]+'</span>';
+    html+='</th>';
+  }
+  html+='</tr></thead><tbody>';
+
+  // ── Compliance + Labs Reviewed header rows ──
+  var gradeColors={A:"#22c55e",B:"#84cc16",C:"#eab308",D:"#f97316",F:"#ef4444"};
+  function gradeCell(g){
+    if(!g) return '<td></td>';
+    var c=gradeColors[g]||"#64748b";
+    return '<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:'+c+';color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">'+g+'</span></td>';
+  }
+  var anyCompl=false, anyLabs=false;
+  if(S.compliance){
+    for(var v=1;v<=maxV;v++){ if(S.compliance[v+"_diet"]||S.compliance[v+"_supp"]){ anyCompl=true; break; } }
+  }
+  for(var v=1;v<=maxV;v++){ if(labsWasReviewed(v)){ anyLabs=true; break; } }
+  if(anyCompl||anyLabs){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#0369a1!important">COMPLIANCE &amp; LABS</th></tr>';
+    if(anyCompl){
+      html+='<tr><td class="row-lbl sub-lbl">🥗 Diet compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=gradeCell((S.compliance||{})[v+"_diet"]);
+      html+='</tr>';
+      html+='<tr><td class="row-lbl sub-lbl">💊 Supplement compliance</td>';
+      for(var v=1;v<=maxV;v++) html+=gradeCell((S.compliance||{})[v+"_supp"]);
+      html+='</tr>';
+    }
+    if(anyLabs){
+      html+='<tr><td class="row-lbl sub-lbl">🧪 Labs reviewed</td>';
+      for(var v=1;v<=maxV;v++){
+        html+=labsWasReviewed(v)
+          ?'<td><span style="display:inline-block;width:18px;height:14px;border-radius:2px;background:#1e40af;color:white;font-size:9px;font-weight:900;line-height:14px;text-align:center">✓</span></td>'
+          :'<td></td>';
+      }
+      html+='</tr>';
+    }
+  }
+
+  Object.keys(secRows).forEach(function(sn){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'">'+escHtml(sn)+'</th></tr>';
+    secRows[sn].forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+='</tr>';
+    });
+  });
+  if(dietBEV.length){
+    html+='<tr><th class="sec-hdr" colspan="'+(maxV+1)+'" style="background:#166534!important">🥗 DIET RECOMMENDATIONS</th></tr>';
+    dietBEV.forEach(function(row){
+      html+='<tr><td class="row-lbl sub-lbl">'+escHtml(row.label)+'</td>';
+      for(var v=1;v<=maxV;v++) html+='<td>'+colorBlock(row.marks[v],true)+'</td>';
+      html+='</tr>';
+    });
+  }
+  html+='</tbody></table></div>';
+  content.innerHTML=html;
+}
+function doPrintFindings(){
+  buildPositiveFindingsView();
+  var pi=S.patientInfo;
+  var rawName=(pi.name||"").trim();
+  var origTitle=document.title;
+  document.title=(rawName||"Patient")+" — Findings Over Time";
+  window.print();
+  document.title=origTitle;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DOSE EDITOR
+// ════════════════════════════════════════════════════════════════
+var DOSE_QUICK=[
+  "QD","BID","TID","QID","QHS","QAM","PRN",
+  "1 cap QD","1 cap BID","1 cap TID","2 caps QD","2 caps BID","2 caps TID",
+  "½ tsp QD","1 tsp QD","1 tsp BID","1 tbsp QD",
+  "With meals","Between meals","Before bed","Empty stomach"
+];
+var _doseCtx=null;
+function openDoseEditor(vn, suppIdx){
+  _doseCtx={vn:vn, suppIdx:suppIdx};
+  var name=SUPPLEMENTS[suppIdx]||"Supplement";
+  document.getElementById("doseTitle").textContent="💊 "+name;
+  document.getElementById("doseSub").textContent="Visit "+vn+" — set dosing instructions";
+  if(!S.suppDoses) S.suppDoses={};
+  var key="v"+vn+"_supp_"+suppIdx;
+  var cur=S.suppDoses[key]||"";
+  document.getElementById("doseInput").value=cur;
+  // Build quick picks
+  var qp=document.getElementById("doseQuickPicks"); qp.innerHTML="";
+  DOSE_QUICK.forEach(function(d){
+    var b=document.createElement("button");
+    b.type="button";
+    b.textContent=d;
+    b.style.cssText="padding:5px 11px;border-radius:14px;border:1.5px solid #e2e8f0;background:white;font-size:12px;font-weight:700;color:#374151;cursor:pointer";
+    b.addEventListener("click",function(){
+      var inp=document.getElementById("doseInput");
+      inp.value=d;
+      inp.focus();
+    });
+    qp.appendChild(b);
+  });
+  document.getElementById("doseModal").classList.add("open");
+  setTimeout(function(){ document.getElementById("doseInput").focus(); },50);
+}
+function closeDoseEditor(){ document.getElementById("doseModal").classList.remove("open"); _doseCtx=null; }
+function saveDoseEditor(){
+  if(!_doseCtx) return;
+  var key="v"+_doseCtx.vn+"_supp_"+_doseCtx.suppIdx;
+  var v=document.getElementById("doseInput").value.trim();
+  if(!S.suppDoses) S.suppDoses={};
+  if(v) S.suppDoses[key]=v; else delete S.suppDoses[key];
+  autoSave();
+  renderSuppMarked(_doseCtx.vn);
+  closeDoseEditor();
+}
+function clearDoseEditor(){
+  if(!_doseCtx) return;
+  var key="v"+_doseCtx.vn+"_supp_"+_doseCtx.suppIdx;
+  if(S.suppDoses) delete S.suppDoses[key];
+  autoSave();
+  renderSuppMarked(_doseCtx.vn);
+  closeDoseEditor();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PER-VISIT SUMMARY (print + email)
+// ════════════════════════════════════════════════════════════════
+function _collectVisitSummary(vn){
+  var pi=S.patientInfo||{};
+  var data={
+    patientName: pi.name||"Patient",
+    dob: pi.dob||"",
+    mrn: pi.mrn||"",
+    provider: pi.provider||"",
+    visitDate: S.visitDates[vn]||"",
+    visitNum: vn,
+    challenges: [],
+    supps: [],
+    diets: [],
+    notes: (S.visitNotes[vn]||"").trim(),
+    dietGrade: (S.compliance||{})[vn+"_diet"]||"",
+    suppGrade: (S.compliance||{})[vn+"_supp"]||"",
+    labsReviewed: labsWasReviewed(vn)
+  };
+  // Challenges
+  FIELDS.forEach(function(sec,si){
+    sec.items.forEach(function(item,ii){
+      var markedLabel=null;
+      if(item.opts){
+        item.opts.forEach(function(opt,oi){
+          if(S.marks[mkKey(vn,si,ii,oi)]) markedLabel=item.lbl+" ("+opt+")";
+        });
+      } else if(S.marks[mkKey(vn,si,ii)]) {
+        markedLabel=item.lbl;
+      }
+      var tagBits=[];
+      var ofKey="v"+vn+"_of_"+si+"_"+ii;
+      var tgKey="v"+vn+"_tag_"+si+"_"+ii;
+      if(S.offenderTags && S.offenderTags[ofKey] && S.offenderTags[ofKey].length) tagBits=tagBits.concat(S.offenderTags[ofKey]);
+      if(S.offenderTags && S.offenderTags[tgKey] && S.offenderTags[tgKey].length) tagBits=tagBits.concat(S.offenderTags[tgKey]);
+      if(markedLabel || tagBits.length){
+        data.challenges.push({section:sec.sec, label:markedLabel||item.lbl, tags:tagBits});
+      }
+    });
+  });
+  // MSK
+  MSK_SECTIONS.forEach(function(sect,si){
+    sect.muscles.forEach(function(m,mi){
+      var hasR=!!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_R"];
+      var hasL=!!S.marks["v"+vn+"_msk_"+si+"_"+mi+"_L"];
+      if(!hasR && !hasL) return;
+      var side=hasR&&hasL?"R+L":(hasR?"R":"L");
+      data.challenges.push({section:"MSK — "+sect.sec, label:m+" ("+side+")", tags:[]});
+    });
+  });
+  // Organs
+  MSK_ORGANS.forEach(function(o,oi){
+    if(S.marks["v"+vn+"_org_"+oi]) data.challenges.push({section:"Organ Indicators", label:o, tags:[]});
+  });
+  // Supplements + doses
+  if(!S.suppDoses) S.suppDoses={};
+  SUPPLEMENTS.forEach(function(name,si){
+    var k="v"+vn+"_supp_"+si;
+    if(S.marks[k]) data.supps.push({name:name, dose:S.suppDoses[k]||""});
+  });
+  // Diet recommendations
+  DIET_RECS.forEach(function(d,di){
+    var k="v"+vn+"_diet_"+di;
+    if(S.marks[k]) data.diets.push(d);
+  });
+  return data;
+}
+
+function _buildVisitSummaryHtml(vn){
+  var d=_collectVisitSummary(vn);
+  var h='<div class="pv-header"><div class="pv-title">🏥 Momentum Health &amp; Wellness — Visit '+d.visitNum+' Summary</div>';
+  var meta=[];
+  if(d.patientName) meta.push('<strong>Patient:</strong> '+escHtml(d.patientName));
+  if(d.dob)         meta.push('<strong>DOB:</strong> '+escHtml(d.dob));
+  if(d.mrn)         meta.push('<strong>MRN:</strong> '+escHtml(d.mrn));
+  if(d.provider)    meta.push('<strong>Provider:</strong> '+escHtml(d.provider));
+  if(d.visitDate)   meta.push('<strong>Visit Date:</strong> '+escHtml(d.visitDate));
+  h+='<div class="pv-meta">'+meta.join(' &nbsp;|&nbsp; ')+'</div></div>';
+
+  // Compliance + labs
+  var comp=[];
+  if(d.dietGrade) comp.push('🥗 Diet compliance: <strong>'+d.dietGrade+'</strong>');
+  if(d.suppGrade) comp.push('💊 Supplement compliance: <strong>'+d.suppGrade+'</strong>');
+  if(d.labsReviewed) comp.push('🧪 <strong>Labs reviewed this visit</strong>');
+  if(comp.length){
+    h+='<div class="pv-section"><div class="pv-section-title">Compliance &amp; Labs</div><p style="font-size:12px;color:#374151;line-height:1.6">'+comp.join(' &nbsp;|&nbsp; ')+'</p></div>';
+  }
+
+  // Challenges
+  h+='<div class="pv-section"><div class="pv-section-title">Challenges Found</div>';
+  if(!d.challenges.length){
+    h+='<p style="font-size:11px;color:#94a3b8;font-style:italic">No findings documented.</p>';
+  } else {
+    var bySec={};
+    d.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
+    Object.keys(bySec).forEach(function(sn){
+      h+='<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">'+escHtml(sn)+'</div>';
+      h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.5">';
+      bySec[sn].forEach(function(c){
+        h+='<li>'+escHtml(c.label)+(c.tags.length?' <em style="color:#92400e">— '+escHtml(c.tags.join(", "))+'</em>':'')+'</li>';
+      });
+      h+='</ul></div>';
+    });
+  }
+  h+='</div>';
+
+  // Supplements + doses
+  h+='<div class="pv-section"><div class="pv-section-title">Supplements Prescribed</div>';
+  if(!d.supps.length){
+    h+='<p style="font-size:11px;color:#94a3b8;font-style:italic">No supplements prescribed at this visit.</p>';
+  } else {
+    h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.6">';
+    d.supps.forEach(function(s){
+      h+='<li><strong>'+escHtml(s.name)+'</strong>'+(s.dose?' — '+escHtml(s.dose):' <em style="color:#94a3b8">(no dose set)</em>')+'</li>';
+    });
+    h+='</ul>';
+  }
+  h+='</div>';
+
+  // Diet recommendations
+  if(d.diets.length){
+    h+='<div class="pv-section"><div class="pv-section-title">Diet Recommendations</div>';
+    h+='<ul style="margin:0 0 0 18px;font-size:12px;color:#374151;line-height:1.6">';
+    d.diets.forEach(function(dd){ h+='<li><strong>'+escHtml(dd)+'</strong></li>'; });
+    h+='</ul></div>';
+  }
+
+  // Notes
+  if(d.notes){
+    h+='<div class="pv-section"><div class="pv-section-title">Provider Notes</div>';
+    h+='<p style="font-size:12px;color:#374151;line-height:1.6;white-space:pre-wrap">'+escHtml(d.notes)+'</p></div>';
+  }
+
+  h+='<div class="pv-footer"><span>Momentum Health &amp; Wellness | Applied Kinesiology</span><span>Printed: '+new Date().toLocaleDateString()+'</span></div>';
+  return h;
+}
+
+function printVisitSummary(vn){
+  var content=document.getElementById("pv-content");
+  var hdr=document.getElementById("pv-meta");
+  var origContent=content.innerHTML, origMeta=hdr.innerHTML;
+  content.innerHTML=_buildVisitSummaryHtml(vn);
+  var origTitle=document.title;
+  var pi=S.patientInfo||{};
+  document.title=(pi.name||"Patient")+" — Visit "+vn+" Summary";
+  window.print();
+  document.title=origTitle;
+  // Restore so the main print view isn't left modified
+  content.innerHTML=origContent;
+  hdr.innerHTML=origMeta;
+}
+
+function _plainVisitSummary(vn){
+  var d=_collectVisitSummary(vn);
+  var lines=[];
+  lines.push("MOMENTUM HEALTH & WELLNESS — VISIT "+d.visitNum+" SUMMARY");
+  lines.push("");
+  if(d.patientName) lines.push("Patient: "+d.patientName);
+  if(d.visitDate)   lines.push("Visit date: "+d.visitDate);
+  if(d.provider)    lines.push("Provider: "+d.provider);
+  lines.push("");
+  var cmp=[];
+  if(d.dietGrade) cmp.push("Diet compliance: "+d.dietGrade);
+  if(d.suppGrade) cmp.push("Supplement compliance: "+d.suppGrade);
+  if(d.labsReviewed) cmp.push("Labs reviewed this visit");
+  if(cmp.length){ lines.push("COMPLIANCE & LABS"); cmp.forEach(function(l){lines.push("  • "+l);}); lines.push(""); }
+  if(d.challenges.length){
+    lines.push("CHALLENGES FOUND");
+    var bySec={};
+    d.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
+    Object.keys(bySec).forEach(function(sn){
+      lines.push("  "+sn+":");
+      bySec[sn].forEach(function(c){
+        lines.push("    - "+c.label+(c.tags.length?" — "+c.tags.join(", "):""));
+      });
+    });
+    lines.push("");
+  }
+  if(d.supps.length){
+    lines.push("SUPPLEMENTS PRESCRIBED");
+    d.supps.forEach(function(s){
+      lines.push("  • "+s.name+(s.dose?" — "+s.dose:""));
+    });
+    lines.push("");
+  }
+  if(d.diets.length){
+    lines.push("DIET RECOMMENDATIONS");
+    d.diets.forEach(function(dd){ lines.push("  • "+dd); });
+    lines.push("");
+  }
+  if(d.notes){
+    lines.push("PROVIDER NOTES");
+    lines.push(d.notes);
+    lines.push("");
+  }
+  lines.push("— Momentum Health & Wellness");
+  return lines.join("\n");
+}
+
+var _emailCtx=null;
+
+function emailVisitSummary(vn){
+  var pi=S.patientInfo||{};
+  var d=_collectVisitSummary(vn);
+  var subject="Visit "+vn+" Summary"+(d.visitDate?" — "+d.visitDate:"")+(d.patientName?" — "+d.patientName:"");
+  var body=_plainVisitSummary(vn);
+  _emailCtx={vn:vn};
+  document.getElementById("emailSub").textContent=
+    "Visit "+vn+(d.visitDate?" · "+d.visitDate:"")+(d.patientName?" · "+d.patientName:"");
+  document.getElementById("emTo").value=pi.email||"";
+  document.getElementById("emSubject").value=subject;
+  document.getElementById("emBody").value=body;
+  document.getElementById("emailModal").classList.add("open");
+  setTimeout(function(){
+    var ta=document.getElementById("emBody"); if(ta) ta.scrollTop=0;
+    if(!pi.email) { var to=document.getElementById("emTo"); if(to) to.focus(); }
+  },50);
+}
+function closeEmailModal(){
+  document.getElementById("emailModal").classList.remove("open");
+  _emailCtx=null;
+}
+function emailOpenMailApp(){
+  var to=document.getElementById("emTo").value.trim();
+  var subj=document.getElementById("emSubject").value;
+  var body=document.getElementById("emBody").value;
+  if(!to){ alert("Enter a recipient email first."); return; }
+  var url="mailto:"+encodeURIComponent(to)+
+    "?subject="+encodeURIComponent(subj)+
+    "&body="+encodeURIComponent(body);
+  // <a>-click is more reliable than window.location.href for protocol handoff.
+  var a=document.createElement("a");
+  a.href=url;
+  a.rel="noopener";
+  document.body.appendChild(a);
+  try{ a.click(); }catch(e){}
+  setTimeout(function(){ if(a.parentNode) a.parentNode.removeChild(a); },500);
+  showToast("📧 Opening email app…");
+}
+function emailCopySummary(){
+  var to=document.getElementById("emTo").value.trim();
+  var subj=document.getElementById("emSubject").value;
+  var body=document.getElementById("emBody").value;
+  var combined=(to?"To: "+to+"\n":"")+(subj?"Subject: "+subj+"\n":"")+"\n"+body;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(combined).then(function(){
+      showToast("📋 Summary copied — paste into your email app");
+    },function(){ _emailFallbackCopy(combined); });
+  } else {
+    _emailFallbackCopy(combined);
+  }
+}
+function _emailFallbackCopy(text){
+  var ta=document.createElement("textarea");
+  ta.value=text;
+  ta.style.cssText="position:fixed;top:-9999px;left:-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand("copy"); showToast("📋 Summary copied"); }
+  catch(e){ alert("Couldn't copy automatically. Select the Message field and copy manually."); }
+  document.body.removeChild(ta);
+}
+function emailOpenSuperhuman(){
+  window.open("https://mail.superhuman.com/","_blank","noopener");
 }
 
 // ════════════════════════════════════════════════════════════════
