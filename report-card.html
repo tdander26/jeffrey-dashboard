@@ -726,6 +726,20 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
   </div>
 </div>
 
+<!-- TEXT MACRO PICKER MODAL (Assessment / Plan templates) -->
+<div class="modal-overlay" id="textMacroModal">
+  <div class="modal-card" style="max-width:700px">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="tmTitle">📝 Templates</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px" id="tmSub">Tap to insert — edit brackets after</div>
+      </div>
+      <button class="modal-close" onclick="closeTextMacro()">✕</button>
+    </div>
+    <div class="modal-body" id="tmBody"></div>
+  </div>
+</div>
+
 <!-- DOSE EDITOR MODAL -->
 <div class="modal-overlay" id="doseModal">
   <div class="modal-card" style="max-width:460px">
@@ -2220,6 +2234,87 @@ var DIET_RECS=[
 var FOOD_SENSITIVITIES=[
   "Gluten","Casein","Nightshades","Lactose","Fructose","Maltose","Chocolate","Coffee"
 ];
+
+// ── TEXT MACROS FOR ASSESSMENT + PLAN FIELDS ──────────────────
+var ASSESSMENT_TEMPLATES=[
+  {cat:"General Progress",items:[
+    {label:"Improving",text:"Patient demonstrates significant improvement compared to prior visit. Functional limitations continue to decrease. Compliance with treatment plan is good."},
+    {label:"Stable",text:"Patient's condition remains stable compared to prior visit. Current symptom presentation is consistent with previous assessment. Treatment plan continues as directed."},
+    {label:"Declining",text:"Patient reports declining symptoms since last visit. Recommend reassessment of treatment protocol and possible additional diagnostic workup."},
+    {label:"Initial assessment",text:"Patient presents with chief complaint of [condition]. Clinical examination reveals [objective findings]. Assessment indicates [diagnosis]. Treatment plan initiated to address underlying dysfunction and restore optimal function."}
+  ]},
+  {cat:"AK / Muscle Testing",items:[
+    {label:"Muscle weakness pattern",text:"Muscle testing reveals inhibition in [muscle] consistent with [organ] dysfunction. Viscerosomatic reflex pattern confirms [organ system] involvement. Structural compensation noted."},
+    {label:"Nutritional deficiency",text:"Muscle testing patterns indicate potential nutritional deficiency in [nutrient]. Dietary history supports inadequate intake. Supplementation recommended to support [organ function]."},
+    {label:"Organ-muscle correlation",text:"Muscle testing demonstrates weakness in [muscle] correlating with [organ] dysfunction. Challenge testing positive for [finding]. Nutritional and structural support indicated."},
+    {label:"Subluxation pattern",text:"Assessment reveals subluxation pattern at [vertebral level]. Muscle testing demonstrates associated inhibition in [muscle]. Motion palpation confirms restricted segmental mobility. Correction applied with positive response."},
+    {label:"Emotional-structural",text:"Patient reports [emotional stress pattern]. Muscle testing reveals weakness pattern consistent with emotional component. Assessment: psychosomatic involvement requiring both structural and emotional support."}
+  ]},
+  {cat:"Gut Health",items:[
+    {label:"Dysbiosis",text:"Clinical assessment suggests dysbiosis characterized by [bloating/gas/irregular bowel function]. Muscle testing indicates small intestine involvement. Dysbiosis protocol recommended."},
+    {label:"Intestinal permeability",text:"Assessment suggests compromised intestinal barrier function. Muscle testing reveals small intestine weakness with multiple food sensitivities. Gut healing protocol recommended."},
+    {label:"Food sensitivity",text:"Dietary history reveals [specific food triggers]. Muscle testing confirms [specific food] testing as inhibitory. Elimination trial recommended for [X] weeks with reassessment."},
+    {label:"ICV/HV dysfunction",text:"ICV testing positive for [open/closed] pattern. HV [open/closed]. Offender challenge reveals [ammonia/histamine/other]. Peristalsis [forward/reverse]. Gut protocol initiated."}
+  ]},
+  {cat:"Hormonal / Endocrine",items:[
+    {label:"Thyroid dysfunction",text:"Patient presents with [fatigue/weight changes/temperature sensitivity]. Muscle testing indicates thyroid involvement. Lab assessment recommended for confirmation. Nutritional thyroid support initiated."},
+    {label:"Adrenal insufficiency",text:"Patient reports [fatigue/afternoon crash/salt cravings]. Muscle testing reveals adrenal challenge response indicating insufficiency. HPA axis dysfunction suspected. Adaptogenic support recommended."},
+    {label:"Hormonal imbalance",text:"Patient reports [cycle irregularity/hot flashes/mood changes]. Muscle testing indicates [ovarian/uterine/pituitary] involvement. Hormonal assessment recommended. Phytonutrient support initiated."},
+    {label:"Blood sugar dysregulation",text:"Patient presents with blood sugar dysregulation pattern. Muscle testing reveals pancreatic involvement. Dietary assessment indicates [high refined carbohydrates]. Dysglycemia diet and metabolic support implemented."}
+  ]},
+  {cat:"MSK / Structural",items:[
+    {label:"Cervical spine",text:"Cervical spine examination reveals tenderness and restricted motion at C[X]. Muscle testing shows weakness consistent with [nerve root pattern]. Working diagnosis: cervical subluxation with associated myofascial restriction."},
+    {label:"Lumbar spine",text:"Lumbar spine palpation reveals segmental dysfunction at L[X]-L[X]. Patient demonstrates limited flexion. Assessment: lumbar subluxation complex with associated myofascial restriction."},
+    {label:"TMJ/hyoid",text:"TMJ assessment reveals [clicking/restricted opening/deviation]. Hyoid position [deviated/restricted]. C2 involvement noted. Associated muscle weakness in [pterygoid/masseter/temporalis]. Cranial protocol indicated."},
+    {label:"Recurrent injury",text:"Recurrent injury pattern identified. [Aerobic/anaerobic] imbalance present. Organ pair involvement: [then organ] → [now organ]. Nutritional support for tissue repair and metabolic balance recommended."}
+  ]},
+  {cat:"Immune / Inflammatory",items:[
+    {label:"Systemic inflammation",text:"Patient presents with widespread inflammatory markers. Muscle testing reveals multiple areas of inhibition. Assessment suggests chronic inflammatory state. Anti-inflammatory protocol recommended."},
+    {label:"Infection pattern",text:"Patient presents with [acute/chronic] infection pattern. Muscle testing shows [specific immune challenge]. [Bacterial/viral/fungal/parasitic] involvement suspected. Targeted antimicrobial support recommended."},
+    {label:"Autoimmune tendency",text:"Patient presents with [fatigue/multi-system symptoms/positive family history]. Muscle testing reveals multiple organ involvement. Assessment suggests autoimmune predisposition. Comprehensive evaluation recommended."}
+  ]},
+  {cat:"Sleep / Brain",items:[
+    {label:"Sleep disruption",text:"Patient reports [difficulty falling asleep/waking frequently/non-restorative sleep]. Muscle testing indicates [cortisol/melatonin/neurotransmitter] involvement. Sleep protocol initiated with [supplement/lifestyle] recommendations."},
+    {label:"Brain fog / cognitive",text:"Patient reports [brain fog/poor concentration/memory concerns]. Muscle testing reveals brain involvement with [oxygen/glucose/neurotransmitter] challenge. Neurological support protocol initiated."}
+  ]}
+];
+var PLAN_TEMPLATES=[
+  {cat:"General",items:[
+    {label:"Continue protocol",text:"Continue current treatment plan. Patient responding positively. Maintain current visit frequency. Reassess at next visit."},
+    {label:"Modify protocol",text:"Current treatment protocol requires modification based on patient response. Adjust [specific area] and recheck muscle testing response at next visit."},
+    {label:"Re-evaluation needed",text:"Full re-evaluation recommended at next visit to reassess treatment approach. Patient to bring symptom log and any new lab work. Consider additional diagnostics."},
+    {label:"Discharge / maintenance",text:"Patient has met treatment goals. Transition to maintenance care schedule of [frequency]. Patient educated on self-care and when to return for acute concerns. Discharged from active care."}
+  ]},
+  {cat:"Supplement Protocols",items:[
+    {label:"Gut healing",text:"Initiate gut healing protocol: Probiotic [product/dose] daily with meals. L-glutamine [dose] twice daily for intestinal repair. Omega-3 [dose] for anti-inflammatory support. Eliminate [trigger foods]. Retest in [4-6 weeks]."},
+    {label:"Digestive support",text:"Add digestive enzyme support [product] with each meal. Include HCl support [dose] to optimize stomach acid. Bile salt support [dose] with fat-containing meals. Monitor tolerance and adjust."},
+    {label:"Adrenal support",text:"Implement adrenal support protocol: Adaptogenic formula [product/dose] twice daily. Vitamin C [dose] for stress support. Pantothenic acid [dose]. Reduce caffeine intake. Follow up in [4 weeks]."},
+    {label:"Thyroid support",text:"Add thyroid support: Iodine [dose], selenium [dose], zinc [dose], L-tyrosine [dose]. Monitor for changes in energy, weight, and temperature. Retest thyroid function in [8-12 weeks]."},
+    {label:"Anti-inflammatory",text:"Initiate anti-inflammatory protocol: Omega-3 [dose], curcumin [dose], quercetin [dose]. Dietary modification to anti-inflammatory diet. Reassess inflammatory markers in [6-8 weeks]."},
+    {label:"Antimicrobial",text:"Begin antimicrobial protocol for [bacterial/fungal/viral/parasitic] challenge: [Product 1/dose], [Product 2/dose]. Duration: [4-8 weeks]. Retest with muscle testing and/or labs at completion. Support detox pathways concurrently."},
+    {label:"Detox support",text:"Initiate detoxification support: Liver support [product/dose]. Glutathione/NAC [dose]. Activated charcoal [dose] between meals. Increase water intake to [amount]. Epsom salt baths [frequency]. Duration: [X weeks]."},
+    {label:"Immune support",text:"Immune support protocol: Vitamin D [dose], Vitamin A [dose], zinc [dose], vitamin C [dose]. Mushroom complex [product/dose]. Rest and stress reduction emphasized. Follow up in [2-4 weeks]."}
+  ]},
+  {cat:"Dietary",items:[
+    {label:"Anti-inflammatory diet",text:"Dietary modification: Emphasize anti-inflammatory foods (fatty fish, berries, cruciferous vegetables, healthy fats). Eliminate processed foods, seed oils, refined sugars. Implement for minimum 4 weeks. Patient education materials provided."},
+    {label:"Elimination diet",text:"Begin elimination diet removing [specific foods] for [4-6 weeks]. Patient education and food list provided. Return for reassessment to evaluate symptom response and plan reintroduction protocol."},
+    {label:"Dysglycemia diet",text:"Implement blood sugar stabilization diet: Protein at every meal, complex carbohydrates only, eliminate refined sugars and grains. Eat every 3-4 hours. Avoid caffeine. Food diary recommended."},
+    {label:"Low histamine",text:"Implement low histamine diet: Avoid aged/fermented foods, alcohol, processed meats, citrus, and leftovers. Emphasize fresh-cooked proteins, rice, fresh fruits (except citrus). Antihistamine nutrient support added."},
+    {label:"Low FODMAP",text:"Initiate low FODMAP elimination phase for [2-4 weeks]. Avoid high FODMAP foods (garlic, onion, wheat, certain fruits/vegetables). Reintroduction protocol to follow. Dietitian referral if needed."}
+  ]},
+  {cat:"Lifestyle / Follow-up",items:[
+    {label:"Stress management",text:"Stress management recommendations: [Deep breathing exercises/meditation/yoga] daily. Limit screen time before bed. Prioritize 7-9 hours of sleep. Consider counseling if emotional stress is primary driver."},
+    {label:"Exercise prescription",text:"Exercise recommendations: [Walking/swimming/yoga] [frequency] per week. Avoid [high-intensity/heavy lifting] during healing phase. Gradually increase intensity as symptoms improve. Report any symptom aggravation."},
+    {label:"Short follow-up",text:"Schedule follow-up in [1-2 weeks] to monitor acute response to treatment. Patient to track symptoms and report any changes. Phone consultation available if acute symptoms develop."},
+    {label:"Standard follow-up",text:"Return in [4-6 weeks] for reassessment of progress. Bring [lab results/symptom log/food diary] to next visit. Continue current protocol until reassessment."},
+    {label:"Extended follow-up",text:"Return in [2-3 months] after completing initial supplement protocol. Muscle testing will be repeated to assess response. Labs to be drawn [X weeks] prior to next visit."},
+    {label:"Referral",text:"Refer to [specialist/lab] for [specific evaluation]. Coordinate care with results to be reviewed at next visit. Continue current supportive care in the interim."}
+  ]},
+  {cat:"Medical Necessity",items:[
+    {label:"Medical necessity",text:"Treatment is medically necessary to address documented functional imbalance and restore optimal health. Ongoing care supports measurable progress toward clinical goals. Patient has not yet reached maximum therapeutic benefit."},
+    {label:"Progress toward goals",text:"Patient demonstrates measurable progress toward established treatment goals. Current treatment frequency remains necessary to continue functional improvement and prevent regression. Treatment plan updated based on objective reassessment."}
+  ]}
+];
 // Combined flat list for marks storage: indices 0-5 = diets, 6-13 = foods
 var ALL_DIET_ITEMS=DIET_RECS.concat(FOOD_SENSITIVITIES);
 
@@ -2712,9 +2807,9 @@ function buildVisitCard(vn){
     '<textarea id="vn'+vn+'" placeholder="Clinical notes, observations, treatment..."></textarea>'+
     '<button class="mic-btn" id="mic'+vn+'" title="Dictate" onclick="toggleDictation('+vn+')">🎤</button>'+
     '</div>'+
-    '<label style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:8px;display:block">Assessment</label>'+
+    '<label style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:8px;display:flex;align-items:center;gap:6px">Assessment <button type="button" onclick="openTextMacro('+vn+',\'assessment\')" style="padding:2px 8px;border-radius:6px;border:1px solid #ddd6fe;background:#faf5ff;font-size:10px;font-weight:800;color:#7c3aed;cursor:pointer">📝 Templates</button></label>'+
     '<textarea id="va'+vn+'" placeholder="Clinical assessment..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:36px;outline:none;font-family:inherit;box-sizing:border-box"></textarea>'+
-    '<label style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;display:block">Plan</label>'+
+    '<label style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-top:6px;display:flex;align-items:center;gap:6px">Plan <button type="button" onclick="openTextMacro('+vn+',\'plan\')" style="padding:2px 8px;border-radius:6px;border:1px solid #ddd6fe;background:#faf5ff;font-size:10px;font-weight:800;color:#7c3aed;cursor:pointer">📝 Templates</button></label>'+
     '<textarea id="vp'+vn+'" placeholder="Treatment plan, next steps..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:36px;outline:none;font-family:inherit;box-sizing:border-box"></textarea>'+
     '<div class="compl-bar">'+
       '<div class="compl-group">'+
@@ -4614,7 +4709,8 @@ var _MODAL_CLOSERS={
   pickerModal: closePicker,
   settingsModal: closeSettings,
   emailModal: closeEmailModal,
-  doseModal: closeDoseEditor
+  doseModal: closeDoseEditor,
+  textMacroModal: closeTextMacro
 };
 function _closeTopmostModal(){
   // Check preview overlay first (highest z-index)
@@ -4809,6 +4905,73 @@ var DOSE_QUICK=[
   "With meals","Between meals","Before bed","Empty stomach"
 ];
 var _doseCtx=null;
+// ════════════════════════════════════════════════════════════════
+//  TEXT MACRO PICKER (Assessment / Plan templates)
+// ════════════════════════════════════════════════════════════════
+var _tmCtx=null; // {vn, field:'assessment'|'plan', templates:[]}
+function openTextMacro(vn, field){
+  var templates=(field==="assessment")?ASSESSMENT_TEMPLATES:PLAN_TEMPLATES;
+  _tmCtx={vn:vn, field:field, templates:templates};
+  document.getElementById("tmTitle").textContent=(field==="assessment"?"📝 Assessment Templates":"📝 Plan Templates");
+  document.getElementById("tmSub").textContent="Visit "+vn+" — tap to insert, then edit [brackets]";
+  _renderTextMacroRoot();
+  document.getElementById("textMacroModal").classList.add("open");
+}
+function closeTextMacro(){
+  document.getElementById("textMacroModal").classList.remove("open");
+  _tmCtx=null;
+}
+var _tmCatIdx=null;
+function _renderTextMacroRoot(){
+  _tmCatIdx=null;
+  var body=document.getElementById("tmBody"); if(!body||!_tmCtx) return;
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">';
+  _tmCtx.templates.forEach(function(cat,ci){
+    html+='<button type="button" onclick="_tmDrillCat('+ci+')" style="padding:12px 14px;border:2px solid #e2e8f0;border-radius:10px;background:white;font-size:13px;font-weight:700;color:#374151;cursor:pointer;text-align:left;transition:all .15s;position:relative;padding-right:26px" onmouseover="this.style.borderColor=\'#7c3aed\';this.style.background=\'#faf5ff\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.background=\'white\'">'+
+      escHtml(cat.cat)+'<span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#94a3b8">▸</span>'+
+      '<div style="font-size:10px;color:#94a3b8;font-weight:500;margin-top:3px">'+cat.items.length+' template'+(cat.items.length===1?'':'s')+'</div></button>';
+  });
+  html+='</div>';
+  body.innerHTML=html;
+}
+function _tmDrillCat(ci){
+  _tmCatIdx=ci;
+  var body=document.getElementById("tmBody"); if(!body||!_tmCtx) return;
+  var cat=_tmCtx.templates[ci];
+  var html='<div style="margin-bottom:10px"><button type="button" onclick="_renderTextMacroRoot()" style="padding:4px 10px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;font-size:11px;font-weight:700;color:#64748b;cursor:pointer">← Back</button> <span style="font-size:13px;font-weight:800;color:#374151">'+escHtml(cat.cat)+'</span></div>';
+  html+='<div style="display:flex;flex-direction:column;gap:8px">';
+  cat.items.forEach(function(item,ii){
+    html+='<button type="button" onclick="_tmInsert('+ci+','+ii+')" style="padding:10px 14px;border:2px solid #e2e8f0;border-radius:10px;background:white;text-align:left;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor=\'#22c55e\';this.style.background=\'#f0fdf4\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.background=\'white\'">';
+    html+='<div style="font-size:12px;font-weight:800;color:#374151;margin-bottom:4px">'+escHtml(item.label)+'</div>';
+    html+='<div style="font-size:11px;color:#64748b;line-height:1.5">'+escHtml(item.text.substring(0,140))+(item.text.length>140?'…':'')+'</div>';
+    html+='</button>';
+  });
+  html+='</div>';
+  body.innerHTML=html;
+}
+function _tmInsert(ci,ii){
+  if(!_tmCtx) return;
+  var item=_tmCtx.templates[ci].items[ii];
+  var fieldId=(_tmCtx.field==="assessment"?"va":"vp")+_tmCtx.vn;
+  var ta=document.getElementById(fieldId);
+  if(ta){
+    var cur=ta.value.trim();
+    ta.value=(cur?cur+"\n\n":"")+item.text;
+    // Save to state
+    var stateObj=(_tmCtx.field==="assessment")?S.visitAssessment:S.visitPlan;
+    if(!stateObj){
+      if(_tmCtx.field==="assessment") S.visitAssessment={};
+      else S.visitPlan={};
+      stateObj=(_tmCtx.field==="assessment")?S.visitAssessment:S.visitPlan;
+    }
+    stateObj[_tmCtx.vn]=ta.value;
+    autoSave();
+  }
+  closeTextMacro();
+  showToast("📝 Inserted: "+item.label);
+  if(ta) ta.focus();
+}
+
 function openDoseEditor(vn, suppIdx){
   _doseCtx={vn:vn, suppIdx:suppIdx};
   var name=SUPPLEMENTS[suppIdx]||"Supplement";
