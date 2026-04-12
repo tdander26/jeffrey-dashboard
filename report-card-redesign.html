@@ -570,7 +570,17 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 .preview-toolbar .pv-print:hover{background:#2563eb}
 .preview-toolbar .pv-close{background:rgba(255,255,255,.1);color:var(--text-primary);border:1px solid var(--border-dim)}
 .preview-toolbar .pv-close:hover{background:rgba(255,255,255,.16)}
-.preview-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:white;padding:16px}
+.preview-scroll{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;background:white;padding:16px;color:#1a1a2e}
+.preview-scroll *{color:inherit}
+.preview-scroll .tl-table th{color:white!important}
+.preview-scroll .tl-table th.sec-hdr{color:white!important}
+.preview-scroll .pv-title{color:#1a1a2e}
+.preview-scroll .pv-meta{color:#374151}
+.preview-scroll .pv-section-title{color:#1a1a2e}
+.preview-scroll .pv-note{color:#64748b}
+.preview-scroll .pv-footer{color:#94a3b8}
+.preview-scroll .tl-table td{color:#374151}
+.preview-scroll .tl-table td.row-lbl{color:#1a1a2e}
 @media print{.preview-overlay{display:none!important}}
 
 /* ══════════════════════════════════════
@@ -618,7 +628,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 <!-- PASSWORD -->
 <div id="pwOverlay">
   <div class="pw-box">
-    <div class="pw-logo">🏥</div>
+    <div class="pw-logo"><svg width="52" height="52" viewBox="0 0 40 40" fill="none"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg></div>
     <div class="pw-brand">Momentum Health & Wellness</div>
     <div class="pw-sub">Secure Patient Records — Applied Kinesiology</div>
     <input type="password" id="pwInput" placeholder="Enter access password" autocomplete="current-password">
@@ -846,7 +856,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 <div id="dash">
   <div class="page-header">
     <div>
-      <h1>🏥 Momentum Health &amp; Wellness</h1>
+      <h1><svg width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>Momentum Health &amp; Wellness</h1>
       <div class="sub">Patient Records — Applied Kinesiology</div>
     </div>
     <div class="hbtns">
@@ -881,7 +891,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 
   <div class="page-header">
     <div>
-      <h1 id="appPatientName">🏥 Patient Record</h1>
+      <h1 id="appPatientName"><svg class="mhw-ico" width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>Patient Record</h1>
       <div class="sub">Applied Kinesiology Progress Report Card</div>
       <div id="backupStatus"></div>
     </div>
@@ -3010,7 +3020,7 @@ function loadPatientInfo(){
   });
   // Update header name
   var n=S.patientInfo.name;
-  document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
+  document.getElementById("appPatientName").innerHTML='<svg width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>'+(n||"New Patient");
 }
 function onStatusChange(){
   var el=document.getElementById("fi_status"); if(!el) return;
@@ -3029,7 +3039,7 @@ function collectPatientInfo(){
     if(el) S.patientInfo[PI_MAP[id]]=el.value;
   });
   var n=S.patientInfo.name;
-  document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
+  document.getElementById("appPatientName").innerHTML='<svg width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>'+(n||"New Patient");
   // Duplicate detection: warn if name or MRN matches another patient
   if(n && n!==_lastDupWarn){
     var lo=n.toLowerCase().trim();
@@ -5159,7 +5169,7 @@ function _collectVisitSummary(vn){
 
 function _buildVisitSummaryHtml(vn){
   var d=_collectVisitSummary(vn);
-  var h='<div class="pv-header"><div class="pv-title">🏥 Momentum Health &amp; Wellness — Visit '+d.visitNum+' Summary</div>';
+  var h='<div class="pv-header"><div class="pv-title">Momentum Health &amp; Wellness — Visit '+d.visitNum+' Summary</div>';
   var meta=[];
   if(d.patientName) meta.push('<strong>Patient:</strong> '+escHtml(d.patientName));
   if(d.dob)         meta.push('<strong>DOB:</strong> '+escHtml(d.dob));
