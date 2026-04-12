@@ -621,6 +621,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 #doseInput{background:var(--bg-input)!important;border-color:var(--border-dim)!important;color:var(--text-primary)!important}
 #pwErrDetail{background:rgba(234,179,8,.1)!important;color:#fcd34d!important;border-color:rgba(234,179,8,.3)!important}
 #macroModalSub,#pickerSub,#emailSub,#doseSub,#tmSub{color:var(--text-muted)!important}
+.qp-back-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:8px;border:1px solid var(--border-dim);background:rgba(255,255,255,.06);color:var(--text-secondary);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;margin-bottom:10px;font-family:inherit}
+.qp-back-btn:hover{background:var(--amber-dim);border-color:rgba(200,130,10,.4);color:var(--amber-bright)}
 </style>
 </head>
 <body>
@@ -1082,6 +1084,57 @@ var FIELDS = [
   ]},
   {sec:"BRAIN",items:[
     {lbl:"Overfiring Supraspinatus",opts:null},{lbl:"CR Stim. Induces Overfiring Supra.",opts:null},
+    {lbl:"Cortex — Left Activation",opts:null,tagPopup:{options:[
+      "R side compression/brushing","Counting","Recalling meaningful information",
+      "Looking at & naming pictures of tools","Writing name with R hand",
+      "Photos of familiar faces/people","Cognitive processing → 'Yes' answer",
+      "Peripheral vision (fixate eyes, locate objects in periphery)","Meaningful hand activity"
+    ],hasCustom:true}},
+    {lbl:"Cortex — Right Activation",opts:null,tagPopup:{options:[
+      "L side compression/brushing","Humming","Arrays (objects, states, geography)",
+      "Tracing maze with L hand / finger-painting L field","Grasping within reach (either hand)",
+      "Photos of unfamiliar faces/people","Cognitive processing → 'No' answer",
+      "Big picture spatial awareness (no detail)","Meaningless hand activity",
+      "Object differentiation by feel (eyes closed)"
+    ],hasCustom:true}},
+    {lbl:"Cerebellum — General Test",opts:null,tagPopup:{options:[
+      "Table lowering / elevator sensation weakens strong muscle",
+      "Structural correction needed first","Coccyx + associated ligaments",
+      "O₂ while exercises performed","IRT (Injury Recall Technique)",
+      "Myofascial work / Chapman's reflexes","Spinal adjustments",
+      "Peripheral acupressure points"
+    ],hasCustom:true}},
+    {lbl:"Cerebellum — R Tests",opts:null,tagPopup:{options:[
+      "R single-leg Romberg (eyes closed)","R finger to nose ×3–4 (eyes closed)",
+      "Clockwise spinning","R hand: open/close/turn",
+      "R hand figure 8s while walking",
+      "Floating up-R then melting down-R (inhibits L CRBL)"
+    ],hasCustom:true}},
+    {lbl:"Cerebellum — L Tests",opts:null,tagPopup:{options:[
+      "L single-leg Romberg (eyes closed)","L finger to nose ×3–4 (eyes closed)",
+      "Counter-clockwise spinning","L hand: open/close/turn",
+      "L hand figure 8s while walking",
+      "Floating up-L then melting down-L (inhibits R CRBL)"
+    ],hasCustom:true}},
+    {lbl:"Cerebellum — Semicircular Canals",opts:null,tagPopup:{options:[
+      "R anterior canal (head 45° L + flex down)",
+      "R posterior canal (head 45° R + extend back)",
+      "R lateral canal (turn head R)",
+      "L anterior canal (head 45° R + flex down)",
+      "L posterior canal (head 45° L + extend back)",
+      "L lateral canal (turn head L)",
+      "Eyes fixated on point (inhibits pathway)",
+      "Eyes closed (excites pathway)",
+      "Head B&E acupressure points negate weakness"
+    ],hasCustom:true}},
+  ]},
+  {sec:"CRANIAL FAULTS",items:[
+    {lbl:"Sagittal (GABA)",opts:null},
+    {lbl:"Squamosal (Dopamine)",opts:null},
+    {lbl:"Frontal (Acetylcholine)",opts:null},
+    {lbl:"Sphenoid (Taurine)",opts:null},
+    {lbl:"Lambdoidal",opts:null},
+    {lbl:"Occipital-Mastoid (Glycine)",opts:null},
   ]},
 ];
 
@@ -4190,6 +4243,10 @@ function renderQuickPick(){
     body.innerHTML=crumbs+'<div class="qp-empty">Nothing to show here.</div>';
     return;
   }
+  var backBtn='';
+  if(_qpPath.length>0){
+    backBtn='<button class="qp-back-btn" onclick="qpGoto('+(_qpPath.length-1)+')">← Back</button>';
+  }
   var gridHtml='<div class="qp-grid">';
   items.forEach(function(it,idx){
     var marked=_qpIsMarked(it);
@@ -4198,7 +4255,7 @@ function renderQuickPick(){
       escHtml(it.label)+extra+'</button>';
   });
   gridHtml+='</div>';
-  body.innerHTML=crumbs+gridHtml;
+  body.innerHTML=crumbs+backBtn+gridHtml;
 }
 
 function _qpChildren(path){
@@ -4285,13 +4342,18 @@ function _qpChildren(path){
     return MSK_ORGANS.map(function(o,oi){ return {type:"organ_detail",label:o,oi:oi,children:true}; });
   }
   // ORGAN DETAIL → Offenders, Infection, Nutrients groups
+  // Organs that should NOT show infection (per clinical protocol)
+  var _noInfectionOrgans={0:1,2:1,3:1,6:1,11:1,12:1,14:1,15:1,16:1,17:1,19:1,23:1,24:1,25:1};
   if(last.type==="organ_detail"){
     var info=ORGAN_INFO[last.oi]||{n:[],o:[]};
-    return [
-      {type:"organ_offenders_group",label:"⚠️ Offenders ("+info.o.length+")",oi:last.oi,children:true,sub:info.o.length+" options"},
-      {type:"organ_infection_group",label:"🦠 Infection",oi:last.oi,children:true,sub:"Bacteria / Fungus / Virus / Parasite"},
-      {type:"organ_nutrients_group",label:"💊 Nutrients ("+info.n.length+")",oi:last.oi,children:true,sub:info.n.length+" options"}
+    var groups=[
+      {type:"organ_offenders_group",label:"⚠️ Offenders ("+info.o.length+")",oi:last.oi,children:true,sub:info.o.length+" options"}
     ];
+    if(!_noInfectionOrgans[last.oi]){
+      groups.push({type:"organ_infection_group",label:"🦠 Infection",oi:last.oi,children:true,sub:"Bacteria / Fungus / Virus / Parasite"});
+    }
+    groups.push({type:"organ_nutrients_group",label:"💊 Nutrients ("+info.n.length+")",oi:last.oi,children:true,sub:info.n.length+" options"});
+    return groups;
   }
   // ORGAN OFFENDERS → leaf toggles (or drillable if offender has nested nutrients)
   if(last.type==="organ_offenders_group"){
