@@ -628,7 +628,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 <!-- PASSWORD -->
 <div id="pwOverlay">
   <div class="pw-box">
-    <div class="pw-logo"><svg width="52" height="52" viewBox="0 0 40 40" fill="none"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <div class="pw-logo"><svg width="64" height="64" viewBox="0 0 24 24" fill="none"><path d="M2 18C4 18 6 5 8 5s3 13 4 13 3-16 5-16 4 10 5 10" stroke="#C8820A" stroke-width="5" stroke-linecap="round" opacity=".08"/><path d="M2 18C4 18 6 5 8 5s3 13 4 13 3-16 5-16 4 10 5 10" stroke="#C8820A" stroke-width="2" stroke-linecap="round"/></svg></div>
     <div class="pw-brand">Momentum Health & Wellness</div>
     <div class="pw-sub">Secure Patient Records — Applied Kinesiology</div>
     <input type="password" id="pwInput" placeholder="Enter access password" autocomplete="current-password">
@@ -856,7 +856,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 <div id="dash">
   <div class="page-header">
     <div>
-      <h1><svg width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>Momentum Health &amp; Wellness</h1>
+      <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><path d="M2 18C4 18 6 5 8 5s3 13 4 13 3-16 5-16 4 10 5 10" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>Momentum Health &amp; Wellness</h1>
       <div class="sub">Patient Records — Applied Kinesiology</div>
     </div>
     <div class="hbtns">
@@ -891,7 +891,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 
   <div class="page-header">
     <div>
-      <h1 id="appPatientName"><svg class="mhw-ico" width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>Patient Record</h1>
+      <h1 id="appPatientName"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><path d="M2 18C4 18 6 5 8 5s3 13 4 13 3-16 5-16 4 10 5 10" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>Patient Record</h1>
       <div class="sub">Applied Kinesiology Progress Report Card</div>
       <div id="backupStatus"></div>
     </div>
@@ -3020,7 +3020,7 @@ function loadPatientInfo(){
   });
   // Update header name
   var n=S.patientInfo.name;
-  document.getElementById("appPatientName").innerHTML='<svg width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>'+(n||"New Patient");
+  document.getElementById("appPatientName").innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><path d="M2 18C4 18 6 5 8 5s3 13 4 13 3-16 5-16 4 10 5 10" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>'+(n||"New Patient");
 }
 function onStatusChange(){
   var el=document.getElementById("fi_status"); if(!el) return;
@@ -3039,7 +3039,7 @@ function collectPatientInfo(){
     if(el) S.patientInfo[PI_MAP[id]]=el.value;
   });
   var n=S.patientInfo.name;
-  document.getElementById("appPatientName").innerHTML='<svg width="22" height="22" viewBox="0 0 40 40" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><rect x="2" y="2" width="36" height="36" rx="12" fill="rgba(200,130,10,.15)" stroke="#C8820A" stroke-width="1.5"/><path d="M20 12v16M12 20h16" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>'+(n||"New Patient");
+  document.getElementById("appPatientName").innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="vertical-align:middle;margin-right:6px;position:relative;top:-1px"><path d="M2 18C4 18 6 5 8 5s3 13 4 13 3-16 5-16 4 10 5 10" stroke="#C8820A" stroke-width="2.5" stroke-linecap="round"/></svg>'+(n||"New Patient");
   // Duplicate detection: warn if name or MRN matches another patient
   if(n && n!==_lastDupWarn){
     var lo=n.toLowerCase().trim();
