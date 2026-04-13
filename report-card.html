@@ -701,6 +701,17 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
           <button onclick="changeAccessPw()">Save</button>
         </div>
       </div>
+      <div class="settings-section">
+        <h4>Plan &amp; Assessment Templates</h4>
+        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+          <select id="tmEditType" onchange="renderSettingsTemplates()" style="padding:5px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:12px;font-weight:700;outline:none">
+            <option value="plan">Plan Templates</option>
+            <option value="assessment">Assessment Templates</option>
+          </select>
+          <button style="padding:5px 10px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:7px;font-size:11px;font-weight:700;color:#64748b;cursor:pointer" onclick="resetTemplates()">Reset to defaults</button>
+        </div>
+        <div id="settingsTemplates" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -2311,12 +2322,12 @@ var PLAN_TEMPLATES=[
     {label:"Low histamine",text:"Implement low histamine diet: Avoid aged/fermented foods, alcohol, processed meats, citrus, and leftovers. Emphasize fresh-cooked proteins, rice, fresh fruits (except citrus). Antihistamine nutrient support added."},
     {label:"Low FODMAP",text:"Initiate low FODMAP elimination phase for [2-4 weeks]. Avoid high FODMAP foods (garlic, onion, wheat, certain fruits/vegetables). Reintroduction protocol to follow. Dietitian referral if needed."}
   ]},
-  {cat:"Lifestyle / Follow-up",items:[
+  {cat:"Follow Up",items:[
     {label:"Stress management",text:"Stress management recommendations: [Deep breathing exercises/meditation/yoga] daily. Limit screen time before bed. Prioritize 7-9 hours of sleep. Consider counseling if emotional stress is primary driver."},
     {label:"Exercise prescription",text:"Exercise recommendations: [Walking/swimming/yoga] [frequency] per week. Avoid [high-intensity/heavy lifting] during healing phase. Gradually increase intensity as symptoms improve. Report any symptom aggravation."},
     {label:"Short follow-up",text:"Schedule follow-up in [1-2 weeks] to monitor acute response to treatment. Patient to track symptoms and report any changes. Phone consultation available if acute symptoms develop."},
-    {label:"Standard follow-up",text:"Return in [4-6 weeks] for reassessment of progress. Bring [lab results/symptom log/food diary] to next visit. Continue current protocol until reassessment."},
-    {label:"Extended follow-up",text:"Return in [2-3 months] after completing initial supplement protocol. Muscle testing will be repeated to assess response. Labs to be drawn [X weeks] prior to next visit."},
+    {label:"2 Weeks",text:"Return in 2-3 weeks for reassessment of progress."},
+    {label:"1 Month",text:"Return in 4 weeks for reassessment of progress."},
     {label:"Referral",text:"Refer to [specialist/lab] for [specific evaluation]. Coordinate care with results to be reviewed at next visit. Continue current supportive care in the interim."}
   ]},
   {cat:"Medical Necessity",items:[
@@ -2324,6 +2335,11 @@ var PLAN_TEMPLATES=[
     {label:"Progress toward goals",text:"Patient demonstrates measurable progress toward established treatment goals. Current treatment frequency remains necessary to continue functional improvement and prevent regression. Treatment plan updated based on objective reassessment."}
   ]}
 ];
+// Load user-edited templates from localStorage (overrides defaults)
+(function(){
+  var a=_LS.getItem("mhw_assessment_templates"); if(a){try{ASSESSMENT_TEMPLATES=JSON.parse(a);}catch(e){}}
+  var p=_LS.getItem("mhw_plan_templates");       if(p){try{PLAN_TEMPLATES=JSON.parse(p);}catch(e){}}
+})();
 // Combined flat list for marks storage: indices 0-5 = diets, 6-13 = foods
 var ALL_DIET_ITEMS=DIET_RECS.concat(FOOD_SENSITIVITIES);
 
@@ -4147,9 +4163,43 @@ function pkToggleMskBoth(si,mi){
 // ════════════════════════════════════════════════════════════════
 function openSettings(){
   renderSettingsSnippets();
+  renderSettingsTemplates();
   document.getElementById("settingsIdleMin").value=IDLE_MINUTES;
   document.getElementById("settingsNewPw").value="";
   document.getElementById("settingsModal").classList.add("open");
+}
+
+function renderSettingsTemplates(){
+  var list=document.getElementById("settingsTemplates"); if(!list) return;
+  var sel=document.getElementById("tmEditType");
+  var type=sel?sel.value:"plan";
+  var arr=type==="plan"?PLAN_TEMPLATES:ASSESSMENT_TEMPLATES;
+  var html="";
+  arr.forEach(function(cat,ci){
+    html+='<div style="margin-bottom:4px">';
+    html+='<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b;padding:4px 6px;background:#f8fafc;border-radius:6px 6px 0 0;border:1px solid #e2e8f0;border-bottom:none">'+escHtml(cat.cat)+'</div>';
+    cat.items.forEach(function(item,ii){
+      var uid="tm_"+type+"_"+ci+"_"+ii;
+      html+='<div style="border:1px solid #e2e8f0;border-top:none;padding:8px;background:white;'+(ii===cat.items.length-1?"border-radius:0 0 6px 6px":"")+'">';
+      html+='<input type="text" value="'+escHtml(item.label)+'" placeholder="Label" style="width:100%;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:5px;box-sizing:border-box;outline:none;font-family:inherit" onchange="updateTemplate(\''+type+'\','+ci+','+ii+',\'label\',this.value)">';
+      html+='<textarea rows="2" style="width:100%;padding:4px 8px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:11px;resize:vertical;box-sizing:border-box;outline:none;font-family:inherit;line-height:1.4" onchange="updateTemplate(\''+type+'\','+ci+','+ii+',\'text\',this.value)">'+escHtml(item.text)+'</textarea>';
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  list.innerHTML=html;
+}
+function updateTemplate(type,ci,ii,field,value){
+  var arr=type==="plan"?PLAN_TEMPLATES:ASSESSMENT_TEMPLATES;
+  arr[ci].items[ii][field]=value;
+  _LS.setItem("mhw_"+type+"_templates",JSON.stringify(arr));
+}
+function resetTemplates(){
+  var sel=document.getElementById("tmEditType");
+  var type=sel?sel.value:"plan";
+  if(!confirm("Reset "+type+" templates to defaults? Any edits will be lost.")) return;
+  _LS.removeItem("mhw_"+type+"_templates");
+  location.reload();
 }
 function closeSettings(){ document.getElementById("settingsModal").classList.remove("open"); }
 function renderSettingsSnippets(){
@@ -5736,6 +5786,20 @@ buildAllVisits();
 window.addEventListener('pagehide',function(){
   if(GDRIVE.isDirty&&GDRIVE.isConnected()) GDRIVE.backup(true);
 });
+
+// Tab through [bracketed] placeholders in assessment/plan/note textareas
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Tab') return;
+  var ta=e.target;
+  if(ta.tagName!=='TEXTAREA') return;
+  var text=ta.value, pos=ta.selectionEnd;
+  var idx=text.indexOf('[',pos);
+  if(idx===-1) idx=text.indexOf('[',0); // wrap
+  if(idx===-1) return;
+  e.preventDefault();
+  var end=text.indexOf(']',idx);
+  ta.setSelectionRange(idx, end===-1?idx+1:end+1);
+},true);
 </script>
 </body>
 </html>
