@@ -19,6 +19,7 @@
 <link rel="icon" type="image/png" href="icon-512.png">
 <title>Momentum Health & Wellness — Patient Records</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 /* ══ DESIGN TOKENS ══ */
 :root{
@@ -855,11 +856,14 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
       <input type="text" id="emSubject" class="em-input">
       <label class="em-lbl">Message</label>
       <textarea id="emBody" class="em-input" style="min-height:260px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.5"></textarea>
-      <div class="em-hint">💡 If "Open in Email App" doesn't launch your mail client, use <strong>Copy Summary</strong> and paste it into Superhuman / Gmail / Outlook.</div>
+      <div class="em-hint">📎 A PDF of the visit summary will be attached automatically when you send via Gmail.</div>
       <div class="em-actions">
-        <button class="btn btn-green" onclick="emailOpenMailApp()">📧 Open in Email App</button>
-        <button class="btn btn-blue" onclick="emailCopySummary()">📋 Copy Summary</button>
-        <button class="btn btn-light" style="background:#f1f5f9;color:#374151" onclick="emailOpenSuperhuman()">🪄 Open Superhuman</button>
+        <button class="btn btn-green" id="gmailSendBtn" onclick="emailSendViaGmail()">✉️ Send via Gmail</button>
+      </div>
+      <div class="em-actions" style="margin-top:8px;padding-top:8px;border-top:1px solid #e2e8f0">
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px" onclick="emailOpenMailApp()">📧 Open Mail App</button>
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px" onclick="emailCopySummary()">📋 Copy Text</button>
+        <button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px" onclick="emailOpenSuperhuman()">🪄 Superhuman</button>
       </div>
     </div>
   </div>
@@ -924,6 +928,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
   <div class="preview-toolbar">
     <span class="pvt-label" id="previewTitle">Preview</span>
     <div style="display:flex;gap:8px">
+      <button class="pv-print" id="previewEmailBtn" onclick="previewDoEmail()" style="background:#166534;color:#fff">✉️ Email</button>
       <button class="pv-print" id="previewPrintBtn" onclick="previewDoPrint()">🖨 Print</button>
       <button class="pv-close" onclick="closePreview()">✕ Close</button>
     </div>
@@ -3335,7 +3340,7 @@ function autoSave(){ clearTimeout(_aT); _aT=setTimeout(saveAll,1200); GDRIVE.isD
 */
 var GDRIVE=(function(){
   var CLIENT_ID='889613087652-fdt1omsivp2l2aqbm2mh4djjq2ekiqeh.apps.googleusercontent.com';
-  var SCOPES='https://www.googleapis.com/auth/drive.file';
+  var SCOPES='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/gmail.send';
   var FOLDER_NAME='Report Card Backups';
   var LS_LAST='mhw_drive_last_backup';
 
@@ -4080,8 +4085,10 @@ function buildPrintView(){
 // Reusable on-screen preview overlay. Content is rendered into
 // #previewContent. The user can scroll, review, then print or close.
 var _previewMode=null; // 'timeline'|'findings'|'visit'
-function _openPreview(title,html,mode){
+var _previewVn=null;
+function _openPreview(title,html,mode,vn){
   _previewMode=mode;
+  _previewVn=vn||null;
   document.getElementById("previewTitle").textContent=title;
   document.getElementById("previewContent").innerHTML=html;
   document.getElementById("previewOverlay").classList.add("open");
@@ -4090,6 +4097,36 @@ function _openPreview(title,html,mode){
 function closePreview(){
   document.getElementById("previewOverlay").classList.remove("open");
   _previewMode=null;
+  _previewVn=null;
+}
+function previewDoEmail(){
+  var pi=S.patientInfo||{};
+  var firstName=(pi.name||"").split(" ")[0]||"there";
+  var today=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  if(_previewMode==="visit"&&_previewVn){
+    // Email a specific visit summary
+    emailVisitSummary(_previewVn);
+    closePreview();
+  } else {
+    // Email the timeline or findings — build ctx from current preview HTML
+    var label=_previewMode==="findings"?"Positive Findings Summary":"Progress Timeline";
+    var subjectLabel=_previewMode==="findings"?"Positive Findings":"Progress Timeline";
+    var subject="Your "+subjectLabel+(pi.name?" — "+pi.name:"")+" — "+today;
+    var body="Hi "+firstName+",\n\nPlease find attached your "+label.toLowerCase()+" from Momentum Health & Wellness.\n\nThis summary reflects your progress and current health recommendations. Please don't hesitate to reach out with any questions.\n\nIn health,\nDr. Todd Anderson\nMomentum Health & Wellness";
+    var html=document.getElementById("previewContent").innerHTML;
+    _emailCtx={previewHtml:html,label:label};
+    var btn=document.getElementById("gmailSendBtn");
+    if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+    document.getElementById("emailSub").textContent=label+(pi.name?" · "+pi.name:"");
+    document.getElementById("emTo").value=pi.email||"";
+    document.getElementById("emSubject").value=subject;
+    document.getElementById("emBody").value=body;
+    closePreview();
+    document.getElementById("emailModal").classList.add("open");
+    setTimeout(function(){
+      if(!pi.email){ var t=document.getElementById("emTo"); if(t) t.focus(); }
+    },50);
+  }
 }
 function previewDoPrint(){
   // Replace the entire #printView content with just the preview HTML.
@@ -4127,7 +4164,7 @@ function previewFindings(){
 }
 function previewVisitSummary(vn){
   var html=_buildVisitSummaryHtml(vn);
-  _openPreview("📋 Visit "+vn+" Summary",html,"visit");
+  _openPreview("📋 Visit "+vn+" Summary",html,"visit",vn);
 }
 
 function previewPatientSummary(){
@@ -6063,14 +6100,19 @@ var _emailCtx=null;
 function emailVisitSummary(vn){
   var pi=S.patientInfo||{};
   var d=_collectVisitSummary(vn);
-  var subject="Visit "+vn+" Summary"+(d.visitDate?" — "+d.visitDate:"")+(d.patientName?" — "+d.patientName:"");
-  var body=_plainVisitSummary(vn);
+  var firstName=(d.patientName||"").split(" ")[0]||"there";
+  var dateStr=d.visitDate||"your recent visit";
+  var subject="Your Visit Summary"+(d.patientName?" — "+d.patientName:"")+(d.visitDate?" — "+d.visitDate:"");
+  var body="Hi "+firstName+",\n\nPlease find attached a summary of your visit on "+dateStr+" at Momentum Health & Wellness.\n\nYour personalized recommendations are outlined in the PDF. Please don't hesitate to reach out with any questions.\n\nIn health,\nDr. Todd Anderson\nMomentum Health & Wellness";
   _emailCtx={vn:vn};
   document.getElementById("emailSub").textContent=
     "Visit "+vn+(d.visitDate?" · "+d.visitDate:"")+(d.patientName?" · "+d.patientName:"");
   document.getElementById("emTo").value=pi.email||"";
   document.getElementById("emSubject").value=subject;
   document.getElementById("emBody").value=body;
+  // Reset send button state
+  var btn=document.getElementById("gmailSendBtn");
+  if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
   document.getElementById("emailModal").classList.add("open");
   setTimeout(function(){
     var ta=document.getElementById("emBody"); if(ta) ta.scrollTop=0;
@@ -6123,6 +6165,304 @@ function _emailFallbackCopy(text){
 }
 function emailOpenSuperhuman(){
   window.open("https://mail.superhuman.com/","_blank","noopener");
+}
+
+// ════════════════════════════════════════════════════════════════
+//  PDF + GMAIL SEND
+// ════════════════════════════════════════════════════════════════
+
+// Shared CSS used by both PDF builders
+var _PDF_CSS=[
+  'body{margin:0;padding:0;font-family:"Inter",system-ui,-apple-system,sans-serif;color:#1a1a2e;background:#fff}',
+  '.pdf-wrap{padding:28px 32px;max-width:720px;margin:0 auto}',
+  '.pdf-header{border-bottom:3px solid #1a1a2e;padding-bottom:14px;margin-bottom:22px}',
+  '.pdf-clinic{font-size:20px;font-weight:900;color:#1a1a2e;letter-spacing:-.01em}',
+  '.pdf-subtitle{font-size:11px;font-weight:600;color:#C8820A;text-transform:uppercase;letter-spacing:.08em;margin-top:3px}',
+  '.pdf-meta{font-size:11px;color:#374151;margin-top:10px;line-height:1.7}',
+  '.pdf-meta strong{color:#1a1a2e}',
+  '.pdf-section{margin-bottom:18px}',
+  '.pdf-section-title{font-size:11px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.07em;padding:3px 0;border-bottom:2px solid #e2e8f0;margin-bottom:8px}',
+  'ul{margin:0 0 0 18px;padding:0}',
+  'li{font-size:11px;color:#374151;line-height:1.7}',
+  'p{font-size:11px;color:#374151;line-height:1.7;margin:0}',
+  '.sub-group-title{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin:6px 0 3px}',
+  '.tag{font-size:9px;color:#92400e;font-style:italic}',
+  '.highlight{font-size:13px;font-weight:800;color:#1d4ed8}',
+  '.pdf-footer{margin-top:24px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:8px;color:#94a3b8;display:flex;justify-content:space-between}',
+  // Timeline table classes
+  '.tl-table{border-collapse:collapse;width:100%;font-size:9px}',
+  '.tl-table th{background:#1a1a2e;color:white;padding:4px 3px;text-align:center;font-size:9px;white-space:nowrap;font-weight:700}',
+  '.tl-table th.row-hdr{text-align:left;min-width:160px;padding-left:6px;font-size:10px}',
+  '.tl-table th.sec-hdr{background:#374151;text-align:left;padding-left:6px;font-size:9px;color:white}',
+  '.tl-table td{border:1px solid #e5e7eb;padding:1px 2px;text-align:center;vertical-align:middle}',
+  '.tl-table td.row-lbl{text-align:left;padding:3px 6px;font-size:9px;white-space:nowrap;background:#f9fafb;font-weight:600}',
+  '.tl-table td.row-lbl.sub-lbl{padding-left:12px;font-weight:500}',
+  '.tl-block{width:28px;height:16px;border-radius:2px;display:inline-block;margin:1px auto}',
+  '.tl-empty{width:28px;height:16px;display:inline-block}',
+  '.pv-header{margin-bottom:16px;border-bottom:3px solid #1a1a2e;padding-bottom:10px}',
+  '.pv-title{font-size:18px;font-weight:900;color:#1a1a2e}',
+  '.pv-meta{font-size:11px;color:#374151;margin-top:4px}',
+  '.pv-legend{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}',
+  '.pv-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700}',
+  '.pv-leg-dot{width:14px;height:14px;border-radius:3px}',
+  '.pv-section{margin-bottom:20px}',
+  '.pv-section-title{font-size:13px;font-weight:900;color:#1a1a2e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding:4px 0;border-bottom:2px solid #e2e8f0}',
+  '.pv-note{font-size:10px;color:#64748b;font-style:italic;margin-bottom:8px}',
+  '.pv-footer{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between}'
+].join("\n");
+
+// Build self-contained HTML for a visit-specific PDF
+function _buildPdfSummaryHtml(vn){
+  var d=_collectVisitSummary(vn);
+  var meta=[];
+  if(d.patientName) meta.push('<strong>Patient:</strong> '+escHtml(d.patientName));
+  if(d.dob)         meta.push('<strong>DOB:</strong> '+escHtml(d.dob));
+  if(d.mrn)         meta.push('<strong>MRN:</strong> '+escHtml(d.mrn));
+  if(d.provider)    meta.push('<strong>Provider:</strong> '+escHtml(d.provider));
+  if(d.visitDate)   meta.push('<strong>Visit Date:</strong> '+escHtml(d.visitDate));
+
+  var body='<div class="pdf-header">';
+  body+='<div class="pdf-clinic">Momentum Health &amp; Wellness</div>';
+  body+='<div class="pdf-subtitle">Visit '+d.visitNum+' Summary</div>';
+  if(meta.length) body+='<div class="pdf-meta">'+meta.join(' &nbsp;&nbsp;|&nbsp;&nbsp; ')+'</div>';
+  body+='</div>';
+
+  // Compliance
+  var comp=[];
+  if(d.dietGrade)    comp.push('Diet compliance: <strong>'+escHtml(d.dietGrade)+'</strong>');
+  if(d.suppGrade)    comp.push('Supplement compliance: <strong>'+escHtml(d.suppGrade)+'</strong>');
+  if(d.labsReviewed) comp.push('<strong>Labs reviewed this visit</strong>');
+  if(comp.length){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Compliance &amp; Labs</div>';
+    body+='<p>'+comp.join(' &nbsp;|&nbsp; ')+'</p></div>';
+  }
+
+  // Challenges
+  body+='<div class="pdf-section"><div class="pdf-section-title">Challenges Found</div>';
+  if(!d.challenges.length){
+    body+='<p style="color:#94a3b8;font-style:italic">No findings documented.</p>';
+  } else {
+    var bySec={};
+    d.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
+    Object.keys(bySec).forEach(function(sn){
+      body+='<div class="sub-group-title">'+escHtml(sn)+'</div><ul>';
+      bySec[sn].forEach(function(c){
+        body+='<li>'+escHtml(c.label)+(c.tags.length?' <span class="tag">— '+escHtml(c.tags.join(", "))+'</span>':'')+'</li>';
+      });
+      body+='</ul>';
+    });
+  }
+  body+='</div>';
+
+  // Supplements
+  body+='<div class="pdf-section"><div class="pdf-section-title">Supplements &amp; Dosing</div>';
+  if(!d.supps.length){
+    body+='<p style="color:#94a3b8;font-style:italic">No supplements prescribed.</p>';
+  } else {
+    body+='<ul>';
+    d.supps.forEach(function(s){
+      body+='<li><strong>'+escHtml(s.name)+'</strong>'+(s.dose?' — '+escHtml(s.dose):' <span style="color:#94a3b8">(no dose set)</span>')+'</li>';
+    });
+    body+='</ul>';
+  }
+  body+='</div>';
+
+  // Diet
+  if(d.diets.length){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Diet Recommendations</div><ul>';
+    d.diets.forEach(function(dd){ body+='<li>'+escHtml(dd)+'</li>'; });
+    body+='</ul></div>';
+  }
+
+  // Labs
+  if(d.labs.length){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Labs Ordered</div><ul>';
+    d.labs.forEach(function(l){ body+='<li>'+escHtml(l)+'</li>'; });
+    body+='</ul></div>';
+  }
+
+  // Follow-up
+  if(d.followUp){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Follow-Up</div>';
+    body+='<p class="highlight">'+escHtml(d.followUp)+'</p></div>';
+  }
+
+  // Notes / Assessment / Plan
+  if(d.notes){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Provider Notes</div>';
+    body+='<p style="white-space:pre-wrap">'+escHtml(d.notes)+'</p></div>';
+  }
+  if(d.assessment){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Assessment</div>';
+    body+='<p style="white-space:pre-wrap">'+escHtml(d.assessment)+'</p></div>';
+  }
+  if(d.plan){
+    body+='<div class="pdf-section"><div class="pdf-section-title">Plan</div>';
+    body+='<p style="white-space:pre-wrap">'+escHtml(d.plan)+'</p></div>';
+  }
+
+  body+='<div class="pdf-footer"><span>Momentum Health &amp; Wellness | Dr. Todd Anderson | Applied Kinesiology &amp; Functional Medicine</span><span>'+new Date().toLocaleDateString()+'</span></div>';
+
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+    '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
+    '<style>'+_PDF_CSS+'</style></head>'+
+    '<body><div class="pdf-wrap">'+body+'</div></body></html>';
+}
+
+// Wrap existing preview HTML (timeline / findings) in a PDF-safe shell
+function _buildPdfWrapperHtml(innerHtml){
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
+    '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
+    '<style>'+_PDF_CSS+'body{padding:24px 28px}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>'+
+    '<body>'+innerHtml+'</body></html>';
+}
+
+// Called by "Send via Gmail" button in the email modal
+function emailSendViaGmail(){
+  var to=(document.getElementById("emTo").value||"").trim();
+  var subject=document.getElementById("emSubject").value||"";
+  var bodyText=document.getElementById("emBody").value||"";
+  if(!to){ alert("Please enter a recipient email address."); document.getElementById("emTo").focus(); return; }
+
+  // Require auth
+  if(!GDRIVE.isConnected()){
+    showToast("Connecting to Google — please sign in…","#1d4ed8");
+    GDRIVE.signIn(function(){ emailSendViaGmail(); },true);
+    return;
+  }
+
+  var btn=document.getElementById("gmailSendBtn");
+  if(btn){ btn.disabled=true; btn.textContent="⏳ Generating PDF…"; }
+
+  // Build PDF source HTML
+  var pdfHtml;
+  if(_emailCtx&&_emailCtx.vn){
+    pdfHtml=_buildPdfSummaryHtml(_emailCtx.vn);
+  } else if(_emailCtx&&_emailCtx.previewHtml){
+    pdfHtml=_buildPdfWrapperHtml(_emailCtx.previewHtml);
+  } else {
+    if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+    showToast("⚠ Nothing to send — open the email modal from a visit card.","#b45309");
+    return;
+  }
+
+  // Render PDF in a hidden off-screen container
+  var container=document.createElement("div");
+  container.style.cssText="position:fixed;left:-9999px;top:-9999px;width:794px;background:#fff;z-index:-1";
+  container.innerHTML=pdfHtml;
+  document.body.appendChild(container);
+
+  // Determine filename
+  var d=(_emailCtx&&_emailCtx.vn)?_collectVisitSummary(_emailCtx.vn):{};
+  var safeName=(d.patientName||"Patient").replace(/[^a-z0-9]/gi,"-");
+  var safeDate=(d.visitDate||new Date().toLocaleDateString()).replace(/[^a-z0-9]/gi,"-");
+  var filename=(_emailCtx&&_emailCtx.label)?
+    _emailCtx.label.replace(/\s+/g,"-")+"-"+new Date().toISOString().slice(0,10)+".pdf":
+    "Visit-Summary-"+safeName+"-"+safeDate+".pdf";
+
+  html2pdf().set({
+    margin:[12,14,12,14],
+    filename:filename,
+    image:{type:"jpeg",quality:0.95},
+    html2canvas:{scale:2,useCORS:true,logging:false},
+    jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+  }).from(container.firstElementChild||container).outputPdf("arraybuffer").then(function(pdfBuffer){
+    document.body.removeChild(container);
+    if(btn){ btn.textContent="⏳ Sending…"; }
+    _gmailSendWithPdf(to,subject,bodyText,pdfBuffer,filename);
+  }).catch(function(err){
+    document.body.removeChild(container);
+    if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+    console.error("[Gmail] PDF generation failed:",err);
+    showToast("⚠ PDF generation failed — try Copy Text instead.","#b45309");
+  });
+}
+
+function _gmailSendWithPdf(to,subject,bodyText,pdfBuffer,filename){
+  var btn=document.getElementById("gmailSendBtn");
+  var boundary="mhw_"+Math.random().toString(36).slice(2);
+
+  // Convert PDF ArrayBuffer to base64
+  var uint8=new Uint8Array(pdfBuffer);
+  var binary="";
+  for(var i=0;i<uint8.length;i++) binary+=String.fromCharCode(uint8[i]);
+  var pdfB64=btoa(binary);
+
+  // Build professional HTML email body
+  var firstName=(document.getElementById("emTo").value||"").split("@")[0];
+  var htmlBody='<!DOCTYPE html><html><body style="font-family:system-ui,-apple-system,sans-serif;color:#1a1a2e;max-width:520px;margin:0 auto;padding:24px">'+
+    '<div style="border-bottom:3px solid #1a1a2e;padding-bottom:14px;margin-bottom:20px">'+
+    '<div style="font-size:18px;font-weight:900;color:#1a1a2e">Momentum Health &amp; Wellness</div>'+
+    '<div style="font-size:11px;font-weight:600;color:#C8820A;text-transform:uppercase;letter-spacing:.08em;margin-top:3px">Visit Summary</div>'+
+    '</div>'+
+    '<p style="font-size:14px;line-height:1.7;margin:0 0 16px">'+bodyText.replace(/\n/g,"<br>")+'</p>'+
+    '<p style="font-size:12px;color:#64748b;line-height:1.6;margin:0">Please find your visit summary attached as a PDF.</p>'+
+    '<div style="margin-top:28px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8">'+
+    'Momentum Health &amp; Wellness | Dr. Todd Anderson | Applied Kinesiology &amp; Functional Medicine'+
+    '</div></body></html>';
+
+  // Build MIME multipart message
+  var mime=[
+    "MIME-Version: 1.0",
+    "From: doc@drtoddanderson.com",
+    "To: "+to,
+    "Subject: "+subject,
+    "Content-Type: multipart/mixed; boundary=\""+boundary+"\"",
+    "",
+    "--"+boundary,
+    "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: quoted-printable",
+    "",
+    htmlBody,
+    "",
+    "--"+boundary,
+    "Content-Type: application/pdf",
+    "Content-Transfer-Encoding: base64",
+    "Content-Disposition: attachment; filename=\""+filename+"\"",
+    "",
+    // Split base64 into 76-char lines per RFC 2045
+    pdfB64.match(/.{1,76}/g).join("\r\n"),
+    "",
+    "--"+boundary+"--"
+  ].join("\r\n");
+
+  // Base64url-encode the entire MIME message
+  var mimeB64u=btoa(unescape(encodeURIComponent(mime)))
+    .replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+
+  fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send",{
+    method:"POST",
+    headers:{
+      "Authorization":"Bearer "+GDRIVE.accessToken,
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({raw:mimeB64u})
+  }).then(function(r){
+    if(r.status===200||r.status===201){
+      closeEmailModal();
+      var pi=S.patientInfo||{};
+      var name=(pi.name||to).split(" ")[0];
+      showToast("✉️ Visit summary sent to "+name,"#166534");
+      if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+    } else if(r.status===401){
+      // Token expired — force re-auth
+      GDRIVE.accessToken=null;
+      if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+      showToast("Session expired — please sign in again.","#b45309");
+      GDRIVE.signIn(function(){ emailSendViaGmail(); },true);
+    } else {
+      return r.json().then(function(j){
+        if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+        var msg=(j.error&&j.error.message)||("Error "+r.status);
+        showToast("⚠ Gmail error: "+msg,"#b45309");
+        console.error("[Gmail] Send failed:",j);
+      });
+    }
+  }).catch(function(err){
+    if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
+    showToast("⚠ Network error — check connection and try again.","#b45309");
+    console.error("[Gmail] Network error:",err);
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
