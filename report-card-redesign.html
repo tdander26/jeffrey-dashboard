@@ -3245,7 +3245,43 @@ var GDRIVE=(function(){
           self.accessToken=resp.access_token;
           self._updateButtons();
           self.updateStatus();
-          self.backup(false);
+          // On a device with no patients, auto-restore from Drive instead of overwriting with empty data
+          var localPatients=loadIndex();
+          if(localPatients.length===0){
+            self._getOrCreateFolder(function(fid){
+              if(!fid){ self.backup(false); return; }
+              self._findLatestFile(fid,function(file){
+                if(file){
+                  var dateLabel=file.modifiedTime?file.modifiedTime.split('T')[0]:'unknown date';
+                  if(confirm('No patient records found on this device.\n\nA Drive backup from '+dateLabel+' is available. Restore it now?')){
+                    self._downloadFile(file.id,function(text){
+                      if(!text){ showToast('⚠ Failed to download backup','#b45309'); return; }
+                      try{
+                        var payload=JSON.parse(text);
+                        if(!payload.version||!payload.index||!payload.patients){ self.backup(false); return; }
+                        payload.index.forEach(function(pt){
+                          if(payload.patients[pt.id]){ _LS.setItem(PT_PREFIX+pt.id,JSON.stringify(payload.patients[pt.id])); }
+                        });
+                        _LS.setItem(INDEX_KEY,JSON.stringify(payload.index));
+                        if(typeof renderDash==='function') renderDash();
+                        if(typeof renderStats==='function') renderStats();
+                        self.lastBackupAt=Date.now();
+                        _LS.setItem(LS_LAST,String(self.lastBackupAt));
+                        self.updateStatus();
+                        showToast('☁ Restored '+payload.index.length+' patient'+(payload.index.length===1?'':'s')+' from Drive','#166534');
+                      }catch(e){ showToast('⚠ Failed to parse backup','#b45309'); }
+                    });
+                  } else {
+                    self.backup(false);
+                  }
+                } else {
+                  self.backup(false);
+                }
+              });
+            });
+          } else {
+            self.backup(false);
+          }
         }
       });
       self._gisReady=true;
