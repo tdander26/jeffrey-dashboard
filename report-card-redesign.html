@@ -6212,7 +6212,15 @@ var _PDF_CSS=[
 ].join("\n");
 
 // Build self-contained HTML for a visit-specific PDF
-function _buildPdfSummaryHtml(vn){
+// Encode a string as RFC 2047 base64 word for use in MIME headers
+function _rfc2047B(str){
+  // UTF-8 encode then base64
+  return '=?UTF-8?B?'+btoa(unescape(encodeURIComponent(str)))+'?=';
+}
+
+// Build the inner content HTML for the PDF (no full-document wrapper —
+// html2pdf.js needs a real DOM element, not a nested HTML document).
+function _buildPdfContent(vn){
   var d=_collectVisitSummary(vn);
   var meta=[];
   if(d.patientName) meta.push('<strong>Patient:</strong> '+escHtml(d.patientName));
@@ -6221,11 +6229,12 @@ function _buildPdfSummaryHtml(vn){
   if(d.provider)    meta.push('<strong>Provider:</strong> '+escHtml(d.provider));
   if(d.visitDate)   meta.push('<strong>Visit Date:</strong> '+escHtml(d.visitDate));
 
-  var body='<div class="pdf-header">';
-  body+='<div class="pdf-clinic">Momentum Health &amp; Wellness</div>';
-  body+='<div class="pdf-subtitle">Visit '+d.visitNum+' Summary</div>';
-  if(meta.length) body+='<div class="pdf-meta">'+meta.join(' &nbsp;&nbsp;|&nbsp;&nbsp; ')+'</div>';
-  body+='</div>';
+  var h='<div class="pdf-wrap">';
+  h+='<div class="pdf-header">';
+  h+='<div class="pdf-clinic">Momentum Health &amp; Wellness</div>';
+  h+='<div class="pdf-subtitle">Visit '+d.visitNum+' Summary</div>';
+  if(meta.length) h+='<div class="pdf-meta">'+meta.join(' &nbsp;&nbsp;|&nbsp;&nbsp; ')+'</div>';
+  h+='</div>';
 
   // Compliance
   var comp=[];
@@ -6233,88 +6242,90 @@ function _buildPdfSummaryHtml(vn){
   if(d.suppGrade)    comp.push('Supplement compliance: <strong>'+escHtml(d.suppGrade)+'</strong>');
   if(d.labsReviewed) comp.push('<strong>Labs reviewed this visit</strong>');
   if(comp.length){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Compliance &amp; Labs</div>';
-    body+='<p>'+comp.join(' &nbsp;|&nbsp; ')+'</p></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Compliance &amp; Labs</div>';
+    h+='<p>'+comp.join(' &nbsp;|&nbsp; ')+'</p></div>';
   }
 
   // Challenges
-  body+='<div class="pdf-section"><div class="pdf-section-title">Challenges Found</div>';
+  h+='<div class="pdf-section"><div class="pdf-section-title">Challenges Found</div>';
   if(!d.challenges.length){
-    body+='<p style="color:#94a3b8;font-style:italic">No findings documented.</p>';
+    h+='<p style="color:#94a3b8;font-style:italic">No findings documented.</p>';
   } else {
     var bySec={};
     d.challenges.forEach(function(c){ (bySec[c.section]=bySec[c.section]||[]).push(c); });
     Object.keys(bySec).forEach(function(sn){
-      body+='<div class="sub-group-title">'+escHtml(sn)+'</div><ul>';
+      h+='<div class="sub-group-title">'+escHtml(sn)+'</div><ul>';
       bySec[sn].forEach(function(c){
-        body+='<li>'+escHtml(c.label)+(c.tags.length?' <span class="tag">— '+escHtml(c.tags.join(", "))+'</span>':'')+'</li>';
+        h+='<li>'+escHtml(c.label)+(c.tags.length?' <span class="tag">&#8212; '+escHtml(c.tags.join(", "))+'</span>':'')+'</li>';
       });
-      body+='</ul>';
+      h+='</ul>';
     });
   }
-  body+='</div>';
+  h+='</div>';
 
   // Supplements
-  body+='<div class="pdf-section"><div class="pdf-section-title">Supplements &amp; Dosing</div>';
+  h+='<div class="pdf-section"><div class="pdf-section-title">Supplements &amp; Dosing</div>';
   if(!d.supps.length){
-    body+='<p style="color:#94a3b8;font-style:italic">No supplements prescribed.</p>';
+    h+='<p style="color:#94a3b8;font-style:italic">No supplements prescribed.</p>';
   } else {
-    body+='<ul>';
+    h+='<ul>';
     d.supps.forEach(function(s){
-      body+='<li><strong>'+escHtml(s.name)+'</strong>'+(s.dose?' — '+escHtml(s.dose):' <span style="color:#94a3b8">(no dose set)</span>')+'</li>';
+      h+='<li><strong>'+escHtml(s.name)+'</strong>'+(s.dose?' &#8212; '+escHtml(s.dose):' <span style="color:#94a3b8">(no dose set)</span>')+'</li>';
     });
-    body+='</ul>';
+    h+='</ul>';
   }
-  body+='</div>';
+  h+='</div>';
 
   // Diet
   if(d.diets.length){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Diet Recommendations</div><ul>';
-    d.diets.forEach(function(dd){ body+='<li>'+escHtml(dd)+'</li>'; });
-    body+='</ul></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Diet Recommendations</div><ul>';
+    d.diets.forEach(function(dd){ h+='<li>'+escHtml(dd)+'</li>'; });
+    h+='</ul></div>';
   }
 
   // Labs
   if(d.labs.length){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Labs Ordered</div><ul>';
-    d.labs.forEach(function(l){ body+='<li>'+escHtml(l)+'</li>'; });
-    body+='</ul></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Labs Ordered</div><ul>';
+    d.labs.forEach(function(l){ h+='<li>'+escHtml(l)+'</li>'; });
+    h+='</ul></div>';
   }
 
   // Follow-up
   if(d.followUp){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Follow-Up</div>';
-    body+='<p class="highlight">'+escHtml(d.followUp)+'</p></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Follow-Up</div>';
+    h+='<p class="highlight">'+escHtml(d.followUp)+'</p></div>';
   }
 
   // Notes / Assessment / Plan
   if(d.notes){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Provider Notes</div>';
-    body+='<p style="white-space:pre-wrap">'+escHtml(d.notes)+'</p></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Provider Notes</div>';
+    h+='<p style="white-space:pre-wrap">'+escHtml(d.notes)+'</p></div>';
   }
   if(d.assessment){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Assessment</div>';
-    body+='<p style="white-space:pre-wrap">'+escHtml(d.assessment)+'</p></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Assessment</div>';
+    h+='<p style="white-space:pre-wrap">'+escHtml(d.assessment)+'</p></div>';
   }
   if(d.plan){
-    body+='<div class="pdf-section"><div class="pdf-section-title">Plan</div>';
-    body+='<p style="white-space:pre-wrap">'+escHtml(d.plan)+'</p></div>';
+    h+='<div class="pdf-section"><div class="pdf-section-title">Plan</div>';
+    h+='<p style="white-space:pre-wrap">'+escHtml(d.plan)+'</p></div>';
   }
 
-  body+='<div class="pdf-footer"><span>Momentum Health &amp; Wellness | Dr. Todd Anderson | Applied Kinesiology &amp; Functional Medicine</span><span>'+new Date().toLocaleDateString()+'</span></div>';
-
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
-    '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
-    '<style>'+_PDF_CSS+'</style></head>'+
-    '<body><div class="pdf-wrap">'+body+'</div></body></html>';
+  h+='<div class="pdf-footer"><span>Momentum Health &amp; Wellness | Dr. Todd Anderson | Applied Kinesiology &amp; Functional Medicine</span><span>'+new Date().toLocaleDateString()+'</span></div>';
+  h+='</div>';
+  return h;
 }
 
-// Wrap existing preview HTML (timeline / findings) in a PDF-safe shell
-function _buildPdfWrapperHtml(innerHtml){
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8">'+
-    '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">'+
-    '<style>'+_PDF_CSS+'body{padding:24px 28px}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head>'+
-    '<body>'+innerHtml+'</body></html>';
+// Build a hidden, off-screen DOM element ready for html2pdf rendering
+function _makePdfContainer(innerHtml, extraCss){
+  var wrap=document.createElement("div");
+  wrap.style.cssText="position:fixed;left:-9999px;top:0;width:794px;background:#fff";
+  var style=document.createElement("style");
+  style.textContent=_PDF_CSS+(extraCss||"");
+  wrap.appendChild(style);
+  var content=document.createElement("div");
+  content.innerHTML=innerHtml;
+  wrap.appendChild(content);
+  return wrap;
 }
 
 // Called by "Send via Gmail" button in the email modal
@@ -6334,22 +6345,17 @@ function emailSendViaGmail(){
   var btn=document.getElementById("gmailSendBtn");
   if(btn){ btn.disabled=true; btn.textContent="⏳ Generating PDF…"; }
 
-  // Build PDF source HTML
-  var pdfHtml;
+  // Build PDF container — real DOM element, no nested HTML doc
+  var container;
   if(_emailCtx&&_emailCtx.vn){
-    pdfHtml=_buildPdfSummaryHtml(_emailCtx.vn);
+    container=_makePdfContainer(_buildPdfContent(_emailCtx.vn));
   } else if(_emailCtx&&_emailCtx.previewHtml){
-    pdfHtml=_buildPdfWrapperHtml(_emailCtx.previewHtml);
+    container=_makePdfContainer(_emailCtx.previewHtml,"body{padding:24px 28px}");
   } else {
     if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
     showToast("⚠ Nothing to send — open the email modal from a visit card.","#b45309");
     return;
   }
-
-  // Render PDF in a hidden off-screen container
-  var container=document.createElement("div");
-  container.style.cssText="position:fixed;left:-9999px;top:-9999px;width:794px;background:#fff;z-index:-1";
-  container.innerHTML=pdfHtml;
   document.body.appendChild(container);
 
   // Determine filename
@@ -6366,7 +6372,7 @@ function emailSendViaGmail(){
     image:{type:"jpeg",quality:0.95},
     html2canvas:{scale:2,useCORS:true,logging:false},
     jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
-  }).from(container.firstElementChild||container).outputPdf("arraybuffer").then(function(pdfBuffer){
+  }).from(container).outputPdf("arraybuffer").then(function(pdfBuffer){
     document.body.removeChild(container);
     if(btn){ btn.textContent="⏳ Sending…"; }
     _gmailSendWithPdf(to,subject,bodyText,pdfBuffer,filename);
@@ -6406,7 +6412,7 @@ function _gmailSendWithPdf(to,subject,bodyText,pdfBuffer,filename){
     "MIME-Version: 1.0",
     "From: doc@drtoddanderson.com",
     "To: "+to,
-    "Subject: "+subject,
+    "Subject: "+_rfc2047B(subject),
     "Content-Type: multipart/mixed; boundary=\""+boundary+"\"",
     "",
     "--"+boundary,
