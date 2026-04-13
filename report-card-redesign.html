@@ -6315,17 +6315,30 @@ function _buildPdfContent(vn){
   return h;
 }
 
-// Build a hidden, off-screen DOM element ready for html2pdf rendering
+// Build a DOM node for PDF rendering and return it with a teardown fn.
+// Key constraints for html2canvas:
+//   1. CSS must live in <head> — styles inside a <div> are ignored during clone
+//   2. Element must be at real (non-negative) coordinates — large negative offsets
+//      produce blank output in html2canvas
 function _makePdfContainer(innerHtml, extraCss){
+  // Inject styles into <head> so they survive html2canvas's cloneWindow pass
+  var tmpStyle=document.createElement("style");
+  tmpStyle.textContent=_PDF_CSS+(extraCss||"");
+  document.head.appendChild(tmpStyle);
+
+  // Position at 0,0 behind the UI (z-index:-9999).  background:white is
+  // explicit so the canvas captures white, not transparent.
   var wrap=document.createElement("div");
-  wrap.style.cssText="position:fixed;left:-9999px;top:0;width:794px;background:#fff";
-  var style=document.createElement("style");
-  style.textContent=_PDF_CSS+(extraCss||"");
-  wrap.appendChild(style);
-  var content=document.createElement("div");
-  content.innerHTML=innerHtml;
-  wrap.appendChild(content);
-  return wrap;
+  wrap.style.cssText="position:absolute;top:0;left:0;width:794px;background:#fff;z-index:-9999;pointer-events:none";
+  wrap.innerHTML=innerHtml;
+
+  return {
+    el: wrap,
+    teardown: function(){
+      if(wrap.parentNode) wrap.parentNode.removeChild(wrap);
+      if(tmpStyle.parentNode) tmpStyle.parentNode.removeChild(tmpStyle);
+    }
+  };
 }
 
 // Called by "Send via Gmail" button in the email modal
@@ -6345,18 +6358,18 @@ function emailSendViaGmail(){
   var btn=document.getElementById("gmailSendBtn");
   if(btn){ btn.disabled=true; btn.textContent="⏳ Generating PDF…"; }
 
-  // Build PDF container — real DOM element, no nested HTML doc
-  var container;
+  // Build PDF render node
+  var ctx;
   if(_emailCtx&&_emailCtx.vn){
-    container=_makePdfContainer(_buildPdfContent(_emailCtx.vn));
+    ctx=_makePdfContainer(_buildPdfContent(_emailCtx.vn));
   } else if(_emailCtx&&_emailCtx.previewHtml){
-    container=_makePdfContainer(_emailCtx.previewHtml,"body{padding:24px 28px}");
+    ctx=_makePdfContainer(_emailCtx.previewHtml,"body{padding:24px 28px}");
   } else {
     if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
     showToast("⚠ Nothing to send — open the email modal from a visit card.","#b45309");
     return;
   }
-  document.body.appendChild(container);
+  document.body.appendChild(ctx.el);
 
   // Determine filename
   var d=(_emailCtx&&_emailCtx.vn)?_collectVisitSummary(_emailCtx.vn):{};
@@ -6370,14 +6383,14 @@ function emailSendViaGmail(){
     margin:[12,14,12,14],
     filename:filename,
     image:{type:"jpeg",quality:0.95},
-    html2canvas:{scale:2,useCORS:true,logging:false},
+    html2canvas:{scale:2,useCORS:true,logging:false,windowWidth:794},
     jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
-  }).from(container).outputPdf("arraybuffer").then(function(pdfBuffer){
-    document.body.removeChild(container);
+  }).from(ctx.el).outputPdf("arraybuffer").then(function(pdfBuffer){
+    ctx.teardown();
     if(btn){ btn.textContent="⏳ Sending…"; }
     _gmailSendWithPdf(to,subject,bodyText,pdfBuffer,filename);
   }).catch(function(err){
-    document.body.removeChild(container);
+    ctx.teardown();
     if(btn){ btn.disabled=false; btn.textContent="✉️ Send via Gmail"; }
     console.error("[Gmail] PDF generation failed:",err);
     showToast("⚠ PDF generation failed — try Copy Text instead.","#b45309");
