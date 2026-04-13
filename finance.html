@@ -1730,6 +1730,63 @@ function deleteEarlyTransfer(etIdx) {
 }
 
 // ─────────────────────────────────────────────
+// YEAR INFERENCE (handles mixed date formats)
+// ─────────────────────────────────────────────
+function inferYears(data) {
+  // Month abbreviation → 0-based index
+  const MA = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
+              sept:8};
+  function getM(s) {
+    for (const p of s.toLowerCase().split(/[^a-z]+/)) {
+      if (p.length >= 3 && p.substring(0,3) in MA) return MA[p.substring(0,3)];
+    }
+    return null;
+  }
+
+  const n = data.length;
+  const years = new Array(n).fill(null);
+
+  // Find first entry with an explicit year as anchor
+  let ai = -1, ay = new Date().getFullYear();
+  for (let i = 0; i < n; i++) {
+    const m = data[i].date.match(/\b(20\d\d)\b/);
+    if (m) { ai = i; ay = parseInt(m[1]); break; }
+  }
+  if (ai < 0) { // no explicit year in any entry — assume all current year
+    return new Array(n).fill(new Date().getFullYear());
+  }
+  years[ai] = ay;
+
+  // Forward pass: if month jumps backward by more than 1 (year wrap), increment year
+  let ry = ay, pm = getM(data[ai].date);
+  for (let i = ai + 1; i < n; i++) {
+    const em = data[i].date.match(/\b(20\d\d)\b/);
+    if (em) { ry = parseInt(em[1]); pm = getM(data[i].date); }
+    else {
+      const cm = getM(data[i].date);
+      if (cm !== null && pm !== null && cm < pm - 1) ry++; // month wrapped Jan after Dec
+      if (cm !== null) pm = cm;
+    }
+    years[i] = ry;
+  }
+
+  // Backward pass: if month jumps forward by more than 1 going backwards, decrement year
+  ry = ay; pm = getM(data[ai].date);
+  for (let i = ai - 1; i >= 0; i--) {
+    const em = data[i].date.match(/\b(20\d\d)\b/);
+    if (em) { ry = parseInt(em[1]); pm = getM(data[i].date); }
+    else {
+      const cm = getM(data[i].date);
+      if (cm !== null && pm !== null && cm > pm + 1) ry--; // going backwards past Jan→Dec boundary
+      if (cm !== null) pm = cm;
+    }
+    years[i] = ry;
+  }
+
+  return years.map(y => y !== null ? y : new Date().getFullYear());
+}
+
+// ─────────────────────────────────────────────
 // SHOW ALL TOGGLE
 // ─────────────────────────────────────────────
 let pfShowAll = false;
@@ -1782,10 +1839,13 @@ function renderTable() {
 
   tbody.innerHTML = '';
 
+  // YTD totals — current calendar year only
+  const currentYear  = new Date().getFullYear();
+  const entryYears   = inferYears(pfData);
   let sumTotal = 0, sumProfit = 0, sumTax = 0, sumOC = 0, sumOPEX = 0;
 
-  // Always accumulate totals from ALL rows
-  pfData.forEach(row => {
+  pfData.forEach((row, i) => {
+    if (entryYears[i] !== currentYear) return;
     const total = parseFloat(row.total) || 0;
     sumTotal  += total;
     sumProfit += calcDollar(total, row.profit);
@@ -1882,7 +1942,7 @@ function renderTable() {
   // Totals row (colspan updated for new W2 column)
   tfoot.innerHTML = `
     <tr class="totals-row">
-      <td><strong>TOTALS</strong></td>
+      <td><strong>YTD ${currentYear}</strong></td>
       <td style="text-align:right"><strong>${fmt$(sumTotal)}</strong></td>
       <td>—</td>
       <td style="text-align:right"><strong>${fmt$(sumProfit)}</strong></td>
