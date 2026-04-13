@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" type="image/png" href="icon-512.png">
 <title>Momentum Health & Wellness — Patient Records</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;min-height:100vh}
@@ -237,6 +238,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
 
 /* TOAST */
 #toast{position:fixed;bottom:22px;right:22px;background:#1a1a2e;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:5000}
+
+/* DRIVE BACKUP */
+#backupStatus{font-size:11px;opacity:.7;margin-top:3px;color:white;min-height:15px;transition:opacity .3s}
+.btn-drive{background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.25)}.btn-drive:hover{background:rgba(255,255,255,.22)}
+.btn-drive-active{background:rgba(34,197,94,.18);color:#86efac;border:1px solid rgba(34,197,94,.3)}.btn-drive-active:hover{background:rgba(34,197,94,.28)}
 
 /* ── DASH TABS ── */
 .dash-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #e2e8f0}
@@ -810,6 +816,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
       <button class="btn btn-light" onclick="bulkExport()">⬇ Backup All</button>
       <button class="btn btn-light" onclick="document.getElementById('bulkImportFile').click()">⬆ Restore</button>
       <input type="file" id="bulkImportFile" accept=".json" style="display:none" onchange="bulkImport(this)">
+      <button id="driveConnectBtn" class="btn btn-drive" onclick="GDRIVE.signIn(null,true)" title="Connect Google Drive for automatic cloud backups">☁ Connect Drive</button>
+      <button id="driveBackupBtn" class="btn btn-drive-active" onclick="GDRIVE.backup(false)" style="display:none" title="Backup all patient records to Google Drive now">☁ Backup Now</button>
+      <button id="driveRestoreBtn" class="btn btn-drive" onclick="GDRIVE.restore()" style="display:none" title="Restore from the most recent Drive backup">↩ Restore</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
@@ -3045,13 +3054,22 @@ function loadVisitDates(){
 // ════════════════════════════════════════════════════════════════
 //  SAVE / LOAD / RENDER
 // ════════════════════════════════════════════════════════════════
+function showToast(msg,color){
+  var t=document.getElementById("toast");
+  t.textContent=msg||"✓ Saved";
+  t.style.background=color||"#1a1a2e";
+  t.style.opacity="1";
+  clearTimeout(t._ht);
+  t._ht=setTimeout(function(){t.style.opacity="0";},3500);
+}
+
 function saveAll(){
   if(!currentPatientId) return;
   collectPatientInfo();
   _LS.setItem(PT_PREFIX+currentPatientId,JSON.stringify(S));
   updateIndex(currentPatientId,S.patientInfo);
-  var t=document.getElementById("toast"); t.style.opacity="1";
-  setTimeout(function(){ t.style.opacity="0"; },1600);
+  showToast("✓ Saved");
+  GDRIVE.isDirty=true;
 }
 
 function renderAll(){
@@ -3065,7 +3083,269 @@ function renderAll(){
 }
 
 var _aT;
-function autoSave(){ clearTimeout(_aT); _aT=setTimeout(saveAll,1200); }
+function autoSave(){ clearTimeout(_aT); _aT=setTimeout(saveAll,1200); GDRIVE.isDirty=true; }
+
+// ════════════════════════════════════════════════════════════════
+//  GOOGLE DRIVE BACKUP
+// ════════════════════════════════════════════════════════════════
+/*
+  ┌─────────────────────────────────────────────────────────────┐
+  │  SETUP REQUIRED (one-time, ~5 minutes)                      │
+  │                                                             │
+  │  1. Go to console.cloud.google.com                          │
+  │  2. Create a project (e.g. "Momentum Report Card")          │
+  │  3. APIs & Services → Enable "Google Drive API"             │
+  │  4. APIs & Services → OAuth consent screen                  │
+  │     • User type: External                                   │
+  │     • Add your Google Workspace email as a Test User        │
+  │  5. APIs & Services → Credentials                           │
+  │     • Create OAuth 2.0 Client ID → Web Application         │
+  │     • Authorized JS origins: add the URL you open           │
+  │       this file from (e.g. http://localhost or file://)     │
+  │  6. Copy the Client ID and paste it below                   │
+  └─────────────────────────────────────────────────────────────┘
+*/
+var GDRIVE=(function(){
+  var CLIENT_ID='PASTE_YOUR_GOOGLE_CLIENT_ID_HERE'; // ← paste here
+  var SCOPES='https://www.googleapis.com/auth/drive.file';
+  var FOLDER_NAME='Report Card Backups';
+  var LS_LAST='mhw_drive_last_backup';
+  var LS_TOKEN='mhw_drive_token_hint';
+
+  var self={
+    isDirty:false,
+    accessToken:null,
+    folderId:null,
+    lastBackupAt:null,
+    _tokenClient:null,
+    _gisReady:false,
+    _statusTimer:null,
+    _autoTimer:null,
+
+    // ── INIT ────────────────────────────────────────────────────
+    init:function(){
+      if(self._gisReady) return;
+      if(typeof google==='undefined'||!google.accounts||!google.accounts.oauth2) return;
+      if(!CLIENT_ID||CLIENT_ID.indexOf('PASTE')===0){
+        console.warn('[Drive] No Client ID configured — Drive backup disabled.');
+        return;
+      }
+      self._tokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID,
+        scope:SCOPES,
+        callback:function(resp){
+          if(resp.error){ self._onAuthError(resp.error); return; }
+          self.accessToken=resp.access_token;
+          _LS.setItem(LS_TOKEN,'1');
+          self._updateButtons();
+          self.updateStatus();
+          // Kick off an immediate backup after sign-in
+          self.backup(false);
+        }
+      });
+      self._gisReady=true;
+      // Restore last backup timestamp
+      var ts=parseInt(_LS.getItem(LS_LAST)||'0',10);
+      if(ts) self.lastBackupAt=ts;
+      self.updateStatus();
+      self._startStatusTimer();
+    },
+
+    isConnected:function(){ return !!self.accessToken; },
+
+    // ── SIGN IN ─────────────────────────────────────────────────
+    // afterSignIn: optional callback; showPrompt: show account picker
+    signIn:function(afterSignIn,showPrompt){
+      if(!self._gisReady){ self.init(); }
+      if(!self._tokenClient){
+        showToast('⚠ Drive not configured — see setup instructions in code','#b45309');
+        return;
+      }
+      if(afterSignIn) self._afterSignIn=afterSignIn;
+      var opts=showPrompt?{prompt:'select_account'}:{prompt:''};
+      self._tokenClient.requestAccessToken(opts);
+    },
+
+    _afterSignIn:null,
+    _onAuthError:function(err){
+      console.error('[Drive] Auth error:',err);
+      showToast('⚠ Drive sign-in failed: '+err,'#b45309');
+    },
+
+    // ── BACKUP ──────────────────────────────────────────────────
+    backup:function(silent){
+      if(!self._gisReady) self.init();
+      if(!self.isConnected()){
+        self.signIn(function(){ self.backup(silent); });
+        return;
+      }
+      self._buildPayload(function(payload){
+        var ts=new Date().toISOString().replace(/:/g,'-').split('.')[0];
+        var filename='momentum_backup_'+ts+'.json';
+        self._getOrCreateFolder(function(fid){
+          if(!fid){ if(!silent) showToast('⚠ Drive backup failed — no folder','#b45309'); return; }
+          self._uploadFile(JSON.stringify(payload,null,2),filename,fid,function(ok){
+            if(ok){
+              self.isDirty=false;
+              self.lastBackupAt=Date.now();
+              _LS.setItem(LS_LAST,String(self.lastBackupAt));
+              self.updateStatus();
+              if(!silent) showToast('☁ Backed up to Drive — '+payload.index.length+' patient'+(payload.index.length===1?'':'s'),'#166534');
+            } else {
+              if(!silent) showToast('⚠ Drive backup failed','#b45309');
+            }
+          });
+        });
+      });
+    },
+
+    // ── RESTORE ─────────────────────────────────────────────────
+    restore:function(){
+      if(!self._gisReady) self.init();
+      if(!self.isConnected()){
+        self.signIn(function(){ self.restore(); });
+        return;
+      }
+      self._getOrCreateFolder(function(fid){
+        if(!fid){ showToast('⚠ No Drive backup folder found','#b45309'); return; }
+        self._findLatestFile(fid,function(file){
+          if(!file){ showToast('⚠ No backup files found in Drive','#b45309'); return; }
+          var dateLabel=file.modifiedTime?file.modifiedTime.split('T')[0]:'unknown date';
+          if(!confirm('Restore backup from '+dateLabel+'?\n\nThis will merge Drive data with your current records. No data will be deleted.')){ return; }
+          self._downloadFile(file.id,function(text){
+            if(!text){ showToast('⚠ Failed to download backup file','#b45309'); return; }
+            try{
+              var payload=JSON.parse(text);
+              if(!payload.version||!payload.index||!payload.patients){ showToast('⚠ Invalid backup file format','#b45309'); return; }
+              // Merge logic (same as bulkImport)
+              var existingIdx=loadIndex();
+              var existingMap={};
+              existingIdx.forEach(function(pt){ existingMap[pt.id]=pt; });
+              payload.index.forEach(function(pt){
+                existingMap[pt.id]=pt;
+                if(payload.patients[pt.id]){ _LS.setItem(PT_PREFIX+pt.id,JSON.stringify(payload.patients[pt.id])); }
+              });
+              var merged=Object.values(existingMap);
+              _LS.setItem(INDEX_KEY,JSON.stringify(merged));
+              if(typeof renderDash==='function') renderDash();
+              if(typeof renderStats==='function') renderStats();
+              showToast('☁ Restored '+payload.index.length+' patient'+(payload.index.length===1?'':'s')+' from Drive','#166534');
+            }catch(e){
+              showToast('⚠ Failed to parse backup: '+e.message,'#b45309');
+            }
+          });
+        });
+      });
+    },
+
+    // ── DRIVE API HELPERS ───────────────────────────────────────
+    _buildPayload:function(cb){
+      var idx=loadIndex();
+      var patients={};
+      idx.forEach(function(pt){
+        var raw=_LS.getItem(PT_PREFIX+pt.id);
+        if(raw){ try{ patients[pt.id]=JSON.parse(raw); }catch(e){} }
+      });
+      cb({version:1,exportedAt:new Date().toISOString(),practice:'Momentum Health & Wellness',index:idx,patients:patients});
+    },
+
+    _driveReq:function(method,url,body,contentType,cb){
+      var opts={method:method,headers:{Authorization:'Bearer '+self.accessToken}};
+      if(body){ opts.body=body; opts.headers['Content-Type']=contentType||'application/json'; }
+      fetch(url,opts).then(function(r){
+        if(r.status===401){ self.accessToken=null; self._updateButtons(); cb(null,'auth'); return; }
+        return r.json().then(function(j){ cb(j,null); });
+      }).catch(function(e){ cb(null,e.message); });
+    },
+
+    _getOrCreateFolder:function(cb){
+      if(self.folderId){ cb(self.folderId); return; }
+      var q="name='"+FOLDER_NAME+"' and mimeType='application/vnd.google-apps.folder' and trashed=false";
+      fetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields=files(id,name)',{
+        headers:{Authorization:'Bearer '+self.accessToken}
+      }).then(function(r){ return r.json(); }).then(function(data){
+        if(data.files&&data.files.length>0){
+          self.folderId=data.files[0].id; cb(self.folderId);
+        } else {
+          // Create folder
+          fetch('https://www.googleapis.com/drive/v3/files',{
+            method:'POST',
+            headers:{Authorization:'Bearer '+self.accessToken,'Content-Type':'application/json'},
+            body:JSON.stringify({name:FOLDER_NAME,mimeType:'application/vnd.google-apps.folder'})
+          }).then(function(r){ return r.json(); }).then(function(f){
+            self.folderId=f.id; cb(self.folderId);
+          }).catch(function(){ cb(null); });
+        }
+      }).catch(function(){ cb(null); });
+    },
+
+    _uploadFile:function(content,filename,folderId,cb){
+      var meta=JSON.stringify({name:filename,parents:[folderId]});
+      var boundary='mhwboundary'+Date.now();
+      var body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+
+               '\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+content+'\r\n--'+boundary+'--';
+      fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+        method:'POST',
+        headers:{Authorization:'Bearer '+self.accessToken,'Content-Type':'multipart/related; boundary='+boundary},
+        body:body
+      }).then(function(r){ cb(r.ok); }).catch(function(){ cb(false); });
+    },
+
+    _findLatestFile:function(folderId,cb){
+      var q="'"+folderId+"' in parents and name contains 'momentum_backup' and trashed=false";
+      fetch('https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&orderBy=modifiedTime+desc&pageSize=1&fields=files(id,name,modifiedTime)',{
+        headers:{Authorization:'Bearer '+self.accessToken}
+      }).then(function(r){ return r.json(); }).then(function(data){
+        cb(data.files&&data.files.length>0?data.files[0]:null);
+      }).catch(function(){ cb(null); });
+    },
+
+    _downloadFile:function(fileId,cb){
+      fetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?alt=media',{
+        headers:{Authorization:'Bearer '+self.accessToken}
+      }).then(function(r){ return r.text(); }).then(function(t){ cb(t); }).catch(function(){ cb(null); });
+    },
+
+    // ── STATUS DISPLAY ──────────────────────────────────────────
+    updateStatus:function(){
+      var el=document.getElementById('backupStatus');
+      if(el){
+        if(!self.isConnected()){
+          el.textContent='';
+        } else if(!self.lastBackupAt){
+          el.textContent='☁ Drive connected — backing up…';
+        } else {
+          var mins=Math.floor((Date.now()-self.lastBackupAt)/60000);
+          el.textContent=mins<1?'☁ Backed up just now':mins===1?'☁ Last backed up: 1 min ago':'☁ Last backed up: '+mins+' min ago';
+        }
+      }
+    },
+
+    _startStatusTimer:function(){
+      clearInterval(self._statusTimer);
+      self._statusTimer=setInterval(function(){ self.updateStatus(); },60000);
+    },
+
+    _updateButtons:function(){
+      var connectBtn=document.getElementById('driveConnectBtn');
+      var backupBtn=document.getElementById('driveBackupBtn');
+      var restoreBtn=document.getElementById('driveRestoreBtn');
+      var connected=self.isConnected();
+      if(connectBtn) connectBtn.style.display=connected?'none':'';
+      if(backupBtn)  backupBtn.style.display=connected?'':'none';
+      if(restoreBtn) restoreBtn.style.display=connected?'':'none';
+    },
+
+    // ── AUTO BACKUP ─────────────────────────────────────────────
+    startAutoBackup:function(){
+      clearInterval(self._autoTimer);
+      self._autoTimer=setInterval(function(){
+        if(self.isDirty&&self.isConnected()) self.backup(true);
+      },5*60*1000);
+    }
+  };
+  return self;
+})();
 
 // ════════════════════════════════════════════════════════════════
 //  EXPORT
@@ -5343,6 +5623,33 @@ function emailOpenSuperhuman(){
 //  INIT
 // ════════════════════════════════════════════════════════════════
 buildAllVisits();
+
+// Google Drive: init when GIS library is ready
+(function(){
+  function tryInit(){
+    if(typeof google!=='undefined'&&google.accounts&&google.accounts.oauth2){
+      GDRIVE.init();
+      GDRIVE.startAutoBackup();
+    }
+  }
+  // If already loaded (unlikely with async, but safe)
+  tryInit();
+  // Otherwise wait for the script to load
+  var gisScript=document.querySelector('script[src*="gsi/client"]');
+  if(gisScript) gisScript.addEventListener('load',tryInit);
+  // Fallback poll for 10s
+  var _poll=setInterval(function(){
+    if(typeof google!=='undefined'&&google.accounts&&google.accounts.oauth2){
+      clearInterval(_poll); tryInit();
+    }
+  },500);
+  setTimeout(function(){ clearInterval(_poll); },10000);
+})();
+
+// Auto-backup on page hide (best-effort for mobile/tab-switch)
+window.addEventListener('pagehide',function(){
+  if(GDRIVE.isDirty&&GDRIVE.isConnected()) GDRIVE.backup(true);
+});
 </script>
 </body>
 </html>
