@@ -5200,6 +5200,7 @@ function resetIdleTimer(){
   clearTimeout(_idleTimer);
   _idleTimer=setTimeout(function(){
     if(document.getElementById("pwOverlay").style.display!=="none") return;
+    if(GDRIVE.isConnected()) GDRIVE.backup(true);
     logout();
     showToast("🔒 Locked after "+IDLE_MINUTES+" min idle");
   }, IDLE_MINUTES*60*1000);
