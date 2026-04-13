@@ -2317,8 +2317,8 @@ function toggleTagPanel(safeKey) {
 // ════════════════════════════════════════════════════════════════
 //  MSK MUSCLE LIST
 // ════════════════════════════════════════════════════════════════
-var SUPPLEMENTS=["Vitamin E (UNIQUE E Mixed Tocopherols)", "Artichoke Extract (AMG)", "Artemisia Annua Full (Ancient Ways)", "Goldenseal - Ancient Ways", "OSHA Root", "Passion Flower", "Oxicell SE", "A.D.P.", "Aqueous Zinc", "Bio-Ae", "Bio-D-Mulsion", "Cr-Zyme", "Cu-Zyme", "Dismuzyme (SOD) Plus", "E-Mulsion", "Garlic Plus", "L-Carnitine Powder", "Mg-Zyme Magnesium", "Mn-Zyme", "Mo-Zyme Forte", "Purified Chondroitin Sulfates", "SOD Powder (Dismuzyme Plus Granules) (17.9 oz)", "Selenium (Se-Zyme Forte) - Biotics", "Selenomethionine - Biotics", "TMG Powder", "Thiamin 50", "Zn-Zyme", "Metal Free and Chemical Cleanse", "Ferritin", "Aloe", "Bone Broth Protein", "Broccoprotect", "C3 Complex Curcumin", "Organic Pure Pea Powder", "Whey Cool", "Bone Guard", "Natural Calm", "Natural Calm Gummies", "Pteridin-4 / BH4", "Andrographis", "Bidens", "Bladderwack", "Blue Cohosh", "Clove Bud", "Cordyceps", "Echinacea", "Lomatium Root", "Myrrh", "OSHA Root 2oz (ELK)", "St. Johns Wort - Weed", "St. John’s Wort", "Usnea", "Daily Immune Builder", "FIT 132", "FIT 176", "FIT 22", "Cysteine - Metabolics", "Hydroxy-B12 Liquid", "Methyltetrahydrofolate (Liquid 5 MTHF)", "Arctic Cod Liver Oil", "Artic Omega", "DHA Gummies Kids", "PRO DHA (120)", "PRO EPA", "PRO-OMEGA", "Pro Eyes", "D-Hist", "D-Hist Jr.", "Digestzyme-V", "Houttuynia - liquid", "Progon B XL", "Self Adhesive Tape", "TCPS Iodine Roller", "Thyme - liquid", "Thyroid", "Vitamin A", "Vitamin D Gummy", "Alpha Lipoic Acid", "Chaste Tree", "CoQ10", "CurcumaSorb", "Curcumin", "D-Mannose", "D-Mannose w/ Cranberry", "DHEA", "Folic Acid", "GABA", "Ginger Extract", "Glycine", "Green Tea Extract", "Inositol Powder", "Ionic Molybdenum", "L-Carnitine", "L-Carnitine (Pure)", "L-Tyrosine Pure", "Magnesium Citrate (Pure)", "Magnesium Glycinate", "Methycobalamin", "P5P 50", "Pantethine", "Pantethinine", "Peptic-Care Zinc L Carnosine", "Quercetin Pure 120", "Quercetine 60 Caps", "Resveratrol", "Resveratrol Extra", "Saccharomyces Boulardii", "Saw Palmetto 320", "Saw Palmetto Plus", "Silymarin", "Taurine 1000", "Vit D", "GABA + L-Theanine", "Liposomal Glutathione", "Adrenal Desiccated", "Albaplex", "Allerplex", "Antronex", "Antronex (180)", "Arginex", "Betacol", "Betafood", "Betaine Hydrochloride", "Bio-Dent", "Biost", "Cal-Amo", "Cal-Ma Plus", "Calcium Lactate", "Cardio Plus GF (330T)", "Cardiotrophin PMG", "Cataplex B GF", "Cataplex B Normal (360)", "Cataplex B2/ G", "Cataplex C", "Cataplex E", "Cataplex E2", "Cholacol", "Choline", "Chromium Complex/ Cataplex GTF (180)", "Congaplex", "Cyruta Plus", "Dermatropin PMG", "Disodium Phosphate", "Drenamin", "Drenatrophin PMG", "Eleuthero", "Enzycore", "Ferrofood", "Glucosamine Synergy", "Immuplex", "Min-Chex", "Min-Tran", "Min-Tran (360)", "Okra Pepsin", "Orchex (150c)", "Orchex (90c)", "Orchic PMG", "Organically Bound Minerals", "Ovatrophin P PMG", "Ovex", "Ovex P", "Pancreatrophin PMG", "Paraplex", "Parotid PMG", "Phosfood Liquid", "Pituitrophin PMG", "Pneumotrophin PMG", "Prolamine Iodine", "Prolamine Iodine 180 Tablets", "Prolamine Iodine Plus", "Prost-X", "Prostate PMG", "RNA (180t)", "Sesame Oil Capsules", "Spleen PMG", "Thymex", "Thymus PMG", "Thytrophin PMG", "Trace Minerals-B12", "Utrophin PMG", "Wheat Germ Oil Fortified", "Zinc Chelate", "Zinc Taste Test", "Zypan", "Zypan (90T)", "Alaria Supreme 90 caps", "Albizia", "American Ginseng", "Artemisia", "Ashwaganda", "Astragalus - Supreme", "BFB-1, 11ml", "BFB-2, 11ml", "Body Guard", "Camu Supreme", "Cissus", "Dan Shen", "Endo Supreme", "Glypho-X Supreme", "Goldenthread Supreme", "Gud Multivitamin", "Gud Prenatal", "Hemo Guard Supreme 120", "Houttuynia", "Illicium Supreme", "Lectin Protect", "Lurong", "MT Supreme", "Manjistha Supreme", "Melia Supreme", "Mimosa Supreme", "Morinda", "Mucuna Supreme", "Olive Leaf Supreme", "Oral Defense", "Reishi Supreme", "Rosemary Supreme", "Schisandra Supreme", "Scutellaria", "Shatavari Supreme", "Smilax Supreme", "St. John's Wort (Supreme)", "THERASUPREME", "Takesumi Supreme", "Tulsi Supreme", "Vidanga", "Vital Guard", "WOAD", "Wild Greens", "Iodine (IOSOL) Drops", "Iodine (IOSOL) Roll-on", "5 HTP (Hydroxytryptophan)", "5 MTHF", "Acetyl-L-Carnitine", "B COMPLEX #12", "B COMPLEX #6", "BASIC B COMPLEX", "Basic Nutrients 2/Day", "Basic Prenatal", "Berberine", "Betaine HCL & Pepsin", "Biotin-8", "Calcium-Magnesium Malate", "Choleast-900", "Chromium Picolinate", "Creatine", "Curcumin Phytosome", "Curcumin Phytosome (Meriva 500 SF) 60 Caps", "D-10,000", "D-1000", "D-5000", "FloraMend", "Glucosamine & Chondrotin", "Hormone Advantage (DIM)", "Iron Bisglycinate", "L-Arginine (Perfusia SR)", "L-Glutamine Powder", "L-Lysine", "Magnesium Citramate", "Men's Multi 50+", "Methyl Guard Plus", "Methyl-Guard", "Molybdenum Glycinate", "NAC", "NAC (N-Acetylcysteine)", "Niacinimide", "OPC - 100 (Grape Seed Extract)", "Pantethine - Discontinued", "Pepti-Guard Discontinued", "Potassium Citrate", "Pyridoxal 5' Phosphate", "R-Lipoic Acid", "Riboflavin 5'- Phosphate", "Selenium (Selenomethionine)- Thorne", "Ultimate E", "Undecylenic Acid", "Vitamin B12 (Methylcobalamin)", "Vitamin C w/ Flavanoids", "Zinc Picolinate", "Astragulus Root (Weed)", "Black Cohosh", "Black Walnut - Weed", "Cat's Claw - Weed", "Clove Bud - Weed", "Dong Quai", "Elderberry - Weed", "Gentian", "Ginger Root - Weed", "Goldenseal (Weed)", "Juniper Berry", "Licorice Root", "Liquid Olive Leaf", "Marshmallow Root", "Milk Thistle Seed - Weed", "Oregon Grape - Weed", "Passion Flower - Weed", "Pau D' Arco", "Peppermint", "Rhodiola Root", "Rosemary- WEED", "Skullcap", "Thyme - Weed", "Uva Ursi - Weed", "Valerian Root - Weed", "Vitex", "Herbal Blend - Flower Essence", "Lavender Vitality", "Lemon Vitality", "Peppermint Vitality", "Theives Dentarome", "Thieves Fruit & Veggie Spray", "Thieves Hand Soap", "Thieves House Hold Cleaner", "Thieves Spray 1fl Oz", "Thieves Vitality Oil", "Thieves hand sanitizer/small"];
-var SUPP_BRANDS=[{"brand": "AC GRACE", "items": [{"name": "Vitamin E (UNIQUE E Mixed Tocopherols)", "idx": 0}]}, {"brand": "AMG Naturals", "items": [{"name": "Artichoke Extract (AMG)", "idx": 1}]}, {"brand": "Ancient Ways", "items": [{"name": "Artemisia Annua Full (Ancient Ways)", "idx": 2}, {"name": "Goldenseal - Ancient Ways", "idx": 3}, {"name": "OSHA Root", "idx": 4}, {"name": "Passion Flower", "idx": 5}]}, {"brand": "Apex Energetics", "items": [{"name": "Oxicell SE", "idx": 6}]}, {"brand": "Biotics Research", "items": [{"name": "A.D.P.", "idx": 7}, {"name": "Aqueous Zinc", "idx": 8}, {"name": "Bio-Ae", "idx": 9}, {"name": "Bio-D-Mulsion", "idx": 10}, {"name": "Cr-Zyme", "idx": 11}, {"name": "Cu-Zyme", "idx": 12}, {"name": "Dismuzyme (SOD) Plus", "idx": 13}, {"name": "E-Mulsion", "idx": 14}, {"name": "Garlic Plus", "idx": 15}, {"name": "L-Carnitine Powder", "idx": 16}, {"name": "Mg-Zyme Magnesium", "idx": 17}, {"name": "Mn-Zyme", "idx": 18}, {"name": "Mo-Zyme Forte", "idx": 19}, {"name": "Purified Chondroitin Sulfates", "idx": 20}, {"name": "SOD Powder (Dismuzyme Plus Granules) (17.9 oz)", "idx": 21}, {"name": "Selenium (Se-Zyme Forte) - Biotics", "idx": 22}, {"name": "Selenomethionine - Biotics", "idx": 23}, {"name": "TMG Powder", "idx": 24}, {"name": "Thiamin 50", "idx": 25}, {"name": "Zn-Zyme", "idx": 26}]}, {"brand": "BodyHealth", "items": [{"name": "Metal Free and Chemical Cleanse", "idx": 27}]}, {"brand": "Cardiovascular Research", "items": [{"name": "Ferritin", "idx": 28}]}, {"brand": "Designs For Health", "items": [{"name": "Aloe", "idx": 29}, {"name": "Bone Broth Protein", "idx": 30}, {"name": "Broccoprotect", "idx": 31}, {"name": "C3 Complex Curcumin", "idx": 32}, {"name": "Organic Pure Pea Powder", "idx": 33}, {"name": "Whey Cool", "idx": 34}]}, {"brand": "Eclectic Institute", "items": [{"name": "Bone Guard", "idx": 35}, {"name": "Natural Calm", "idx": 36}, {"name": "Natural Calm Gummies", "idx": 37}]}, {"brand": "Ecological Formulas", "items": [{"name": "Pteridin-4 / BH4", "idx": 38}]}, {"brand": "Elk Mountain", "items": [{"name": "Andrographis", "idx": 39}, {"name": "Bidens", "idx": 40}, {"name": "Bladderwack", "idx": 41}, {"name": "Blue Cohosh", "idx": 42}, {"name": "Clove Bud", "idx": 43}, {"name": "Cordyceps", "idx": 44}, {"name": "Echinacea", "idx": 45}, {"name": "Lomatium Root", "idx": 46}, {"name": "Myrrh", "idx": 47}, {"name": "OSHA Root 2oz (ELK)", "idx": 48}, {"name": "St. Johns Wort - Weed", "idx": 49}, {"name": "St. John’s Wort", "idx": 50}, {"name": "Usnea", "idx": 51}]}, {"brand": "Herb Farm", "items": [{"name": "Daily Immune Builder", "idx": 52}]}, {"brand": "KBMO", "items": [{"name": "FIT 132", "idx": 53}, {"name": "FIT 176", "idx": 54}, {"name": "FIT 22", "idx": 55}]}, {"brand": "Metabolics", "items": [{"name": "Cysteine - Metabolics", "idx": 56}, {"name": "Hydroxy-B12 Liquid", "idx": 57}, {"name": "Methyltetrahydrofolate (Liquid 5 MTHF)", "idx": 58}]}, {"brand": "Nordic Naturals", "items": [{"name": "Arctic Cod Liver Oil", "idx": 59}, {"name": "Artic Omega", "idx": 60}, {"name": "DHA Gummies Kids", "idx": 61}, {"name": "PRO DHA (120)", "idx": 62}, {"name": "PRO EPA", "idx": 63}, {"name": "PRO-OMEGA", "idx": 64}, {"name": "Pro Eyes", "idx": 65}]}, {"brand": "Ortho Molecular", "items": [{"name": "D-Hist", "idx": 66}, {"name": "D-Hist Jr.", "idx": 67}, {"name": "Digestzyme-V", "idx": 68}]}, {"brand": "Other", "items": [{"name": "Houttuynia - liquid", "idx": 69}, {"name": "Progon B XL", "idx": 70}, {"name": "Self Adhesive Tape", "idx": 71}, {"name": "TCPS Iodine Roller", "idx": 72}, {"name": "Thyme - liquid", "idx": 73}, {"name": "Thyroid", "idx": 74}, {"name": "Vitamin A", "idx": 75}, {"name": "Vitamin D Gummy", "idx": 76}]}, {"brand": "Pure Encapsulations", "items": [{"name": "Alpha Lipoic Acid", "idx": 77}, {"name": "Chaste Tree", "idx": 78}, {"name": "CoQ10", "idx": 79}, {"name": "CurcumaSorb", "idx": 80}, {"name": "Curcumin", "idx": 81}, {"name": "D-Mannose", "idx": 82}, {"name": "D-Mannose w/ Cranberry", "idx": 83}, {"name": "DHEA", "idx": 84}, {"name": "Folic Acid", "idx": 85}, {"name": "GABA", "idx": 86}, {"name": "Ginger Extract", "idx": 87}, {"name": "Glycine", "idx": 88}, {"name": "Green Tea Extract", "idx": 89}, {"name": "Inositol Powder", "idx": 90}, {"name": "Ionic Molybdenum", "idx": 91}, {"name": "L-Carnitine", "idx": 92}, {"name": "L-Carnitine (Pure)", "idx": 93}, {"name": "L-Tyrosine Pure", "idx": 94}, {"name": "Magnesium Citrate (Pure)", "idx": 95}, {"name": "Magnesium Glycinate", "idx": 96}, {"name": "Methycobalamin", "idx": 97}, {"name": "P5P 50", "idx": 98}, {"name": "Pantethine", "idx": 99}, {"name": "Pantethinine", "idx": 100}, {"name": "Peptic-Care Zinc L Carnosine", "idx": 101}, {"name": "Quercetin Pure 120", "idx": 102}, {"name": "Quercetine 60 Caps", "idx": 103}, {"name": "Resveratrol", "idx": 104}, {"name": "Resveratrol Extra", "idx": 105}, {"name": "Saccharomyces Boulardii", "idx": 106}, {"name": "Saw Palmetto 320", "idx": 107}, {"name": "Saw Palmetto Plus", "idx": 108}, {"name": "Silymarin", "idx": 109}, {"name": "Taurine 1000", "idx": 110}, {"name": "Vit D", "idx": 111}]}, {"brand": "Quick Silver", "items": [{"name": "GABA + L-Theanine", "idx": 112}, {"name": "Liposomal Glutathione", "idx": 113}]}, {"brand": "Standard Process", "items": [{"name": "Adrenal Desiccated", "idx": 114}, {"name": "Albaplex", "idx": 115}, {"name": "Allerplex", "idx": 116}, {"name": "Antronex", "idx": 117}, {"name": "Antronex (180)", "idx": 118}, {"name": "Arginex", "idx": 119}, {"name": "Betacol", "idx": 120}, {"name": "Betafood", "idx": 121}, {"name": "Betaine Hydrochloride", "idx": 122}, {"name": "Bio-Dent", "idx": 123}, {"name": "Biost", "idx": 124}, {"name": "Cal-Amo", "idx": 125}, {"name": "Cal-Ma Plus", "idx": 126}, {"name": "Calcium Lactate", "idx": 127}, {"name": "Cardio Plus GF (330T)", "idx": 128}, {"name": "Cardiotrophin PMG", "idx": 129}, {"name": "Cataplex B GF", "idx": 130}, {"name": "Cataplex B Normal (360)", "idx": 131}, {"name": "Cataplex B2/ G", "idx": 132}, {"name": "Cataplex C", "idx": 133}, {"name": "Cataplex E", "idx": 134}, {"name": "Cataplex E2", "idx": 135}, {"name": "Cholacol", "idx": 136}, {"name": "Choline", "idx": 137}, {"name": "Chromium Complex/ Cataplex GTF (180)", "idx": 138}, {"name": "Congaplex", "idx": 139}, {"name": "Cyruta Plus", "idx": 140}, {"name": "Dermatropin PMG", "idx": 141}, {"name": "Disodium Phosphate", "idx": 142}, {"name": "Drenamin", "idx": 143}, {"name": "Drenatrophin PMG", "idx": 144}, {"name": "Eleuthero", "idx": 145}, {"name": "Enzycore", "idx": 146}, {"name": "Ferrofood", "idx": 147}, {"name": "Glucosamine Synergy", "idx": 148}, {"name": "Immuplex", "idx": 149}, {"name": "Min-Chex", "idx": 150}, {"name": "Min-Tran", "idx": 151}, {"name": "Min-Tran (360)", "idx": 152}, {"name": "Okra Pepsin", "idx": 153}, {"name": "Orchex (150c)", "idx": 154}, {"name": "Orchex (90c)", "idx": 155}, {"name": "Orchic PMG", "idx": 156}, {"name": "Organically Bound Minerals", "idx": 157}, {"name": "Ovatrophin P PMG", "idx": 158}, {"name": "Ovex", "idx": 159}, {"name": "Ovex P", "idx": 160}, {"name": "Pancreatrophin PMG", "idx": 161}, {"name": "Paraplex", "idx": 162}, {"name": "Parotid PMG", "idx": 163}, {"name": "Phosfood Liquid", "idx": 164}, {"name": "Pituitrophin PMG", "idx": 165}, {"name": "Pneumotrophin PMG", "idx": 166}, {"name": "Prolamine Iodine", "idx": 167}, {"name": "Prolamine Iodine 180 Tablets", "idx": 168}, {"name": "Prolamine Iodine Plus", "idx": 169}, {"name": "Prost-X", "idx": 170}, {"name": "Prostate PMG", "idx": 171}, {"name": "RNA (180t)", "idx": 172}, {"name": "Sesame Oil Capsules", "idx": 173}, {"name": "Spleen PMG", "idx": 174}, {"name": "Thymex", "idx": 175}, {"name": "Thymus PMG", "idx": 176}, {"name": "Thytrophin PMG", "idx": 177}, {"name": "Trace Minerals-B12", "idx": 178}, {"name": "Utrophin PMG", "idx": 179}, {"name": "Wheat Germ Oil Fortified", "idx": 180}, {"name": "Zinc Chelate", "idx": 181}, {"name": "Zinc Taste Test", "idx": 182}, {"name": "Zypan", "idx": 183}, {"name": "Zypan (90T)", "idx": 184}]}, {"brand": "Supreme Nutrition", "items": [{"name": "Alaria Supreme 90 caps", "idx": 185}, {"name": "Albizia", "idx": 186}, {"name": "American Ginseng", "idx": 187}, {"name": "Artemisia", "idx": 188}, {"name": "Ashwaganda", "idx": 189}, {"name": "Astragalus - Supreme", "idx": 190}, {"name": "BFB-1, 11ml", "idx": 191}, {"name": "BFB-2, 11ml", "idx": 192}, {"name": "Body Guard", "idx": 193}, {"name": "Camu Supreme", "idx": 194}, {"name": "Cissus", "idx": 195}, {"name": "Dan Shen", "idx": 196}, {"name": "Endo Supreme", "idx": 197}, {"name": "Glypho-X Supreme", "idx": 198}, {"name": "Goldenthread Supreme", "idx": 199}, {"name": "Gud Multivitamin", "idx": 200}, {"name": "Gud Prenatal", "idx": 201}, {"name": "Hemo Guard Supreme 120", "idx": 202}, {"name": "Houttuynia", "idx": 203}, {"name": "Illicium Supreme", "idx": 204}, {"name": "Lectin Protect", "idx": 205}, {"name": "Lurong", "idx": 206}, {"name": "MT Supreme", "idx": 207}, {"name": "Manjistha Supreme", "idx": 208}, {"name": "Melia Supreme", "idx": 209}, {"name": "Mimosa Supreme", "idx": 210}, {"name": "Morinda", "idx": 211}, {"name": "Mucuna Supreme", "idx": 212}, {"name": "Olive Leaf Supreme", "idx": 213}, {"name": "Oral Defense", "idx": 214}, {"name": "Reishi Supreme", "idx": 215}, {"name": "Rosemary Supreme", "idx": 216}, {"name": "Schisandra Supreme", "idx": 217}, {"name": "Scutellaria", "idx": 218}, {"name": "Shatavari Supreme", "idx": 219}, {"name": "Smilax Supreme", "idx": 220}, {"name": "St. John's Wort (Supreme)", "idx": 221}, {"name": "THERASUPREME", "idx": 222}, {"name": "Takesumi Supreme", "idx": 223}, {"name": "Tulsi Supreme", "idx": 224}, {"name": "Vidanga", "idx": 225}, {"name": "Vital Guard", "idx": 226}, {"name": "WOAD", "idx": 227}, {"name": "Wild Greens", "idx": 228}]}, {"brand": "TPCS Distributions", "items": [{"name": "Iodine (IOSOL) Drops", "idx": 229}, {"name": "Iodine (IOSOL) Roll-on", "idx": 230}]}, {"brand": "Thorne Research", "items": [{"name": "5 HTP (Hydroxytryptophan)", "idx": 231}, {"name": "5 MTHF", "idx": 232}, {"name": "Acetyl-L-Carnitine", "idx": 233}, {"name": "B COMPLEX #12", "idx": 234}, {"name": "B COMPLEX #6", "idx": 235}, {"name": "BASIC B COMPLEX", "idx": 236}, {"name": "Basic Nutrients 2/Day", "idx": 237}, {"name": "Basic Prenatal", "idx": 238}, {"name": "Berberine", "idx": 239}, {"name": "Betaine HCL & Pepsin", "idx": 240}, {"name": "Biotin-8", "idx": 241}, {"name": "Calcium-Magnesium Malate", "idx": 242}, {"name": "Choleast-900", "idx": 243}, {"name": "Chromium Picolinate", "idx": 244}, {"name": "Creatine", "idx": 245}, {"name": "Curcumin Phytosome", "idx": 246}, {"name": "Curcumin Phytosome (Meriva 500 SF) 60 Caps", "idx": 247}, {"name": "D-10,000", "idx": 248}, {"name": "D-1000", "idx": 249}, {"name": "D-5000", "idx": 250}, {"name": "FloraMend", "idx": 251}, {"name": "Glucosamine & Chondrotin", "idx": 252}, {"name": "Hormone Advantage (DIM)", "idx": 253}, {"name": "Iron Bisglycinate", "idx": 254}, {"name": "L-Arginine (Perfusia SR)", "idx": 255}, {"name": "L-Glutamine Powder", "idx": 256}, {"name": "L-Lysine", "idx": 257}, {"name": "Magnesium Citramate", "idx": 258}, {"name": "Men's Multi 50+", "idx": 259}, {"name": "Methyl Guard Plus", "idx": 260}, {"name": "Methyl-Guard", "idx": 261}, {"name": "Molybdenum Glycinate", "idx": 262}, {"name": "NAC", "idx": 263}, {"name": "NAC (N-Acetylcysteine)", "idx": 264}, {"name": "Niacinimide", "idx": 265}, {"name": "OPC - 100 (Grape Seed Extract)", "idx": 266}, {"name": "Pantethine - Discontinued", "idx": 267}, {"name": "Pepti-Guard Discontinued", "idx": 268}, {"name": "Potassium Citrate", "idx": 269}, {"name": "Pyridoxal 5' Phosphate", "idx": 270}, {"name": "R-Lipoic Acid", "idx": 271}, {"name": "Riboflavin 5'- Phosphate", "idx": 272}, {"name": "Selenium (Selenomethionine)- Thorne", "idx": 273}, {"name": "Ultimate E", "idx": 274}, {"name": "Undecylenic Acid", "idx": 275}, {"name": "Vitamin B12 (Methylcobalamin)", "idx": 276}, {"name": "Vitamin C w/ Flavanoids", "idx": 277}, {"name": "Zinc Picolinate", "idx": 278}]}, {"brand": "Weed", "items": [{"name": "Astragulus Root (Weed)", "idx": 279}, {"name": "Black Cohosh", "idx": 280}, {"name": "Black Walnut - Weed", "idx": 281}, {"name": "Cat's Claw - Weed", "idx": 282}, {"name": "Clove Bud - Weed", "idx": 283}, {"name": "Dong Quai", "idx": 284}, {"name": "Elderberry - Weed", "idx": 285}, {"name": "Gentian", "idx": 286}, {"name": "Ginger Root - Weed", "idx": 287}, {"name": "Goldenseal (Weed)", "idx": 288}, {"name": "Juniper Berry", "idx": 289}, {"name": "Licorice Root", "idx": 290}, {"name": "Liquid Olive Leaf", "idx": 291}, {"name": "Marshmallow Root", "idx": 292}, {"name": "Milk Thistle Seed - Weed", "idx": 293}, {"name": "Oregon Grape - Weed", "idx": 294}, {"name": "Passion Flower - Weed", "idx": 295}, {"name": "Pau D' Arco", "idx": 296}, {"name": "Peppermint", "idx": 297}, {"name": "Rhodiola Root", "idx": 298}, {"name": "Rosemary- WEED", "idx": 299}, {"name": "Skullcap", "idx": 300}, {"name": "Thyme - Weed", "idx": 301}, {"name": "Uva Ursi - Weed", "idx": 302}, {"name": "Valerian Root - Weed", "idx": 303}, {"name": "Vitex", "idx": 304}]}, {"brand": "Woodland Essences", "items": [{"name": "Herbal Blend - Flower Essence", "idx": 305}]}, {"brand": "Young Living", "items": [{"name": "Lavender Vitality", "idx": 306}, {"name": "Lemon Vitality", "idx": 307}, {"name": "Peppermint Vitality", "idx": 308}, {"name": "Theives Dentarome", "idx": 309}, {"name": "Thieves Fruit & Veggie Spray", "idx": 310}, {"name": "Thieves Hand Soap", "idx": 311}, {"name": "Thieves House Hold Cleaner", "idx": 312}, {"name": "Thieves Spray 1fl Oz", "idx": 313}, {"name": "Thieves Vitality Oil", "idx": 314}, {"name": "Thieves hand sanitizer/small", "idx": 315}]}];
+var SUPPLEMENTS=["Vitamin E (UNIQUE E Mixed Tocopherols)","Artichoke Extract (AMG)","Artemisia Annua Full (Ancient Ways)","Goldenseal - Ancient Ways","OSHA Root","Passion Flower","Oxicell SE","A.D.P.","Aqueous Zinc","Bio-Ae","Bio-D-Mulsion","Cr-Zyme","Cu-Zyme","Dismuzyme (SOD) Plus","E-Mulsion","Garlic Plus","L-Carnitine Powder","Mg-Zyme Magnesium","Mn-Zyme","Mo-Zyme Forte","Purified Chondroitin Sulfates","SOD Powder (Dismuzyme Plus Granules) (17.9 oz)","Selenium (Se-Zyme Forte) - Biotics","Selenomethionine - Biotics","TMG Powder","Thiamin 50","Zn-Zyme","Metal Free and Chemical Cleanse","Ferritin","Aloe","Bone Broth Protein","Broccoprotect","C3 Complex Curcumin","Organic Pure Pea Powder","Whey Cool","Bone Guard","Natural Calm","Natural Calm Gummies","Pteridin-4 / BH4","Andrographis","Bidens","Bladderwack","Blue Cohosh","Clove Bud","Cordyceps","Echinacea","Lomatium Root","Myrrh","OSHA Root 2oz (ELK)","St. Johns Wort - Weed","St. John’s Wort","Usnea","Daily Immune Builder","Cysteine - Metabolics","Hydroxy-B12 Liquid","Methyltetrahydrofolate (Liquid 5 MTHF)","Arctic Cod Liver Oil","Artic Omega","DHA Gummies Kids","PRO DHA (120)","PRO EPA","PRO-OMEGA","Pro Eyes","D-Hist","D-Hist Jr.","Digestzyme-V","Houttuynia - liquid","Progon B XL","Self Adhesive Tape","TCPS Iodine Roller","Thyme - liquid","Thyroid","Vitamin A","Vitamin D Gummy","Alpha Lipoic Acid","Chaste Tree","CoQ10","CurcumaSorb","Curcumin","D-Mannose","D-Mannose w/ Cranberry","DHEA","Folic Acid","GABA","Ginger Extract","Glycine","Green Tea Extract","Inositol Powder","Ionic Molybdenum","L-Carnitine","L-Carnitine (Pure)","L-Tyrosine Pure","Magnesium Citrate (Pure)","Magnesium Glycinate","Methycobalamin","P5P 50","Pantethine","Pantethinine","Peptic-Care Zinc L Carnosine","Quercetin Pure 120","Quercetine 60 Caps","Resveratrol","Resveratrol Extra","Saccharomyces Boulardii","Saw Palmetto 320","Saw Palmetto Plus","Silymarin","Taurine 1000","Vit D","GABA + L-Theanine","Liposomal Glutathione","Adrenal Desiccated","Albaplex","Allerplex","Antronex","Antronex (180)","Arginex","Betacol","Betafood","Betaine Hydrochloride","Bio-Dent","Biost","Cal-Amo","Cal-Ma Plus","Calcium Lactate","Cardio Plus GF (330T)","Cardiotrophin PMG","Cataplex B GF","Cataplex B Normal (360)","Cataplex B2/ G","Cataplex C","Cataplex E","Cataplex E2","Cholacol","Choline","Chromium Complex/ Cataplex GTF (180)","Congaplex","Cyruta Plus","Dermatropin PMG","Drenamin","Drenatrophin PMG","Eleuthero","Enzycore","Ferrofood","Glucosamine Synergy","Immuplex","Min-Chex","Min-Tran","Min-Tran (360)","Okra Pepsin","Orchex (150c)","Orchex (90c)","Orchic PMG","Organically Bound Minerals","Ovatrophin P PMG","Ovex","Ovex P","Pancreatrophin PMG","Paraplex","Parotid PMG","Phosfood Liquid","Pituitrophin PMG","Pneumotrophin PMG","Prolamine Iodine","Prolamine Iodine 180 Tablets","Prolamine Iodine Plus","Prost-X","Prostate PMG","RNA (180t)","Sesame Oil Capsules","Spleen PMG","Thymex","Thymus PMG","Thytrophin PMG","Trace Minerals-B12","Utrophin PMG","Wheat Germ Oil Fortified","Zinc Chelate","Zypan","Zypan (90T)","Alaria Supreme 90 caps","Albizia","American Ginseng","Artemisia","Ashwaganda","Astragalus - Supreme","BFB-1, 11ml","BFB-2, 11ml","Body Guard","Camu Supreme","Cissus","Dan Shen","Endo Supreme","Glypho-X Supreme","Goldenthread Supreme","Gud Multivitamin","Gud Prenatal","Hemo Guard Supreme 120","Houttuynia","Illicium Supreme","Lectin Protect","Lurong","MT Supreme","Manjistha Supreme","Melia Supreme","Mimosa Supreme","Morinda","Mucuna Supreme","Olive Leaf Supreme","Oral Defense","Reishi Supreme","Rosemary Supreme","Schisandra Supreme","Scutellaria","Shatavari Supreme","Smilax Supreme","St. John's Wort (Supreme)","THERASUPREME","Takesumi Supreme","Tulsi Supreme","Vidanga","Vital Guard","WOAD","Wild Greens","Iodine (IOSOL) Drops","Iodine (IOSOL) Roll-on","5 HTP (Hydroxytryptophan)","5 MTHF","Acetyl-L-Carnitine","B COMPLEX #12","B COMPLEX #6","BASIC B COMPLEX","Basic Nutrients 2/Day","Basic Prenatal","Berberine","Betaine HCL & Pepsin","Biotin-8","Calcium-Magnesium Malate","Choleast-900","Chromium Picolinate","Creatine","Curcumin Phytosome","Curcumin Phytosome (Meriva 500 SF) 60 Caps","D-10,000","D-1000","D-5000","FloraMend","Glucosamine & Chondrotin","Hormone Advantage (DIM)","Iron Bisglycinate","L-Arginine (Perfusia SR)","L-Glutamine Powder","L-Lysine","Magnesium Citramate","Men's Multi 50+","Methyl Guard Plus","Methyl-Guard","Molybdenum Glycinate","NAC","NAC (N-Acetylcysteine)","Niacinimide","OPC - 100 (Grape Seed Extract)","Pantethine - Discontinued","Pepti-Guard Discontinued","Potassium Citrate","Pyridoxal 5' Phosphate","R-Lipoic Acid","Riboflavin 5'- Phosphate","Selenium (Selenomethionine)- Thorne","Ultimate E","Undecylenic Acid","Vitamin B12 (Methylcobalamin)","Vitamin C w/ Flavanoids","Zinc Picolinate","Astragulus Root (Weed)","Black Cohosh","Black Walnut - Weed","Cat's Claw - Weed","Clove Bud - Weed","Dong Quai","Elderberry - Weed","Gentian","Ginger Root - Weed","Goldenseal (Weed)","Juniper Berry","Licorice Root","Liquid Olive Leaf","Marshmallow Root","Milk Thistle Seed - Weed","Oregon Grape - Weed","Passion Flower - Weed","Pau D' Arco","Peppermint","Rhodiola Root","Rosemary- WEED","Skullcap","Thyme - Weed","Uva Ursi - Weed","Valerian Root - Weed","Vitex","Herbal Blend - Flower Essence","Lavender Vitality","Lemon Vitality","Peppermint Vitality","Theives Dentarome","Thieves Fruit & Veggie Spray","Thieves Hand Soap","Thieves House Hold Cleaner","Thieves Spray 1fl Oz","Thieves Vitality Oil","Thieves hand sanitizer/small"];
+var SUPP_BRANDS=[{"brand":"AC GRACE","items":[{"name":"Vitamin E (UNIQUE E Mixed Tocopherols)","idx":0}]},{"brand":"AMG Naturals","items":[{"name":"Artichoke Extract (AMG)","idx":1}]},{"brand":"Ancient Ways","items":[{"name":"Artemisia Annua Full (Ancient Ways)","idx":2},{"name":"Goldenseal - Ancient Ways","idx":3},{"name":"OSHA Root","idx":4},{"name":"Passion Flower","idx":5}]},{"brand":"Apex Energetics","items":[{"name":"Oxicell SE","idx":6}]},{"brand":"Biotics Research","items":[{"name":"A.D.P.","idx":7},{"name":"Aqueous Zinc","idx":8},{"name":"Bio-Ae","idx":9},{"name":"Bio-D-Mulsion","idx":10},{"name":"Cr-Zyme","idx":11},{"name":"Cu-Zyme","idx":12},{"name":"Dismuzyme (SOD) Plus","idx":13},{"name":"E-Mulsion","idx":14},{"name":"Garlic Plus","idx":15},{"name":"L-Carnitine Powder","idx":16},{"name":"Mg-Zyme Magnesium","idx":17},{"name":"Mn-Zyme","idx":18},{"name":"Mo-Zyme Forte","idx":19},{"name":"Purified Chondroitin Sulfates","idx":20},{"name":"SOD Powder (Dismuzyme Plus Granules) (17.9 oz)","idx":21},{"name":"Selenium (Se-Zyme Forte) - Biotics","idx":22},{"name":"Selenomethionine - Biotics","idx":23},{"name":"TMG Powder","idx":24},{"name":"Thiamin 50","idx":25},{"name":"Zn-Zyme","idx":26}]},{"brand":"BodyHealth","items":[{"name":"Metal Free and Chemical Cleanse","idx":27}]},{"brand":"Cardiovascular Research","items":[{"name":"Ferritin","idx":28}]},{"brand":"Designs For Health","items":[{"name":"Aloe","idx":29},{"name":"Bone Broth Protein","idx":30},{"name":"Broccoprotect","idx":31},{"name":"C3 Complex Curcumin","idx":32},{"name":"Organic Pure Pea Powder","idx":33},{"name":"Whey Cool","idx":34}]},{"brand":"Eclectic Institute","items":[{"name":"Bone Guard","idx":35},{"name":"Natural Calm","idx":36},{"name":"Natural Calm Gummies","idx":37}]},{"brand":"Ecological Formulas","items":[{"name":"Pteridin-4 / BH4","idx":38}]},{"brand":"Elk Mountain","items":[{"name":"Andrographis","idx":39},{"name":"Bidens","idx":40},{"name":"Bladderwack","idx":41},{"name":"Blue Cohosh","idx":42},{"name":"Clove Bud","idx":43},{"name":"Cordyceps","idx":44},{"name":"Echinacea","idx":45},{"name":"Lomatium Root","idx":46},{"name":"Myrrh","idx":47},{"name":"OSHA Root 2oz (ELK)","idx":48},{"name":"St. Johns Wort - Weed","idx":49},{"name":"St. John’s Wort","idx":50},{"name":"Usnea","idx":51}]},{"brand":"Herb Farm","items":[{"name":"Daily Immune Builder","idx":52}]},{"brand":"Metabolics","items":[{"name":"Cysteine - Metabolics","idx":53},{"name":"Hydroxy-B12 Liquid","idx":54},{"name":"Methyltetrahydrofolate (Liquid 5 MTHF)","idx":55}]},{"brand":"Nordic Naturals","items":[{"name":"Arctic Cod Liver Oil","idx":56},{"name":"Artic Omega","idx":57},{"name":"DHA Gummies Kids","idx":58},{"name":"PRO DHA (120)","idx":59},{"name":"PRO EPA","idx":60},{"name":"PRO-OMEGA","idx":61},{"name":"Pro Eyes","idx":62}]},{"brand":"Ortho Molecular","items":[{"name":"D-Hist","idx":63},{"name":"D-Hist Jr.","idx":64},{"name":"Digestzyme-V","idx":65}]},{"brand":"Other","items":[{"name":"Houttuynia - liquid","idx":66},{"name":"Progon B XL","idx":67},{"name":"Self Adhesive Tape","idx":68},{"name":"TCPS Iodine Roller","idx":69},{"name":"Thyme - liquid","idx":70},{"name":"Thyroid","idx":71},{"name":"Vitamin A","idx":72},{"name":"Vitamin D Gummy","idx":73}]},{"brand":"Pure Encapsulations","items":[{"name":"Alpha Lipoic Acid","idx":74},{"name":"Chaste Tree","idx":75},{"name":"CoQ10","idx":76},{"name":"CurcumaSorb","idx":77},{"name":"Curcumin","idx":78},{"name":"D-Mannose","idx":79},{"name":"D-Mannose w/ Cranberry","idx":80},{"name":"DHEA","idx":81},{"name":"Folic Acid","idx":82},{"name":"GABA","idx":83},{"name":"Ginger Extract","idx":84},{"name":"Glycine","idx":85},{"name":"Green Tea Extract","idx":86},{"name":"Inositol Powder","idx":87},{"name":"Ionic Molybdenum","idx":88},{"name":"L-Carnitine","idx":89},{"name":"L-Carnitine (Pure)","idx":90},{"name":"L-Tyrosine Pure","idx":91},{"name":"Magnesium Citrate (Pure)","idx":92},{"name":"Magnesium Glycinate","idx":93},{"name":"Methycobalamin","idx":94},{"name":"P5P 50","idx":95},{"name":"Pantethine","idx":96},{"name":"Pantethinine","idx":97},{"name":"Peptic-Care Zinc L Carnosine","idx":98},{"name":"Quercetin Pure 120","idx":99},{"name":"Quercetine 60 Caps","idx":100},{"name":"Resveratrol","idx":101},{"name":"Resveratrol Extra","idx":102},{"name":"Saccharomyces Boulardii","idx":103},{"name":"Saw Palmetto 320","idx":104},{"name":"Saw Palmetto Plus","idx":105},{"name":"Silymarin","idx":106},{"name":"Taurine 1000","idx":107},{"name":"Vit D","idx":108}]},{"brand":"Quick Silver","items":[{"name":"GABA + L-Theanine","idx":109},{"name":"Liposomal Glutathione","idx":110}]},{"brand":"Standard Process","items":[{"name":"Adrenal Desiccated","idx":111},{"name":"Albaplex","idx":112},{"name":"Allerplex","idx":113},{"name":"Antronex","idx":114},{"name":"Antronex (180)","idx":115},{"name":"Arginex","idx":116},{"name":"Betacol","idx":117},{"name":"Betafood","idx":118},{"name":"Betaine Hydrochloride","idx":119},{"name":"Bio-Dent","idx":120},{"name":"Biost","idx":121},{"name":"Cal-Amo","idx":122},{"name":"Cal-Ma Plus","idx":123},{"name":"Calcium Lactate","idx":124},{"name":"Cardio Plus GF (330T)","idx":125},{"name":"Cardiotrophin PMG","idx":126},{"name":"Cataplex B GF","idx":127},{"name":"Cataplex B Normal (360)","idx":128},{"name":"Cataplex B2/ G","idx":129},{"name":"Cataplex C","idx":130},{"name":"Cataplex E","idx":131},{"name":"Cataplex E2","idx":132},{"name":"Cholacol","idx":133},{"name":"Choline","idx":134},{"name":"Chromium Complex/ Cataplex GTF (180)","idx":135},{"name":"Congaplex","idx":136},{"name":"Cyruta Plus","idx":137},{"name":"Dermatropin PMG","idx":138},{"name":"Drenamin","idx":139},{"name":"Drenatrophin PMG","idx":140},{"name":"Eleuthero","idx":141},{"name":"Enzycore","idx":142},{"name":"Ferrofood","idx":143},{"name":"Glucosamine Synergy","idx":144},{"name":"Immuplex","idx":145},{"name":"Min-Chex","idx":146},{"name":"Min-Tran","idx":147},{"name":"Min-Tran (360)","idx":148},{"name":"Okra Pepsin","idx":149},{"name":"Orchex (150c)","idx":150},{"name":"Orchex (90c)","idx":151},{"name":"Orchic PMG","idx":152},{"name":"Organically Bound Minerals","idx":153},{"name":"Ovatrophin P PMG","idx":154},{"name":"Ovex","idx":155},{"name":"Ovex P","idx":156},{"name":"Pancreatrophin PMG","idx":157},{"name":"Paraplex","idx":158},{"name":"Parotid PMG","idx":159},{"name":"Phosfood Liquid","idx":160},{"name":"Pituitrophin PMG","idx":161},{"name":"Pneumotrophin PMG","idx":162},{"name":"Prolamine Iodine","idx":163},{"name":"Prolamine Iodine 180 Tablets","idx":164},{"name":"Prolamine Iodine Plus","idx":165},{"name":"Prost-X","idx":166},{"name":"Prostate PMG","idx":167},{"name":"RNA (180t)","idx":168},{"name":"Sesame Oil Capsules","idx":169},{"name":"Spleen PMG","idx":170},{"name":"Thymex","idx":171},{"name":"Thymus PMG","idx":172},{"name":"Thytrophin PMG","idx":173},{"name":"Trace Minerals-B12","idx":174},{"name":"Utrophin PMG","idx":175},{"name":"Wheat Germ Oil Fortified","idx":176},{"name":"Zinc Chelate","idx":177},{"name":"Zypan","idx":178},{"name":"Zypan (90T)","idx":179}]},{"brand":"Supreme Nutrition","items":[{"name":"Alaria Supreme 90 caps","idx":180},{"name":"Albizia","idx":181},{"name":"American Ginseng","idx":182},{"name":"Artemisia","idx":183},{"name":"Ashwaganda","idx":184},{"name":"Astragalus - Supreme","idx":185},{"name":"BFB-1, 11ml","idx":186},{"name":"BFB-2, 11ml","idx":187},{"name":"Body Guard","idx":188},{"name":"Camu Supreme","idx":189},{"name":"Cissus","idx":190},{"name":"Dan Shen","idx":191},{"name":"Endo Supreme","idx":192},{"name":"Glypho-X Supreme","idx":193},{"name":"Goldenthread Supreme","idx":194},{"name":"Gud Multivitamin","idx":195},{"name":"Gud Prenatal","idx":196},{"name":"Hemo Guard Supreme 120","idx":197},{"name":"Houttuynia","idx":198},{"name":"Illicium Supreme","idx":199},{"name":"Lectin Protect","idx":200},{"name":"Lurong","idx":201},{"name":"MT Supreme","idx":202},{"name":"Manjistha Supreme","idx":203},{"name":"Melia Supreme","idx":204},{"name":"Mimosa Supreme","idx":205},{"name":"Morinda","idx":206},{"name":"Mucuna Supreme","idx":207},{"name":"Olive Leaf Supreme","idx":208},{"name":"Oral Defense","idx":209},{"name":"Reishi Supreme","idx":210},{"name":"Rosemary Supreme","idx":211},{"name":"Schisandra Supreme","idx":212},{"name":"Scutellaria","idx":213},{"name":"Shatavari Supreme","idx":214},{"name":"Smilax Supreme","idx":215},{"name":"St. John's Wort (Supreme)","idx":216},{"name":"THERASUPREME","idx":217},{"name":"Takesumi Supreme","idx":218},{"name":"Tulsi Supreme","idx":219},{"name":"Vidanga","idx":220},{"name":"Vital Guard","idx":221},{"name":"WOAD","idx":222},{"name":"Wild Greens","idx":223}]},{"brand":"TPCS Distributions","items":[{"name":"Iodine (IOSOL) Drops","idx":224},{"name":"Iodine (IOSOL) Roll-on","idx":225}]},{"brand":"Thorne Research","items":[{"name":"5 HTP (Hydroxytryptophan)","idx":226},{"name":"5 MTHF","idx":227},{"name":"Acetyl-L-Carnitine","idx":228},{"name":"B COMPLEX #12","idx":229},{"name":"B COMPLEX #6","idx":230},{"name":"BASIC B COMPLEX","idx":231},{"name":"Basic Nutrients 2/Day","idx":232},{"name":"Basic Prenatal","idx":233},{"name":"Berberine","idx":234},{"name":"Betaine HCL & Pepsin","idx":235},{"name":"Biotin-8","idx":236},{"name":"Calcium-Magnesium Malate","idx":237},{"name":"Choleast-900","idx":238},{"name":"Chromium Picolinate","idx":239},{"name":"Creatine","idx":240},{"name":"Curcumin Phytosome","idx":241},{"name":"Curcumin Phytosome (Meriva 500 SF) 60 Caps","idx":242},{"name":"D-10,000","idx":243},{"name":"D-1000","idx":244},{"name":"D-5000","idx":245},{"name":"FloraMend","idx":246},{"name":"Glucosamine & Chondrotin","idx":247},{"name":"Hormone Advantage (DIM)","idx":248},{"name":"Iron Bisglycinate","idx":249},{"name":"L-Arginine (Perfusia SR)","idx":250},{"name":"L-Glutamine Powder","idx":251},{"name":"L-Lysine","idx":252},{"name":"Magnesium Citramate","idx":253},{"name":"Men's Multi 50+","idx":254},{"name":"Methyl Guard Plus","idx":255},{"name":"Methyl-Guard","idx":256},{"name":"Molybdenum Glycinate","idx":257},{"name":"NAC","idx":258},{"name":"NAC (N-Acetylcysteine)","idx":259},{"name":"Niacinimide","idx":260},{"name":"OPC - 100 (Grape Seed Extract)","idx":261},{"name":"Pantethine - Discontinued","idx":262},{"name":"Pepti-Guard Discontinued","idx":263},{"name":"Potassium Citrate","idx":264},{"name":"Pyridoxal 5' Phosphate","idx":265},{"name":"R-Lipoic Acid","idx":266},{"name":"Riboflavin 5'- Phosphate","idx":267},{"name":"Selenium (Selenomethionine)- Thorne","idx":268},{"name":"Ultimate E","idx":269},{"name":"Undecylenic Acid","idx":270},{"name":"Vitamin B12 (Methylcobalamin)","idx":271},{"name":"Vitamin C w/ Flavanoids","idx":272},{"name":"Zinc Picolinate","idx":273}]},{"brand":"Weed","items":[{"name":"Astragulus Root (Weed)","idx":274},{"name":"Black Cohosh","idx":275},{"name":"Black Walnut - Weed","idx":276},{"name":"Cat's Claw - Weed","idx":277},{"name":"Clove Bud - Weed","idx":278},{"name":"Dong Quai","idx":279},{"name":"Elderberry - Weed","idx":280},{"name":"Gentian","idx":281},{"name":"Ginger Root - Weed","idx":282},{"name":"Goldenseal (Weed)","idx":283},{"name":"Juniper Berry","idx":284},{"name":"Licorice Root","idx":285},{"name":"Liquid Olive Leaf","idx":286},{"name":"Marshmallow Root","idx":287},{"name":"Milk Thistle Seed - Weed","idx":288},{"name":"Oregon Grape - Weed","idx":289},{"name":"Passion Flower - Weed","idx":290},{"name":"Pau D' Arco","idx":291},{"name":"Peppermint","idx":292},{"name":"Rhodiola Root","idx":293},{"name":"Rosemary- WEED","idx":294},{"name":"Skullcap","idx":295},{"name":"Thyme - Weed","idx":296},{"name":"Uva Ursi - Weed","idx":297},{"name":"Valerian Root - Weed","idx":298},{"name":"Vitex","idx":299}]},{"brand":"Woodland Essences","items":[{"name":"Herbal Blend - Flower Essence","idx":300}]},{"brand":"Young Living","items":[{"name":"Lavender Vitality","idx":301},{"name":"Lemon Vitality","idx":302},{"name":"Peppermint Vitality","idx":303},{"name":"Theives Dentarome","idx":304},{"name":"Thieves Fruit & Veggie Spray","idx":305},{"name":"Thieves Hand Soap","idx":306},{"name":"Thieves House Hold Cleaner","idx":307},{"name":"Thieves Spray 1fl Oz","idx":308},{"name":"Thieves Vitality Oil","idx":309},{"name":"Thieves hand sanitizer/small","idx":310}]}];
 
 var MSK_SECTIONS=[
   {sec:"Neck", muscles:["Deep Neck Flexors","Masseter","Neck Extensor","Pterygoid (Med/Lat)","Scalenes","SCM","Temporalis"]},
@@ -2683,7 +2683,7 @@ function renderAllLabMarked(){ for(var v=1;v<=18;v++) renderLabMarked(v); }
 // ────────────────────────────────────────────────────────────────
 //  FOLLOW-UP INTERVAL — inline chip picker per visit
 // ────────────────────────────────────────────────────────────────
-var FU_PRESETS=["+2 weeks","+3 weeks","+4 weeks","+5 weeks"];
+var FU_PRESETS=["+2 weeks","+3 weeks","+4 weeks"];
 function _fuChipsHtml(vn){
   if(!S.followUp) S.followUp={};
   var cur=S.followUp[vn]||"";
@@ -4940,7 +4940,11 @@ function qpSelect(idx){
     _autoMarkOrgan(vn,it.oi);
   } else if(it.type==="leaf_supp"){
     var k="v"+vn+"_supp_"+it.idx;
-    if(S.marks[k]) delete S.marks[k]; else S.marks[k]="green";
+    if(S.marks[k]){ delete S.marks[k]; } else {
+      S.marks[k]="green";
+      if(!S.suppDoses) S.suppDoses={};
+      if(!S.suppDoses[k] && SUPP_DEFAULT_DOSE[it.label]) S.suppDoses[k]=SUPP_DEFAULT_DOSE[it.label];
+    }
     renderSuppCell(k); renderSuppMarked(vn); updateSuppHL(vn);
   } else if(it.type==="leaf_diet"){
     var k="v"+vn+"_diet_"+it.idx;
@@ -5410,6 +5414,185 @@ function doPrintFindings(){
 // ════════════════════════════════════════════════════════════════
 //  DOSE EDITOR
 // ════════════════════════════════════════════════════════════════
+// Default dosing per supplement (lower bound of any range, per dosing sheet).
+// Pre-populates the dose editor when no dose has been saved for that visit.
+var SUPP_DEFAULT_DOSE={
+  // AC Grace
+  "Vitamin E (UNIQUE E Mixed Tocopherols)":"QD",
+  // Ancient Ways
+  "Artemisia Annua Full (Ancient Ways)":"2 droppers BID",
+  "Goldenseal - Ancient Ways":"2 droppers BID",
+  "Passion Flower":"1 dropper PRN",
+  // Biotics Research
+  "A.D.P.":"2 BID",
+  "Bio-Ae":"5 GTT BID (w/fats)",
+  "Bio-D-Mulsion":"3 GTT QD (w/fats)",
+  "Cu-Zyme":"1 QD",
+  "Dismuzyme (SOD) Plus":"3 QID",
+  "SOD Powder (Dismuzyme Plus Granules) (17.9 oz)":"QD",
+  "E-Mulsion":"1 BID",
+  "Garlic Plus":"1 BID",
+  "L-Carnitine Powder":"3 g QD",
+  "Mg-Zyme Magnesium":"BID",
+  "Mn-Zyme":"1 BID",
+  "Mo-Zyme Forte":"2 BID",
+  "Purified Chondroitin Sulfates":"2 BID",
+  "Selenium (Se-Zyme Forte) - Biotics":"1 BID",
+  "TMG Powder":"1 BID",
+  "Zn-Zyme":"2 BID",
+  // BodyHealth
+  "Metal Free and Chemical Cleanse":"1 spray QD",
+  // Cardiovascular Research
+  "Ferritin":"QD",
+  // Ecological Formulas
+  "Pteridin-4 / BH4":"1 BID",
+  // Elk Mountain
+  "Andrographis":"¼ dropper BID",
+  "Bidens":"2 droppers QID",
+  "Bladderwack":"1 dropper TID",
+  "Blue Cohosh":"1 dropper TID",
+  "Clove Bud":"1 dropper BID",
+  "Cordyceps":"1 TID",
+  "Echinacea":"1 dropper q2h",
+  "Lomatium Root":"15 drops TID",
+  "OSHA Root 2oz (ELK)":"1 dropper 5x/day",
+  "Usnea":"1 dropper QID",
+  // Metabolics
+  "Cysteine - Metabolics":"1 BID",
+  "Hydroxy-B12 Liquid":"20 drops BID",
+  "Methyltetrahydrofolate (Liquid 5 MTHF)":"10 drops BID",
+  // Natural Vitality
+  "Natural Calm":"1 tsp HS",
+  // Nordic Naturals
+  "PRO EPA":"2 BID",
+  "PRO DHA (120)":"2 BID",
+  // Pure Encapsulations
+  "Alpha Lipoic Acid":"1 BID",
+  "CoQ10":"2 BID",
+  "Curcumin":"2 BID",
+  "Folic Acid":"BID (w/ B12)",
+  "Ginger Extract":"2 BID",
+  "Glycine":"3 TID",
+  "Green Tea Extract":"2 BID",
+  "Methycobalamin":"1 BID",
+  "Quercetin Pure 120":"2 BID",
+  "Quercetine 60 Caps":"2 BID",
+  "Resveratrol":"2 BID",
+  "Resveratrol Extra":"2 BID",
+  "Silymarin":"2 BID",
+  // Quicksilver Scientific
+  "Liposomal Glutathione":"2 pumps BID",
+  // Standard Process
+  "Adrenal Desiccated":"QD (6-9am)",
+  "Antronex":"3 PRN",
+  "Antronex (180)":"3 PRN",
+  "Arginex":"3 q3h when sick",
+  "Betacol":"1 daily (add 1 every 2 days to max 6)",
+  "Betafood":"3 w/ meals",
+  "Betaine Hydrochloride":"2 TID (w/ meals)",
+  "Biost":"1 q1h x2 days, then 3 BID x2 months",
+  "Cal-Amo":"2 q1h x2 days, then 2 TID",
+  "Cal-Ma Plus":"QD",
+  "Calcium Lactate":"2 BID",
+  "Cataplex B GF":"2 BID",
+  "Cataplex B Normal (360)":"2 BID",
+  "Cataplex B2/ G":"3 TID",
+  "Cataplex C":"3 TID",
+  "Cataplex E":"3 BID",
+  "Cataplex E2":"4 BID",
+  "Chromium Complex/ Cataplex GTF (180)":"2 QID",
+  "Cholacol":"3 w/ meals",
+  "Choline":"3 TID",
+  "Cyruta Plus":"4 PRN",
+  "Drenatrophin PMG":"3 TID",
+  "Ferrofood":"QD",
+  "Min-Chex":"1 HS",
+  "Min-Tran":"4 BID",
+  "Min-Tran (360)":"4 BID",
+  "Orchic PMG":"BID",
+  "Orchex (150c)":"BID",
+  "Orchex (90c)":"BID",
+  "Organically Bound Minerals":"3 TID",
+  "Ovex":"2 TID",
+  "Ovex P":"2 TID",
+  "Pancreatrophin PMG":"3 TID",
+  "Parotid PMG":"1 QD (w/ thyroid meds)",
+  "Phosfood Liquid":"2 droppers BID (w/ apple cider)",
+  "Pituitrophin PMG":"1 qAM",
+  "Pneumotrophin PMG":"2 TID",
+  "Prolamine Iodine":"2 q2days",
+  "Prolamine Iodine 180 Tablets":"2 q2days",
+  "Prolamine Iodine Plus":"2 q2days",
+  "Prostate PMG":"3 TID",
+  "Prost-X":"2 BID",
+  "Sesame Oil Capsules":"5 BID x6 days",
+  "Spleen PMG":"2 q1h when sick",
+  "Thymex":"3 TID",
+  "Thymus PMG":"2 q1h when sick",
+  "Thytrophin PMG":"2 qAM",
+  "Trace Minerals-B12":"BID",
+  "Utrophin PMG":"3 PRN",
+  "Vital Guard":"4 TID",
+  "Zinc Chelate":"2 BID",
+  // Supreme Nutrition
+  "Albizia":"2 BID",
+  "Artemisia":"2 TID",
+  "Ashwaganda":"qAM",
+  "Astragalus - Supreme":"2 BID",
+  "BFB-1, 11ml":"6 areas BID",
+  "BFB-2, 11ml":"6 areas BID",
+  "Camu Supreme":"2 BID",
+  "Dan Shen":"2 BID",
+  "Goldenthread Supreme":"2 TID",
+  "Hemo Guard Supreme 120":"2 BID",
+  "Illicium Supreme":"3 TID",
+  "Manjistha Supreme":"2 TID",
+  "Melia Supreme":"2 TID",
+  "Morinda":"4 TID",
+  "Olive Leaf Supreme":"3 TID",
+  "Rosemary Supreme":"2 BID",
+  "Schisandra Supreme":"1 TID",
+  "Scutellaria":"1 TID",
+  "Tulsi Supreme":"qAM",
+  // TPCS
+  "Iodine (IOSOL) Drops":"1 drop qAM",
+  "Iodine (IOSOL) Roll-on":"PRN",
+  // Thorne Research
+  "5 MTHF":"BID",
+  "Berberine":"2 BID",
+  "Biotin-8":"4 daily",
+  "Creatine":"1 scoop QD",
+  "D-1000":"QD",
+  "D-5000":"QD",
+  "D-10,000":"QD",
+  "Iron Bisglycinate":"QD",
+  "Magnesium Citramate":"QD",
+  "Niacinimide":"BID",
+  "OPC - 100 (Grape Seed Extract)":"2 TID",
+  "Pyridoxal 5' Phosphate":"2 BID",
+  "Taurine 1000":"1 TID",
+  "L-Tyrosine Pure":"1 TID",
+  "Zinc Picolinate":"1 BID",
+  // Weed Botanical Co.
+  "Black Walnut - Weed":"1 dropper BID",
+  "Cat's Claw - Weed":"1 dropper BID",
+  "Clove Bud - Weed":"1 dropper BID",
+  "Elderberry - Weed":"3 droppers QID",
+  "Gentian":"1 dropper BID",
+  "Ginger Root - Weed":"1 dropper BID",
+  "Milk Thistle Seed - Weed":"1 dropper BID",
+  "Oregon Grape - Weed":"1 dropper TID",
+  "Passion Flower - Weed":"1 dropper PRN",
+  "Peppermint":"1 dropper BID",
+  "Rhodiola Root":"1 dropper HS",
+  "Skullcap":"1 dropper TID",
+  "Thyme - Weed":"1 dropper BID",
+  "Uva Ursi - Weed":"2 droppers BID",
+  "Valerian Root - Weed":"1 dropper PRN",
+  "Vitex":"1 dropper BID",
+  "Licorice Root":"1 dropper TID",
+  "Pau D' Arco":"½ tsp QID"
+};
 var DOSE_QUICK=[
   "QD","BID","TID","QID","QHS","QAM","PRN",
   "1 cap QD","1 cap BID","1 cap TID","2 caps QD","2 caps BID","2 caps TID",
@@ -5491,7 +5674,7 @@ function openDoseEditor(vn, suppIdx){
   document.getElementById("doseSub").textContent="Visit "+vn+" — set dosing instructions";
   if(!S.suppDoses) S.suppDoses={};
   var key="v"+vn+"_supp_"+suppIdx;
-  var cur=S.suppDoses[key]||"";
+  var cur=S.suppDoses[key]||(SUPP_DEFAULT_DOSE[name]||"");
   document.getElementById("doseInput").value=cur;
   // Build quick picks
   var qp=document.getElementById("doseQuickPicks"); qp.innerHTML="";
