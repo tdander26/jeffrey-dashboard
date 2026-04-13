@@ -572,6 +572,16 @@
     margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);
   }
   .et-add-row .form-label { margin-bottom: 4px; }
+
+  /* ── W2 compact account select ── */
+  .w2-src-sel {
+    padding: 2px 4px; border: 1px solid rgba(0,0,0,0.14); border-radius: 5px;
+    font-size: 11px; font-weight: 600; font-family: inherit; color: #1d1d1f;
+    background: #fff; cursor: pointer; margin-right: 3px;
+    transition: border-color 0.12s;
+  }
+  .w2-src-sel:focus { outline: none; border-color: #007AFF; }
+  .w2-src-sel option { font-weight: 600; }
   .et-add-row select, .et-add-row input {
     padding: 8px 10px; border: 1.5px solid rgba(0,0,0,0.12);
     border-radius: 8px; font-size: 13px; font-family: inherit;
@@ -1480,14 +1490,22 @@ function calcDollar(total, pct) {
 // W2 EMPLOYEES — STORAGE & DEFAULTS
 // ─────────────────────────────────────────────
 const W2_DEFAULTS = [
-  { id: 'emp_1', name: 'Dr. Todd (W2)', source: 'OC',   salary: 3004.56, empTaxPct: 24.79, erTaxPct: 12.50 },
-  { id: 'emp_2', name: 'Employee',      source: 'OPEX', salary: 2307.00, empTaxPct:  8.67, erTaxPct:  0.00 }
+  { id: 'emp_1', name: 'Dr. Todd (W2)', source: 'OC',   salary: 3004.56, empTaxSource: 'Tax',  empTaxPct: 24.79, erTaxSource: 'OPEX', erTaxPct: 12.50 },
+  { id: 'emp_2', name: 'Employee',      source: 'OPEX', salary: 2307.00, empTaxSource: 'Tax',  empTaxPct:  8.67, erTaxSource: 'OPEX', erTaxPct:  0.00 }
 ];
 
 function loadW2Employees() {
   try {
     const raw = localStorage.getItem('w2_employees');
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const emps = JSON.parse(raw);
+      // Migrate older records that lack empTaxSource / erTaxSource
+      emps.forEach(e => {
+        if (!e.empTaxSource) e.empTaxSource = 'Tax';
+        if (!e.erTaxSource)  e.erTaxSource  = e.source || 'OPEX';
+      });
+      return emps;
+    }
   } catch(e) {}
   return W2_DEFAULTS.map(e => ({...e}));
 }
@@ -1509,22 +1527,25 @@ function renderW2Panel() {
   const content = document.getElementById('w2SettingsContent');
   const summary = document.getElementById('w2PanelSummary');
 
+  // Helper: accumulate payroll totals by account
+  function w2Totals(empList) {
+    const t = { OC: 0, OPEX: 0, Tax: 0, Profit: 0 };
+    empList.forEach(emp => {
+      const eTax  = emp.salary * emp.empTaxPct / 100;
+      const erTax = emp.salary * emp.erTaxPct  / 100;
+      t[emp.source]                        = (t[emp.source]                        || 0) + emp.salary;
+      t[emp.empTaxSource || 'Tax']         = (t[emp.empTaxSource || 'Tax']         || 0) + eTax;
+      t[emp.erTaxSource  || emp.source]    = (t[emp.erTaxSource  || emp.source]    || 0) + erTax;
+    });
+    return t;
+  }
+
   // Build summary for collapsed header
   if (emps.length === 0) {
     summary.textContent = '(no employees configured)';
   } else {
-    let totOC = 0, totOPEX = 0, totTax = 0;
-    emps.forEach(emp => {
-      const eTax = emp.salary * emp.empTaxPct / 100;
-      const erTax = emp.salary * emp.erTaxPct / 100;
-      totTax += eTax;
-      if (emp.source === 'OC') totOC += emp.salary + erTax;
-      else                     totOPEX += emp.salary + erTax;
-    });
-    const parts = [];
-    if (totOC   > 0) parts.push(fmt$(totOC)   + ' OC');
-    if (totTax  > 0) parts.push(fmt$(totTax)  + ' Tax');
-    if (totOPEX > 0) parts.push(fmt$(totOPEX) + ' OPEX');
+    const t = w2Totals(emps);
+    const parts = ['OC','Tax','OPEX','Profit'].filter(k => t[k] > 0).map(k => fmt$(t[k]) + ' ' + k);
     summary.textContent = emps.length + ' employee' + (emps.length > 1 ? 's' : '') + ' · ' + parts.join(' · ');
   }
 
@@ -1533,22 +1554,31 @@ function renderW2Panel() {
     return;
   }
 
+  function srcSel(empId, field, current, opts) {
+    return `<select class="w2-src-sel" data-empid="${empId}" data-field="${field}" onchange="setW2TaxSource(this)">`
+      + opts.map(o => `<option value="${o}"${current===o?' selected':''}>${o}</option>`).join('')
+      + `</select>`;
+  }
+
   let html = `<table class="w2-tbl">
     <thead><tr>
       <th>Name</th>
-      <th>Account</th>
+      <th>Salary Acct</th>
       <th>Salary / Period</th>
-      <th>Emp Tax %</th>
-      <th>Er Tax %</th>
+      <th>Emp Tax</th>
       <th>Emp Tax $</th>
+      <th>Er Tax</th>
       <th>Er Tax $</th>
       <th></th>
     </tr></thead>
     <tbody>`;
 
+  const ACCTS = ['Tax','OC','OPEX','Profit'];
   emps.forEach(emp => {
-    const empTaxAmt = emp.salary * emp.empTaxPct / 100;
-    const erTaxAmt  = emp.salary * emp.erTaxPct  / 100;
+    const empTaxAmt  = emp.salary * emp.empTaxPct / 100;
+    const erTaxAmt   = emp.salary * emp.erTaxPct  / 100;
+    const empTaxSrc  = emp.empTaxSource || 'Tax';
+    const erTaxSrc   = emp.erTaxSource  || emp.source;
     html += `<tr>
       <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="name" onblur="w2FieldEdit(this)">${escHtml(emp.name)}</span></td>
       <td>
@@ -1558,9 +1588,9 @@ function renderW2Panel() {
         </div>
       </td>
       <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
-      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
+      <td>${srcSel(emp.id,'empTaxSource',empTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
       <td style="color:#FF3B30;font-weight:500">${fmt$(empTaxAmt)}</td>
+      <td>${srcSel(emp.id,'erTaxSource',erTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
       <td style="color:#FF9500;font-weight:500">${fmt$(erTaxAmt)}</td>
       <td><button class="delete-btn" style="opacity:1" onclick="deleteW2Employee('${emp.id}')" title="Remove">🗑</button></td>
     </tr>`;
@@ -1570,9 +1600,23 @@ function renderW2Panel() {
   content.innerHTML = html;
 }
 
+function setW2TaxSource(el) {
+  const empId = el.dataset.empid;
+  const field  = el.dataset.field;
+  const emps   = loadW2Employees();
+  const emp    = emps.find(e => e.id === empId);
+  if (emp) {
+    emp[field] = el.value;
+    saveW2Employees(emps);
+    renderW2Panel();
+    renderTable();
+    renderFooter();
+  }
+}
+
 function addW2Employee() {
   const emps = loadW2Employees();
-  emps.push({ id: 'emp_' + Date.now(), name: 'New Employee', source: 'OPEX', salary: 0, empTaxPct: 0, erTaxPct: 0 });
+  emps.push({ id: 'emp_' + Date.now(), name: 'New Employee', source: 'OPEX', salary: 0, empTaxSource: 'Tax', empTaxPct: 0, erTaxSource: 'OPEX', erTaxPct: 0 });
   saveW2Employees(emps);
   renderW2Panel();
   renderTable();
@@ -1639,24 +1683,19 @@ function renderFooter() {
   if (emps.length === 0) {
     html += '<div class="footer-note">💵 <strong>W2:</strong> No employees configured</div>';
   } else {
-    let totOC = 0, totOPEX = 0, totTax = 0;
+    const tot = { OC: 0, OPEX: 0, Tax: 0, Profit: 0 };
+    function addFoot(acct, amt) { if (acct in tot) tot[acct] += amt; }
     emps.forEach(emp => {
       const eTax  = emp.salary * emp.empTaxPct / 100;
       const erTax = emp.salary * emp.erTaxPct  / 100;
-      totTax += eTax;
-      if (emp.source === 'OC') totOC   += emp.salary + erTax;
-      else                     totOPEX += emp.salary + erTax;
+      addFoot(emp.source,                     emp.salary);
+      addFoot(emp.empTaxSource || 'Tax',      eTax);
+      addFoot(emp.erTaxSource  || emp.source, erTax);
+      const empSrc = emp.empTaxSource || 'Tax';
+      const erSrc  = emp.erTaxSource  || emp.source;
+      html += `<div class="footer-note">💵 <strong>${escHtml(emp.name)}:</strong> ${fmt$(emp.salary)} ${emp.source} · ${fmt$(eTax)} ${empSrc} · ${fmt$(erTax)} ${erSrc}</div>`;
     });
-    emps.forEach(emp => {
-      const eTax  = emp.salary * emp.empTaxPct / 100;
-      const erTax = emp.salary * emp.erTaxPct  / 100;
-      const src   = emp.source === 'OC' ? 'OC' : 'OPEX';
-      html += `<div class="footer-note">💵 <strong>${escHtml(emp.name)}:</strong> ${fmt$(emp.salary)} ${src} · ${fmt$(eTax)} Tax · ${fmt$(erTax)} Er</div>`;
-    });
-    const totalParts = [];
-    if (totOC   > 0) totalParts.push(fmt$(totOC)   + ' OC');
-    if (totTax  > 0) totalParts.push(fmt$(totTax)  + ' Tax');
-    if (totOPEX > 0) totalParts.push(fmt$(totOPEX) + ' OPEX');
+    const totalParts = ['OC','Tax','OPEX','Profit'].filter(k => tot[k] > 0).map(k => fmt$(tot[k]) + ' ' + k);
     html += `<div class="footer-note warn">👷 <strong>Total Payroll / Period:</strong> ${totalParts.join(' · ')}</div>`;
   }
   el.innerHTML = html;
@@ -1870,13 +1909,18 @@ function renderTable() {
     const earlyTransfers = row.earlyTransfers || [];
 
     let payrollOC = 0, payrollOPEX = 0, payrollTax = 0;
+    function addPayroll(account, amt) {
+      if      (account === 'OC')   payrollOC   += amt;
+      else if (account === 'OPEX') payrollOPEX += amt;
+      else if (account === 'Tax')  payrollTax  += amt;
+    }
     w2Emps.forEach(emp => {
       if (w2Active[emp.id] === false) return; // disabled for this row
       const empTaxAmt = emp.salary * emp.empTaxPct / 100;
       const erTaxAmt  = emp.salary * emp.erTaxPct  / 100;
-      payrollTax += empTaxAmt;
-      if (emp.source === 'OC') payrollOC   += emp.salary + erTaxAmt;
-      else                     payrollOPEX += emp.salary + erTaxAmt;
+      addPayroll(emp.source,                      emp.salary);  // salary
+      addPayroll(emp.empTaxSource || 'Tax',        empTaxAmt);  // employee tax
+      addPayroll(emp.erTaxSource  || emp.source,   erTaxAmt);   // employer tax
     });
     earlyTransfers.forEach(et => {
       const amt = parseFloat(et.amount) || 0;
