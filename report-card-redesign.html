@@ -3462,11 +3462,45 @@ var GDRIVE=(function(){
       if(restoreBtn) restoreBtn.style.display=connected?'':'none';
     },
 
-    // ── AUTO BACKUP ─────────────────────────────────────────────
+    // ── PERIODIC SYNC ───────────────────────────────────────────
+    // Every 5 min: if Drive is newer pull it, else push if dirty
     startAutoBackup:function(){
       clearInterval(self._autoTimer);
       self._autoTimer=setInterval(function(){
-        if(self.isDirty&&self.isConnected()) self.backup(true);
+        if(!self.isConnected()) return;
+        self._getOrCreateFolder(function(fid){
+          if(!fid){ if(self.isDirty) self.backup(true); return; }
+          self._findLatestFile(fid,function(file){
+            if(file){
+              var driveTime=new Date(file.modifiedTime).getTime();
+              var localTime=self.lastBackupAt||0;
+              if(driveTime>localTime){
+                self._downloadFile(file.id,function(text){
+                  if(!text) return;
+                  try{
+                    var payload=JSON.parse(text);
+                    if(!payload.version||!payload.index||!payload.patients) return;
+                    payload.index.forEach(function(pt){
+                      if(payload.patients[pt.id]){ _LS.setItem(PT_PREFIX+pt.id,JSON.stringify(payload.patients[pt.id])); }
+                    });
+                    _LS.setItem(INDEX_KEY,JSON.stringify(payload.index));
+                    if(typeof renderDash==='function') renderDash();
+                    if(typeof renderStats==='function') renderStats();
+                    self.lastBackupAt=driveTime;
+                    _LS.setItem(LS_LAST,String(self.lastBackupAt));
+                    self.isDirty=false;
+                    self.updateStatus();
+                    showToast('☁ Synced latest changes from Drive','#166534');
+                  }catch(e){}
+                });
+              } else if(self.isDirty){
+                self.backup(true);
+              }
+            } else if(self.isDirty){
+              self.backup(true);
+            }
+          });
+        });
       },5*60*1000);
     }
   };
