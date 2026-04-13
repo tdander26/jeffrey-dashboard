@@ -868,8 +868,8 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1a1a2e;mi
     <div class="field-row">
       <div class="fg"><label>Patient Name</label><input type="text"  id="fi_name"     placeholder="Full legal name"    oninput="autoSave()"></div>
       <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob"      oninput="autoSave()"></div>
-      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave()"></div>
-      <div class="fg"><label>Date of Collection</label><input type="date" id="fi_collection" oninput="autoSave()"></div>
+      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave();updateCaseWeek()"></div>
+      <div class="fg"><label>Case Week</label><div id="caseWeekDisplay" style="padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:700;color:#1a1a2e;background:white;min-height:38px">—</div></div>
       <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
       <div class="fg"><label>Email</label><input type="email"        id="fi_email"    placeholder="patient@example.com" oninput="autoSave()"></div>
@@ -2560,7 +2560,7 @@ function renderAllLabMarked(){ for(var v=1;v<=18;v++) renderLabMarked(v); }
 // ────────────────────────────────────────────────────────────────
 //  FOLLOW-UP INTERVAL — inline chip picker per visit
 // ────────────────────────────────────────────────────────────────
-var FU_PRESETS=["+1 week","+2 weeks","+3 weeks","+4 weeks","+6 weeks","+8 weeks","+12 weeks"];
+var FU_PRESETS=["+2 weeks","+3 weeks","+4 weeks","+5 weeks"];
 function _fuChipsHtml(vn){
   if(!S.followUp) S.followUp={};
   var cur=S.followUp[vn]||"";
@@ -2966,16 +2966,29 @@ function renderSymTable(){
 // ════════════════════════════════════════════════════════════════
 //  PATIENT INFO
 // ════════════════════════════════════════════════════════════════
-var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_collection:"collection",fi_provider:"provider",fi_mrn:"mrn",fi_email:"email",fi_status:"status"};
+var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",fi_mrn:"mrn",fi_email:"email",fi_status:"status"};
+
+function updateCaseWeek(){
+  var el=document.getElementById("caseWeekDisplay"); if(!el) return;
+  var start=S.patientInfo.start||(document.getElementById("fi_start")||{}).value||"";
+  if(!start){ el.textContent="—"; el.style.color="#94a3b8"; return; }
+  var ms=Date.now()-new Date(start+"T00:00:00").getTime();
+  if(ms<0){ el.textContent="Not started"; el.style.color="#94a3b8"; return; }
+  var days=Math.floor(ms/86400000);
+  var weeks=Math.floor(days/7);
+  var rem=days%7;
+  var label="Week "+(weeks+1)+(rem>0?" + "+rem+" day"+(rem===1?"":"s"):"");
+  el.textContent=label; el.style.color="#1a1a2e";
+}
 
 function loadPatientInfo(){
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.value=S.patientInfo[PI_MAP[id]]||"";
   });
-  // Update header name
   var n=S.patientInfo.name;
   document.getElementById("appPatientName").textContent="🏥 "+(n||"New Patient");
+  updateCaseWeek();
 }
 function onStatusChange(){
   var el=document.getElementById("fi_status"); if(!el) return;
