@@ -3139,43 +3139,8 @@ var GDRIVE=(function(){
           _LS.setItem(LS_TOKEN,'1');
           self._updateButtons();
           self.updateStatus();
-          // On a device with no patients, auto-restore from Drive instead of overwriting with empty data
-          var localPatients=loadIndex();
-          if(localPatients.length===0){
-            self._getOrCreateFolder(function(fid){
-              if(!fid){ self.backup(false); return; }
-              self._findLatestFile(fid,function(file){
-                if(file){
-                  var dateLabel=file.modifiedTime?file.modifiedTime.split('T')[0]:'unknown date';
-                  if(confirm('No patient records found on this device.\n\nA Drive backup from '+dateLabel+' is available. Restore it now?')){
-                    self._downloadFile(file.id,function(text){
-                      if(!text){ showToast('⚠ Failed to download backup','#b45309'); return; }
-                      try{
-                        var payload=JSON.parse(text);
-                        if(!payload.version||!payload.index||!payload.patients){ self.backup(false); return; }
-                        payload.index.forEach(function(pt){
-                          if(payload.patients[pt.id]){ _LS.setItem(PT_PREFIX+pt.id,JSON.stringify(payload.patients[pt.id])); }
-                        });
-                        _LS.setItem(INDEX_KEY,JSON.stringify(payload.index));
-                        if(typeof renderDash==='function') renderDash();
-                        if(typeof renderStats==='function') renderStats();
-                        self.lastBackupAt=Date.now();
-                        _LS.setItem(LS_LAST,String(self.lastBackupAt));
-                        self.updateStatus();
-                        showToast('☁ Restored '+payload.index.length+' patient'+(payload.index.length===1?'':'s')+' from Drive','#166534');
-                      }catch(e){ showToast('⚠ Failed to parse backup','#b45309'); }
-                    });
-                  } else {
-                    self.backup(false);
-                  }
-                } else {
-                  self.backup(false);
-                }
-              });
-            });
-          } else {
-            self.backup(false);
-          }
+          // Always sync on sign-in: pull from Drive if it's newer, otherwise push
+          self._syncOnSignIn();
         }
       });
       self._gisReady=true;
@@ -3205,6 +3170,43 @@ var GDRIVE=(function(){
     _onAuthError:function(err){
       console.error('[Drive] Auth error:',err);
       showToast('⚠ Drive sign-in failed: '+err,'#b45309');
+    },
+
+    // ── SYNC ON SIGN-IN ─────────────────────────────────────────
+    // Always runs after OAuth. If Drive has a newer backup than what
+    // this device last saw, auto-restore. Otherwise back up.
+    _syncOnSignIn:function(){
+      self._getOrCreateFolder(function(fid){
+        if(!fid){ self.backup(true); return; }
+        self._findLatestFile(fid,function(file){
+          if(!file){ self.backup(false); return; }
+          var driveTime=new Date(file.modifiedTime).getTime();
+          var localTime=self.lastBackupAt||0;
+          if(driveTime>localTime){
+            // Drive is newer — pull it down silently
+            self._downloadFile(file.id,function(text){
+              if(!text){ self.backup(false); return; }
+              try{
+                var payload=JSON.parse(text);
+                if(!payload.version||!payload.index||!payload.patients){ self.backup(false); return; }
+                payload.index.forEach(function(pt){
+                  if(payload.patients[pt.id]){ _LS.setItem(PT_PREFIX+pt.id,JSON.stringify(payload.patients[pt.id])); }
+                });
+                _LS.setItem(INDEX_KEY,JSON.stringify(payload.index));
+                if(typeof renderDash==='function') renderDash();
+                if(typeof renderStats==='function') renderStats();
+                self.lastBackupAt=driveTime;
+                _LS.setItem(LS_LAST,String(self.lastBackupAt));
+                self.updateStatus();
+                showToast('☁ Synced '+payload.index.length+' patient'+(payload.index.length===1?'':'s')+' from Drive','#166534');
+              }catch(e){ self.backup(false); }
+            });
+          } else {
+            // Local is up to date — push to Drive
+            self.backup(true);
+          }
+        });
+      });
     },
 
     // ── BACKUP ──────────────────────────────────────────────────
