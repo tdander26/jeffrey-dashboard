@@ -1141,6 +1141,9 @@ function updateIndex(id, info) {
 // ════════════════════════════════════════════════════════════════
 //  DASHBOARD TABS
 // ════════════════════════════════════════════════════════════════
+var _dashStageFilter = null; // null=all, 'red'/'yellow'/'blue'/'green'
+var _dashStagePts = {red:{}, yellow:{}, blue:{}, green:{}};
+
 function showStatsTab() {
   var ts = document.getElementById("tab-stats");
   var tp = document.getElementById("tab-patients");
@@ -1153,7 +1156,7 @@ function showStatsTab() {
   renderStats();
 }
 
-function showPatientsTab() {
+function showPatientsTab(keepFilter) {
   var ts = document.getElementById("tab-stats");
   var tp = document.getElementById("tab-patients");
   var sc = document.getElementById("statsContent");
@@ -1164,7 +1167,12 @@ function showPatientsTab() {
   if (sc) sc.style.display = "none";
   var ds = document.getElementById("dashSearch");
   if (ds) ds.value = "";
+  if (!keepFilter) _dashStageFilter = null;
   renderDash();
+}
+function filterDashByStage(stage) {
+  _dashStageFilter = stage;
+  showPatientsTab(true);
 }
 
 function renderStats() {
@@ -1175,6 +1183,7 @@ function renderStats() {
   var totalPts = idx.length;
   var activeCount = 0, dischargedCount = 0, onHoldCount = 0;
   var stageCount = {red:0, yellow:0, blue:0, green:0};
+  _dashStagePts = {red:{}, yellow:{}, blue:{}, green:{}};
   var symAgg = {};
   var findingCounts = {};
   var suppCounts = {};       // suppName → {count, pts:{}, ptSymOutcomes:[{hasB,hasG}]}
@@ -1219,8 +1228,9 @@ function renderStats() {
       visitedWeeks.sort(function(a,b){return a-b;});
 
       if (isActive) {
-        if (currentColor) stageCount[currentColor]++;
-        else stageCount.red++;
+        var sColor = currentColor || 'red';
+        stageCount[sColor]++;
+        _dashStagePts[sColor][pt.id] = true;
       }
 
       // Cumulative milestones — green counts toward blue and yellow
@@ -1331,11 +1341,11 @@ function renderStats() {
   // Row 1: Symptom stage cards (active patients only)
   var totalActiveSyms = stageCount.red + stageCount.yellow + stageCount.blue + stageCount.green;
   html += '<div class="stat-cards">';
-  html += symStageCard("\u{1F534}", stageCount.red,    "No Progress",    "#ef4444", totalActiveSyms);
-  html += symStageCard("\u{1F7E1}", stageCount.yellow, "Any Progress",   "#eab308", totalActiveSyms);
-  html += symStageCard("\u{1F535}", stageCount.blue,   "80% Better",     "#3b82f6", totalActiveSyms);
-  html += symStageCard("\u{1F7E2}", stageCount.green,  "100% Resolved",  "#22c55e", totalActiveSyms);
-  html += '<div class="stat-card" style="border-color:#e2e8f0"><div class="stat-emoji">\u{1F465}</div><div class="stat-value">' + totalPts + '</div><div class="stat-label">Total Patients</div></div>';
+  html += symStageCard("\u{1F534}", stageCount.red,    "No Progress",    "#ef4444", totalActiveSyms, "filterDashByStage('red')");
+  html += symStageCard("\u{1F7E1}", stageCount.yellow, "Any Progress",   "#eab308", totalActiveSyms, "filterDashByStage('yellow')");
+  html += symStageCard("\u{1F535}", stageCount.blue,   "80% Better",     "#3b82f6", totalActiveSyms, "filterDashByStage('blue')");
+  html += symStageCard("\u{1F7E2}", stageCount.green,  "100% Resolved",  "#22c55e", totalActiveSyms, "filterDashByStage('green')");
+  html += '<div class="stat-card" style="cursor:pointer;border-color:#e2e8f0" onclick="filterDashByStage(null)" title="View all patients"><div class="stat-emoji">\u{1F465}</div><div class="stat-value">' + totalPts + '</div><div class="stat-label">Total Patients</div></div>';
   html += '</div>';
   html += '<p style="font-size:11px;color:#94a3b8;margin:-10px 0 18px">Active patients only (' + activeCount + ' active' +
     (onHoldCount ? ', ' + onHoldCount + ' on hold' : '') +
@@ -1582,9 +1592,11 @@ function renderStats() {
   el.innerHTML = html;
 }
 
-function symStageCard(emoji, count, label, color, total) {
+function symStageCard(emoji, count, label, color, total, onclick) {
   var pct = total > 0 ? Math.round(count/total*100) : 0;
-  return '<div class="stat-card" style="border-color:' + color + '33;border-left:4px solid ' + color + '">' +
+  var extra = onclick ? ' onclick="'+onclick+'" title="View patients" style="cursor:pointer;border-color:'+color+'33;border-left:4px solid '+color+'"'
+                      : ' style="border-color:'+color+'33;border-left:4px solid '+color+'"';
+  return '<div class="stat-card"'+extra+'>' +
     '<div class="stat-emoji">' + emoji + '</div>' +
     '<div class="stat-value" style="color:' + color + '">' + count + '</div>' +
     '<div class="stat-label">' + label + '</div>' +
@@ -1668,6 +1680,11 @@ function getStatusBadgeHtml(status) {
 
 function renderDash() {
   var idx=loadIndex();
+  var stageLabels={red:"No Progress 🔴",yellow:"Any Progress 🟡",blue:"80% Better 🔵",green:"100% Resolved 🟢"};
+  if(_dashStageFilter){
+    var ids=_dashStagePts[_dashStageFilter]||{};
+    idx=idx.filter(function(p){return ids[p.id];});
+  }
   var q=(document.getElementById("dashSearch").value||"").toLowerCase().trim();
   if(q) idx=idx.filter(function(p){
     return (p.name||"").toLowerCase().includes(q)||(p.dob||"").includes(q)||(p.mrn||"").toLowerCase().includes(q);
@@ -1675,7 +1692,13 @@ function renderDash() {
   idx.sort(function(a,b){ return (b.modified||"").localeCompare(a.modified||""); });
 
   var count=loadIndex().length;
-  document.getElementById("dashCount").textContent=count+" patient"+(count===1?"":"s");
+  var dc=document.getElementById("dashCount");
+  if(_dashStageFilter){
+    dc.innerHTML='<span style="background:#f1f5f9;padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">'+stageLabels[_dashStageFilter]+'</span> '
+      +'<button onclick="_dashStageFilter=null;renderDash()" style="margin-left:6px;padding:2px 8px;border-radius:8px;border:1px solid #cbd5e1;background:white;font-size:11px;cursor:pointer">✕ Clear</button>';
+  } else {
+    dc.textContent=count+" patient"+(count===1?"":"s");
+  }
 
   var grid=document.getElementById("ptGrid");
   if(idx.length===0){
