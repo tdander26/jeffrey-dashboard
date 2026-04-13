@@ -605,6 +605,7 @@
     </div>
   </div>
   <div class="toolbar-right">
+    <span class="badge badge-blue" id="syncBadge" style="font-size:11px;padding:4px 9px">⟳ Connecting…</span>
     <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
     <button class="btn btn-primary" id="addEntryBtn" onclick="openModal()">+ Add Entry</button>
   </div>
@@ -1369,6 +1370,10 @@
   </div>
 </div>
 
+<!-- Firebase SDK (compat — works in plain HTML without a bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <!-- Early Transfers Modal -->
 <div class="et-overlay" id="etOverlay">
   <div class="et-modal">
@@ -1411,6 +1416,92 @@
 </div>
 
 <script>
+// ─────────────────────────────────────────────
+// FIREBASE — CONFIG & SYNC
+// ─────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBq77puuoon1uTmEVOFhHP9x-sixa7PD5o",
+  authDomain:        "profit-first-dashboard.firebaseapp.com",
+  projectId:         "profit-first-dashboard",
+  storageBucket:     "profit-first-dashboard.firebasestorage.app",
+  messagingSenderId: "457012175633",
+  appId:             "1:457012175633:web:1ca50f59e38346e6ade2b0"
+};
+
+let _db = null;
+
+function initFirebase() {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    _db = firebase.firestore();
+    _db.enablePersistence().catch(() => {}); // offline cache
+  } catch(e) { console.warn('Firebase init:', e); }
+}
+
+function _fsDoc() {
+  return _db ? _db.collection('dashboard').doc('main') : null;
+}
+
+function setSyncBadge(state) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const states = {
+    syncing: { text: '⟳ Syncing…',  cls: 'badge-orange' },
+    synced:  { text: '☁ Synced',    cls: 'badge-green'  },
+    local:   { text: '⚡ Local',     cls: 'badge-blue'   },
+    error:   { text: '⚠ Sync error', cls: 'badge-red'   }
+  };
+  const s = states[state] || states.local;
+  el.textContent = s.text;
+  el.className   = 'badge ' + s.cls;
+}
+
+// Write all data to Firestore (fire-and-forget on every save)
+function saveToFirestore() {
+  const doc = _fsDoc();
+  if (!doc) return;
+  setSyncBadge('syncing');
+  try {
+    const entries        = JSON.parse(localStorage.getItem('profitfirst_data') || '[]');
+    const w2Employees    = JSON.parse(localStorage.getItem('w2_employees')     || '[]');
+    const taxCheckboxes  = {};
+    ['2024','2025','2026'].forEach(yr => {
+      const raw = localStorage.getItem('tax_checkboxes_' + yr);
+      if (raw) taxCheckboxes[yr] = JSON.parse(raw);
+    });
+    doc.set({ entries, w2Employees, taxCheckboxes })
+      .then(()  => setSyncBadge('synced'))
+      .catch(()  => setSyncBadge('error'));
+  } catch(e) { setSyncBadge('error'); }
+}
+
+// Pull latest from Firestore into localStorage, then re-render
+async function syncFromFirestore() {
+  const doc = _fsDoc();
+  if (!doc) { setSyncBadge('local'); return; }
+  setSyncBadge('syncing');
+  try {
+    const snap = await doc.get();
+    if (!snap.exists) { setSyncBadge('synced'); return; } // first open, nothing there yet
+    const d = snap.data();
+    if (d.entries)       localStorage.setItem('profitfirst_data', JSON.stringify(d.entries));
+    if (d.w2Employees)   localStorage.setItem('w2_employees',     JSON.stringify(d.w2Employees));
+    if (d.taxCheckboxes) {
+      Object.entries(d.taxCheckboxes).forEach(([yr, v]) =>
+        localStorage.setItem('tax_checkboxes_' + yr, JSON.stringify(v))
+      );
+    }
+    setSyncBadge('synced');
+    // Re-render with fresh cloud data
+    renderTable();
+    renderW2Panel();
+    renderFooter();
+    initCheckboxes('2024');
+    initCheckboxes('2025');
+    initCheckboxes('2026');
+  } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
+}
+
 // ─────────────────────────────────────────────
 // DEFAULT DATA
 // ─────────────────────────────────────────────
@@ -1461,6 +1552,7 @@ function loadData() {
 
 function saveData(data) {
   localStorage.setItem('profitfirst_data', JSON.stringify(data));
+  saveToFirestore();
 }
 
 function loadCheckboxes(year) {
@@ -1472,6 +1564,7 @@ function loadCheckboxes(year) {
 
 function saveCheckboxes(year, obj) {
   localStorage.setItem('tax_checkboxes_' + (year || '2026'), JSON.stringify(obj));
+  saveToFirestore();
 }
 
 // ─────────────────────────────────────────────
@@ -1512,6 +1605,7 @@ function loadW2Employees() {
 
 function saveW2Employees(emps) {
   localStorage.setItem('w2_employees', JSON.stringify(emps));
+  saveToFirestore();
 }
 
 // ─────────────────────────────────────────────
@@ -2203,12 +2297,14 @@ document.getElementById('etOverlay').addEventListener('click', function(e) {
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
-renderTable();
+initFirebase();
+renderTable();       // instant render from localStorage
 renderW2Panel();
 renderFooter();
 initCheckboxes('2024');
 initCheckboxes('2025');
 initCheckboxes('2026');
+syncFromFirestore(); // then pull latest from cloud in background
 </script>
 </body>
 </html>
