@@ -33,6 +33,72 @@
   --shadow-amber:0 4px 16px rgba(200,130,10,.25);
   color-scheme:dark;
 }
+html[data-theme="light"]{
+  --bg-body:#F7F8FA;--bg-card:#FFFFFF;--bg-surface:#F1F3F5;
+  --bg-input:rgba(0,0,0,.03);--bg-input-hover:rgba(0,0,0,.06);
+  --border-subtle:rgba(0,0,0,.06);--border-dim:rgba(0,0,0,.1);--border-medium:rgba(0,0,0,.18);
+  --amber:#B07209;--amber-bright:#926008;--amber-dim:rgba(176,114,9,.08);--amber-glow:0 0 0 3px rgba(176,114,9,.15);
+  --text-primary:#111827;--text-secondary:#4B5563;--text-muted:#6B7280;--text-dim:#9CA3AF;
+  --shadow-card:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow-modal:0 20px 48px rgba(0,0,0,.12),0 8px 16px rgba(0,0,0,.06);
+  --shadow-amber:0 4px 12px rgba(176,114,9,.12);
+  color-scheme:light;
+}
+/* ── LIGHT MODE: hardcoded color overrides ── */
+html[data-theme="light"] #pwOverlay,
+html[data-theme="light"] .lock-overlay{background:radial-gradient(ellipse at 50% 40%,rgba(176,114,9,.05) 0%,transparent 60%),linear-gradient(160deg,#F7F8FA 0%,#EEF0F2 100%)}
+html[data-theme="light"] .pw-box button{color:#fff}
+html[data-theme="light"] .pw-hipaa{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.15);color:#15803d}
+html[data-theme="light"] .pw-error{background:rgba(239,68,68,.06);color:#dc2626}
+html[data-theme="light"] #toast{background:#1F2937;color:#F9FAFB}
+html[data-theme="light"] .btn-light{background:rgba(0,0,0,.04);border-color:var(--border-dim)}
+html[data-theme="light"] .btn-light:hover{background:rgba(0,0,0,.08);border-color:var(--border-medium)}
+html[data-theme="light"] .btn-drive{background:rgba(0,0,0,.03);border-color:var(--border-dim);color:var(--text-secondary)}
+html[data-theme="light"] .btn-drive:hover{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .btn-drive-active{color:#fff}
+html[data-theme="light"] .fg select option{background:#fff;color:var(--text-primary)}
+html[data-theme="light"] .sym-table th,
+html[data-theme="light"] .stats-table th{background:#F3F4F6}
+html[data-theme="light"] .stats-table td:first-child{background:rgba(0,0,0,.02)}
+html[data-theme="light"] .stats-table tr:hover td{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .sym-cell,
+html[data-theme="light"] .mcell,
+html[data-theme="light"] .msk-cell{background:rgba(0,0,0,.02)}
+html[data-theme="light"] .sym-cell:hover,
+html[data-theme="light"] .mcell:hover,
+html[data-theme="light"] .msk-cell:hover{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .cb-btn{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .cb-btn:hover,
+html[data-theme="light"] .cb-btn.active{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .cb-clr:hover{background:rgba(0,0,0,.05)}
+html[data-theme="light"] .vsec-title{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .vsec-toggle:hover{background:rgba(0,0,0,.04)}
+html[data-theme="light"] .tag-pill{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .tag-pill:hover{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .tag-pill.active{color:#fff}
+html[data-theme="light"] .offender-btn{background:rgba(0,0,0,.04)}
+html[data-theme="light"] .offender-btn:hover{background:rgba(0,0,0,.08)}
+html[data-theme="light"] .tag-panel{background:rgba(0,0,0,.02)}
+html[data-theme="light"] .opp-item:hover{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .opp-done{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .opp-done:hover{background:rgba(0,0,0,.06)}
+html[data-theme="light"] .supp-brand-hdr{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .supp-brand-hdr:hover{background:rgba(0,0,0,.05)}
+html[data-theme="light"] .supp-brand-count{background:rgba(0,0,0,.05)}
+html[data-theme="light"] .sym-table td:first-child{background:rgba(0,0,0,.02)}
+html[data-theme="light"] .dash-tab:hover:not(.active){background:rgba(0,0,0,.03)}
+html[data-theme="light"] .stat-card{background:#fff;border-color:#E5E7EB}
+html[data-theme="light"] .modal-overlay{background:rgba(0,0,0,.25)}
+html[data-theme="light"] .phase-tab.active,
+html[data-theme="light"] .today-btn:hover,
+html[data-theme="light"] .modal-done-btn,
+html[data-theme="light"] .fu-chip.active,
+html[data-theme="light"] .fu-custom button{color:#fff}
+html[data-theme="light"] .qp-back-btn{background:rgba(0,0,0,.04);border-color:var(--border-dim);color:var(--text-secondary)}
+html[data-theme="light"] #macroModalFooter .btn-light,
+html[data-theme="light"] .modal-done-bar .btn-light,
+html[data-theme="light"] .modal-body .btn-light{background:rgba(0,0,0,.04)!important;border-color:var(--border-dim)!important}
+.theme-toggle{font-size:16px;padding:6px 10px;min-width:36px;line-height:1}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-body);color:var(--text-primary);min-height:100vh}
 
@@ -886,6 +952,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
       <button id="driveConnectBtn" class="btn btn-drive" onclick="GDRIVE.signIn(null,true)" title="Connect Google Drive for automatic cloud backups">☁ Connect Drive</button>
       <button id="driveBackupBtn" class="btn btn-drive-active" onclick="GDRIVE.backup(false)" style="display:none" title="Backup all patient records to Google Drive now">☁ Backup Now</button>
       <button id="driveRestoreBtn" class="btn btn-drive" onclick="GDRIVE.restore()" style="display:none" title="Restore from the most recent Drive backup">↩ Restore</button>
+      <button class="btn btn-light theme-toggle" onclick="toggleTheme()" title="Switch to light mode">☀️</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
@@ -926,6 +993,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
       <button class="btn btn-light" style="background:rgba(168,85,247,.22);color:white" onclick="openMacroModal()">⚡ Macros</button>
       <button class="btn btn-green" onclick="saveAll()">💾 Save</button>
       <button class="settings-btn" title="Settings" onclick="openSettings()">⚙️</button>
+      <button class="btn btn-light theme-toggle" onclick="toggleTheme()" title="Switch to light mode">☀️</button>
       <button class="btn btn-danger" onclick="logout()">🔒 Lock</button>
     </div>
   </div>
@@ -6099,6 +6167,33 @@ document.addEventListener('keydown',function(e){
   var end=text.indexOf(']',idx);
   ta.setSelectionRange(idx, end===-1?idx+1:end+1);
 },true);
+
+// ════════════════════════════════════════════════════════════════
+//  THEME TOGGLE (light / dark)
+// ════════════════════════════════════════════════════════════════
+function toggleTheme(){
+  var html=document.documentElement;
+  var isLight=html.getAttribute('data-theme')==='light';
+  html.setAttribute('data-theme',isLight?'dark':'light');
+  localStorage.setItem('mhw_theme',isLight?'dark':'light');
+  _updateThemeIcons();
+}
+function _updateThemeIcons(){
+  var isLight=document.documentElement.getAttribute('data-theme')==='light';
+  var icon=isLight?'🌙':'☀️';
+  var title=isLight?'Switch to dark mode':'Switch to light mode';
+  document.querySelectorAll('.theme-toggle').forEach(function(b){
+    b.textContent=icon; b.title=title;
+  });
+  var meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content=isLight?'#F7F8FA':'#0D0F14';
+}
+// Restore saved theme immediately
+(function(){
+  var saved=localStorage.getItem('mhw_theme');
+  if(saved==='light') document.documentElement.setAttribute('data-theme','light');
+})();
+_updateThemeIcons();
 </script>
 </body>
 </html>
