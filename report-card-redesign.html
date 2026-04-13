@@ -438,6 +438,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
   .card{padding:16px 14px}
   .modal-overlay{align-items:flex-end;padding:0}
   .modal-card{border-radius:14px 14px 0 0;position:fixed;bottom:0;max-height:85vh}
+  .compl-group-fu{margin-left:0;flex:0 0 100%}
+  .fu-bar{padding:6px 0}
 }
 
 /* ══════════════════════════════════════
@@ -573,7 +575,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 /* ══════════════════════════════════════
    COMPLIANCE LETTER GRADES (per visit)
 ══════════════════════════════════════ */
-.compl-bar{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border-subtle);margin-top:8px}
+.compl-bar{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border-subtle);margin-top:8px;flex-wrap:wrap}
+.compl-group-fu{margin-left:auto}
 .compl-group{display:flex;align-items:center;gap:5px}
 .compl-label{font-size:10px;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
 .compl-pills{display:flex;gap:2px}
@@ -1007,12 +1010,16 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
     <div class="card-title">👤 Patient Information</div>
     <div class="field-row">
       <div class="fg"><label>Patient Name</label><input type="text"  id="fi_name"     placeholder="Full legal name"    oninput="autoSave()"></div>
-      <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob"      oninput="autoSave()"></div>
-      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave();updateCaseWeek()"></div>
-      <div class="fg"><label>Case Week</label><div id="caseWeekDisplay" style="padding:9px 12px;border:1.5px solid var(--border-dim);border-radius:var(--r-input);font-size:13px;font-weight:700;color:var(--text-primary);background:var(--bg-input);min-height:38px">—</div></div>
       <div class="fg"><label>Provider</label><input type="text"      id="fi_provider" placeholder="Dr. Todd Anderson" oninput="autoSave()"></div>
       <div class="fg"><label>Chart / MRN</label><input type="text"   id="fi_mrn"      placeholder="Chart number"       oninput="autoSave()"></div>
       <div class="fg"><label>Email</label><input type="email"        id="fi_email"    placeholder="patient@example.com" oninput="autoSave()"></div>
+    </div>
+    <div class="field-row" style="margin-top:10px">
+      <div class="fg"><label>Date of Birth</label><input type="date" id="fi_dob"      oninput="autoSave()"></div>
+      <div class="fg"><label>Case Start Date</label><input type="date" id="fi_start"  oninput="autoSave();updateCaseWeek()" onchange="autoSave();updateCaseWeek()"></div>
+      <div class="fg"><label>Case Week</label><div id="caseWeekDisplay" style="padding:9px 12px;border:1.5px solid var(--border-dim);border-radius:var(--r-input);font-size:13px;font-weight:700;color:var(--text-primary);background:var(--bg-input);min-height:38px">—</div></div>
+    </div>
+    <div class="field-row" style="margin-top:10px">
       <div class="fg"><label>Status</label>
         <select id="fi_status" onchange="onStatusChange(); autoSave()">
           <option value="active">Active</option>
@@ -3048,7 +3055,7 @@ function buildVisitCard(vn){
         '<span class="compl-label">💊 Supp</span>'+
         '<div class="compl-pills" id="supp'+vn+'">'+_complPillsHtml(vn,"supp")+'</div>'+
       '</div>'+
-      '<div class="compl-group" style="margin-left:auto">'+
+      '<div class="compl-group compl-group-fu">'+
         '<span class="compl-label">📅 Follow-up</span>'+
         '<div class="fu-bar" id="fuBar'+vn+'" style="margin:0">'+_fuChipsHtml(vn)+'</div>'+
       '</div>'+
@@ -3189,7 +3196,7 @@ var PI_MAP={fi_name:"name",fi_dob:"dob",fi_start:"start",fi_provider:"provider",
 
 function updateCaseWeek(){
   var el=document.getElementById("caseWeekDisplay"); if(!el) return;
-  var start=S.patientInfo.start||(document.getElementById("fi_start")||{}).value||"";
+  var start=(document.getElementById("fi_start")||{}).value||S.patientInfo.start||"";
   if(!start){ el.textContent="—"; el.style.color="var(--text-muted)"; return; }
   var ms=Date.now()-new Date(start+"T00:00:00").getTime();
   if(ms<0){ el.textContent="Not started"; el.style.color="var(--text-muted)"; return; }
