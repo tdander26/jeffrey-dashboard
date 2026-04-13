@@ -481,6 +481,106 @@
   .badge-green { background: rgba(52,199,89,0.1); color: #34c759; }
   .badge-orange { background: rgba(255,149,0,0.1); color: #FF9500; }
   .badge-red { background: rgba(255,59,48,0.1); color: #FF3B30; }
+
+  /* ── W2 / Payroll Settings Panel ── */
+  .w2-panel-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 20px; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    user-select: none; transition: background 0.12s;
+  }
+  .w2-panel-toggle:hover { background: #f9f9fb; }
+  .w2-arrow { display: inline-block; transition: transform 0.18s; font-size: 11px; color: #86868b; }
+  .w2-arrow.open { transform: rotate(90deg); }
+  .w2-panel-body { display: none; padding: 16px 20px 20px; }
+  .w2-panel-body.open { display: block; }
+
+  .w2-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .w2-tbl th { background: #f5f5f7; padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .w2-tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .w2-tbl tr:last-child td { border-bottom: none; }
+  .w2-tbl tr:hover td { background: #f9f9fb; }
+
+  .src-toggle { display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid rgba(0,0,0,0.12); }
+  .src-toggle button { border: none; background: transparent; padding: 3px 10px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; color: #86868b; transition: all 0.12s; }
+  .src-toggle .st-oc.active  { background: #34c759; color: #fff; }
+  .src-toggle .st-opex.active { background: #FF9500; color: #fff; }
+
+  /* ── W2 Row Badges ── */
+  .w2-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 5px;
+    font-size: 10px; font-weight: 700; cursor: pointer;
+    border: 1.5px solid transparent; transition: all 0.12s; user-select: none;
+  }
+  .w2-badge.on-oc   { background: rgba(52,199,89,0.12); color: #34c759; border-color: rgba(52,199,89,0.3); }
+  .w2-badge.on-opex { background: rgba(255,149,0,0.12); color: #FF9500; border-color: rgba(255,149,0,0.3); }
+  .w2-badge.off     { background: rgba(0,0,0,0.04); color: #c7c7cc; border-color: rgba(0,0,0,0.1); }
+  .w2-cell { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; min-width: 44px; }
+
+  /* ── Adj amounts (inline in Tax$, OC$, OPEX$ cells) ── */
+  .adj-line { font-size: 10.5px; font-weight: 600; display: block; margin-top: 2px; white-space: nowrap; }
+  .adj-line.pos  { color: #34c759; }
+  .adj-line.neg  { color: #FF3B30; }
+  .adj-line.zero { color: #86868b; }
+
+  /* ── Early Transfer button (appears in last column on row hover) ── */
+  .et-btn {
+    background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2);
+    color: #FF9500; border-radius: 4px; padding: 2px 5px; font-size: 10px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+    opacity: 0; transition: opacity 0.15s; white-space: nowrap;
+    margin-right: 4px;
+  }
+  tr:hover .et-btn { opacity: 1; }
+  .et-btn.has-et { opacity: 1; }
+  .et-btn:hover { background: rgba(255,149,0,0.18); }
+
+  /* ── Early Transfer Modal ── */
+  .et-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .et-overlay.open { display: flex; }
+  .et-modal {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+    width: 540px; max-width: 95vw; overflow: hidden;
+    animation: modal-in 0.2s ease;
+  }
+  .et-list { display: flex; flex-direction: column; gap: 8px; }
+  .et-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; background: #f5f5f7; border-radius: 8px; font-size: 13px;
+  }
+  .et-acct { font-weight: 700; padding: 2px 7px; border-radius: 5px; font-size: 11px; flex-shrink: 0; }
+  .et-acct.acct-opex   { background: rgba(255,149,0,0.12); color: #FF9500; }
+  .et-acct.acct-tax    { background: rgba(255,59,48,0.1);  color: #FF3B30; }
+  .et-acct.acct-oc     { background: rgba(52,199,89,0.1);  color: #34c759; }
+  .et-acct.acct-profit { background: rgba(0,122,255,0.1);  color: #007AFF; }
+  .et-amt  { font-weight: 600; min-width: 75px; }
+  .et-note { color: #636366; flex: 1; font-size: 12px; }
+  .et-del-btn { background: none; border: none; cursor: pointer; color: #FF3B30; opacity: 0.4; font-size: 13px; padding: 2px 5px; border-radius: 4px; transition: opacity 0.12s, background 0.12s; flex-shrink: 0; }
+  .et-del-btn:hover { opacity: 1; background: rgba(255,59,48,0.1); }
+  .et-empty { text-align: center; color: #86868b; font-size: 13px; padding: 20px 0; font-style: italic; }
+  .et-add-row {
+    display: grid; grid-template-columns: 110px 110px 1fr auto;
+    gap: 8px; align-items: end;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .et-add-row .form-label { margin-bottom: 4px; }
+  .et-add-row select, .et-add-row input {
+    padding: 8px 10px; border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 8px; font-size: 13px; font-family: inherit;
+    background: #fff; outline: none; color: #1d1d1f;
+    transition: border-color 0.15s, box-shadow 0.15s; width: 100%;
+  }
+  .et-add-row select:focus, .et-add-row input:focus {
+    border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
 </style>
 </head>
 <body>
@@ -513,6 +613,22 @@
 
   <!-- ══ Tab 1: Profit First ══ -->
   <div id="tab-profitfirst" class="tab-content active">
+
+    <!-- W2 / Payroll Settings Panel -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="w2-panel-toggle" onclick="toggleW2Panel()">
+        <span class="w2-arrow" id="w2Arrow">▶</span>
+        <span>Payroll / W2 Settings</span>
+        <span id="w2PanelSummary" style="font-size:12px;color:#86868b;font-weight:400;margin-left:6px"></span>
+      </div>
+      <div class="w2-panel-body" id="w2PanelBody">
+        <div id="w2SettingsContent"></div>
+        <div style="margin-top:12px">
+          <button class="btn btn-secondary btn-sm" onclick="addW2Employee()">+ Add Employee</button>
+        </div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">
         <div>
@@ -539,6 +655,7 @@
               <th>OC $</th>
               <th>OPEX %</th>
               <th>OPEX $</th>
+              <th id="w2ColHeader" style="min-width:50px;text-align:center">W2</th>
               <th class="col-notes" style="min-width:160px">Notes</th>
               <th>100%</th>
               <th></th>
@@ -1184,13 +1301,10 @@
 
 </div><!-- end main -->
 
-<!-- Profit First Footer -->
+<!-- Profit First Footer (dynamic) -->
 <div class="pf-footer visible" id="pfFooter">
-  <div class="footer-notes">
-    <div class="footer-note">📧 <strong>Use:</strong> profit@drtoddanderson.com</div>
-    <div class="footer-note">💵 <strong>W2:</strong> $3,004.56 OC · $745.44 Tax · $375.84 OPEX</div>
-    <div class="footer-note warn">⚠️ <strong>Min Tax:</strong> $2,500 (incl. $745)</div>
-    <div class="footer-note warn">👷 <strong>Employee Payroll:</strong> $2,500 total ($2,307 OPEX + $200 Tax)</div>
+  <div class="footer-notes" id="footerNotes">
+    <!-- rendered by renderFooter() -->
   </div>
 </div>
 
@@ -1241,6 +1355,47 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" onclick="addEntry()">Add Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Early Transfers Modal -->
+<div class="et-overlay" id="etOverlay">
+  <div class="et-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="etModalTitle">Early Transfers</div>
+      <button class="modal-close" onclick="closeETModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#636366;margin-bottom:14px;line-height:1.6">
+        Document funds pulled from income <em>before</em> the regular allocation. Each entry reduces the net transfer needed for that account — so you don't double-move money.
+      </p>
+      <div id="etList"></div>
+      <div class="et-add-row">
+        <div>
+          <div class="form-label">Account</div>
+          <select id="et_account">
+            <option value="OPEX">OPEX</option>
+            <option value="Tax">Tax</option>
+            <option value="OC">OC</option>
+            <option value="Profit">Profit</option>
+          </select>
+        </div>
+        <div>
+          <div class="form-label">Amount ($)</div>
+          <input id="et_amount" type="number" step="0.01" placeholder="0.00" />
+        </div>
+        <div>
+          <div class="form-label">Reason / Note</div>
+          <input id="et_note" type="text" placeholder="e.g. Covered rent early" />
+        </div>
+        <div style="padding-top:20px">
+          <button class="btn btn-primary btn-sm" onclick="addEarlyTransfer()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeETModal()">Done</button>
     </div>
   </div>
 </div>
@@ -1322,6 +1477,259 @@ function calcDollar(total, pct) {
 }
 
 // ─────────────────────────────────────────────
+// W2 EMPLOYEES — STORAGE & DEFAULTS
+// ─────────────────────────────────────────────
+const W2_DEFAULTS = [
+  { id: 'emp_1', name: 'Dr. Todd (W2)', source: 'OC',   salary: 3004.56, empTaxPct: 24.79, erTaxPct: 12.50 },
+  { id: 'emp_2', name: 'Employee',      source: 'OPEX', salary: 2307.00, empTaxPct:  8.67, erTaxPct:  0.00 }
+];
+
+function loadW2Employees() {
+  try {
+    const raw = localStorage.getItem('w2_employees');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return W2_DEFAULTS.map(e => ({...e}));
+}
+
+function saveW2Employees(emps) {
+  localStorage.setItem('w2_employees', JSON.stringify(emps));
+}
+
+// ─────────────────────────────────────────────
+// W2 PANEL — TOGGLE & RENDER
+// ─────────────────────────────────────────────
+function toggleW2Panel() {
+  document.getElementById('w2PanelBody').classList.toggle('open');
+  document.getElementById('w2Arrow').classList.toggle('open');
+}
+
+function renderW2Panel() {
+  const emps = loadW2Employees();
+  const content = document.getElementById('w2SettingsContent');
+  const summary = document.getElementById('w2PanelSummary');
+
+  // Build summary for collapsed header
+  if (emps.length === 0) {
+    summary.textContent = '(no employees configured)';
+  } else {
+    let totOC = 0, totOPEX = 0, totTax = 0;
+    emps.forEach(emp => {
+      const eTax = emp.salary * emp.empTaxPct / 100;
+      const erTax = emp.salary * emp.erTaxPct / 100;
+      totTax += eTax;
+      if (emp.source === 'OC') totOC += emp.salary + erTax;
+      else                     totOPEX += emp.salary + erTax;
+    });
+    const parts = [];
+    if (totOC   > 0) parts.push(fmt$(totOC)   + ' OC');
+    if (totTax  > 0) parts.push(fmt$(totTax)  + ' Tax');
+    if (totOPEX > 0) parts.push(fmt$(totOPEX) + ' OPEX');
+    summary.textContent = emps.length + ' employee' + (emps.length > 1 ? 's' : '') + ' · ' + parts.join(' · ');
+  }
+
+  if (emps.length === 0) {
+    content.innerHTML = '<div style="color:#86868b;font-size:13px;font-style:italic;padding:4px 0 8px">No employees configured. Click "+ Add Employee" to get started.</div>';
+    return;
+  }
+
+  let html = `<table class="w2-tbl">
+    <thead><tr>
+      <th>Name</th>
+      <th>Account</th>
+      <th>Salary / Period</th>
+      <th>Emp Tax %</th>
+      <th>Er Tax %</th>
+      <th>Emp Tax $</th>
+      <th>Er Tax $</th>
+      <th></th>
+    </tr></thead>
+    <tbody>`;
+
+  emps.forEach(emp => {
+    const empTaxAmt = emp.salary * emp.empTaxPct / 100;
+    const erTaxAmt  = emp.salary * emp.erTaxPct  / 100;
+    html += `<tr>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="name" onblur="w2FieldEdit(this)">${escHtml(emp.name)}</span></td>
+      <td>
+        <div class="src-toggle">
+          <button class="st-oc${emp.source==='OC'?' active':''}" onclick="setW2Source('${emp.id}','OC')">OC</button>
+          <button class="st-opex${emp.source==='OPEX'?' active':''}" onclick="setW2Source('${emp.id}','OPEX')">OPEX</button>
+        </div>
+      </td>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
+      <td style="color:#FF3B30;font-weight:500">${fmt$(empTaxAmt)}</td>
+      <td style="color:#FF9500;font-weight:500">${fmt$(erTaxAmt)}</td>
+      <td><button class="delete-btn" style="opacity:1" onclick="deleteW2Employee('${emp.id}')" title="Remove">🗑</button></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  content.innerHTML = html;
+}
+
+function addW2Employee() {
+  const emps = loadW2Employees();
+  emps.push({ id: 'emp_' + Date.now(), name: 'New Employee', source: 'OPEX', salary: 0, empTaxPct: 0, erTaxPct: 0 });
+  saveW2Employees(emps);
+  renderW2Panel();
+  renderTable();
+  renderFooter();
+}
+
+function deleteW2Employee(id) {
+  if (!confirm('Remove this employee from payroll settings?')) return;
+  let emps = loadW2Employees();
+  emps = emps.filter(e => e.id !== id);
+  saveW2Employees(emps);
+  renderW2Panel();
+  renderTable();
+  renderFooter();
+}
+
+function w2FieldEdit(el) {
+  const empId = el.dataset.empid;
+  const field  = el.dataset.field;
+  let val = el.innerText.trim();
+  if (['salary','empTaxPct','erTaxPct'].includes(field)) val = parseFloat(val) || 0;
+  const emps = loadW2Employees();
+  const emp  = emps.find(e => e.id === empId);
+  if (emp) {
+    emp[field] = val;
+    saveW2Employees(emps);
+    renderW2Panel();
+    renderTable();
+    renderFooter();
+  }
+}
+
+function setW2Source(empId, source) {
+  const emps = loadW2Employees();
+  const emp  = emps.find(e => e.id === empId);
+  if (emp) {
+    emp.source = source;
+    saveW2Employees(emps);
+    renderW2Panel();
+    renderTable();
+    renderFooter();
+  }
+}
+
+function toggleW2Active(rowIdx, empId) {
+  const data = loadData();
+  const row  = data[rowIdx];
+  if (!row.w2Active) row.w2Active = {};
+  const current = row.w2Active[empId] !== false; // undefined = active by default
+  row.w2Active[empId] = !current;
+  saveData(data);
+  pfData = data;
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// FOOTER — DYNAMIC W2 SUMMARY
+// ─────────────────────────────────────────────
+function renderFooter() {
+  const emps  = loadW2Employees();
+  const el    = document.getElementById('footerNotes');
+  let html    = '<div class="footer-note">📧 <strong>Use:</strong> profit@drtoddanderson.com</div>';
+
+  if (emps.length === 0) {
+    html += '<div class="footer-note">💵 <strong>W2:</strong> No employees configured</div>';
+  } else {
+    let totOC = 0, totOPEX = 0, totTax = 0;
+    emps.forEach(emp => {
+      const eTax  = emp.salary * emp.empTaxPct / 100;
+      const erTax = emp.salary * emp.erTaxPct  / 100;
+      totTax += eTax;
+      if (emp.source === 'OC') totOC   += emp.salary + erTax;
+      else                     totOPEX += emp.salary + erTax;
+    });
+    emps.forEach(emp => {
+      const eTax  = emp.salary * emp.empTaxPct / 100;
+      const erTax = emp.salary * emp.erTaxPct  / 100;
+      const src   = emp.source === 'OC' ? 'OC' : 'OPEX';
+      html += `<div class="footer-note">💵 <strong>${escHtml(emp.name)}:</strong> ${fmt$(emp.salary)} ${src} · ${fmt$(eTax)} Tax · ${fmt$(erTax)} Er</div>`;
+    });
+    const totalParts = [];
+    if (totOC   > 0) totalParts.push(fmt$(totOC)   + ' OC');
+    if (totTax  > 0) totalParts.push(fmt$(totTax)  + ' Tax');
+    if (totOPEX > 0) totalParts.push(fmt$(totOPEX) + ' OPEX');
+    html += `<div class="footer-note warn">👷 <strong>Total Payroll / Period:</strong> ${totalParts.join(' · ')}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// EARLY TRANSFERS
+// ─────────────────────────────────────────────
+let etCurrentRowIdx = null;
+
+function openETModal(rowIdx) {
+  etCurrentRowIdx = rowIdx;
+  const data = loadData();
+  document.getElementById('etModalTitle').textContent = 'Early Transfers — ' + data[rowIdx].date;
+  renderETList();
+  document.getElementById('etOverlay').classList.add('open');
+}
+
+function closeETModal() {
+  document.getElementById('etOverlay').classList.remove('open');
+  etCurrentRowIdx = null;
+}
+
+function renderETList() {
+  const data = loadData();
+  const ets  = (data[etCurrentRowIdx].earlyTransfers) || [];
+  const el   = document.getElementById('etList');
+  if (ets.length === 0) {
+    el.innerHTML = '<div class="et-empty">No early transfers logged for this period.</div>';
+    return;
+  }
+  let html = '<div class="et-list">';
+  ets.forEach((et, i) => {
+    const acctCls = 'acct-' + et.account.toLowerCase();
+    html += `<div class="et-item">
+      <span class="et-acct ${acctCls}">${escHtml(et.account)}</span>
+      <span class="et-amt">${fmt$(et.amount)}</span>
+      <span class="et-note">${escHtml(et.note || '')}</span>
+      <button class="et-del-btn" onclick="deleteEarlyTransfer(${i})" title="Remove">🗑</button>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function addEarlyTransfer() {
+  const account = document.getElementById('et_account').value;
+  const amount  = parseFloat(document.getElementById('et_amount').value) || 0;
+  const note    = document.getElementById('et_note').value.trim();
+  if (!amount) { alert('Please enter an amount.'); return; }
+  const data = loadData();
+  const row  = data[etCurrentRowIdx];
+  if (!row.earlyTransfers) row.earlyTransfers = [];
+  row.earlyTransfers.push({ account, amount, note });
+  saveData(data);
+  pfData = data;
+  document.getElementById('et_amount').value = '';
+  document.getElementById('et_note').value   = '';
+  renderETList();
+  renderTable();
+}
+
+function deleteEarlyTransfer(etIdx) {
+  const data = loadData();
+  const row  = data[etCurrentRowIdx];
+  row.earlyTransfers.splice(etIdx, 1);
+  saveData(data);
+  pfData = data;
+  renderETList();
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
 // SHOW ALL TOGGLE
 // ─────────────────────────────────────────────
 let pfShowAll = false;
@@ -1338,6 +1746,7 @@ let pfData = [];
 
 function renderTable() {
   pfData = loadData();
+  const w2Emps = loadW2Employees();
   const tbody = document.getElementById('pfBody');
   const tfoot = document.getElementById('pfFoot');
   const toggleBtn = document.getElementById('pfToggleBtn');
@@ -1345,7 +1754,7 @@ function renderTable() {
   const totalCountEl = document.getElementById('pfTotalCount');
 
   const totalRows = pfData.length;
-  const PREVIEW_COUNT = 10;
+  const PREVIEW_COUNT = 5;
 
   // Update toggle bar
   totalCountEl.textContent = totalRows;
@@ -1390,11 +1799,60 @@ function renderTable() {
     const pSum = (parseFloat(row.profit)||0) + (parseFloat(row.tax)||0) + (parseFloat(row.oc)||0) + (parseFloat(row.opex)||0);
     const isError = pSum !== 100;
 
-    const total = parseFloat(row.total) || 0;
+    const total  = parseFloat(row.total) || 0;
     const profitD = calcDollar(total, row.profit);
     const taxD    = calcDollar(total, row.tax);
     const ocD     = calcDollar(total, row.oc);
     const opexD   = calcDollar(total, row.opex);
+
+    // ── Payroll deductions for this row ──────────────────
+    const w2Active      = row.w2Active      || {};
+    const earlyTransfers = row.earlyTransfers || [];
+
+    let payrollOC = 0, payrollOPEX = 0, payrollTax = 0;
+    w2Emps.forEach(emp => {
+      if (w2Active[emp.id] === false) return; // disabled for this row
+      const empTaxAmt = emp.salary * emp.empTaxPct / 100;
+      const erTaxAmt  = emp.salary * emp.erTaxPct  / 100;
+      payrollTax += empTaxAmt;
+      if (emp.source === 'OC') payrollOC   += emp.salary + erTaxAmt;
+      else                     payrollOPEX += emp.salary + erTaxAmt;
+    });
+    earlyTransfers.forEach(et => {
+      const amt = parseFloat(et.amount) || 0;
+      if      (et.account === 'Tax')    payrollTax  += amt;
+      else if (et.account === 'OC')     payrollOC   += amt;
+      else if (et.account === 'OPEX')   payrollOPEX += amt;
+    });
+
+    const hasPayroll = payrollOC > 0.005 || payrollOPEX > 0.005 || payrollTax > 0.005;
+    const adjTax  = taxD  - payrollTax;
+    const adjOC   = ocD   - payrollOC;
+    const adjOPEX = opexD - payrollOPEX;
+
+    // Returns an "→ $X" line shown below the base allocation when payroll applies
+    function adjLine(adj) {
+      if (!hasPayroll) return '';
+      const cls = adj > 0.005 ? 'pos' : (adj < -0.005 ? 'neg' : 'zero');
+      return `<span class="adj-line ${cls}" title="After payroll deductions">→ ${fmt$(adj)}</span>`;
+    }
+
+    // ── W2 badge toggles ─────────────────────────────────
+    let w2Html = '<div class="w2-cell">';
+    if (w2Emps.length === 0) {
+      w2Html += '<span style="color:#c7c7cc;font-size:11px">—</span>';
+    } else {
+      w2Emps.forEach(emp => {
+        const isOn = w2Active[emp.id] !== false;
+        const initials = emp.name.trim().split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+        const cls = isOn ? (emp.source === 'OC' ? 'on-oc' : 'on-opex') : 'off';
+        w2Html += `<span class="w2-badge ${cls}" title="${escHtml(emp.name)} — click to toggle" onclick="toggleW2Active(${idx},'${emp.id}')">${initials}</span>`;
+      });
+    }
+    w2Html += '</div>';
+
+    const hasET   = earlyTransfers.length > 0;
+    const etLabel = hasET ? `ET (${earlyTransfers.length})` : 'ET';
 
     const tr = document.createElement('tr');
     if (isError) tr.classList.add('row-error');
@@ -1405,19 +1863,23 @@ function renderTable() {
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="profit" onblur="cellEdit(this)">${row.profit}</span>%</td>
       <td>${fmt$(profitD)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="tax" onblur="cellEdit(this)">${row.tax}</span>%</td>
-      <td>${fmt$(taxD)}</td>
+      <td>${fmt$(taxD)}${adjLine(adjTax)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="oc" onblur="cellEdit(this)">${row.oc}</span>%</td>
-      <td>${fmt$(ocD)}</td>
+      <td>${fmt$(ocD)}${adjLine(adjOC)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="opex" onblur="cellEdit(this)">${row.opex}</span>%</td>
-      <td>${fmt$(opexD)}</td>
+      <td>${fmt$(opexD)}${adjLine(adjOPEX)}</td>
+      <td>${w2Html}</td>
       <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
       <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
-      <td><button class="delete-btn" onclick="deleteRow(${idx})" title="Delete row">🗑</button></td>
+      <td>
+        <button class="et-btn${hasET ? ' has-et' : ''}" onclick="openETModal(${idx})" title="Log early transfer">${etLabel}</button>
+        <button class="delete-btn" onclick="deleteRow(${idx})" title="Delete row">🗑</button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
 
-  // Totals row
+  // Totals row (colspan updated for new W2 column)
   tfoot.innerHTML = `
     <tr class="totals-row">
       <td><strong>TOTALS</strong></td>
@@ -1430,7 +1892,7 @@ function renderTable() {
       <td style="text-align:right"><strong>${fmt$(sumOC)}</strong></td>
       <td>—</td>
       <td style="text-align:right"><strong>${fmt$(sumOPEX)}</strong></td>
-      <td colspan="3"></td>
+      <td colspan="4"></td>
     </tr>
   `;
 
@@ -1630,11 +2092,16 @@ function initCheckboxes(year) {
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+document.getElementById('etOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeETModal();
+});
 
 // ─────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────
 renderTable();
+renderW2Panel();
+renderFooter();
 initCheckboxes('2024');
 initCheckboxes('2025');
 initCheckboxes('2026');
