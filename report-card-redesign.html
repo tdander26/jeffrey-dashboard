@@ -195,6 +195,12 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 .fg input::placeholder{color:var(--text-dim)}
 .fg select option{background:#1A1D26;color:var(--text-primary)}
 
+/* SYM AUTOCOMPLETE */
+.sym-ac-drop{position:absolute;left:0;top:100%;z-index:9800;background:var(--bg-card);border:1.5px solid var(--amber);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);min-width:200px;max-width:320px;max-height:180px;overflow-y:auto;display:none}
+.sym-ac-drop.open{display:block}
+.sym-ac-item{padding:7px 12px;font-size:12px;font-weight:600;color:var(--text-secondary);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sym-ac-item:hover,.sym-ac-item.focused{background:var(--amber-dim);color:var(--amber-bright)}
+
 /* SYM TABLE */
 .sym-scroll{overflow-x:auto;margin-top:8px}
 .sym-hint{font-size:12px;color:var(--text-muted);margin-bottom:10px}
@@ -3101,6 +3107,67 @@ function buildAllVisits(){
 }
 
 // ════════════════════════════════════════════════════════════════
+//  SYMPTOM AUTOCOMPLETE (cross-patient history)
+// ════════════════════════════════════════════════════════════════
+var SYM_HISTORY_KEY="mhw_sym_history";
+function getSymHistory(){
+  try{ var v=_LS.getItem(SYM_HISTORY_KEY); return v?JSON.parse(v):[]; }catch(e){ return []; }
+}
+function addToSymHistory(val){
+  val=val.trim(); if(!val) return;
+  var list=getSymHistory();
+  var lower=val.toLowerCase();
+  var idx=list.findIndex(function(s){ return s.toLowerCase()===lower; });
+  if(idx>-1) list.splice(idx,1);
+  list.unshift(val);
+  if(list.length>500) list.length=500;
+  try{ _LS.setItem(SYM_HISTORY_KEY,JSON.stringify(list)); }catch(e){}
+}
+function attachSymAutocomplete(inp){
+  var drop=document.createElement("div");
+  drop.className="sym-ac-drop";
+  inp.parentNode.appendChild(drop);
+  var focusIdx=-1;
+
+  function showDrop(query){
+    var q=query.trim().toLowerCase();
+    drop.innerHTML="";
+    focusIdx=-1;
+    if(!q){ drop.classList.remove("open"); return; }
+    var matches=getSymHistory().filter(function(s){ return s.toLowerCase().indexOf(q)>-1; });
+    if(!matches.length){ drop.classList.remove("open"); return; }
+    matches.slice(0,12).forEach(function(s,i){
+      var item=document.createElement("div");
+      item.className="sym-ac-item";
+      item.textContent=s;
+      item.addEventListener("mousedown",function(e){
+        e.preventDefault();
+        inp.value=s;
+        inp.dispatchEvent(new Event("input",{bubbles:true}));
+        addToSymHistory(s);
+        drop.classList.remove("open");
+      });
+      drop.appendChild(item);
+    });
+    drop.classList.add("open");
+  }
+
+  inp.addEventListener("input",function(){ showDrop(inp.value); });
+  inp.addEventListener("keydown",function(e){
+    var items=drop.querySelectorAll(".sym-ac-item");
+    if(!drop.classList.contains("open")||!items.length) return;
+    if(e.key==="ArrowDown"){ e.preventDefault(); focusIdx=Math.min(focusIdx+1,items.length-1); items.forEach(function(el,i){ el.classList.toggle("focused",i===focusIdx); }); }
+    else if(e.key==="ArrowUp"){ e.preventDefault(); focusIdx=Math.max(focusIdx-1,0); items.forEach(function(el,i){ el.classList.toggle("focused",i===focusIdx); }); }
+    else if(e.key==="Enter"&&focusIdx>-1){ e.preventDefault(); items[focusIdx].dispatchEvent(new MouseEvent("mousedown")); }
+    else if(e.key==="Escape"){ drop.classList.remove("open"); }
+  });
+  inp.addEventListener("blur",function(){ setTimeout(function(){ drop.classList.remove("open"); },150); });
+  inp.addEventListener("change",function(){
+    var v=inp.value.trim(); if(v) addToSymHistory(v);
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
 //  SYMPTOM TABLE
 // ════════════════════════════════════════════════════════════════
 function addSymRow(){ S.symRows++; renderSymTable(); autoSave(); }
@@ -3166,6 +3233,7 @@ function renderSymTable(){
       inp.addEventListener("input",(function(rr){ return function(){ S.symLabels["r"+rr]=inp.value; autoSave(); }; })(row));
       tdL.style.position="relative";
       tdL.appendChild(inp);
+      attachSymAutocomplete(inp);
       var delBtn=document.createElement("span");
       delBtn.textContent="✕";
       delBtn.title="Remove row";
