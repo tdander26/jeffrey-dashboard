@@ -257,6 +257,61 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg-
 .opt-lbl{font-size:9px;color:var(--text-dim);font-weight:600;white-space:nowrap;pointer-events:none}
 .visit-notes{margin-top:12px;padding-top:10px;border-top:1px solid var(--border-subtle)}
 .visit-notes label{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:4px}
+
+/* VISIT ACCORDION */
+.visit-card{padding:0}
+.vc-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;cursor:pointer;user-select:none;border-radius:var(--r-card);transition:background .15s}
+.vc-hdr:hover{background:rgba(255,255,255,.04)}
+.vc-expanded .vc-hdr{border-radius:var(--r-card) var(--r-card) 0 0;border-bottom:1px solid var(--border-subtle)}
+.vc-hdr-left{display:flex;align-items:center;gap:10px}
+.vc-visit-label{font-size:15px;font-weight:800;color:var(--text-primary)}
+.vc-date-preview{font-size:11px;color:var(--text-muted);font-weight:500}
+.vc-chevron{font-size:11px;color:var(--text-dim);transition:transform .25s;display:inline-block}
+.vc-expanded .vc-chevron{transform:rotate(90deg)}
+.vc-body{overflow:hidden;max-height:0;transition:max-height .35s ease-out}
+.vc-expanded .vc-body{max-height:8000px;transition:max-height .55s ease-in}
+.vc-body-inner{padding:18px}
+
+/* CHALLENGE FLOWCHART PANELS */
+.fc-panel{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-subtle)}
+.fc-card{background:rgba(255,255,255,.03);border:1px solid var(--border-subtle);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.fc-card-title{font-size:12px;font-weight:800;color:var(--text-primary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.fc-toggle-group{display:flex;gap:6px;margin-bottom:10px}
+.fc-toggle-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border-dim);background:transparent;color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;font-family:inherit}
+.fc-toggle-btn:hover{border-color:var(--border-medium);color:var(--text-secondary)}
+.fc-toggle-btn.fc-str.active{background:#c8820a22;border-color:#C8820A;color:#D4A843}
+.fc-toggle-btn.fc-wk.active{background:#3b82f622;border-color:#3b82f6;color:#60a5fa}
+.fc-note{font-size:10px;color:var(--text-muted);font-style:italic;margin:6px 0 2px;line-height:1.5}
+.fc-pathway{margin-bottom:6px;border:1px solid var(--border-subtle);border-radius:8px;overflow:hidden}
+.fc-pathway-hdr{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;cursor:pointer;background:rgba(255,255,255,.025);transition:background .15s;user-select:none}
+.fc-pathway-hdr:hover{background:rgba(255,255,255,.05)}
+.fc-pathway-name{font-size:11px;font-weight:700;color:var(--text-primary)}
+.fc-pathway-arrow{font-size:10px;color:var(--text-dim);transition:transform .2s;display:inline-block}
+.fc-pathway.open .fc-pathway-arrow{transform:rotate(90deg)}
+.fc-pathway-body{display:none;padding:8px 10px}
+.fc-pathway.open .fc-pathway-body{display:block}
+.fc-subgroup-label{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin:7px 0 3px;padding-top:5px;border-top:1px solid var(--border-subtle)}
+.fc-subgroup-label:first-child{border-top:none;margin-top:0}
+.fc-chain{list-style:none;padding:0;margin:0}
+.fc-chain-item{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.fc-chain-item:last-child{border-bottom:none}
+.fc-chain-name{font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:3px}
+.fc-chain-item.fc-terminus .fc-chain-name{color:var(--amber-bright)}
+.fc-step-label{font-size:9px;color:var(--text-dim);font-style:italic;margin-bottom:3px}
+.fc-arginase-note{font-size:9px;color:#f59e0b;font-style:italic;margin-top:2px}
+.fc-nut-chips{display:flex;flex-wrap:wrap;gap:4px}
+.fc-nut-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);font-size:10px;font-weight:600;color:#93c5fd;cursor:pointer;transition:all .15s}
+.fc-nut-chip:hover{background:rgba(59,130,246,.25);border-color:#3b82f6}
+.fc-nut-chip.fc-added{background:rgba(34,197,94,.15);border-color:#22c55e;color:#86efac}
+.fc-nut-chip.fc-notfound{background:rgba(245,158,11,.15);border-color:#f59e0b;color:#fcd34d}
+.fc-cac-expand{font-size:10px;color:#60a5fa;cursor:pointer;text-decoration:underline;margin-top:3px;display:inline-block}
+.fc-cac-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.fc-placeholder{font-size:11px;color:var(--text-dim);font-style:italic;padding:4px 0}
+.fc-flat-nuts{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.fc-flat-label{font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:4px}
+.fc-linear-chain{display:flex;flex-direction:column;gap:4px}
+.fc-linear-step{border:1px solid var(--border-subtle);border-radius:7px;padding:8px 10px;background:rgba(255,255,255,.02)}
+.fc-linear-arrow{text-align:center;color:var(--text-dim);font-size:12px;padding:2px 0}
 .visit-notes textarea{width:100%;border:1.5px solid var(--border-dim);border-radius:6px;padding:7px 9px;font-size:12px;resize:vertical;min-height:48px;outline:none;font-family:inherit;background:var(--bg-input);color:var(--text-primary);transition:border-color .2s,box-shadow .2s}
 .visit-notes textarea:focus{border-color:var(--amber);box-shadow:var(--amber-glow)}
 .visit-notes textarea::placeholder{color:var(--text-dim)}
@@ -1141,6 +1196,7 @@ var currentPatientId = null;
 // ════════════════════════════════════════════════════════════════
 var OFFENDER_OPTIONS=[
   "Ammonia","Aldehydes","Histamine","B2 / Cysteine",
+  "ClO\u207b (Hypochlorite)","Acetaldehyde",
   "Bacteria","Fungus","Virus","Parasite"
 ];
 
@@ -2073,9 +2129,12 @@ function jumpToVisit(vn){
   // Switch to the correct phase
   var phase=vn<=6?1:(vn<=12?2:3);
   switchPhase(phase);
-  // Scroll to the visit card
+  // Expand the card then scroll to it
   var card=document.getElementById("vc"+vn);
-  if(card) card.scrollIntoView({behavior:"smooth",block:"start"});
+  if(card){
+    card.classList.add("vc-expanded");
+    setTimeout(function(){ card.scrollIntoView({behavior:"smooth",block:"start"}); },50);
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -2615,6 +2674,107 @@ function _offenderHasNutrients(offLabel){
   return null;
 }
 
+// ════════════════════════════════════════════════════════════════
+//  CHALLENGE FLOWCHART DATA
+// ════════════════════════════════════════════════════════════════
+var CHALLENGE_FLOWCHARTS={
+  "ammonia":{
+    id:"ammonia",title:"NH\u2083 (Ammonia) Pathway",
+    matchKeys:["ammonia","nh3"],
+    hasModes:true,
+    strengthens:{
+      nutrients:["B6 (P5P)","Protein"],
+      note:"Then test \u03b1-ketoglutarate and urea cycle"
+    },
+    weakens:{
+      pathways:[
+        {id:"urea_cycle",name:"Urea Cycle",
+         chain:[
+           {name:"Glutamic Acid",nutrients:["B3","B6 (P5P)"]},
+           {name:"Ornithine",nutrients:["Biotin (B7)"]},
+           {name:"Citrulline",nutrients:["Mg","CAC Components"],hasCac:true},
+           {name:"Arginine",nutrients:[],arginaseNote:true},
+           {name:"Urea",terminus:true}
+         ]
+        },
+        {id:"creatine_p",name:"Creatine-P",
+         chain:[
+           {name:"Arginine / Glycine",nutrients:["P","Mg"],arginaseNote:true},
+           {name:"Creatine-P",terminus:true}
+         ]
+        },
+        {id:"uric_acid",name:"Uric Acid",
+         chain:[
+           {name:"Uric Acid",nutrients:["Mo","Fe"]}
+         ]
+        }
+      ],
+      cacComponents:["Mn","P","B1","B2","B3","B5","Lipoic acid","Biotin"]
+    }
+  },
+  "hypochlorite":{
+    id:"hypochlorite",title:"ClO\u207b (Hypochlorite) Pathway",
+    matchKeys:["hypochlorite","clo","chlorite"],
+    hasModes:true,
+    strengthens:{
+      nutrients:["B3 (Niacinamide)"],
+      note:"Need for improved thymus gland function"
+    },
+    weakens:{
+      pathways:[
+        {id:"taurine",name:"Taurine",
+         flatNuts:["Mg","Mo","5-MTHF","B6 (P5P)","Methyl-B12","Betaine","Choline","DMG","L-Cysteine"]
+        },
+        {id:"cyp450",name:"CYP450",
+         subgroups:[
+           {name:"Liver Hydroxylation/Oxidation",nutrients:["B2","B3"]},
+           {name:"ROS / Free Radicals (SOD)",nutrients:["Cu","Zn","Mn (SOD)","Se"]},
+           {name:"Antioxidants",nutrients:["Vitamin A","Vitamin C","Vitamin D","Vitamin E","CoQ10"]},
+           {name:"Phytonutrients",nutrients:["Quercetin","Resveratrol","OPCs","HMC"]}
+         ]
+        },
+        {id:"glutathione",name:"Glutathione & Cofactors",placeholder:true},
+        {id:"fatty_acids",name:"Fatty Acids & Cofactors",placeholder:true},
+        {id:"adrenal",name:"Adrenal Gland Function",placeholder:true},
+        {id:"heavy_metals",name:"Heavy Metal Issues",placeholder:true}
+      ]
+    }
+  },
+  "acetaldehyde":{
+    id:"acetaldehyde",title:"Acetaldehyde Pathway",
+    matchKeys:["acetaldehyde"],
+    hasModes:false,
+    linear:{
+      note:"Consider an infection especially if B2 strengthens",
+      chain:[
+        {name:"Acetaldehyde",stepLabel:"Acetaldehyde Dehydrogenase",nutrients:["Mo","Fe","B2","B3"]},
+        {name:"Acetic Acid",stepLabel:"\u2192 Acetyl-CoA conversion",nutrients:["B5"]},
+        {name:"Acetyl-CoA",terminus:true}
+      ]
+    }
+  }
+};
+
+// Return array of flowchart IDs that are active for a given visit
+function _getVisitFlowcharts(vn){
+  if(!S.offenderTags) return [];
+  var active={};
+  // Scan all offender tag keys for this visit
+  Object.keys(S.offenderTags).forEach(function(k){
+    if(k.indexOf("v"+vn+"_of_")!==0 && k.indexOf("v"+vn+"_orgoff_")!==0) return;
+    var arr=S.offenderTags[k];
+    if(!Array.isArray(arr)) return;
+    arr.forEach(function(tag){
+      var lo=tag.toLowerCase();
+      Object.keys(CHALLENGE_FLOWCHARTS).forEach(function(id){
+        var fc=CHALLENGE_FLOWCHARTS[id];
+        fc.matchKeys.forEach(function(mk){ if(lo.indexOf(mk)>=0) active[id]=true; });
+      });
+    });
+  });
+  return Object.keys(active);
+}
+
 // Wire items that should use the organ list as their selectable tags.
 // Pituitary: TL Glabella + Endo Organ → provider selects which endocrine organ was tested.
 // Two Organ → provider picks exactly 2 organs (reuses the thenNow flag: same
@@ -2926,6 +3086,7 @@ function renderChallengesFound(vn) {
   div.innerHTML = pills.length
     ? '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">⚠️ Challenges found</div>'+pills.join('')
     : '';
+  renderFlowchartPanels(vn);
 }
 function renderAllChallenges(){ for(var v=1;v<=18;v++) renderChallengesFound(v); }
 
@@ -2966,11 +3127,29 @@ function toggleMsk(vn){
 // ════════════════════════════════════════════════════════════════
 function buildVisitCard(vn){
   var div=document.createElement("div"); div.className="visit-card"; div.id="vc"+vn;
-  div.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
+
+  // Accordion header (always visible)
+  var hdr=document.createElement("div"); hdr.className="vc-hdr";
+  hdr.setAttribute("onclick","toggleVisitCard("+vn+")");
+  hdr.innerHTML='<div class="vc-hdr-left">'+
+    '<span class="vc-visit-label">Visit '+vn+'</span>'+
+    '<span class="vc-date-preview" id="vc_date_preview_'+vn+'"></span>'+
+    '</div>'+
+    '<span class="vc-chevron">&#9658;</span>';
+  div.appendChild(hdr);
+
+  // Collapsible body
+  var body=document.createElement("div"); body.className="vc-body";
+  var inner=document.createElement("div"); inner.className="vc-body-inner";
+  body.appendChild(inner);
+  div.appendChild(body);
+
+  // All existing content goes into inner
+  inner.innerHTML='<div class="visit-header"><div class="visit-num">Visit '+vn+'</div>'+
     '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
     '<span style="font-size:10px;color:#94a3b8">Date</span>'+
-    '<input type="date" class="vdi" id="vd'+vn+'">'+
-    '<button class="today-btn" onclick="setToday(\'vd'+vn+'\')">Today</button>'+
+    '<input type="date" class="vdi" id="vd'+vn+'" oninput="updateVcHdr('+vn+')">'+
+    '<button class="today-btn" onclick="setToday(\'vd'+vn+'\');updateVcHdr('+vn+')">Today</button>'+
     '<button class="copy-fwd-btn" id="cpf'+vn+'" onclick="copyPriorVisit('+vn+')"'+(vn===1?' disabled title="No prior visit"':' title="Copy marks from Visit '+(vn-1)+'"')+'>⇲ Copy V'+(vn-1)+'</button>'+
     '<button class="macro-open-btn" onclick="openMacroModal('+vn+')">⚡ Macros</button>'+
     '</div></div>';
@@ -3042,7 +3221,7 @@ function buildVisitCard(vn){
     });
     secGrid.appendChild(labCard);
   })();
-  div.appendChild(secGrid);
+  inner.appendChild(secGrid);
 
   var no=document.createElement("div"); no.className="visit-notes";
   no.innerHTML='<label style="display:flex;align-items:center;gap:6px">Visit Notes <span id="labsBadge'+vn+'"></span></label>'+
@@ -3069,35 +3248,39 @@ function buildVisitCard(vn){
         '<div class="fu-bar" id="fuBar'+vn+'" style="margin:0">'+_fuChipsHtml(vn)+'</div>'+
       '</div>'+
     '</div>';
-  div.appendChild(no);
+  inner.appendChild(no);
   // Snippet chips build after append so the container exists
   setTimeout(function(){ buildSnippetChips(vn); renderLabsBadge(vn); },0);
 
   // Challenges found (read-only pills derived from marks + offender/tag selections)
   var challMarked=document.createElement("div"); challMarked.id="chall_marked_"+vn;
-  challMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
-  div.appendChild(challMarked);
+  challMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)";
+  inner.appendChild(challMarked);
+
+  // Flowchart panels (rendered when matching offenders are selected)
+  var fcPanel=document.createElement("div"); fcPanel.id="fc_panel_"+vn;
+  inner.appendChild(fcPanel);
 
   // Prescribed supplements summary (click a pill to edit dose)
   var suppMarked=document.createElement("div"); suppMarked.id="supp_marked_"+vn;
-  suppMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
-  div.appendChild(suppMarked);
+  suppMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)";
+  inner.appendChild(suppMarked);
 
   // Diet recommendations summary
   var dietMarked=document.createElement("div"); dietMarked.id="diet_marked_"+vn;
-  dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
-  div.appendChild(dietMarked);
+  dietMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)";
+  inner.appendChild(dietMarked);
 
   var labMarked=document.createElement("div"); labMarked.id="lab_marked_"+vn;
-  labMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9";
-  div.appendChild(labMarked);
+  labMarked.style.cssText="margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)";
+  inner.appendChild(labMarked);
 
   // Per-visit action bar: print summary / email summary
   var actBar=document.createElement("div");
-  actBar.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end";
+  actBar.style.cssText="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end";
   actBar.innerHTML='<button class="btn btn-light" style="background:#f1f5f9;color:#374151;font-size:11px;padding:6px 12px" onclick="previewVisitSummary('+vn+')">📋 Visit Summary</button>'+
     '<button class="btn btn-light" style="background:#dbeafe;color:#1e40af;font-size:11px;padding:6px 12px" onclick="emailVisitSummary('+vn+')">✉️ Email to Patient</button>';
-  div.appendChild(actBar);
+  inner.appendChild(actBar);
 
   return div;
 }
@@ -3107,6 +3290,7 @@ function buildAllVisits(){
     var g=document.getElementById(p[2]); g.innerHTML="";
     for(var v=p[0];v<=p[1];v++) g.appendChild(buildVisitCard(v));
   });
+  _expandLatestVisit();
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -3403,6 +3587,7 @@ function saveAll(){
 function renderAll(){
   loadPatientInfo(); renderSymTable(); loadVisitDates(); renderAllMarks(); renderAllMskCells(); renderAllSuppCells(); renderAllSuppMarked(); renderAllOffenderTags(); updateAllHL();
   renderAllCompliance(); renderAllLabsBadges(); renderAllChallenges(); renderAllDietMarked(); renderAllLabMarked(); renderAllFollowUp(); renderVJumpStrip();
+  _restoreVcHdrs(); _expandLatestVisit();
   // Hook up patient info inputs (once per open)
   Object.keys(PI_MAP).forEach(function(id){
     var el=document.getElementById(id);
@@ -6648,6 +6833,275 @@ function _updateThemeIcons(){
   if(saved==='light') document.documentElement.setAttribute('data-theme','light');
 })();
 _updateThemeIcons();
+
+// ════════════════════════════════════════════════════════════════
+//  VISIT ACCORDION
+// ════════════════════════════════════════════════════════════════
+function toggleVisitCard(vn){
+  var card=document.getElementById("vc"+vn);
+  if(card) card.classList.toggle("vc-expanded");
+}
+
+function updateVcHdr(vn){
+  var inp=document.getElementById("vd"+vn);
+  var preview=document.getElementById("vc_date_preview_"+vn);
+  if(!inp||!preview) return;
+  if(inp.value){
+    // Format date nicely: "Apr 14, 2026"
+    var parts=inp.value.split("-");
+    var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    preview.textContent=months[parseInt(parts[1])-1]+" "+parseInt(parts[2])+", "+parts[0];
+  } else {
+    preview.textContent="";
+  }
+}
+
+function _expandLatestVisit(){
+  var latest=0;
+  for(var v=1;v<=18;v++){ if(S.visitDates&&S.visitDates[v]) latest=v; }
+  var target=latest>0?latest:1;
+  for(var v=1;v<=18;v++){
+    var card=document.getElementById("vc"+v);
+    if(!card) continue;
+    if(v===target) card.classList.add("vc-expanded");
+    else card.classList.remove("vc-expanded");
+  }
+}
+
+function _restoreVcHdrs(){
+  for(var v=1;v<=18;v++) updateVcHdr(v);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  CHALLENGE FLOWCHART RENDERING
+// ════════════════════════════════════════════════════════════════
+function renderFlowchartPanels(vn){
+  var panel=document.getElementById("fc_panel_"+vn); if(!panel) return;
+  var ids=_getVisitFlowcharts(vn);
+  if(!ids.length){ panel.innerHTML=""; return; }
+  var html='<div class="fc-panel">';
+  html+='<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">🧬 Biochemical Pathways</div>';
+  ids.forEach(function(id){
+    var fc=CHALLENGE_FLOWCHARTS[id]; if(!fc) return;
+    var mode=_fcGetMode(vn,id);
+    html+='<div class="fc-card">';
+    html+='<div class="fc-card-title">'+escHtml(fc.title)+'</div>';
+    if(fc.hasModes){
+      html+='<div class="fc-toggle-group">';
+      html+='<button type="button" class="fc-toggle-btn fc-str'+(mode==="strengthens"?" active":"")+'" onclick="setFcMode('+vn+',\''+id+'\',\'strengthens\')">Strengthens</button>';
+      html+='<button type="button" class="fc-toggle-btn fc-wk'+(mode==="weakens"?" active":"")+'" onclick="setFcMode('+vn+',\''+id+'\',\'weakens\')">Weakens</button>';
+      if(mode) html+='<button type="button" class="fc-toggle-btn" onclick="setFcMode('+vn+',\''+id+'\',\'\')" style="font-size:10px;opacity:.6">✕ Clear</button>';
+      html+='</div>';
+      if(mode==="strengthens" && fc.strengthens){
+        html+=_fcStrengthensHtml(vn,id,fc.strengthens);
+      } else if(mode==="weakens" && fc.weakens){
+        html+=_fcWeakensHtml(vn,id,fc.weakens,fc.weakens.cacComponents);
+      }
+    } else if(fc.linear){
+      if(fc.linear.note) html+='<div class="fc-note">'+escHtml(fc.linear.note)+'</div>';
+      html+=_fcLinearChainHtml(vn,id,fc.linear.chain);
+    }
+    html+='</div>'; // fc-card
+  });
+  html+='</div>'; // fc-panel
+  panel.innerHTML=html;
+}
+
+function _fcGetMode(vn,id){
+  if(!S.offenderTags) return "";
+  return S.offenderTags["v"+vn+"_fc_"+id+"_mode"]||"";
+}
+
+function setFcMode(vn,id,mode){
+  if(!S.offenderTags) S.offenderTags={};
+  S.offenderTags["v"+vn+"_fc_"+id+"_mode"]=mode;
+  autoSave();
+  renderFlowchartPanels(vn);
+}
+
+function toggleFcPathway(vn,id,pwId){
+  if(!S.offenderTags) S.offenderTags={};
+  var key="v"+vn+"_fc_"+id+"_open";
+  var open=JSON.parse(S.offenderTags[key]||"[]");
+  var idx=open.indexOf(pwId);
+  if(idx>=0) open.splice(idx,1); else open.push(pwId);
+  S.offenderTags[key]=JSON.stringify(open);
+  autoSave();
+  renderFlowchartPanels(vn);
+}
+
+function _fcIsOpen(vn,id,pwId){
+  if(!S.offenderTags) return false;
+  var key="v"+vn+"_fc_"+id+"_open";
+  var open=JSON.parse(S.offenderTags[key]||"[]");
+  return open.indexOf(pwId)>=0;
+}
+
+function _fcStrengthensHtml(vn,id,str){
+  var h='';
+  if(str.note) h+='<div class="fc-note">'+escHtml(str.note)+'</div>';
+  if(str.nutrients&&str.nutrients.length){
+    h+='<div class="fc-flat-label">Recommend:</div>';
+    h+='<div class="fc-nut-chips">';
+    str.nutrients.forEach(function(n){ h+=_fcNutChip(vn,n,id+"_str"); });
+    h+='</div>';
+  }
+  return h;
+}
+
+function _fcWeakensHtml(vn,id,weakens,cacComponents){
+  var h='<div>';
+  weakens.pathways.forEach(function(pw){
+    var isOpen=_fcIsOpen(vn,id,pw.id);
+    h+='<div class="fc-pathway'+(isOpen?" open":"")+'">';
+    h+='<div class="fc-pathway-hdr" onclick="toggleFcPathway('+vn+',\''+id+'\',\''+pw.id+'\')">';
+    h+='<span class="fc-pathway-name">'+escHtml(pw.name)+'</span>';
+    h+='<span class="fc-pathway-arrow">&#9658;</span>';
+    h+='</div>';
+    h+='<div class="fc-pathway-body">';
+    if(pw.placeholder){
+      h+='<div class="fc-placeholder">Coming soon — tap to expand when data is added</div>';
+    } else if(pw.chain){
+      h+=_fcChainHtml(vn,id,pw.chain,cacComponents);
+    } else if(pw.flatNuts){
+      h+='<div class="fc-nut-chips">';
+      pw.flatNuts.forEach(function(n){ h+=_fcNutChip(vn,n,id+"_"+pw.id); });
+      h+='</div>';
+    } else if(pw.subgroups){
+      pw.subgroups.forEach(function(sg){
+        h+='<div class="fc-subgroup-label">'+escHtml(sg.name)+'</div>';
+        h+='<div class="fc-nut-chips">';
+        sg.nutrients.forEach(function(n){ h+=_fcNutChip(vn,n,id+"_"+pw.id); });
+        h+='</div>';
+      });
+    }
+    h+='</div></div>'; // pathway-body + pathway
+  });
+  h+='</div>';
+  return h;
+}
+
+function _fcChainHtml(vn,id,chain,cacComponents){
+  var h='<ul class="fc-chain">';
+  for(var i=0;i<chain.length;i++){
+    var step=chain[i];
+    var isLast=(i===chain.length-1);
+    h+='<li class="fc-chain-item'+(step.terminus?" fc-terminus":"")+'">';
+    if(!isLast){
+      var arrow=i===0?'':'';
+      h+='<div class="fc-chain-name">'+escHtml(step.name)+'</div>';
+      if(!step.terminus && i<chain.length-2){
+        h+='<div class="fc-step-label">&#8595;</div>';
+      }
+    } else {
+      h+='<div class="fc-chain-name">'+escHtml(step.name)+'</div>';
+    }
+    if(step.nutrients&&step.nutrients.length){
+      h+='<div class="fc-nut-chips">';
+      step.nutrients.forEach(function(n){
+        if(n==="CAC Components"&&cacComponents){
+          h+=_fcCacChip(vn,id,cacComponents);
+        } else {
+          h+=_fcNutChip(vn,n,id+"_chain");
+        }
+      });
+      h+='</div>';
+    }
+    if(step.arginaseNote){
+      h+='<div class="fc-arginase-note">* If Arginine weakens → test Arginase enzyme or Mn</div>';
+    }
+    h+='</li>';
+  }
+  h+='</ul>';
+  return h;
+}
+
+function _fcLinearChainHtml(vn,id,chain){
+  var h='<div class="fc-linear-chain">';
+  for(var i=0;i<chain.length;i++){
+    var step=chain[i];
+    if(i>0) h+='<div class="fc-linear-arrow">&#8595;</div>';
+    h+='<div class="fc-linear-step">';
+    h+='<div class="fc-chain-name">'+escHtml(step.name)+'</div>';
+    if(step.stepLabel) h+='<div class="fc-step-label">'+escHtml(step.stepLabel)+'</div>';
+    if(step.nutrients&&step.nutrients.length){
+      h+='<div class="fc-nut-chips" style="margin-top:4px">';
+      step.nutrients.forEach(function(n){ h+=_fcNutChip(vn,n,id+"_lin"); });
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function _fcCacChip(vn,id,cacComponents){
+  var cacKey="v"+vn+"_fc_"+id+"_cac";
+  var isOpen=!!(S.offenderTags&&S.offenderTags[cacKey]);
+  var h='<span>';
+  if(isOpen){
+    h+='<span class="fc-cac-expand" onclick="_fcToggleCac('+vn+',\''+id+'\')" style="color:#94a3b8">&#9660; CAC Components</span>';
+    h+='<div class="fc-cac-list">';
+    cacComponents.forEach(function(n){ h+=_fcNutChip(vn,n,id+"_cac"); });
+    h+='</div>';
+  } else {
+    h+='<span class="fc-cac-expand" onclick="_fcToggleCac('+vn+',\''+id+'\')">&#9658; CAC Components</span>';
+  }
+  h+='</span>';
+  return h;
+}
+
+function _fcToggleCac(vn,id){
+  if(!S.offenderTags) S.offenderTags={};
+  var cacKey="v"+vn+"_fc_"+id+"_cac";
+  if(S.offenderTags[cacKey]) delete S.offenderTags[cacKey];
+  else S.offenderTags[cacKey]="1";
+  autoSave();
+  renderFlowchartPanels(vn);
+}
+
+function _fcNutChip(vn,nutName,ctx){
+  // Check if already added to supplements
+  var added=false;
+  var lo=nutName.toLowerCase();
+  for(var i=0;i<SUPPLEMENTS.length;i++){
+    if(SUPPLEMENTS[i].toLowerCase().indexOf(lo)>=0){
+      if(S.marks["v"+vn+"_supp_"+i]) { added=true; break; }
+    }
+  }
+  var cls="fc-nut-chip"+(added?" fc-added":"");
+  var title=added?"Already prescribed":"Tap to add to supplements";
+  return '<span class="'+cls+'" onclick="fcAddNutrient('+vn+',\''+escHtml(nutName.replace(/'/g,"\\'"))+'\',this)" title="'+title+'">'+
+    escHtml(nutName)+(added?' <span style="font-size:9px">✓</span>':' <span style="font-size:9px;opacity:.7">+</span>')+
+    '</span>';
+}
+
+function fcAddNutrient(vn,nutName,chipEl){
+  var lo=nutName.toLowerCase();
+  var found=-1;
+  for(var i=0;i<SUPPLEMENTS.length;i++){
+    if(SUPPLEMENTS[i].toLowerCase().indexOf(lo)>=0){ found=i; break; }
+  }
+  if(found>=0){
+    var key="v"+vn+"_supp_"+found;
+    S.marks[key]="green";
+    autoSave();
+    renderSuppMarked(vn);
+    // Visual feedback on the chip
+    if(chipEl){
+      chipEl.classList.add("fc-added");
+      chipEl.innerHTML=escHtml(SUPPLEMENTS[found])+' <span style="font-size:9px">✓</span>';
+    }
+  } else {
+    // Not in supplement list — brief amber flash
+    if(chipEl){
+      chipEl.classList.add("fc-notfound");
+      var orig=chipEl.innerHTML;
+      chipEl.innerHTML=escHtml(nutName)+' <span style="font-size:9px">?</span>';
+      setTimeout(function(){ chipEl.classList.remove("fc-notfound"); chipEl.innerHTML=orig; },1500);
+    }
+  }
+}
 </script>
 </body>
 </html>
