@@ -591,6 +591,67 @@
   .et-add-row select:focus, .et-add-row input:focus {
     border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
   }
+
+  /* ── QBO Live Balances Panel ── */
+  .qbo-panel-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 20px; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    user-select: none; transition: background 0.12s;
+  }
+  .qbo-panel-toggle:hover { background: #f9f9fb; }
+  .qbo-arrow { display: inline-block; transition: transform 0.18s; font-size: 11px; color: #86868b; }
+  .qbo-arrow.open { transform: rotate(90deg); }
+  .qbo-panel-body { display: none; padding: 16px 20px 20px; }
+  .qbo-panel-body.open { display: block; }
+
+  .qbo-url-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 14px;
+  }
+  .qbo-url-row input {
+    flex: 1; padding: 8px 12px; border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 8px; font-size: 13px; font-family: inherit;
+    color: #1d1d1f; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
+  }
+  .qbo-url-row input:focus {
+    border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
+  .qbo-meta {
+    font-size: 12px; color: #86868b; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .qbo-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .qbo-tbl th {
+    background: #f5f5f7; padding: 8px 10px; text-align: left;
+    font-size: 11px; font-weight: 600; color: #86868b;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .qbo-tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .qbo-tbl tr:last-child td { border-bottom: none; }
+  .qbo-tbl tr:hover td { background: #f9f9fb; }
+  .qbo-tbl td.amt { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .qbo-bucket-totals {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .qbo-bucket-chip {
+    padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  }
+  .qbo-chip-profit  { background: rgba(0,122,255,0.1);  color: #007AFF; }
+  .qbo-chip-tax     { background: rgba(255,59,48,0.1);   color: #FF3B30; }
+  .qbo-chip-oc      { background: rgba(52,199,89,0.1);   color: #34c759; }
+  .qbo-chip-opex    { background: rgba(255,149,0,0.1);   color: #FF9500; }
+  .qbo-chip-unmap   { background: rgba(0,0,0,0.06);      color: #86868b; }
+  .qbo-chip-total   { background: #f5f5f7; color: #1d1d1f; }
+  .qbo-error {
+    padding: 12px 16px; background: #fff2f1; border-radius: 8px;
+    color: #FF3B30; font-size: 13px; line-height: 1.5;
+  }
+  .qbo-loading { padding: 12px; color: #86868b; font-size: 13px; font-style: italic; }
 </style>
 </head>
 <body>
@@ -637,6 +698,33 @@
         <div style="margin-top:12px">
           <button class="btn btn-secondary btn-sm" onclick="addW2Employee()">+ Add Employee</button>
         </div>
+      </div>
+    </div>
+
+    <!-- QBO Live Balances Panel -->
+    <div class="panel" style="margin-bottom:16px" id="qboPanelWrap">
+      <div class="qbo-panel-toggle" onclick="toggleQBOPanel()">
+        <span class="qbo-arrow" id="qboArrow">▶</span>
+        <span>Live QBO Balances</span>
+        <span id="qboPanelSummary" style="font-size:12px;color:#86868b;font-weight:400;margin-left:6px"></span>
+      </div>
+      <div class="qbo-panel-body" id="qboPanelBody">
+        <div class="qbo-url-row">
+          <input
+            id="qboSheetUrl"
+            type="url"
+            placeholder="Paste your published Google Sheet CSV URL here…"
+            onchange="saveQBOUrl()"
+            onblur="saveQBOUrl()"
+          />
+          <button class="btn btn-secondary btn-sm" onclick="fetchQBOBalances()">Refresh</button>
+          <button class="btn btn-primary btn-sm" onclick="useQBOBalances()">Use These Balances</button>
+        </div>
+        <div class="qbo-meta" id="qboMeta"></div>
+        <div id="qboContent">
+          <div class="qbo-loading">Enter your Google Sheet CSV URL above and click Refresh to load balances.</div>
+        </div>
+        <div class="qbo-bucket-totals" id="qboBucketTotals"></div>
       </div>
     </div>
 
@@ -2133,6 +2221,266 @@ function deleteRow(idx) {
 }
 
 // ─────────────────────────────────────────────
+// QBO LIVE BALANCES PANEL
+// ─────────────────────────────────────────────
+
+function toggleQBOPanel() {
+  const body  = document.getElementById('qboPanelBody');
+  const arrow = document.getElementById('qboArrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+  if (body.classList.contains('open')) {
+    const url = localStorage.getItem('qbo_sheet_url') || '';
+    document.getElementById('qboSheetUrl').value = url;
+    renderQBOFromCache();
+  }
+}
+
+function saveQBOUrl() {
+  const url = (document.getElementById('qboSheetUrl').value || '').trim();
+  if (url) localStorage.setItem('qbo_sheet_url', url);
+}
+
+function loadQBOMapping() {
+  try { return JSON.parse(localStorage.getItem('qboAccountMapping') || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveQBOMapping(mapping) {
+  localStorage.setItem('qboAccountMapping', JSON.stringify(mapping));
+}
+
+async function fetchQBOBalances() {
+  const urlInput = document.getElementById('qboSheetUrl');
+  const url = (urlInput.value || localStorage.getItem('qbo_sheet_url') || '').trim();
+
+  if (!url) {
+    document.getElementById('qboContent').innerHTML =
+      '<div class="qbo-error">Please enter a Google Sheet CSV URL first.<br>' +
+      '<small>See SETUP.md Step 11 for instructions on publishing your sheet.</small></div>';
+    return;
+  }
+
+  // Save in case it was just typed
+  localStorage.setItem('qbo_sheet_url', url);
+
+  document.getElementById('qboContent').innerHTML = '<div class="qbo-loading">Loading balances from Google Sheet…</div>';
+  document.getElementById('qboMeta').textContent = '';
+  document.getElementById('qboBucketTotals').innerHTML = '';
+
+  try {
+    // Cache-bust so we always get fresh data (Google caches published CSVs for ~5 min)
+    const fetchUrl = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    const resp = await fetch(fetchUrl);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' — check that the sheet is published to the web.');
+    const csvText = await resp.text();
+
+    const accounts = parseQBOCSV(csvText);
+    if (!accounts.length) throw new Error('No account data found in the sheet. Make sure the "Balances" sheet has data rows.');
+
+    localStorage.setItem('qbo_last_fetched', JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      accounts
+    }));
+
+    renderQBOAccounts(accounts, new Date().toISOString());
+  } catch(err) {
+    document.getElementById('qboContent').innerHTML =
+      '<div class="qbo-error">Could not load balances: ' + escHtml(err.message) + '<br>' +
+      '<small>Check that the Sheet URL is correct and published as CSV (see SETUP.md Step 11).</small></div>';
+  }
+}
+
+function parseQBOCSV(csvText) {
+  // Minimal RFC-4180 CSV parser — handles quoted fields with embedded commas
+  function parseRow(line) {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        result.push(cur); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  const headers  = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+  const dateIdx  = headers.indexOf('date');
+  const nameIdx  = headers.indexOf('account name');
+  const balIdx   = headers.indexOf('balance');
+  const typeIdx  = headers.indexOf('account type');
+
+  if (dateIdx < 0 || nameIdx < 0 || balIdx < 0) return [];
+
+  // Keep only the latest row per account name (max date string — ISO yyyy-MM-dd sorts correctly)
+  const byAccount = {};
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseRow(lines[i]);
+    if (cols.length < 3) continue;
+    const date    = (cols[dateIdx]  || '').trim();
+    const name    = (cols[nameIdx]  || '').trim();
+    const balance = parseFloat((cols[balIdx] || '').replace(/[^0-9.\-]/g, '')) || 0;
+    const acctType = typeIdx >= 0 ? (cols[typeIdx] || '').trim() : 'Bank';
+    if (!name || !date) continue;
+    if (!byAccount[name] || date > byAccount[name].date) {
+      byAccount[name] = { date, balance, accountType: acctType };
+    }
+  }
+
+  return Object.entries(byAccount).map(([name, v]) => ({
+    name,
+    balance:     v.balance,
+    accountType: v.accountType,
+    latestDate:  v.date
+  }));
+}
+
+function renderQBOFromCache() {
+  try {
+    const raw = localStorage.getItem('qbo_last_fetched');
+    if (!raw) return;
+    const { fetchedAt, accounts } = JSON.parse(raw);
+    renderQBOAccounts(accounts, fetchedAt);
+  } catch(e) {}
+}
+
+function renderQBOAccounts(accounts, fetchedAt) {
+  const mapping = loadQBOMapping();
+  const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+  const CHIP_CLASS = { Profit: 'qbo-chip-profit', Tax: 'qbo-chip-tax', OC: 'qbo-chip-oc', OPEX: 'qbo-chip-opex' };
+
+  // Meta line — show when data was from and when it was fetched
+  const latestDataDate = accounts.reduce((max, a) => (a.latestDate > max ? a.latestDate : max), '');
+  const fetchStr = fetchedAt
+    ? ' · Fetched ' + new Date(fetchedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : '';
+  document.getElementById('qboMeta').innerHTML =
+    '<span>QBO data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>';
+
+  // Account mapping table
+  let html = '<table class="qbo-tbl"><thead><tr>' +
+    '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th>' +
+    '</tr></thead><tbody>';
+
+  accounts.forEach(function(a) {
+    const safeName = a.name.replace(/'/g, "\\'");
+    const opts = BUCKETS.map(function(b) {
+      return '<option value="' + b + '"' + (mapping[a.name] === b ? ' selected' : '') + '>' + b + '</option>';
+    }).join('');
+    html += '<tr>' +
+      '<td>' + escHtml(a.name) + '</td>' +
+      '<td><select class="w2-src-sel" style="font-size:12px" ' +
+        'onchange="setQBOMapping(\'' + escHtml(safeName) + '\', this.value)">' +
+        '<option value=""' + (!mapping[a.name] ? ' selected' : '') + '>(unassigned)</option>' +
+        opts +
+      '</select></td>' +
+      '<td class="amt">' + fmt$(a.balance) + '</td>' +
+    '</tr>';
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('qboContent').innerHTML = html;
+
+  // Bucket totals
+  const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0, _unassigned: 0 };
+  accounts.forEach(function(a) {
+    const bucket = mapping[a.name];
+    if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
+    else totals._unassigned += a.balance;
+  });
+
+  const grandTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0) + totals._unassigned;
+
+  let chips = BUCKETS.filter(function(b) { return totals[b] > 0; }).map(function(b) {
+    return '<span class="qbo-bucket-chip ' + CHIP_CLASS[b] + '">' + b + ': ' + fmt$(totals[b]) + '</span>';
+  });
+  if (totals._unassigned > 0) {
+    chips.push('<span class="qbo-bucket-chip qbo-chip-unmap">Unassigned: ' + fmt$(totals._unassigned) + '</span>');
+  }
+  chips.push('<span class="qbo-bucket-chip qbo-chip-total">Total: ' + fmt$(grandTotal) + '</span>');
+
+  document.getElementById('qboBucketTotals').innerHTML = chips.join('');
+
+  // Update summary badge in panel header
+  const assignedTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
+  document.getElementById('qboPanelSummary').textContent =
+    accounts.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned';
+}
+
+function setQBOMapping(accountName, bucket) {
+  const mapping = loadQBOMapping();
+  if (bucket) mapping[accountName] = bucket;
+  else delete mapping[accountName];
+  saveQBOMapping(mapping);
+  renderQBOFromCache();
+}
+
+function useQBOBalances() {
+  const raw = localStorage.getItem('qbo_last_fetched');
+  if (!raw) {
+    alert('No QBO balance data loaded yet. Click Refresh first.');
+    return;
+  }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e) { return; }
+  const accounts = parsed.accounts || [];
+  const mapping  = loadQBOMapping();
+  const BUCKETS  = ['Profit', 'Tax', 'OC', 'OPEX'];
+
+  const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0 };
+  accounts.forEach(function(a) {
+    const bucket = mapping[a.name];
+    if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
+  });
+
+  const grandTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
+  if (grandTotal <= 0) {
+    alert('The total of assigned balances is $0.\nPlease assign your accounts to Profit First buckets first.');
+    return;
+  }
+
+  // Open the existing Add Entry modal
+  openModal();
+
+  // Pre-fill date as "Month Day" format (e.g. "April 25")
+  const MONTH_NAMES = ['January','February','March','April','May','June',
+                       'July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('m_date').value = MONTH_NAMES[now.getMonth()] + ' ' + now.getDate();
+
+  // Pre-fill total
+  document.getElementById('m_total').value = grandTotal.toFixed(2);
+
+  // Calculate percentages — round to whole %, let OPEX absorb rounding so sum = 100%
+  let pctSum = 0;
+  const pcts = {};
+  ['Profit', 'Tax', 'OC'].forEach(function(b) {
+    pcts[b] = Math.round(totals[b] / grandTotal * 100);
+    pctSum += pcts[b];
+  });
+  pcts['OPEX'] = 100 - pctSum;
+
+  document.getElementById('m_profit_pct').value = pcts['Profit'];
+  document.getElementById('m_tax_pct').value    = pcts['Tax'];
+  document.getElementById('m_oc_pct').value     = pcts['OC'];
+  document.getElementById('m_opex_pct').value   = pcts['OPEX'];
+  document.getElementById('m_notes').value      = 'QBO balance snapshot';
+
+  if (typeof updateModalPreview === 'function') updateModalPreview();
+}
+
+// ─────────────────────────────────────────────
 // SMART NEXT DATE
 // ─────────────────────────────────────────────
 function getNextDate() {
@@ -2305,6 +2653,26 @@ initCheckboxes('2024');
 initCheckboxes('2025');
 initCheckboxes('2026');
 syncFromFirestore(); // then pull latest from cloud in background
+
+// QBO — restore URL field and populate summary badge from cache
+(function initQBO() {
+  const url = localStorage.getItem('qbo_sheet_url') || '';
+  const urlInput = document.getElementById('qboSheetUrl');
+  if (urlInput) urlInput.value = url;
+  try {
+    const raw = localStorage.getItem('qbo_last_fetched');
+    if (!raw) return;
+    const { accounts } = JSON.parse(raw);
+    const mapping = loadQBOMapping();
+    const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+    const assignedTotal = accounts.reduce(function(s, a) {
+      const b = mapping[a.name];
+      return s + (BUCKETS.includes(b) ? a.balance : 0);
+    }, 0);
+    document.getElementById('qboPanelSummary').textContent =
+      accounts.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned';
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>
