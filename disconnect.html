@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disconnect · Momentum Health Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f7; color: #1d1d1f;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    padding: 48px 24px;
+  }
+  .wrap {
+    max-width: 640px; margin: 0 auto;
+    background: #fff; padding: 48px 56px;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+  }
+  h1 {
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.5px; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 14px; color: #86868b; margin-bottom: 28px; }
+  h2 {
+    font-size: 16px; font-weight: 600;
+    margin-top: 24px; margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+  p { margin-bottom: 12px; font-size: 15px; }
+  ol, ul { margin: 8px 0 12px 24px; }
+  li { font-size: 15px; margin-bottom: 8px; }
+  a { color: #007AFF; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: rgba(0,0,0,0.05);
+    padding: 2px 6px; border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+  }
+  .meta {
+    margin-top: 32px; padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    font-size: 13px; color: #86868b;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Disconnect from QuickBooks</h1>
+<p class="subtitle">Momentum Health Dashboard</p>
+
+<p>The Momentum Health Dashboard is a private, single-user tool. If you want to revoke its access to your QuickBooks Online data, you can do so at any time. There are two ways, and either is sufficient.</p>
+
+<h2>Option 1 — From QuickBooks Online</h2>
+<ol>
+  <li>Sign in at <a href="https://qbo.intuit.com" target="_blank">qbo.intuit.com</a>.</li>
+  <li>Click the <strong>gear icon ⚙️</strong> (top right) → <strong>Apps</strong>.</li>
+  <li>Find the <strong>Momentum Health Dashboard</strong> app in the list.</li>
+  <li>Click <strong>Disconnect</strong>.</li>
+</ol>
+
+<h2>Option 2 — From Google Apps Script</h2>
+<ol>
+  <li>Open your QBO Sync Apps Script project.</li>
+  <li>Select the <code>resetAuth</code> function from the function dropdown.</li>
+  <li>Click <strong>Run ▶</strong>.</li>
+  <li>Stored OAuth tokens and automatic triggers are cleared immediately.</li>
+</ol>
+
+<h2>After disconnecting</h2>
+<p>The Dashboard can no longer read balance or transaction data from QuickBooks. Previously retrieved data remains in your private Google Sheet and browser local storage until you choose to delete it. See the <a href="privacy.html">Privacy Policy</a> for details on what is stored and where.</p>
+
+<div class="meta">
+  Momentum Health Chiropractic · <a href="finance.html">Dashboard</a> · <a href="privacy.html">Privacy</a> · <a href="eula.html">EULA</a>
+</div>
+
+</div>
+</body>
+</html>
