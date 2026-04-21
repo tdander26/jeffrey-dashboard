@@ -662,6 +662,30 @@
   }
   .qbo-approve-btn:hover { background: rgba(0,122,255,0.22); }
 
+  .qbo-hide-btn {
+    padding: 3px 8px; border-radius: 6px; border: none;
+    background: transparent; color: #86868b;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; line-height: 1;
+    transition: background 0.12s, color 0.12s;
+  }
+  .qbo-hide-btn:hover { background: rgba(255,59,48,0.1); color: #FF3B30; }
+
+  .qbo-hidden-row {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed rgba(0,0,0,0.08);
+    font-size: 12px; color: #86868b;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .qbo-unhide-chip {
+    padding: 3px 8px; border-radius: 6px; border: none;
+    background: rgba(0,0,0,0.05); color: #1d1d1f;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+  }
+  .qbo-unhide-chip:hover { background: rgba(0,122,255,0.1); color: #007AFF; }
+
   .qbo-url-advanced {
     margin-top: 10px; padding-top: 10px;
     border-top: 1px dashed rgba(0,0,0,0.08);
@@ -755,34 +779,36 @@
       </div>
       <div class="qbo-panel-body" id="qboPanelBody">
         <div class="qbo-url-row">
-          <input
-            id="qboSheetUrl"
-            type="url"
-            placeholder="Paste your published Balances CSV URL here…"
-            onchange="saveQBOUrl()"
-            onblur="saveQBOUrl()"
-          />
           <button class="btn btn-secondary btn-sm" onclick="fetchQBOBalances()">Refresh</button>
           <button class="btn btn-primary btn-sm" onclick="useQBOBalances()">Use These Balances</button>
         </div>
         <div class="qbo-meta" id="qboMeta"></div>
         <div id="qboContent">
-          <div class="qbo-loading">Enter your Google Sheet CSV URL above and click Refresh to load balances.</div>
+          <div class="qbo-loading">Loading balances…</div>
         </div>
         <div class="qbo-bucket-totals" id="qboBucketTotals"></div>
+        <div id="qboTaxStatus" style="font-size:12px;color:#86868b;margin-top:8px"></div>
         <details class="qbo-url-advanced">
-          <summary>Tax Payments CSV URL (optional)</summary>
-          <div class="qbo-url-row">
+          <summary>Change sheet URLs (advanced)</summary>
+          <div class="qbo-url-row" style="margin-top:10px">
+            <input
+              id="qboSheetUrl"
+              type="url"
+              placeholder="Balances CSV URL"
+              onchange="saveQBOUrl()"
+              onblur="saveQBOUrl()"
+            />
+          </div>
+          <div class="qbo-url-row" style="margin-top:6px">
             <input
               id="qboTaxUrl"
               type="url"
-              placeholder="Paste your published Tax Payments CSV URL here…"
+              placeholder="Tax Payments CSV URL"
               onchange="saveQBOTaxUrl()"
               onblur="saveQBOTaxUrl()"
             />
             <button class="btn btn-secondary btn-sm" onclick="fetchQBOTaxPayments()">Refresh Taxes</button>
           </div>
-          <div id="qboTaxStatus" style="font-size:12px;color:#86868b"></div>
         </details>
       </div>
     </div>
@@ -2289,11 +2315,18 @@ function toggleQBOPanel() {
   body.classList.toggle('open');
   arrow.classList.toggle('open');
   if (body.classList.contains('open')) {
-    const url = localStorage.getItem('qbo_sheet_url') || '';
+    const url = localStorage.getItem('qbo_sheet_url') || DEFAULT_QBO_BALANCES_URL || '';
     document.getElementById('qboSheetUrl').value = url;
     renderQBOFromCache();
   }
 }
+
+// ─── Built-in QBO CSV URLs ──────────────────────────────────────────────────
+// Private single-user dashboard — URLs are baked in so the page "just works".
+// Users can still override by pasting a different URL into the input fields,
+// which is saved in localStorage and takes precedence.
+const DEFAULT_QBO_BALANCES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=1270621260&single=true&output=csv';
+const DEFAULT_QBO_TAX_PAYMENTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=2087166635&single=true&output=csv';
 
 function saveQBOUrl() {
   const url = (document.getElementById('qboSheetUrl').value || '').trim();
@@ -2309,9 +2342,35 @@ function saveQBOMapping(mapping) {
   localStorage.setItem('qboAccountMapping', JSON.stringify(mapping));
 }
 
+function loadQBOHidden() {
+  try { return JSON.parse(localStorage.getItem('qbo_hidden_accounts') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveQBOHidden(list) {
+  localStorage.setItem('qbo_hidden_accounts', JSON.stringify(list));
+}
+
+function hideQBOAccount(name) {
+  const hidden = loadQBOHidden();
+  if (hidden.indexOf(name) < 0) hidden.push(name);
+  saveQBOHidden(hidden);
+  renderQBOFromCache();
+}
+
+function unhideQBOAccount(name) {
+  saveQBOHidden(loadQBOHidden().filter(function(n) { return n !== name; }));
+  renderQBOFromCache();
+}
+
+function showAllQBOAccounts() {
+  saveQBOHidden([]);
+  renderQBOFromCache();
+}
+
 async function fetchQBOBalances() {
   const urlInput = document.getElementById('qboSheetUrl');
-  const url = (urlInput.value || localStorage.getItem('qbo_sheet_url') || '').trim();
+  const url = (urlInput.value || localStorage.getItem('qbo_sheet_url') || DEFAULT_QBO_BALANCES_URL || '').trim();
 
   if (!url) {
     document.getElementById('qboContent').innerHTML =
@@ -2415,8 +2474,13 @@ function renderQBOFromCache() {
 
 function renderQBOAccounts(accounts, fetchedAt) {
   const mapping = loadQBOMapping();
+  const hidden  = loadQBOHidden();
   const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
   const CHIP_CLASS = { Profit: 'qbo-chip-profit', Tax: 'qbo-chip-tax', OC: 'qbo-chip-oc', OPEX: 'qbo-chip-opex' };
+
+  // Split visible / hidden
+  const visible      = accounts.filter(function(a) { return hidden.indexOf(a.name) < 0; });
+  const hiddenAccts  = accounts.filter(function(a) { return hidden.indexOf(a.name) >= 0; });
 
   // Meta line — show when data was from and when it was fetched
   const latestDataDate = accounts.reduce((max, a) => (a.latestDate > max ? a.latestDate : max), '');
@@ -2428,10 +2492,10 @@ function renderQBOAccounts(accounts, fetchedAt) {
 
   // Account mapping table
   let html = '<table class="qbo-tbl"><thead><tr>' +
-    '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th><th></th>' +
+    '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th><th></th><th></th>' +
     '</tr></thead><tbody>';
 
-  accounts.forEach(function(a) {
+  visible.forEach(function(a) {
     const safeName = a.name.replace(/'/g, "\\'");
     const opts = BUCKETS.map(function(b) {
       return '<option value="' + b + '"' + (mapping[a.name] === b ? ' selected' : '') + '>' + b + '</option>';
@@ -2446,15 +2510,31 @@ function renderQBOAccounts(accounts, fetchedAt) {
       '<td class="amt">' + fmt$(a.balance) + '</td>' +
       '<td class="amt"><button class="qbo-approve-btn" title="Approve this balance as a new Profit First entry" ' +
         'onclick="approveBalance(\'' + escHtml(safeName) + '\', ' + a.balance + ')">→ Income</button></td>' +
+      '<td class="amt"><button class="qbo-hide-btn" title="Hide this account from the dashboard" ' +
+        'onclick="hideQBOAccount(\'' + escHtml(safeName) + '\')">✕</button></td>' +
     '</tr>';
   });
 
   html += '</tbody></table>';
+
+  // Hidden accounts footer — shown when any are hidden
+  if (hiddenAccts.length) {
+    html += '<div class="qbo-hidden-row">' +
+      '<span>Hidden (' + hiddenAccts.length + '): </span>' +
+      hiddenAccts.map(function(a) {
+        const safeName = a.name.replace(/'/g, "\\'");
+        return '<button class="qbo-unhide-chip" onclick="unhideQBOAccount(\'' + escHtml(safeName) + '\')">' +
+          escHtml(a.name) + ' +</button>';
+      }).join(' ') +
+      ' <button class="qbo-unhide-chip" onclick="showAllQBOAccounts()">Show all</button>' +
+    '</div>';
+  }
+
   document.getElementById('qboContent').innerHTML = html;
 
-  // Bucket totals
+  // Bucket totals — only count visible accounts
   const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0, _unassigned: 0 };
-  accounts.forEach(function(a) {
+  visible.forEach(function(a) {
     const bucket = mapping[a.name];
     if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
     else totals._unassigned += a.balance;
@@ -2475,7 +2555,8 @@ function renderQBOAccounts(accounts, fetchedAt) {
   // Update summary badge in panel header
   const assignedTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
   document.getElementById('qboPanelSummary').textContent =
-    accounts.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned';
+    visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
+    (hiddenAccts.length ? ' · ' + hiddenAccts.length + ' hidden' : '');
 }
 
 function setQBOMapping(accountName, bucket) {
@@ -2576,7 +2657,9 @@ function saveQBOTaxUrl() {
 
 async function fetchQBOTaxPayments() {
   const url = (document.getElementById('qboTaxUrl').value
-    || localStorage.getItem('qbo_tax_payments_url') || '').trim();
+    || localStorage.getItem('qbo_tax_payments_url')
+    || DEFAULT_QBO_TAX_PAYMENTS_URL
+    || '').trim();
 
   const status = document.getElementById('qboTaxStatus');
   if (!url) {
@@ -2932,28 +3015,44 @@ syncFromFirestore(); // then pull latest from cloud in background
 
 // QBO — restore URL fields, populate summary badge, run tax detection from cache
 (function initQBO() {
-  const url = localStorage.getItem('qbo_sheet_url') || '';
+  const url = localStorage.getItem('qbo_sheet_url') || DEFAULT_QBO_BALANCES_URL || '';
   const urlInput = document.getElementById('qboSheetUrl');
   if (urlInput) urlInput.value = url;
 
-  const taxUrl = localStorage.getItem('qbo_tax_payments_url') || '';
+  const taxUrl = localStorage.getItem('qbo_tax_payments_url') || DEFAULT_QBO_TAX_PAYMENTS_URL || '';
   const taxInput = document.getElementById('qboTaxUrl');
   if (taxInput) taxInput.value = taxUrl;
 
+  let hasCache = false;
   try {
     const raw = localStorage.getItem('qbo_last_fetched');
     if (raw) {
+      hasCache = true;
       const { accounts } = JSON.parse(raw);
       const mapping = loadQBOMapping();
+      const hidden  = loadQBOHidden();
       const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
-      const assignedTotal = accounts.reduce(function(s, a) {
+      const visible = accounts.filter(function(a) { return hidden.indexOf(a.name) < 0; });
+      const assignedTotal = visible.reduce(function(s, a) {
         const b = mapping[a.name];
         return s + (BUCKETS.includes(b) ? a.balance : 0);
       }, 0);
       document.getElementById('qboPanelSummary').textContent =
-        accounts.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned';
+        visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
+        (hidden.length ? ' · ' + hidden.length + ' hidden' : '');
     }
   } catch(e) {}
+
+  // Auto-fetch fresh balances on page load so the dashboard always shows current data.
+  // Runs in the background — renderQBOAccounts() updates the panel when it completes.
+  if (url) {
+    setTimeout(function() { fetchQBOBalances().catch(function() {}); }, 200);
+  }
+  if (taxUrl) {
+    setTimeout(function() {
+      if (typeof fetchQBOTaxPayments === 'function') fetchQBOTaxPayments().catch(function() {});
+    }, 400);
+  }
 
   // Run tax payment detection against current cached payments (if any)
   try {

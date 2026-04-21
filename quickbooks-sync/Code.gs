@@ -12,6 +12,8 @@
 //   QBO_CLIENT_SECRET  — from developer.intuit.com
 //   QBO_REALM_ID       — your QuickBooks Company ID
 //   QBO_ENVIRONMENT    — "production" or "sandbox"
+//   QBO_SHEET_ID       — Google Sheet ID where balances & tax payments are written
+//                        (from the sheet's URL: docs.google.com/spreadsheets/d/<THIS>/edit)
 // ═══════════════════════════════════════════════════════════════════════════
 
 var SHEET_NAME     = 'Balances';
@@ -34,6 +36,25 @@ var TAX_ACCOUNT_KEYWORDS = [
 
 // How far back to look for tax transactions
 var TAX_LOOKBACK_DAYS = 400;
+
+/**
+ * Returns the target Google Sheet. Uses QBO_SHEET_ID from Script Properties
+ * so the script works whether it's standalone or container-bound.
+ */
+function getTargetSpreadsheet() {
+  var sheetId = (PropertiesService.getScriptProperties().getProperty('QBO_SHEET_ID') || '').replace(/\s+/g, '');
+  if (sheetId) {
+    return SpreadsheetApp.openById(sheetId);
+  }
+  var active = SpreadsheetApp.getActiveSpreadsheet();
+  if (!active) {
+    throw new Error(
+      'No target spreadsheet. Set QBO_SHEET_ID in Script Properties ' +
+      '(the long ID in your Google Sheet URL between /d/ and /edit).'
+    );
+  }
+  return active;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WEB APP ENTRY POINT
@@ -77,8 +98,10 @@ function doGet(e) {
 function getQBOService() {
   var props = PropertiesService.getScriptProperties();
   var env   = props.getProperty('QBO_ENVIRONMENT') || 'production';
-  var clientId     = props.getProperty('QBO_CLIENT_ID');
-  var clientSecret = props.getProperty('QBO_CLIENT_SECRET');
+  // Strip whitespace defensively — paste artifacts (spaces, line breaks) in
+  // credentials are a common cause of invalid_client errors.
+  var clientId     = (props.getProperty('QBO_CLIENT_ID')     || '').replace(/\s+/g, '');
+  var clientSecret = (props.getProperty('QBO_CLIENT_SECRET') || '').replace(/\s+/g, '');
 
   if (!clientId || !clientSecret) {
     throw new Error(
@@ -97,7 +120,17 @@ function getQBOService() {
     .setScope('com.intuit.quickbooks.accounting')
     .setParam('response_type', 'code')
     .setTokenHeaders({
-      Authorization: 'Basic ' + Utilities.base64Encode(clientId + ':' + clientSecret)
+      Authorization: 'Basic ' + Utilities.base64Encode(clientId + ':' + clientSecret),
+      Accept: 'application/json'
+    })
+    // Intuit rejects the token request if client_id/client_secret appear in
+    // BOTH the Basic auth header AND the body — the default OAuth2 library
+    // includes them in the body. Strip them here so only the Basic header
+    // authenticates the client.
+    .setTokenPayloadHandler(function(payload) {
+      delete payload.client_id;
+      delete payload.client_secret;
+      return payload;
     });
 }
 
@@ -231,7 +264,7 @@ function getQBOTaxPayments() {
 
   var props   = PropertiesService.getScriptProperties();
   var env     = props.getProperty('QBO_ENVIRONMENT') || 'production';
-  var realmId = props.getProperty('QBO_REALM_ID');
+  var realmId = (props.getProperty('QBO_REALM_ID') || '').replace(/\s+/g, '');
   if (!realmId) throw new Error('Missing QBO_REALM_ID in Script Properties.');
 
   var baseUrl = (env === 'sandbox')
@@ -320,7 +353,7 @@ function isTaxTransaction(payee, memo, accountNames) {
  * Always replaces all data rows (we want the latest picture, not history).
  */
 function writeTaxPaymentsToSheet(payments) {
-  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var ss    = getTargetSpreadsheet();
   var sheet = ss.getSheetByName(TAX_SHEET_NAME);
 
   if (!sheet) {
@@ -373,7 +406,7 @@ function getQBOAccounts() {
 
   var props   = PropertiesService.getScriptProperties();
   var env     = props.getProperty('QBO_ENVIRONMENT') || 'production';
-  var realmId = props.getProperty('QBO_REALM_ID');
+  var realmId = (props.getProperty('QBO_REALM_ID') || '').replace(/\s+/g, '');
 
   if (!realmId) {
     throw new Error('Missing QBO_REALM_ID in Script Properties. See SETUP.md.');
@@ -436,7 +469,7 @@ function getQBOAccounts() {
  * @param {Array<{name: string, balance: number, accountType: string, subType: string}>} accounts
  */
 function writeToSheet(accounts) {
-  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var ss    = getTargetSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
 
   // Create the sheet with headers if this is the first run
@@ -556,6 +589,7 @@ function checkStatus() {
   Logger.log('Realm ID: ' + (props.getProperty('QBO_REALM_ID') || 'not set'));
   Logger.log('Client ID: ' + (props.getProperty('QBO_CLIENT_ID') ? '✓ set' : '✗ MISSING'));
   Logger.log('Client Secret: ' + (props.getProperty('QBO_CLIENT_SECRET') ? '✓ set' : '✗ MISSING'));
+  Logger.log('Sheet ID: ' + (props.getProperty('QBO_SHEET_ID') || '✗ MISSING'));
 
   var triggers = ScriptApp.getProjectTriggers()
     .filter(function(t) {
