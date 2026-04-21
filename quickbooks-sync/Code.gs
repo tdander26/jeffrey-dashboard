@@ -14,6 +14,9 @@
 //   QBO_ENVIRONMENT    — "production" or "sandbox"
 //   QBO_SHEET_ID       — Google Sheet ID where balances & tax payments are written
 //                        (from the sheet's URL: docs.google.com/spreadsheets/d/<THIS>/edit)
+//   QBO_EXCLUDED_ACCOUNTS — (optional) comma-separated QBO account names to skip
+//                           entirely. Case-insensitive. Example:
+//                           "Old Savings, Chase ending 1234, Petty Cash"
 // ═══════════════════════════════════════════════════════════════════════════
 
 var SHEET_NAME     = 'Balances';
@@ -448,14 +451,24 @@ function getQBOAccounts() {
   var data     = JSON.parse(response.getContentText());
   var rawAccts = (data.QueryResponse && data.QueryResponse.Account) || [];
 
-  return rawAccts.map(function(a) {
-    return {
-      name:        a.Name            || 'Unknown Account',
-      balance:     a.CurrentBalance  || 0,
-      accountType: a.AccountType     || 'Bank',
-      subType:     a.AccountSubType  || ''
-    };
-  });
+  // Optional exclude list from Script Properties — skip accounts by name
+  var excludedRaw = props.getProperty('QBO_EXCLUDED_ACCOUNTS') || '';
+  var excluded = excludedRaw.split(',')
+    .map(function(n) { return n.trim().toLowerCase(); })
+    .filter(function(n) { return n.length > 0; });
+
+  return rawAccts
+    .filter(function(a) {
+      return excluded.indexOf((a.Name || '').toLowerCase()) < 0;
+    })
+    .map(function(a) {
+      return {
+        name:        a.Name            || 'Unknown Account',
+        balance:     a.CurrentBalance  || 0,
+        accountType: a.AccountType     || 'Bank',
+        subType:     a.AccountSubType  || ''
+      };
+    });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -590,6 +603,7 @@ function checkStatus() {
   Logger.log('Client ID: ' + (props.getProperty('QBO_CLIENT_ID') ? '✓ set' : '✗ MISSING'));
   Logger.log('Client Secret: ' + (props.getProperty('QBO_CLIENT_SECRET') ? '✓ set' : '✗ MISSING'));
   Logger.log('Sheet ID: ' + (props.getProperty('QBO_SHEET_ID') || '✗ MISSING'));
+  Logger.log('Excluded accounts: ' + (props.getProperty('QBO_EXCLUDED_ACCOUNTS') || '(none)'));
 
   var triggers = ScriptApp.getProjectTriggers()
     .filter(function(t) {
