@@ -79,7 +79,7 @@ The script needs a helper library to handle QuickBooks authentication.
 2. Next to **"Libraries"**, click the **+** (plus) button.
 3. In the "Add a library" dialog, paste this Script ID:
    ```
-   1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMBbjqp
+   1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF
    ```
 4. Click **"Look up"**.
 5. It should find **"OAuth2"** — select the **highest version number** from the dropdown.

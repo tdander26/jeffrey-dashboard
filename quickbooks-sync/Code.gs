@@ -5,7 +5,7 @@
 // SETUP REQUIRED — see SETUP.md for step-by-step instructions.
 //
 // OAuth2 library must be added before this script will work.
-// Library Script ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMBbjqp
+// Library Script ID: 1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF
 //
 // Script Properties required (Project Settings → Script Properties):
 //   QBO_CLIENT_ID      — from developer.intuit.com
