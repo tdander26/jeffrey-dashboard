@@ -652,6 +652,51 @@
     color: #FF3B30; font-size: 13px; line-height: 1.5;
   }
   .qbo-loading { padding: 12px; color: #86868b; font-size: 13px; font-style: italic; }
+
+  .qbo-approve-btn {
+    padding: 4px 10px; border-radius: 6px; border: none;
+    background: rgba(0,122,255,0.1); color: #007AFF;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+    transition: background 0.12s;
+  }
+  .qbo-approve-btn:hover { background: rgba(0,122,255,0.22); }
+
+  .qbo-url-advanced {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed rgba(0,0,0,0.08);
+  }
+  .qbo-url-advanced summary {
+    cursor: pointer; font-size: 11px; font-weight: 600;
+    color: #86868b; user-select: none; margin-bottom: 8px;
+  }
+  .qbo-url-advanced summary:hover { color: #1d1d1f; }
+
+  /* ── Tax Payment Detected Badge ── */
+  .tax-detected {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-left: 8px; padding: 2px 8px; border-radius: 6px;
+    background: rgba(52,199,89,0.14); color: #2ea44f;
+    font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+  }
+  .tax-unmatched-panel {
+    margin-bottom: 14px; padding: 10px 14px;
+    background: rgba(255,149,0,0.07); border: 1px solid rgba(255,149,0,0.18);
+    border-radius: 8px; font-size: 12px;
+  }
+  .tax-unmatched-panel .title {
+    font-weight: 600; color: #1d1d1f; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tax-unmatched-panel .items {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .tax-unmatched-item {
+    padding: 3px 10px; background: #fff; border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08); color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+  }
 </style>
 </head>
 <body>
@@ -713,7 +758,7 @@
           <input
             id="qboSheetUrl"
             type="url"
-            placeholder="Paste your published Google Sheet CSV URL here…"
+            placeholder="Paste your published Balances CSV URL here…"
             onchange="saveQBOUrl()"
             onblur="saveQBOUrl()"
           />
@@ -725,6 +770,20 @@
           <div class="qbo-loading">Enter your Google Sheet CSV URL above and click Refresh to load balances.</div>
         </div>
         <div class="qbo-bucket-totals" id="qboBucketTotals"></div>
+        <details class="qbo-url-advanced">
+          <summary>Tax Payments CSV URL (optional)</summary>
+          <div class="qbo-url-row">
+            <input
+              id="qboTaxUrl"
+              type="url"
+              placeholder="Paste your published Tax Payments CSV URL here…"
+              onchange="saveQBOTaxUrl()"
+              onblur="saveQBOTaxUrl()"
+            />
+            <button class="btn btn-secondary btn-sm" onclick="fetchQBOTaxPayments()">Refresh Taxes</button>
+          </div>
+          <div id="qboTaxStatus" style="font-size:12px;color:#86868b"></div>
+        </details>
       </div>
     </div>
 
@@ -1002,25 +1061,25 @@
                   <td>Q1 — April 18th</td>
                   <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2025" data-amount="16332" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q2 — June 15th</td>
                   <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2025" data-amount="16332" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q3 — Sept 16th</td>
                   <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2025" data-amount="16332" data-due="2025-09-16" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q4 — Jan 15th</td>
                   <td class="amount">—</td>
                   <td class="amount">$4,000.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" data-amount="4000" data-due="2026-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row na-row">
                   <td>2025 Total <span style="font-weight:400;font-size:11px;color:#86868b">(7285 rolled over)</span></td>
@@ -1065,22 +1124,22 @@
                 </tr>
                 <tr>
                   <td>Q1 — April 18th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2025" data-amount="3298" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr>
                   <td>Q2 — June 15th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2025" data-amount="3298" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr>
                   <td>Q3 — Sept 15th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2025" data-amount="3298" data-due="2025-09-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr>
                   <td>Q4 — Jan 16th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q4" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q4" data-year="2025" data-amount="3298" data-due="2026-01-16" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr class="totals-row na-row">
@@ -1125,13 +1184,13 @@
                   <td>2024</td>
                   <td class="amount">$252,167.42</td>
                   <td class="amount">$4,539.01</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2024" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2024" data-year="2025" data-amount="4539.01" data-due="2025-03-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>2025</td>
                   <td class="amount">—</td>
                   <td class="amount">$4,459.44</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2025" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2025" data-year="2025" data-amount="4459.44" data-due="2026-03-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row">
                   <td>Total</td>
@@ -1212,25 +1271,25 @@
                   <td>Q1 — April 18th</td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$5,290.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2026" data-amount="5290" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q2 — June 15th</td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2026" data-amount="12580" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q3 — Sept 16th</td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2026" data-amount="12580" data-due="2026-09-16" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q4 — Jan 15th</td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
-                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" data-amount="12580" data-due="2027-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row na-row">
                   <td>2025 Total</td>
@@ -1275,22 +1334,22 @@
                 </tr>
                 <tr>
                   <td>Q1 — April 18th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2026" data-amount="1226" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$1,226.00</td>
                 </tr>
                 <tr>
                   <td>Q2 — June 15th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2026" data-amount="3110" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,110.00</td>
                 </tr>
                 <tr>
                   <td>Q3 — Sept 15th</td>
-                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2026" data-amount="3110" data-due="2026-09-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,110.00</td>
                 </tr>
                 <tr>
                   <td>Q4 — Jan 16th</td>
-                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2026" data-amount="3110" data-due="2027-01-16" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,110.00</td>
                 </tr>
                 <tr class="totals-row na-row">
@@ -1331,13 +1390,13 @@
                   <td>2024</td>
                   <td class="amount">$252,167.42</td>
                   <td class="amount">$4,539.01</td>
-                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" data-year="2026" data-amount="4539.01" data-due="2025-03-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>2025</td>
                   <td class="amount">—</td>
                   <td class="amount">$4,459.44</td>
-                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2025" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2025" data-year="2026" data-amount="4459.44" data-due="2026-03-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row">
                   <td>Total</td>
@@ -1377,7 +1436,7 @@
                   <td>2026</td>
                   <td class="amount">$200.00</td>
                   <td class="amount">$200.00</td>
-                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" data-year="2026" data-amount="200" data-due="2027-04-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row">
                   <td>Total</td>
@@ -2369,7 +2428,7 @@ function renderQBOAccounts(accounts, fetchedAt) {
 
   // Account mapping table
   let html = '<table class="qbo-tbl"><thead><tr>' +
-    '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th>' +
+    '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th><th></th>' +
     '</tr></thead><tbody>';
 
   accounts.forEach(function(a) {
@@ -2385,6 +2444,8 @@ function renderQBOAccounts(accounts, fetchedAt) {
         opts +
       '</select></td>' +
       '<td class="amt">' + fmt$(a.balance) + '</td>' +
+      '<td class="amt"><button class="qbo-approve-btn" title="Approve this balance as a new Profit First entry" ' +
+        'onclick="approveBalance(\'' + escHtml(safeName) + '\', ' + a.balance + ')">→ Income</button></td>' +
     '</tr>';
   });
 
@@ -2478,6 +2539,220 @@ function useQBOBalances() {
   document.getElementById('m_notes').value      = 'QBO balance snapshot';
 
   if (typeof updateModalPreview === 'function') updateModalPreview();
+}
+
+function approveBalance(accountName, balance) {
+  // Use the most recent PF entry's percentages as the starting point
+  const data = loadData();
+  const last = data.length ? data[data.length - 1] : null;
+  const defaults = last
+    ? { profit: last.profit, tax: last.tax, oc: last.oc, opex: last.opex }
+    : { profit: 0, tax: 20, oc: 30, opex: 50 };
+
+  openModal();
+
+  const MONTH_NAMES = ['January','February','March','April','May','June',
+                       'July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('m_date').value = MONTH_NAMES[now.getMonth()] + ' ' + now.getDate();
+  document.getElementById('m_total').value = Number(balance).toFixed(2);
+  document.getElementById('m_profit_pct').value = defaults.profit;
+  document.getElementById('m_tax_pct').value    = defaults.tax;
+  document.getElementById('m_oc_pct').value     = defaults.oc;
+  document.getElementById('m_opex_pct').value   = defaults.opex;
+  document.getElementById('m_notes').value      = 'QBO: ' + accountName;
+
+  if (typeof updateModalPreview === 'function') updateModalPreview();
+}
+
+// ─────────────────────────────────────────────
+// QBO TAX PAYMENT DETECTION
+// ─────────────────────────────────────────────
+
+function saveQBOTaxUrl() {
+  const url = (document.getElementById('qboTaxUrl').value || '').trim();
+  if (url) localStorage.setItem('qbo_tax_payments_url', url);
+}
+
+async function fetchQBOTaxPayments() {
+  const url = (document.getElementById('qboTaxUrl').value
+    || localStorage.getItem('qbo_tax_payments_url') || '').trim();
+
+  const status = document.getElementById('qboTaxStatus');
+  if (!url) {
+    status.innerHTML = '<span style="color:#FF3B30">Enter your Tax Payments CSV URL first.</span>';
+    return;
+  }
+
+  localStorage.setItem('qbo_tax_payments_url', url);
+  status.textContent = 'Loading tax payments…';
+
+  try {
+    const fetchUrl = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    const resp = await fetch(fetchUrl);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const csvText = await resp.text();
+    const payments = parseTaxPaymentsCSV(csvText);
+
+    localStorage.setItem('qbo_tax_payments_cache', JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      payments
+    }));
+
+    status.innerHTML = '<span style="color:#34c759">✓ Loaded ' + payments.length +
+      ' tax payment(s). Switch to the Taxes tab to see detected badges.</span>';
+
+    detectTaxPayments();
+  } catch(err) {
+    status.innerHTML = '<span style="color:#FF3B30">Could not load: ' + escHtml(err.message) + '</span>';
+  }
+}
+
+function parseTaxPaymentsCSV(csvText) {
+  function parseRow(line) {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        result.push(cur); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  const headers  = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+  const dateIdx  = headers.indexOf('date');
+  const payeeIdx = headers.indexOf('payee');
+  const amtIdx   = headers.indexOf('amount');
+  const memoIdx  = headers.indexOf('memo');
+  const catIdx   = headers.indexOf('category');
+  const typeIdx  = headers.indexOf('type');
+
+  if (dateIdx < 0 || amtIdx < 0) return [];
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseRow(lines[i]);
+    if (cols.length < 2) continue;
+    const date   = (cols[dateIdx] || '').trim();
+    const payee  = payeeIdx >= 0 ? (cols[payeeIdx] || '').trim() : '';
+    const amount = parseFloat((cols[amtIdx] || '').replace(/[^0-9.\-]/g, '')) || 0;
+    const memo   = memoIdx >= 0 ? (cols[memoIdx] || '').trim() : '';
+    const cat    = catIdx  >= 0 ? (cols[catIdx]  || '').trim() : '';
+    const type   = typeIdx >= 0 ? (cols[typeIdx] || '').trim() : '';
+    if (!date || !amount) continue;
+    rows.push({ date, payee, amount: Math.abs(amount), memo, category: cat, type });
+  }
+  return rows;
+}
+
+function clearTaxBadges() {
+  document.querySelectorAll('.tax-detected, .tax-unmatched-panel').forEach(n => n.remove());
+}
+
+function detectTaxPayments() {
+  clearTaxBadges();
+
+  let cache;
+  try { cache = JSON.parse(localStorage.getItem('qbo_tax_payments_cache') || 'null'); }
+  catch(e) { return; }
+  if (!cache || !cache.payments || !cache.payments.length) return;
+
+  const AMOUNT_TOL   = 5.00;           // match within ±$5
+  const DAY_WINDOW   = 60;             // match within ±60 days of due date
+  const MS_PER_DAY   = 86400000;
+
+  // Every tax row with a data-amount is a match candidate
+  const rows = Array.from(document.querySelectorAll('.checkbox-custom[data-amount]'));
+
+  // Track which payments were matched (to identify unmatched ones)
+  const matchedPayments = new Set();
+  // Track which rows already got a badge (avoid double-matching)
+  const matchedRowKeys = new Set();
+
+  // Sort payments by date (oldest first) so earliest payment wins for each row
+  const payments = cache.payments.slice().sort((a, b) => a.date.localeCompare(b.date));
+
+  rows.forEach(rowEl => {
+    const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
+    if (matchedRowKeys.has(rowKey)) return;
+
+    const expectedAmt = parseFloat(rowEl.dataset.amount);
+    const dueStr = rowEl.dataset.due;
+    if (!expectedAmt || !dueStr) return;
+
+    const dueMs = new Date(dueStr + 'T12:00:00').getTime();
+
+    // Find the best payment match for this row
+    let bestIdx = -1;
+    let bestDeltaAmt = Infinity;
+    payments.forEach((p, idx) => {
+      if (matchedPayments.has(idx)) return;
+      const deltaAmt = Math.abs(p.amount - expectedAmt);
+      if (deltaAmt > AMOUNT_TOL) return;
+      const pMs = new Date(p.date + 'T12:00:00').getTime();
+      const deltaDays = Math.abs(pMs - dueMs) / MS_PER_DAY;
+      if (deltaDays > DAY_WINDOW) return;
+      if (deltaAmt < bestDeltaAmt) {
+        bestDeltaAmt = deltaAmt;
+        bestIdx = idx;
+      }
+    });
+
+    if (bestIdx < 0) return;
+
+    const p = payments[bestIdx];
+    matchedPayments.add(bestIdx);
+    matchedRowKeys.add(rowKey);
+
+    // Inject badge into the row's label cell (first <td> of the parent <tr>)
+    const tr = rowEl.closest('tr');
+    if (!tr) return;
+    const labelCell = tr.querySelector('td');
+    if (!labelCell) return;
+
+    // Format payment date as "Apr 10"
+    const pDate = new Date(p.date + 'T12:00:00');
+    const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
+    const dateStr = mName + ' ' + pDate.getDate();
+
+    const badge = document.createElement('span');
+    badge.className = 'tax-detected';
+    badge.textContent = '✓ Detected ' + fmt$(p.amount) + ' on ' + dateStr;
+    if (p.payee) badge.title = 'From QBO: ' + p.payee + (p.memo ? ' — ' + p.memo : '');
+    labelCell.appendChild(badge);
+  });
+
+  // Unmatched payments → small panel at the top of the currently-visible tax year
+  const unmatched = payments.filter((_, i) => !matchedPayments.has(i));
+  if (!unmatched.length) return;
+
+  const activeYearEl = document.querySelector('.tax-year-content.active');
+  if (!activeYearEl) return;
+
+  const panel = document.createElement('div');
+  panel.className = 'tax-unmatched-panel';
+  const items = unmatched.map(p => {
+    const d = new Date(p.date + 'T12:00:00');
+    const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+    return '<span class="tax-unmatched-item" title="' + escHtml(p.payee || '') + '">' +
+      fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() +
+      (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
+  }).join('');
+  panel.innerHTML =
+    '<div class="title">⚠ ' + unmatched.length + ' QBO tax payment(s) didn\'t match a row</div>' +
+    '<div class="items">' + items + '</div>';
+  activeYearEl.insertBefore(panel, activeYearEl.firstChild);
 }
 
 // ─────────────────────────────────────────────
@@ -2606,6 +2881,7 @@ function switchTaxYear(year, btn) {
   document.getElementById('tax-year-' + year).classList.add('active');
   btn.classList.add('active');
   initCheckboxes(year);
+  if (typeof detectTaxPayments === 'function') detectTaxPayments();
 }
 
 // ─────────────────────────────────────────────
@@ -2654,23 +2930,43 @@ initCheckboxes('2025');
 initCheckboxes('2026');
 syncFromFirestore(); // then pull latest from cloud in background
 
-// QBO — restore URL field and populate summary badge from cache
+// QBO — restore URL fields, populate summary badge, run tax detection from cache
 (function initQBO() {
   const url = localStorage.getItem('qbo_sheet_url') || '';
   const urlInput = document.getElementById('qboSheetUrl');
   if (urlInput) urlInput.value = url;
+
+  const taxUrl = localStorage.getItem('qbo_tax_payments_url') || '';
+  const taxInput = document.getElementById('qboTaxUrl');
+  if (taxInput) taxInput.value = taxUrl;
+
   try {
     const raw = localStorage.getItem('qbo_last_fetched');
-    if (!raw) return;
-    const { accounts } = JSON.parse(raw);
-    const mapping = loadQBOMapping();
-    const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
-    const assignedTotal = accounts.reduce(function(s, a) {
-      const b = mapping[a.name];
-      return s + (BUCKETS.includes(b) ? a.balance : 0);
-    }, 0);
-    document.getElementById('qboPanelSummary').textContent =
-      accounts.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned';
+    if (raw) {
+      const { accounts } = JSON.parse(raw);
+      const mapping = loadQBOMapping();
+      const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+      const assignedTotal = accounts.reduce(function(s, a) {
+        const b = mapping[a.name];
+        return s + (BUCKETS.includes(b) ? a.balance : 0);
+      }, 0);
+      document.getElementById('qboPanelSummary').textContent =
+        accounts.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned';
+    }
+  } catch(e) {}
+
+  // Run tax payment detection against current cached payments (if any)
+  try {
+    const taxRaw = localStorage.getItem('qbo_tax_payments_cache');
+    if (taxRaw) {
+      const { payments, fetchedAt } = JSON.parse(taxRaw);
+      const statusEl = document.getElementById('qboTaxStatus');
+      if (statusEl && payments) {
+        statusEl.textContent = payments.length + ' tax payment(s) cached · fetched ' +
+          new Date(fetchedAt).toLocaleDateString();
+      }
+      detectTaxPayments();
+    }
   } catch(e) {}
 })();
 </script>

@@ -14,7 +14,26 @@
 //   QBO_ENVIRONMENT    — "production" or "sandbox"
 // ═══════════════════════════════════════════════════════════════════════════
 
-var SHEET_NAME = 'Balances';
+var SHEET_NAME     = 'Balances';
+var TAX_SHEET_NAME = 'Tax Payments';
+
+// Payees matched when detecting tax payments (case-insensitive substring match)
+var TAX_PAYEE_KEYWORDS = [
+  'united states treasury', 'us treasury', 'treasury',
+  'internal revenue', 'irs',
+  'minnesota department of revenue', 'mn dept of revenue',
+  'mn revenue', 'minnesota revenue', 'minnesota dept of revenue',
+  'eftps', 'franchise tax'
+];
+
+// Account / category names that also identify tax payments
+var TAX_ACCOUNT_KEYWORDS = [
+  'tax', 'federal tax', 'state tax', 'mn care', 'income tax',
+  'estimated tax', 'quarterly tax'
+];
+
+// How far back to look for tax transactions
+var TAX_LOOKBACK_DAYS = 400;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // WEB APP ENTRY POINT
@@ -158,6 +177,181 @@ function fetchAndSaveBalances() {
   });
 }
 
+/**
+ * Orchestrator — runs both balance sync AND tax payment sync.
+ * This is the function the scheduled triggers point at.
+ */
+function fetchAll() {
+  try {
+    fetchAndSaveBalances();
+  } catch(err) {
+    Logger.log('✗ fetchAndSaveBalances failed: ' + err.message);
+  }
+  try {
+    fetchAndSaveTaxPayments();
+  } catch(err) {
+    Logger.log('✗ fetchAndSaveTaxPayments failed: ' + err.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAX PAYMENT SYNC
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Queries QBO for recent transactions that look like tax payments
+ * (matched by payee name OR expense account name) and overwrites the
+ * "Tax Payments" sheet with the results.
+ */
+function fetchAndSaveTaxPayments() {
+  Logger.log('Starting QBO tax payment fetch — ' + new Date().toLocaleString());
+
+  var payments = getQBOTaxPayments();
+  Logger.log('Found ' + payments.length + ' tax payment(s).');
+
+  writeTaxPaymentsToSheet(payments);
+  Logger.log('✓ Tax payments saved to sheet successfully.');
+
+  payments.forEach(function(p) {
+    Logger.log('  ' + p.date + ' · ' + p.payee + ' · $' + p.amount.toFixed(2));
+  });
+}
+
+/**
+ * Queries QBO Purchase transactions in the lookback window and filters
+ * for tax-related payments.
+ *
+ * @returns {Array<{date, payee, amount, memo, category, type}>}
+ */
+function getQBOTaxPayments() {
+  var service = getQBOService();
+  if (!service.hasAccess()) {
+    throw new Error('Not authorized. Run authorize() first.');
+  }
+
+  var props   = PropertiesService.getScriptProperties();
+  var env     = props.getProperty('QBO_ENVIRONMENT') || 'production';
+  var realmId = props.getProperty('QBO_REALM_ID');
+  if (!realmId) throw new Error('Missing QBO_REALM_ID in Script Properties.');
+
+  var baseUrl = (env === 'sandbox')
+    ? 'https://sandbox-quickbooks.api.intuit.com'
+    : 'https://quickbooks.api.intuit.com';
+
+  // Build the date window
+  var sinceDate = new Date();
+  sinceDate.setDate(sinceDate.getDate() - TAX_LOOKBACK_DAYS);
+  var sinceStr = Utilities.formatDate(sinceDate, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+
+  // Pull all Purchases since the window. QBO's query language doesn't
+  // support OR across different fields, so we filter client-side.
+  var query = "SELECT * FROM Purchase WHERE TxnDate >= '" + sinceStr + "' MAXRESULTS 1000";
+  var url   = baseUrl + '/v3/company/' + realmId +
+              '/query?query=' + encodeURIComponent(query) + '&minorversion=65';
+
+  var resp = UrlFetchApp.fetch(url, {
+    method: 'get',
+    headers: {
+      Authorization: 'Bearer ' + service.getAccessToken(),
+      Accept:        'application/json'
+    },
+    muteHttpExceptions: true
+  });
+
+  if (resp.getResponseCode() !== 200) {
+    throw new Error('QBO Purchase query failed: ' + resp.getResponseCode() + ' ' + resp.getContentText());
+  }
+
+  var data      = JSON.parse(resp.getContentText());
+  var purchases = (data.QueryResponse && data.QueryResponse.Purchase) || [];
+
+  var results = [];
+  purchases.forEach(function(p) {
+    var payee = (p.EntityRef && p.EntityRef.name) || '';
+    var memo  = p.PrivateNote || '';
+
+    // Collect all expense account names from the lines
+    var accountNames = [];
+    (p.Line || []).forEach(function(line) {
+      if (line.AccountBasedExpenseLineDetail &&
+          line.AccountBasedExpenseLineDetail.AccountRef) {
+        accountNames.push(line.AccountBasedExpenseLineDetail.AccountRef.name || '');
+      }
+    });
+
+    if (!isTaxTransaction(payee, memo, accountNames)) return;
+
+    results.push({
+      date:     p.TxnDate || '',
+      payee:    payee,
+      amount:   p.TotalAmt || 0,
+      memo:     memo,
+      category: accountNames.join(' / '),
+      type:     p.PaymentType || 'Purchase'
+    });
+  });
+
+  // Sort newest first
+  results.sort(function(a, b) { return b.date.localeCompare(a.date); });
+  return results;
+}
+
+/**
+ * Returns true if the payee, memo, or any account name matches a tax keyword.
+ */
+function isTaxTransaction(payee, memo, accountNames) {
+  var payeeLc = (payee || '').toLowerCase();
+  var memoLc  = (memo  || '').toLowerCase();
+
+  var payeeMatch = TAX_PAYEE_KEYWORDS.some(function(kw) {
+    return payeeLc.indexOf(kw) >= 0 || memoLc.indexOf(kw) >= 0;
+  });
+  if (payeeMatch) return true;
+
+  var acctMatch = (accountNames || []).some(function(n) {
+    var lc = (n || '').toLowerCase();
+    return TAX_ACCOUNT_KEYWORDS.some(function(kw) { return lc.indexOf(kw) >= 0; });
+  });
+  return acctMatch;
+}
+
+/**
+ * Overwrites the "Tax Payments" sheet with the given list of payments.
+ * Always replaces all data rows (we want the latest picture, not history).
+ */
+function writeTaxPaymentsToSheet(payments) {
+  var ss    = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(TAX_SHEET_NAME);
+
+  if (!sheet) {
+    sheet = ss.insertSheet(TAX_SHEET_NAME);
+    sheet.setColumnWidth(1, 100);
+    sheet.setColumnWidth(2, 240);
+    sheet.setColumnWidth(3, 110);
+    sheet.setColumnWidth(4, 240);
+    sheet.setColumnWidth(5, 200);
+    sheet.setColumnWidth(6, 100);
+  }
+
+  // Clear everything except column headers
+  sheet.clear();
+
+  var headers = ['Date', 'Payee', 'Amount', 'Memo', 'Category', 'Type'];
+  var header  = sheet.getRange(1, 1, 1, headers.length);
+  header.setValues([headers]);
+  header.setFontWeight('bold');
+  header.setBackground('#f5f5f7');
+  sheet.setFrozenRows(1);
+
+  if (payments.length) {
+    var rows = payments.map(function(p) {
+      return [p.date, p.payee, p.amount, p.memo, p.category, p.type];
+    });
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+    sheet.getRange(2, 3, rows.length, 1).setNumberFormat('$#,##0.00');
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // QUICKBOOKS API
 // ─────────────────────────────────────────────────────────────────────────────
@@ -297,26 +491,30 @@ function writeToSheet(accounts) {
  * HOW TO USE: Select "setupTriggers" and click Run (▶) in the Apps Script editor.
  */
 function setupTriggers() {
-  // Remove any existing triggers for this function
+  // Remove any existing triggers for fetchAll AND legacy fetchAndSaveBalances
   ScriptApp.getProjectTriggers()
-    .filter(function(t) { return t.getHandlerFunction() === 'fetchAndSaveBalances'; })
+    .filter(function(t) {
+      var fn = t.getHandlerFunction();
+      return fn === 'fetchAll' || fn === 'fetchAndSaveBalances';
+    })
     .forEach(function(t) { ScriptApp.deleteTrigger(t); });
 
-  // 10th of every month at 8 AM
-  ScriptApp.newTrigger('fetchAndSaveBalances')
+  // 10th of every month at 8 AM — runs balances + tax payments
+  ScriptApp.newTrigger('fetchAll')
     .timeBased()
     .onMonthDay(10)
     .atHour(8)
     .create();
 
   // 25th of every month at 8 AM
-  ScriptApp.newTrigger('fetchAndSaveBalances')
+  ScriptApp.newTrigger('fetchAll')
     .timeBased()
     .onMonthDay(25)
     .atHour(8)
     .create();
 
   Logger.log('✓ Two triggers created: 10th and 25th of each month at 8 AM.');
+  Logger.log('  Both triggers call fetchAll() which runs balances + tax payments.');
   Logger.log('  Go to the Triggers panel (clock icon) to confirm.');
 }
 
@@ -334,7 +532,10 @@ function resetAuth() {
 
   // Also clear all triggers so they can be re-created cleanly
   ScriptApp.getProjectTriggers()
-    .filter(function(t) { return t.getHandlerFunction() === 'fetchAndSaveBalances'; })
+    .filter(function(t) {
+      var fn = t.getHandlerFunction();
+      return fn === 'fetchAll' || fn === 'fetchAndSaveBalances' || fn === 'fetchAndSaveTaxPayments';
+    })
     .forEach(function(t) { ScriptApp.deleteTrigger(t); });
 
   Logger.log('✓ Auth tokens cleared and triggers removed.');
@@ -357,6 +558,9 @@ function checkStatus() {
   Logger.log('Client Secret: ' + (props.getProperty('QBO_CLIENT_SECRET') ? '✓ set' : '✗ MISSING'));
 
   var triggers = ScriptApp.getProjectTriggers()
-    .filter(function(t) { return t.getHandlerFunction() === 'fetchAndSaveBalances'; });
+    .filter(function(t) {
+      var fn = t.getHandlerFunction();
+      return fn === 'fetchAll' || fn === 'fetchAndSaveBalances';
+    });
   Logger.log('Active triggers: ' + triggers.length + ' (should be 2 after setupTriggers())');
 }
