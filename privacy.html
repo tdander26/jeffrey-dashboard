@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy · Momentum Health Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f7; color: #1d1d1f;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    padding: 48px 24px;
+  }
+  .wrap {
+    max-width: 720px; margin: 0 auto;
+    background: #fff; padding: 48px 56px;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+  }
+  h1 {
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.5px; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 14px; color: #86868b; margin-bottom: 32px; }
+  h2 {
+    font-size: 17px; font-weight: 600;
+    margin-top: 28px; margin-bottom: 10px;
+    letter-spacing: -0.2px;
+  }
+  p { margin-bottom: 12px; font-size: 15px; }
+  ul { margin: 8px 0 12px 24px; }
+  li { font-size: 15px; margin-bottom: 6px; }
+  a { color: #007AFF; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .meta {
+    margin-top: 36px; padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    font-size: 13px; color: #86868b;
+  }
+  strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Privacy Policy</h1>
+<p class="subtitle">Momentum Health Dashboard · Effective April 20, 2026</p>
+
+<p>The Momentum Health Dashboard ("the Dashboard") is a private, single-user tool operated by Todd Anderson, D.C. of Momentum Health Chiropractic. This policy describes what data the Dashboard accesses, where it is stored, and how it is used.</p>
+
+<h2>1. Who uses this application</h2>
+<p>The Dashboard is not a public or commercial product. It is used by the owner of Momentum Health Chiropractic for internal financial administration. No other users, customers, or patients have accounts on the Dashboard or interact with its QuickBooks integration.</p>
+
+<h2>2. What data is accessed from QuickBooks Online</h2>
+<p>When connected to QuickBooks Online via the official Intuit OAuth 2.0 authorization flow, the Dashboard reads only:</p>
+<ul>
+  <li>Names and current balances of bank accounts belonging to the authorizing QuickBooks company</li>
+  <li>Expense and payment transactions whose payee or expense category matches a defined list of tax-related keywords (e.g. "Treasury," "IRS," "MN Dept of Revenue")</li>
+</ul>
+<p>The Dashboard does <strong>not</strong> access, read, modify, or store patient records, customer data, invoices, payroll detail, or any other QuickBooks data outside the scope listed above.</p>
+
+<h2>3. Where data is stored</h2>
+<p>Data retrieved from QuickBooks is written only to:</p>
+<ul>
+  <li>A private Google Sheet owned by the authorizing user, inside that user's Google account</li>
+  <li>The browser's local storage (<code>localStorage</code>) on devices where the dashboard is opened, for client-side caching and user preferences (e.g., account-to-bucket mapping)</li>
+  <li>A Firebase Firestore database private to the dashboard owner, used only to sync entries the owner manually creates in the dashboard</li>
+</ul>
+<p>No data is uploaded to, transmitted through, or stored by any server operated by the Licensor or any third party outside those listed above.</p>
+
+<h2>4. Who has access</h2>
+<p>Data is accessible only to the owner of the authorizing QuickBooks account and Google account. Data is not shared with, sold to, or disclosed to any third party. There are no analytics services, advertising networks, or external APIs that receive data from the Dashboard.</p>
+
+<h2>5. OAuth tokens and credentials</h2>
+<p>Authorization tokens issued by Intuit are stored securely inside Google Apps Script's built-in <code>PropertiesService</code>, scoped to the authorizing user's Google account. These tokens are never displayed in the user interface, logged to the browser, transmitted off-device, or copied elsewhere. They can be revoked at any time by running the <code>resetAuth()</code> function in Apps Script or by disconnecting the app inside QuickBooks Online.</p>
+
+<h2>6. Data retention</h2>
+<p>Financial data remains in the owner's Google Sheet and browser local storage for as long as the owner chooses to retain it. The owner may delete the Sheet, clear browser local storage, or revoke QuickBooks access at any time to remove all data the Dashboard has access to.</p>
+
+<h2>7. Children's privacy</h2>
+<p>The Dashboard is a business-administration tool and is not directed to or used by children under 13.</p>
+
+<h2>8. Changes</h2>
+<p>This policy may be updated from time to time. The "Effective" date at the top of this page reflects the most recent revision.</p>
+
+<h2>9. Contact</h2>
+<p>Questions about this Privacy Policy or the data the Dashboard handles can be directed to <a href="mailto:doc@drtoddanderson.com">doc@drtoddanderson.com</a>.</p>
+
+<div class="meta">
+  Momentum Health Chiropractic · <a href="eula.html">End-User License Agreement</a> · <a href="finance.html">Dashboard</a>
+</div>
+
+</div>
+</body>
+</html>
