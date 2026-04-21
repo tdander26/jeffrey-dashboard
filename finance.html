@@ -774,7 +774,7 @@
     <div class="panel" style="margin-bottom:16px" id="qboPanelWrap">
       <div class="qbo-panel-toggle" onclick="toggleQBOPanel()">
         <span class="qbo-arrow" id="qboArrow">▶</span>
-        <span>Live QBO Balances</span>
+        <span>Live Bank Balances</span>
         <span id="qboPanelSummary" style="font-size:12px;color:#86868b;font-weight:400;margin-left:6px"></span>
       </div>
       <div class="qbo-panel-body" id="qboPanelBody">
@@ -2488,7 +2488,7 @@ function renderQBOAccounts(accounts, fetchedAt) {
     ? ' · Fetched ' + new Date(fetchedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     : '';
   document.getElementById('qboMeta').innerHTML =
-    '<span>QBO data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>';
+    '<span>Bank data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>';
 
   // Account mapping table
   let html = '<table class="qbo-tbl"><thead><tr>' +

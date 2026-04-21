@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connect a Bank</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f7; color: #1d1d1f;
+    line-height: 1.55; -webkit-font-smoothing: antialiased;
+    padding: 32px 20px;
+  }
+  .wrap {
+    max-width: 560px; margin: 0 auto;
+    background: #fff; padding: 32px;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.04);
+  }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #86868b; margin-bottom: 24px; }
+  h2 { font-size: 14px; font-weight: 600; margin-top: 24px; margin-bottom: 10px; color: #1d1d1f; }
+  label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: #1d1d1f; margin-bottom: 6px;
+  }
+  input[type="text"] {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid rgba(0,0,0,0.12); border-radius: 8px;
+    font-size: 14px; font-family: inherit;
+    margin-bottom: 12px;
+  }
+  input[type="text"]:focus { outline: none; border-color: #007AFF; }
+  button {
+    display: inline-block; padding: 10px 20px;
+    border-radius: 8px; border: none;
+    background: #007AFF; color: #fff;
+    font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: #0064d1; }
+  button:disabled { background: #c7c7cc; cursor: not-allowed; }
+  button.secondary { background: rgba(0,0,0,0.06); color: #1d1d1f; }
+  button.secondary:hover { background: rgba(0,0,0,0.1); }
+  button.danger { background: rgba(255,59,48,0.1); color: #FF3B30; padding: 6px 12px; font-size: 12px; }
+  button.danger:hover { background: rgba(255,59,48,0.2); }
+  .banks-list { margin-top: 8px; }
+  .bank-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: #f5f5f7; border-radius: 8px;
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .bank-meta { font-size: 11px; color: #86868b; }
+  .status {
+    padding: 10px 14px; border-radius: 8px;
+    margin-top: 16px; font-size: 13px; display: none;
+  }
+  .status.error   { display: block; background: rgba(255,59,48,0.08); color: #FF3B30; }
+  .status.success { display: block; background: rgba(52,199,89,0.1);   color: #248A3D; }
+  .status.info    { display: block; background: rgba(0,122,255,0.08);  color: #007AFF; }
+  .empty { color: #86868b; font-size: 13px; font-style: italic; padding: 8px 0; }
+</style>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <h1>Connect a Bank</h1>
+  <p class="subtitle">Plaid securely links your bank account to the Momentum Health Dashboard so live balances and tax payments sync automatically.</p>
+
+  <h2>Connect a new bank</h2>
+  <label for="bankName">Bank name (so you can identify it later)</label>
+  <input id="bankName" type="text" placeholder="e.g. Chase Business, Ally Savings" value="Chase Business" />
+  <button id="connectBtn" onclick="startLink()">Connect Bank →</button>
+
+  <div id="status" class="status"></div>
+
+  <h2 style="margin-top:32px">Connected banks</h2>
+  <div id="banksList" class="banks-list"><div class="empty">Loading…</div></div>
+</div>
+
+<script>
+  var currentHandler = null;
+
+  function setStatus(msg, type) {
+    var el = document.getElementById('status');
+    el.className = 'status ' + (type || 'info');
+    el.textContent = msg;
+  }
+
+  function clearStatus() {
+    document.getElementById('status').className = 'status';
+    document.getElementById('status').textContent = '';
+  }
+
+  function refreshBankList() {
+    google.script.run
+      .withSuccessHandler(function(banks) {
+        var el = document.getElementById('banksList');
+        if (!banks.length) {
+          el.innerHTML = '<div class="empty">No banks connected yet.</div>';
+          return;
+        }
+        el.innerHTML = banks.map(function(b) {
+          var connectedAt = b.connectedAt
+            ? new Date(b.connectedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : 'unknown';
+          return '<div class="bank-row">' +
+            '<div><div>' + escHtml(b.bankName) + '</div>' +
+            '<div class="bank-meta">Connected ' + escHtml(connectedAt) + '</div></div>' +
+            '<button class="danger" onclick="disconnectBank(\'' + escAttr(b.bankName) + '\')">Disconnect</button>' +
+          '</div>';
+        }).join('');
+      })
+      .withFailureHandler(function(err) {
+        document.getElementById('banksList').innerHTML =
+          '<div class="empty">Error loading: ' + escHtml(err.message || String(err)) + '</div>';
+      })
+      .listConnectedBanks();
+  }
+
+  function startLink() {
+    var name = (document.getElementById('bankName').value || '').trim();
+    if (!name) { setStatus('Please enter a bank name.', 'error'); return; }
+
+    document.getElementById('connectBtn').disabled = true;
+    setStatus('Preparing secure connection…', 'info');
+
+    google.script.run
+      .withSuccessHandler(function(resp) {
+        clearStatus();
+        currentHandler = Plaid.create({
+          token: resp.linkToken,
+          onSuccess: function(publicToken, metadata) {
+            setStatus('Exchanging tokens…', 'info');
+            google.script.run
+              .withSuccessHandler(function(result) {
+                setStatus('✓ ' + name + ' connected. You can connect another bank or close this tab.', 'success');
+                document.getElementById('connectBtn').disabled = false;
+                document.getElementById('bankName').value = '';
+                refreshBankList();
+              })
+              .withFailureHandler(function(err) {
+                setStatus('Token exchange failed: ' + (err.message || err), 'error');
+                document.getElementById('connectBtn').disabled = false;
+              })
+              .exchangePublicToken(publicToken, name);
+          },
+          onExit: function(err, metadata) {
+            document.getElementById('connectBtn').disabled = false;
+            if (err) setStatus('Plaid Link closed: ' + (err.display_message || err.error_message || err.error_code), 'error');
+            else clearStatus();
+          }
+        });
+        currentHandler.open();
+      })
+      .withFailureHandler(function(err) {
+        setStatus('Could not create link token: ' + (err.message || err), 'error');
+        document.getElementById('connectBtn').disabled = false;
+      })
+      .createLinkToken(name);
+  }
+
+  function disconnectBank(name) {
+    if (!confirm('Disconnect ' + name + '? Balances for this bank will stop syncing.')) return;
+    setStatus('Disconnecting ' + name + '…', 'info');
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.ok) setStatus('✓ ' + name + ' disconnected.', 'success');
+        else setStatus('Disconnect failed: ' + (result.error || 'unknown'), 'error');
+        refreshBankList();
+      })
+      .withFailureHandler(function(err) {
+        setStatus('Disconnect failed: ' + (err.message || err), 'error');
+      })
+      .removeBank(name);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function escAttr(s) { return escHtml(s); }
+
+  refreshBankList();
+</script>
+</body>
+</html>
