@@ -90,9 +90,6 @@
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    color: transparent;
-    font-size: 0;
-    overflow: hidden;
   }
   .app-icon svg { display: block; }
 
@@ -760,290 +757,421 @@
   /* ── W2 / Payroll Settings Panel ── */
   .w2-panel-toggle {
     display: flex; align-items: center; gap: 8px;
-    padding: 12px 20px; cursor: pointer;
-    font-size: 14px; font-weight: 600;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    user-select: none; transition: background 0.12s;
+    padding: 12px 16px; cursor: pointer;
+    font-family: var(--font-serif);
+    font-size: 14px; font-weight: 500; letter-spacing: -0.01em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    user-select: none; transition: background .12s;
   }
-  .w2-panel-toggle:hover { background: #f9f9fb; }
-  .w2-arrow { display: inline-block; transition: transform 0.18s; font-size: 11px; color: #86868b; }
+  .w2-panel-toggle:hover { background: var(--card-subtle); }
+  .w2-arrow { display: inline-block; transition: transform .18s; font-size: 10px; color: var(--ink-3); }
   .w2-arrow.open { transform: rotate(90deg); }
-  .w2-panel-body { display: none; padding: 16px 20px 20px; }
+  .w2-panel-body { display: none; padding: 14px 16px 16px; }
   .w2-panel-body.open { display: block; }
 
-  .w2-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .w2-tbl th { background: #f5f5f7; padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid rgba(0,0,0,0.06); }
-  .w2-tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .w2-tbl { width: 100%; border-collapse: collapse; font-family: var(--font-sans); font-size: 12px; }
+  .w2-tbl th {
+    background: var(--card-subtle); padding: 8px 10px; text-align: left;
+    font-size: 10px; font-weight: 600;
+    color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--rule);
+  }
+  .w2-tbl td {
+    padding: 8px 10px; border-bottom: 1px solid var(--rule);
+    vertical-align: middle; color: var(--ink);
+  }
   .w2-tbl tr:last-child td { border-bottom: none; }
-  .w2-tbl tr:hover td { background: #f9f9fb; }
+  .w2-tbl tr:hover td { background: var(--card-subtle); }
 
-  .src-toggle { display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid rgba(0,0,0,0.12); }
-  .src-toggle button { border: none; background: transparent; padding: 3px 10px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; color: #86868b; transition: all 0.12s; }
-  .src-toggle .st-oc.active  { background: #34c759; color: #fff; }
-  .src-toggle .st-opex.active { background: #FF9500; color: #fff; }
+  .src-toggle {
+    display: inline-flex; border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--rule); background: var(--card-subtle);
+  }
+  .src-toggle button {
+    border: none; background: transparent;
+    padding: 3px 10px; cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--ink-3);
+    transition: background .12s, color .12s;
+  }
+  .src-toggle .st-oc.active   { background: var(--bronze); color: #fff; }
+  .src-toggle .st-opex.active { background: var(--navy);   color: #fff; }
 
   /* ── W2 Row Badges ── */
   .w2-badge {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 22px; height: 22px; border-radius: 5px;
+    width: 22px; height: 22px; border-radius: 4px;
+    font-family: var(--font-sans);
     font-size: 10px; font-weight: 700; cursor: pointer;
-    border: 1.5px solid transparent; transition: all 0.12s; user-select: none;
+    border: 1px solid transparent; transition: background .12s;
+    user-select: none;
   }
-  .w2-badge.on-oc   { background: rgba(52,199,89,0.12); color: #34c759; border-color: rgba(52,199,89,0.3); }
-  .w2-badge.on-opex { background: rgba(255,149,0,0.12); color: #FF9500; border-color: rgba(255,149,0,0.3); }
-  .w2-badge.off     { background: rgba(0,0,0,0.04); color: #c7c7cc; border-color: rgba(0,0,0,0.1); }
+  .w2-badge.on-oc   { background: var(--bronze-bg); color: var(--bronze-dark); border-color: var(--bronze-bg); }
+  .w2-badge.on-opex { background: var(--navy-bg);   color: var(--navy);        border-color: var(--navy-bg); }
+  .w2-badge.off     { background: var(--chip);      color: var(--ink-4);       border-color: var(--rule); }
   .w2-cell { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; min-width: 44px; }
 
-  /* ── Adj amounts (inline in Tax$, OC$, OPEX$ cells) ── */
-  .adj-line { font-size: 10.5px; font-weight: 600; display: block; margin-top: 2px; white-space: nowrap; }
-  .adj-line.pos  { color: #34c759; }
-  .adj-line.neg  { color: #FF3B30; }
-  .adj-line.zero { color: #86868b; }
+  /* ── Adj amounts ── */
+  .adj-line {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600;
+    display: block; margin-top: 2px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .adj-line.pos  { color: var(--green); }
+  .adj-line.neg  { color: var(--red); }
+  .adj-line.zero { color: var(--ink-4); }
 
-  /* ── Early Transfer button (appears in last column on row hover) ── */
+  /* Amount cells in the allocation table — single number with hover breakdown */
+  .amt-cell {
+    cursor: help;
+    border-bottom: 1px dotted transparent;
+    transition: border-color .12s, color .12s;
+  }
+  .amt-cell.amt-adj {
+    color: var(--bronze-dark);
+    border-bottom-color: var(--bronze);
+  }
+  .amt-cell.amt-neg {
+    color: var(--red);
+    border-bottom-color: var(--red);
+  }
+  .amt-cell:hover { border-bottom-color: currentColor; }
+
+  /* ── Early Transfer button ── */
   .et-btn {
-    background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2);
-    color: #FF9500; border-radius: 4px; padding: 2px 5px; font-size: 10px;
-    font-weight: 600; cursor: pointer; font-family: inherit;
-    opacity: 0; transition: opacity 0.15s; white-space: nowrap;
-    margin-right: 4px;
+    background: var(--amber-bg); border: 1px solid var(--amber-bg);
+    color: var(--amber); border-radius: 4px;
+    padding: 2px 6px;
+    font-family: var(--font-sans);
+    font-size: 10px; font-weight: 600; cursor: pointer;
+    opacity: 0; transition: opacity .15s, background .12s;
+    white-space: nowrap; margin-right: 4px;
+    letter-spacing: 0.02em;
   }
   tr:hover .et-btn { opacity: 1; }
   .et-btn.has-et { opacity: 1; }
-  .et-btn:hover { background: rgba(255,149,0,0.18); }
+  .et-btn:hover { background: #ecdcb4; }
 
   /* ── Early Transfer Modal ── */
   .et-overlay {
     display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(20,20,20,0.35);
     z-index: 200; align-items: center; justify-content: center;
   }
   .et-overlay.open { display: flex; }
   .et-modal {
-    background: #fff; border-radius: 16px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+    background: var(--card); border-radius: 12px;
+    box-shadow: var(--shadow-hi);
     width: 540px; max-width: 95vw; overflow: hidden;
-    animation: modal-in 0.2s ease;
+    animation: modal-in .18s ease;
+    font-family: var(--font-sans);
   }
-  .et-list { display: flex; flex-direction: column; gap: 8px; }
+  .et-list { display: flex; flex-direction: column; gap: 6px; }
   .et-item {
     display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px; background: #f5f5f7; border-radius: 8px; font-size: 13px;
+    padding: 8px 10px; background: var(--card-subtle);
+    border: 1px solid var(--rule); border-radius: 6px;
+    font-size: 12px;
   }
-  .et-acct { font-weight: 700; padding: 2px 7px; border-radius: 5px; font-size: 11px; flex-shrink: 0; }
-  .et-acct.acct-opex   { background: rgba(255,149,0,0.12); color: #FF9500; }
-  .et-acct.acct-tax    { background: rgba(255,59,48,0.1);  color: #FF3B30; }
-  .et-acct.acct-oc     { background: rgba(52,199,89,0.1);  color: #34c759; }
-  .et-acct.acct-profit { background: rgba(0,122,255,0.1);  color: #007AFF; }
-  .et-amt  { font-weight: 600; min-width: 75px; }
-  .et-note { color: #636366; flex: 1; font-size: 12px; }
-  .et-del-btn { background: none; border: none; cursor: pointer; color: #FF3B30; opacity: 0.4; font-size: 13px; padding: 2px 5px; border-radius: 4px; transition: opacity 0.12s, background 0.12s; flex-shrink: 0; }
-  .et-del-btn:hover { opacity: 1; background: rgba(255,59,48,0.1); }
-  .et-empty { text-align: center; color: #86868b; font-size: 13px; padding: 20px 0; font-style: italic; }
+  .et-acct {
+    font-family: var(--font-sans);
+    font-weight: 600; padding: 2px 8px;
+    border-radius: 999px; font-size: 10.5px;
+    letter-spacing: 0.02em; flex-shrink: 0;
+  }
+  .et-acct.acct-opex   { background: var(--navy-bg);   color: var(--navy); }
+  .et-acct.acct-tax    { background: var(--green-bg);  color: var(--green); }
+  .et-acct.acct-oc     { background: var(--bronze-bg); color: var(--bronze-dark); }
+  .et-acct.acct-profit { background: var(--green-bg);  color: var(--green); }
+  .et-amt {
+    font-family: var(--font-mono);
+    font-weight: 600; min-width: 75px;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  }
+  .et-note { color: var(--ink-3); flex: 1; font-size: 11px; }
+  .et-del-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--red); opacity: .5; font-size: 13px;
+    padding: 2px 6px; border-radius: 4px;
+    transition: opacity .12s, background .12s; flex-shrink: 0;
+  }
+  .et-del-btn:hover { opacity: 1; background: var(--red-bg); }
+  .et-empty {
+    text-align: center; color: var(--ink-3);
+    font-size: 12px; padding: 20px 0; font-style: italic;
+  }
   .et-add-row {
     display: grid; grid-template-columns: 110px 110px 1fr auto;
     gap: 8px; align-items: end;
-    margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rule);
   }
   .et-add-row .form-label { margin-bottom: 4px; }
 
-  /* ── W2 compact account select ── */
+  /* ── Compact selects ── */
   .w2-src-sel {
-    padding: 2px 4px; border: 1px solid rgba(0,0,0,0.14); border-radius: 5px;
-    font-size: 11px; font-weight: 600; font-family: inherit; color: #1d1d1f;
-    background: #fff; cursor: pointer; margin-right: 3px;
-    transition: border-color 0.12s;
+    padding: 2px 6px; border: 1px solid var(--rule); border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 11px; font-weight: 600;
+    color: var(--ink); background: var(--card);
+    cursor: pointer; margin-right: 3px;
+    transition: border-color .12s;
   }
-  .w2-src-sel:focus { outline: none; border-color: #007AFF; }
+  .w2-src-sel:focus { outline: none; border-color: var(--navy); }
   .w2-src-sel option { font-weight: 600; }
   .et-add-row select, .et-add-row input {
-    padding: 8px 10px; border: 1.5px solid rgba(0,0,0,0.12);
-    border-radius: 8px; font-size: 13px; font-family: inherit;
-    background: #fff; outline: none; color: #1d1d1f;
-    transition: border-color 0.15s, box-shadow 0.15s; width: 100%;
+    height: 34px; padding: 0 10px;
+    border: 1px solid var(--rule); border-radius: 6px;
+    font-family: var(--font-sans); font-size: 12px;
+    background: var(--card); outline: none; color: var(--ink);
+    transition: border-color .15s, box-shadow .15s; width: 100%;
+  }
+  .et-add-row input[type="number"] {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
   }
   .et-add-row select:focus, .et-add-row input:focus {
-    border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+    border-color: var(--navy); box-shadow: 0 0 0 2px rgba(29,53,87,.12);
   }
 
   /* ── QBO Live Balances Panel ── */
   .qbo-panel-toggle {
     display: flex; align-items: center; gap: 8px;
-    padding: 12px 20px; cursor: pointer;
-    font-size: 14px; font-weight: 600;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    user-select: none; transition: background 0.12s;
+    padding: 12px 16px; cursor: pointer;
+    font-family: var(--font-serif);
+    font-size: 14px; font-weight: 500; letter-spacing: -0.01em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+    user-select: none; transition: background .12s;
   }
-  .qbo-panel-toggle:hover { background: #f9f9fb; }
-  .qbo-arrow { display: inline-block; transition: transform 0.18s; font-size: 11px; color: #86868b; }
+  .qbo-panel-toggle:hover { background: var(--card-subtle); }
+  .qbo-arrow { display: inline-block; transition: transform .18s; font-size: 10px; color: var(--ink-3); }
   .qbo-arrow.open { transform: rotate(90deg); }
-  .qbo-panel-body { display: none; padding: 16px 20px 20px; }
+  .qbo-panel-body { display: none; padding: 14px 16px 16px; }
   .qbo-panel-body.open { display: block; }
 
   .qbo-url-row {
-    display: flex; gap: 8px; align-items: center; margin-bottom: 14px;
+    display: flex; gap: 6px; align-items: center; margin-bottom: 12px;
   }
   .qbo-url-row input {
-    flex: 1; padding: 8px 12px; border: 1.5px solid rgba(0,0,0,0.12);
-    border-radius: 8px; font-size: 13px; font-family: inherit;
-    color: #1d1d1f; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-    background: #fff;
+    flex: 1; height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--rule); border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    background: var(--card);
   }
   .qbo-url-row input:focus {
-    border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+    border-color: var(--navy);
+    box-shadow: 0 0 0 2px rgba(29,53,87,.12);
   }
   .qbo-meta {
-    font-size: 12px; color: #86868b; margin-bottom: 12px;
+    font-family: var(--font-sans);
+    font-size: 11px; color: var(--ink-3); margin-bottom: 10px;
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   }
-  .qbo-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .qbo-meta strong { color: var(--ink-2); font-weight: 600; }
+  .qbo-tbl { width: 100%; border-collapse: collapse; font-family: var(--font-sans); font-size: 12px; }
   .qbo-tbl th {
-    background: #f5f5f7; padding: 8px 10px; text-align: left;
-    font-size: 11px; font-weight: 600; color: #86868b;
-    text-transform: uppercase; letter-spacing: 0.3px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    background: var(--card-subtle); padding: 8px 10px; text-align: left;
+    font-size: 10px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--rule);
   }
-  .qbo-tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .qbo-tbl td {
+    padding: 10px; border-bottom: 1px solid var(--rule);
+    vertical-align: middle; color: var(--ink);
+  }
   .qbo-tbl tr:last-child td { border-bottom: none; }
-  .qbo-tbl tr:hover td { background: #f9f9fb; }
-  .qbo-tbl td.amt { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .qbo-tbl tr:hover td { background: var(--card-subtle); }
+  .qbo-tbl td.amt {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
   .qbo-bucket-totals {
-    display: flex; gap: 10px; flex-wrap: wrap;
-    margin-top: 14px; padding-top: 14px;
-    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-top: 12px; padding: 10px 12px;
+    border-top: 1px solid var(--rule);
+    background: var(--card-subtle);
+    border-radius: 0 0 10px 10px;
+    margin-left: -16px; margin-right: -16px;
+    margin-bottom: -16px;
+    padding: 10px 16px 12px;
   }
   .qbo-bucket-chip {
-    padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px; border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.01em;
   }
-  .qbo-chip-profit  { background: rgba(0,122,255,0.1);  color: #007AFF; }
-  .qbo-chip-tax     { background: rgba(255,59,48,0.1);   color: #FF3B30; }
-  .qbo-chip-oc      { background: rgba(52,199,89,0.1);   color: #34c759; }
-  .qbo-chip-opex    { background: rgba(255,149,0,0.1);   color: #FF9500; }
-  .qbo-chip-unmap   { background: rgba(0,0,0,0.06);      color: #86868b; }
-  .qbo-chip-total   { background: #f5f5f7; color: #1d1d1f; }
+  .qbo-bucket-chip strong {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .qbo-chip-profit  { background: var(--green-bg);  color: var(--green); }
+  .qbo-chip-tax     { background: var(--green-bg);  color: var(--green); }
+  .qbo-chip-oc      { background: var(--bronze-bg); color: var(--bronze-dark); }
+  .qbo-chip-opex    { background: var(--navy-bg);   color: var(--navy); }
+  .qbo-chip-unmap   { background: var(--amber-bg);  color: var(--amber); }
+  .qbo-chip-total   { background: var(--chip);      color: var(--ink); }
   .qbo-error {
-    padding: 12px 16px; background: #fff2f1; border-radius: 8px;
-    color: #FF3B30; font-size: 13px; line-height: 1.5;
+    padding: 10px 14px; background: var(--red-bg);
+    border: 1px solid var(--red-bg); border-radius: 6px;
+    color: var(--red);
+    font-family: var(--font-sans);
+    font-size: 12px; line-height: 1.5;
   }
-  .qbo-loading { padding: 12px; color: #86868b; font-size: 13px; font-style: italic; }
+  .qbo-loading {
+    padding: 12px;
+    font-family: var(--font-sans);
+    color: var(--ink-3); font-size: 12px; font-style: italic;
+  }
 
   .qbo-approve-btn {
-    padding: 4px 10px; border-radius: 6px; border: none;
-    background: rgba(0,122,255,0.1); color: #007AFF;
+    height: 24px; padding: 0 10px;
+    border-radius: 6px; border: 1px solid var(--rule);
+    background: var(--card); color: var(--navy);
+    font-family: var(--font-sans);
     font-size: 11px; font-weight: 600; cursor: pointer;
-    font-family: inherit; white-space: nowrap;
-    transition: background 0.12s;
+    white-space: nowrap;
+    transition: background .12s, border-color .12s;
+    letter-spacing: 0.01em;
   }
-  .qbo-approve-btn:hover { background: rgba(0,122,255,0.22); }
+  .qbo-approve-btn:hover { background: var(--navy-bg); border-color: var(--navy-bg); }
 
   .qbo-hide-btn {
-    padding: 3px 8px; border-radius: 6px; border: none;
-    background: transparent; color: #86868b;
+    padding: 3px 8px; border-radius: 4px; border: none;
+    background: transparent; color: var(--ink-4);
     font-size: 13px; font-weight: 600; cursor: pointer;
-    font-family: inherit; line-height: 1;
-    transition: background 0.12s, color 0.12s;
+    font-family: var(--font-sans); line-height: 1;
+    transition: background .12s, color .12s;
   }
-  .qbo-hide-btn:hover { background: rgba(255,59,48,0.1); color: #FF3B30; }
+  .qbo-hide-btn:hover { background: var(--red-bg); color: var(--red); }
 
   .qbo-hidden-row {
     margin-top: 10px; padding-top: 10px;
-    border-top: 1px dashed rgba(0,0,0,0.08);
-    font-size: 12px; color: #86868b;
+    border-top: 1px dashed var(--rule-2);
+    font-family: var(--font-sans);
+    font-size: 11px; color: var(--ink-3);
     display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   }
   .qbo-unhide-chip {
-    padding: 3px 8px; border-radius: 6px; border: none;
-    background: rgba(0,0,0,0.05); color: #1d1d1f;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid var(--rule);
+    background: var(--card); color: var(--ink-2);
+    font-family: var(--font-sans);
     font-size: 11px; font-weight: 500; cursor: pointer;
-    font-family: inherit;
-    transition: background 0.12s;
+    transition: background .12s, color .12s, border-color .12s;
   }
-  .qbo-unhide-chip:hover { background: rgba(0,122,255,0.1); color: #007AFF; }
+  .qbo-unhide-chip:hover {
+    background: var(--navy-bg); color: var(--navy); border-color: var(--navy-bg);
+  }
 
   .qbo-url-advanced {
     margin-top: 10px; padding-top: 10px;
-    border-top: 1px dashed rgba(0,0,0,0.08);
+    border-top: 1px dashed var(--rule-2);
   }
   .qbo-url-advanced summary {
-    cursor: pointer; font-size: 11px; font-weight: 600;
-    color: #86868b; user-select: none; margin-bottom: 8px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 10.5px; font-weight: 600;
+    color: var(--ink-3); user-select: none; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 0.06em;
   }
-  .qbo-url-advanced summary:hover { color: #1d1d1f; }
+  .qbo-url-advanced summary:hover { color: var(--ink); }
 
   /* ── Tax Payment Detected Badge ── */
   .tax-detected {
     display: inline-flex; align-items: center; gap: 4px;
-    margin-left: 8px; padding: 2px 8px; border-radius: 6px;
-    background: rgba(52,199,89,0.14); color: #2ea44f;
-    font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+    margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+    background: var(--green-bg); color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
     vertical-align: middle;
   }
   .tax-unmatched-panel {
     margin-bottom: 14px; padding: 10px 14px;
-    background: rgba(255,149,0,0.07); border: 1px solid rgba(255,149,0,0.18);
-    border-radius: 8px; font-size: 12px;
+    background: var(--amber-banner);
+    border: 1px solid var(--amber-bg);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 12px;
   }
   .tax-unmatched-panel .title {
-    font-weight: 600; color: #1d1d1f; margin-bottom: 6px;
-    display: flex; align-items: center; gap: 6px;
+    font-weight: 500; color: var(--amber);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
   }
   .tax-unmatched-panel .items {
-    display: flex; flex-wrap: wrap; gap: 8px;
+    display: flex; flex-wrap: wrap; gap: 6px;
   }
   .tax-unmatched-item {
-    padding: 3px 10px; background: #fff; border-radius: 6px;
-    border: 1px solid rgba(0,0,0,0.08); color: #1d1d1f;
+    padding: 4px 8px;
+    background: var(--card);
+    border-radius: 6px;
+    border: 1px solid var(--amber-bg);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
 </style>
 </head>
 <body>
 
-<!-- Toolbar -->
+<!-- Shell (Toolbar) -->
 <div class="toolbar">
   <div class="toolbar-left">
-    <div class="app-icon">💼</div>
+    <div class="app-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M3.5 6 H10.5 M7 6 V18" stroke="#b8956a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13 18 L16.5 6 L20 18 M14 14 H19" stroke="#fbfaf7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
     <div>
-      <div class="app-title">Finance Dashboard</div>
-      <div class="app-subtitle">Dr. Todd Anderson · Momentum Health</div>
+      <div class="app-title">Anderson Ledger</div>
+      <div class="app-subtitle">Dr Todd Anderson · Momentum Health · FY 2026</div>
     </div>
   </div>
-  <div class="toolbar-right">
-    <span class="badge badge-blue" id="syncBadge" style="font-size:11px;padding:4px 9px">⟳ Connecting…</span>
-    <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
-    <button class="btn btn-primary" id="addEntryBtn" onclick="openModal()">+ Add Entry</button>
+  <div class="toolbar-spacer"></div>
+  <div class="tab-bar">
+    <div class="segmented-control">
+      <button class="seg-btn active" onclick="switchTab('profitfirst', this)"><span class="seg-glyph">◆</span>Profit First</button>
+      <button class="seg-btn" onclick="switchTab('taxes', this)"><span class="seg-glyph">▲</span>Taxes</button>
+      <button class="seg-btn" onclick="switchTab('payroll', this)"><span class="seg-glyph">●</span>Payroll</button>
+    </div>
   </div>
-</div>
-
-<!-- Tabs -->
-<div class="tab-bar">
-  <div class="segmented-control">
-    <button class="seg-btn active" onclick="switchTab('profitfirst', this)">💰 Profit First</button>
-    <button class="seg-btn" onclick="switchTab('taxes', this)">📊 Taxes</button>
+  <div class="toolbar-spacer"></div>
+  <div class="toolbar-right">
+    <span class="badge badge-green dot" id="syncBadge">Connecting…</span>
+    <button class="btn btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn btn-dark" id="addEntryBtn" onclick="openModal()">+ Add Entry</button>
   </div>
 </div>
 
 <!-- Main -->
 <div class="main">
 
+  <!-- Hero strip — persistent across tabs -->
+  <div class="hero-strip" id="heroStrip">
+    <!-- rendered by renderHeroStrip() -->
+  </div>
+
+
   <!-- ══ Tab 1: Profit First ══ -->
   <div id="tab-profitfirst" class="tab-content active">
-
-    <!-- W2 / Payroll Settings Panel -->
-    <div class="panel" style="margin-bottom:16px">
-      <div class="w2-panel-toggle" onclick="toggleW2Panel()">
-        <span class="w2-arrow" id="w2Arrow">▶</span>
-        <span>Payroll / W2 Settings</span>
-        <span id="w2PanelSummary" style="font-size:12px;color:#86868b;font-weight:400;margin-left:6px"></span>
-      </div>
-      <div class="w2-panel-body" id="w2PanelBody">
-        <div id="w2SettingsContent"></div>
-        <div style="margin-top:12px">
-          <button class="btn btn-secondary btn-sm" onclick="addW2Employee()">+ Add Employee</button>
-        </div>
-      </div>
-    </div>
 
     <!-- QBO Live Balances Panel -->
     <div class="panel" style="margin-bottom:16px" id="qboPanelWrap">
@@ -1758,6 +1886,22 @@
 
   </div><!-- end tab-taxes -->
 
+  <!-- ══ Tab 3: Payroll ══ -->
+  <div id="tab-payroll" class="tab-content">
+    <div class="panel">
+      <header class="panel-header">
+        <div>
+          <div class="panel-title">Payroll / W2 Settings</div>
+          <div class="panel-subtitle" id="w2PanelSummary"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addW2Employee()">+ Add Employee</button>
+      </header>
+      <div style="padding: 14px 16px 16px">
+        <div id="w2SettingsContent"></div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- end main -->
 
 <!-- Profit First Footer (dynamic) -->
@@ -1894,10 +2038,10 @@ function setSyncBadge(state) {
   const el = document.getElementById('syncBadge');
   if (!el) return;
   const states = {
-    syncing: { text: '⟳ Syncing…',  cls: 'badge-orange' },
-    synced:  { text: '☁ Synced',    cls: 'badge-green'  },
-    local:   { text: '⚡ Local',     cls: 'badge-blue'   },
-    error:   { text: '⚠ Sync error', cls: 'badge-red'   }
+    syncing: { text: 'Syncing…',   cls: 'badge-orange dot' },
+    synced:  { text: 'Synced',     cls: 'badge-green dot'  },
+    local:   { text: 'Local',      cls: 'badge-blue dot'   },
+    error:   { text: 'Sync error', cls: 'badge-red dot'    }
   };
   const s = states[state] || states.local;
   el.textContent = s.text;
@@ -2073,8 +2217,8 @@ function renderW2Panel() {
   function w2Totals(empList) {
     const t = { OC: 0, OPEX: 0, Tax: 0, Profit: 0 };
     empList.forEach(emp => {
-      const eTax  = emp.salary * emp.empTaxPct / 100;
-      const erTax = emp.salary * emp.erTaxPct  / 100;
+      const eTax  = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+      const erTax = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
       t[emp.source]                        = (t[emp.source]                        || 0) + emp.salary;
       t[emp.empTaxSource || 'Tax']         = (t[emp.empTaxSource || 'Tax']         || 0) + eTax;
       t[emp.erTaxSource  || emp.source]    = (t[emp.erTaxSource  || emp.source]    || 0) + erTax;
@@ -2117,10 +2261,19 @@ function renderW2Panel() {
 
   const ACCTS = ['Tax','OC','OPEX','Profit'];
   emps.forEach(emp => {
-    const empTaxAmt  = emp.salary * emp.empTaxPct / 100;
-    const erTaxAmt   = emp.salary * emp.erTaxPct  / 100;
+    const empTaxCalc = emp.salary * emp.empTaxPct / 100;
+    const erTaxCalc  = emp.salary * emp.erTaxPct  / 100;
+    // Use fixed dollar amount if explicitly set, otherwise fall back to % calculation
+    const empTaxAmt  = emp.empTaxFixed != null ? emp.empTaxFixed : empTaxCalc;
+    const erTaxAmt   = emp.erTaxFixed  != null ? emp.erTaxFixed  : erTaxCalc;
     const empTaxSrc  = emp.empTaxSource || 'Tax';
     const erTaxSrc   = emp.erTaxSource  || emp.source;
+    const empFixedTip = emp.empTaxFixed != null
+      ? `Exact amount — overrides % calc (${fmt$(empTaxCalc)} from ${emp.empTaxPct}%)`
+      : `Computed from ${emp.empTaxPct}% — click to enter exact payroll amount`;
+    const erFixedTip  = emp.erTaxFixed != null
+      ? `Exact amount — overrides % calc (${fmt$(erTaxCalc)} from ${emp.erTaxPct}%)`
+      : `Computed from ${emp.erTaxPct}% — click to enter exact payroll amount`;
     html += `<tr>
       <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="name" onblur="w2FieldEdit(this)">${escHtml(emp.name)}</span></td>
       <td>
@@ -2131,9 +2284,9 @@ function renderW2Panel() {
       </td>
       <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
       <td>${srcSel(emp.id,'empTaxSource',empTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
-      <td style="color:#FF3B30;font-weight:500">${fmt$(empTaxAmt)}</td>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxFixed" onblur="w2FieldEdit(this)" title="${empFixedTip}" style="color:#FF3B30;font-weight:500">${empTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
       <td>${srcSel(emp.id,'erTaxSource',erTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
-      <td style="color:#FF9500;font-weight:500">${fmt$(erTaxAmt)}</td>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxFixed" onblur="w2FieldEdit(this)" title="${erFixedTip}" style="color:#FF9500;font-weight:500">${erTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
       <td><button class="delete-btn" style="opacity:1" onclick="deleteW2Employee('${emp.id}')" title="Remove">🗑</button></td>
     </tr>`;
   });
@@ -2179,7 +2332,7 @@ function w2FieldEdit(el) {
   const empId = el.dataset.empid;
   const field  = el.dataset.field;
   let val = el.innerText.trim();
-  if (['salary','empTaxPct','erTaxPct'].includes(field)) val = parseFloat(val) || 0;
+  if (['salary','empTaxPct','erTaxPct','empTaxFixed','erTaxFixed'].includes(field)) val = parseFloat(val) || 0;
   const emps = loadW2Employees();
   const emp  = emps.find(e => e.id === empId);
   if (emp) {
@@ -2228,8 +2381,8 @@ function renderFooter() {
     const tot = { OC: 0, OPEX: 0, Tax: 0, Profit: 0 };
     function addFoot(acct, amt) { if (acct in tot) tot[acct] += amt; }
     emps.forEach(emp => {
-      const eTax  = emp.salary * emp.empTaxPct / 100;
-      const erTax = emp.salary * emp.erTaxPct  / 100;
+      const eTax  = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+      const erTax = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
       addFoot(emp.source,                     emp.salary);
       addFoot(emp.empTaxSource || 'Tax',      eTax);
       addFoot(emp.erTaxSource  || emp.source, erTax);
@@ -2474,8 +2627,8 @@ function renderTable() {
     }
     w2Emps.forEach(emp => {
       if (w2Active[emp.id] === false) return;
-      const empTaxAmt = emp.salary * emp.empTaxPct / 100;
-      const erTaxAmt  = emp.salary * emp.erTaxPct  / 100;
+      const empTaxAmt = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+      const erTaxAmt  = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
       addPayroll(emp.source,                      emp.salary);
       addPayroll(emp.empTaxSource || 'Tax',        empTaxAmt);
       addPayroll(emp.erTaxSource  || emp.source,   erTaxAmt);
@@ -2489,25 +2642,23 @@ function renderTable() {
     const adjOC     = ocD    - payrollOC  - etOC;
     const adjOPEX   = opexD  - payrollOPEX - etOPEX;
 
-    // Shows "→ $X" below a cell when payroll or early transfers affect this account.
-    // base = full allocation, payroll = W2 already pulled, et = early transfer already sent.
-    function adjLine(base, payroll, et) {
-      if (payroll < 0.005 && et < 0.005) return '';
-      const adj = base - payroll - et;
-      const cls = adj > 0.005 ? 'pos' : (adj < -0.005 ? 'neg' : 'zero');
-      let tip = `Base: ${fmt$(base)}`;
-      if (payroll > 0.005) tip += ` | Payroll: −${fmt$(payroll)}`;
-      if (et > 0.005)      tip += ` | Early transfer: −${fmt$(et)}`;
-      tip += ` | Remaining: ${fmt$(adj)}`;
-      return `<span class="adj-line ${cls}" title="${tip}">→ ${fmt$(adj)}</span>`;
+    // Returns the remaining amount as a single span with full breakdown
+    // surfaced via the title attribute (mouse hover).
+    function remainingCell(base, payroll, et, label, pct) {
+      const remaining = base - payroll - et;
+      const lines = [`${label} ${pct}% = ${fmt$(base)}`];
+      if (payroll > 0.005) lines.push(`− Payroll  ${fmt$(payroll)}`);
+      if (et > 0.005)      lines.push(`− Early transfer  ${fmt$(et)}`);
+      if (payroll > 0.005 || et > 0.005) lines.push(`= Remaining  ${fmt$(remaining)}`);
+      const tip = escAttr(lines.join('\n'));
+      const cls = remaining < -0.005 ? ' amt-neg' : (remaining > 0.005 && (payroll > 0.005 || et > 0.005) ? ' amt-adj' : '');
+      return `<span class="amt-cell${cls}" title="${tip}">${fmt$(remaining)}</span>`;
     }
 
-    // Shows the grossed-up allocation basis when early transfers exist.
-    // The entered balance is lower because ETs already left; we add them back so
-    // allocations reflect the true income received.
-    function incomeAdjLine() {
+    // Tooltip text for the Total cell — shows true gross income when ETs exist.
+    function totalTip() {
       if (!hasET) return '';
-      return `<span class="adj-line pos" title="Current balance ${fmt$(total)} + ${fmt$(totalET)} sent early = ${fmt$(grossTotal)} true income. Allocations are based on ${fmt$(grossTotal)}.">↑ ${fmt$(grossTotal)} true income</span>`;
+      return ` title="${escAttr('Balance entered ' + fmt$(total) + '\n+ Early transfers ' + fmt$(totalET) + '\n= True income ' + fmt$(grossTotal) + ' (allocations use this)')}"`;
     }
 
     // ── W2 badge toggles ─────────────────────────────────
@@ -2531,15 +2682,15 @@ function renderTable() {
 
     tr.innerHTML = `
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="date" onblur="cellEdit(this)">${escHtml(row.date)}</span></td>
-      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span>${incomeAdjLine()}</td>
+      <td${totalTip()}><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span></td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="profit" onblur="cellEdit(this)">${row.profit}</span>%</td>
-      <td>${fmt$(profitD)}${adjLine(profitD, 0, etProfit)}</td>
+      <td>${remainingCell(profitD, 0, etProfit, 'Profit', row.profit)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="tax" onblur="cellEdit(this)">${row.tax}</span>%</td>
-      <td>${fmt$(taxD)}${adjLine(taxD, payrollTax, etTax)}</td>
+      <td>${remainingCell(taxD, payrollTax, etTax, 'Tax', row.tax)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="oc" onblur="cellEdit(this)">${row.oc}</span>%</td>
-      <td>${fmt$(ocD)}${adjLine(ocD, payrollOC, etOC)}</td>
+      <td>${remainingCell(ocD, payrollOC, etOC, 'OC', row.oc)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="opex" onblur="cellEdit(this)">${row.opex}</span>%</td>
-      <td>${fmt$(opexD)}${adjLine(opexD, payrollOPEX, etOPEX)}</td>
+      <td>${remainingCell(opexD, payrollOPEX, etOPEX, 'OPEX', row.opex)}</td>
       <td>${w2Html}</td>
       <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
       <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
@@ -2569,6 +2720,112 @@ function renderTable() {
   `;
 
   document.getElementById('entryCount').textContent = pfData.length + ' entries';
+  renderHeroStrip();
+}
+
+// ─────────────────────────────────────────────
+// HERO STRIP — 4 KPI cards persistent across tabs
+// ─────────────────────────────────────────────
+function fmtMoney0(n) {
+  if (n == null || isNaN(n)) return '$0';
+  const sign = n < 0 ? '−' : '';
+  return sign + '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
+}
+
+function renderHeroStrip() {
+  const el = document.getElementById('heroStrip');
+  if (!el) return;
+
+  // ── 1. Total Cash — sum of QBO balances (visible accounts only) ──
+  let totalCash = 0;
+  let acctCount = 0;
+  let unassigned = 0;
+  let unassignedAcctCount = 0;
+  try {
+    const raw = localStorage.getItem('qbo_last_fetched');
+    if (raw) {
+      const { accounts } = JSON.parse(raw);
+      const hidden  = loadQBOHidden ? loadQBOHidden() : [];
+      const mapping = loadQBOMapping ? loadQBOMapping() : {};
+      const BUCKETS = ['Profit','Tax','OC','OPEX'];
+      const visible = accounts.filter(a => hidden.indexOf(a.name) < 0);
+      acctCount = visible.length;
+      visible.forEach(a => {
+        totalCash += (parseFloat(a.balance) || 0);
+        const bucket = mapping[a.name];
+        if (!BUCKETS.includes(bucket)) {
+          unassigned += (parseFloat(a.balance) || 0);
+          unassignedAcctCount++;
+        }
+      });
+    }
+  } catch(e) {}
+
+  // ── 2. Allocation Health — % rows summing to 100% ──
+  let compliant = 0, totalRows = 0, healthPct = 100;
+  try {
+    const data = pfData && pfData.length ? pfData : (typeof loadData === 'function' ? loadData() : []);
+    data.forEach(r => {
+      const sum = (parseFloat(r.profit)||0) + (parseFloat(r.tax)||0) +
+                  (parseFloat(r.oc)||0)     + (parseFloat(r.opex)||0);
+      totalRows++;
+      if (sum === 100) compliant++;
+    });
+    healthPct = totalRows > 0 ? Math.round(compliant / totalRows * 100) : 100;
+  } catch(e) {}
+
+  // ── 3. Federal Quarterly — paid count for current year ──
+  let fedPaid = 0, fedTotal = 4;
+  try {
+    const checks = JSON.parse(localStorage.getItem('tax_checkboxes_2026') || '{}');
+    ['fed_q1','fed_q2','fed_q3','fed_q4'].forEach(k => { if (checks[k]) fedPaid++; });
+  } catch(e) {}
+
+  const fedComplete = fedPaid === fedTotal;
+  const hasUnassigned = unassigned > 0.005;
+
+  const cards = [
+    {
+      hero: true,
+      label: 'Total Cash',
+      value: totalCash > 0 ? fmtMoney0(totalCash) : '—',
+      sub:   totalCash > 0
+              ? acctCount + ' accounts · 4 PF buckets'
+              : 'Awaiting bank sync',
+    },
+    {
+      label: 'Allocation Health',
+      value: healthPct + '%',
+      sub:   compliant + ' of ' + totalRows + ' rows compliant',
+      tone:  healthPct === 100 ? 'green' : (healthPct >= 80 ? 'amber' : 'red'),
+    },
+    {
+      label: 'Unassigned',
+      value: hasUnassigned ? fmtMoney0(unassigned) : '$0',
+      sub:   hasUnassigned
+              ? unassignedAcctCount + ' accounts need a bucket'
+              : 'All accounts assigned',
+      tone:  hasUnassigned ? 'amber' : 'green',
+    },
+    {
+      label: 'Fed Quarterly',
+      value: fedPaid + '/' + fedTotal,
+      sub:   fedComplete ? 'All quarters paid' : 'Q' + (fedPaid + 1) + ' due next',
+      tone:  fedComplete ? 'green' : 'navy',
+    },
+  ];
+
+  el.innerHTML = cards.map(c => {
+    const dotClass = c.tone && c.tone !== 'neutral' ? ' hero-dot ' + c.tone : '';
+    const dot = c.tone && c.tone !== 'neutral'
+      ? '<span class="' + dotClass.trim() + '"></span>'
+      : '';
+    return '<div class="hero-card' + (c.hero ? ' hero-primary' : '') + '">'
+      +    '<div class="hero-label">' + escHtml(c.label) + '</div>'
+      +    '<div class="hero-value">' + escHtml(c.value) + '</div>'
+      +    '<div class="hero-sub">' + dot + escHtml(c.sub) + '</div>'
+      +  '</div>';
+  }).join('');
 }
 
 function escHtml(str) {
@@ -2578,6 +2835,21 @@ function escHtml(str) {
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
 }
+
+// Like escHtml but also encodes newlines so they survive inside a title="…" attribute.
+function escAttr(str) {
+  return escHtml(str).replace(/\n/g, '&#10;');
+}
+
+// Enter on a contenteditable cell commits the edit instead of inserting a newline.
+// Shift+Enter still inserts a newline (rare, but useful for the Notes column).
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  const el = e.target;
+  if (!el || !el.classList || !el.classList.contains('editable')) return;
+  e.preventDefault();
+  el.blur();
+});
 
 // ─────────────────────────────────────────────
 // CELL EDIT
@@ -2858,6 +3130,8 @@ function renderQBOAccounts(accounts, fetchedAt) {
   document.getElementById('qboPanelSummary').textContent =
     visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
     (hiddenAccts.length ? ' · ' + hiddenAccts.length + ' hidden' : '');
+
+  renderHeroStrip();
 }
 
 function setQBOMapping(accountName, bucket) {
@@ -3240,7 +3514,8 @@ function addEntry() {
 // ─────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.seg-btn').forEach(el => el.classList.remove('active'));
+  // Scope to the main shell tab group so year-tab-bar state isn't reset
+  btn.closest('.segmented-control').querySelectorAll('.seg-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
   btn.classList.add('active');
 
@@ -3278,6 +3553,7 @@ function toggleCheck(el) {
   const checks = loadCheckboxes(year);
   checks[key] = el.classList.contains('checked');
   saveCheckboxes(year, checks);
+  renderHeroStrip();
 }
 
 function initCheckboxes(year) {
@@ -3312,6 +3588,7 @@ renderFooter();
 initCheckboxes('2024');
 initCheckboxes('2025');
 initCheckboxes('2026');
+renderHeroStrip();
 syncFromFirestore(); // then pull latest from cloud in background
 
 // QBO — restore URL fields, populate summary badge, run tax detection from cache
