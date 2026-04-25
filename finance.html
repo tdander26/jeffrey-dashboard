@@ -2182,30 +2182,52 @@ function renderTable() {
       else if (account === 'Tax')  payrollTax  += amt;
     }
     w2Emps.forEach(emp => {
-      if (w2Active[emp.id] === false) return; // disabled for this row
+      if (w2Active[emp.id] === false) return;
       const empTaxAmt = emp.salary * emp.empTaxPct / 100;
       const erTaxAmt  = emp.salary * emp.erTaxPct  / 100;
-      addPayroll(emp.source,                      emp.salary);  // salary
-      addPayroll(emp.empTaxSource || 'Tax',        empTaxAmt);  // employee tax
-      addPayroll(emp.erTaxSource  || emp.source,   erTaxAmt);   // employer tax
+      addPayroll(emp.source,                      emp.salary);
+      addPayroll(emp.empTaxSource || 'Tax',        empTaxAmt);
+      addPayroll(emp.erTaxSource  || emp.source,   erTaxAmt);
     });
+
+    // Early transfers tracked separately per destination account
+    let etProfit = 0, etTax = 0, etOC = 0, etOPEX = 0;
     earlyTransfers.forEach(et => {
       const amt = parseFloat(et.amount) || 0;
-      if      (et.account === 'Tax')    payrollTax  += amt;
-      else if (et.account === 'OC')     payrollOC   += amt;
-      else if (et.account === 'OPEX')   payrollOPEX += amt;
+      if      (et.account === 'Profit') etProfit += amt;
+      else if (et.account === 'Tax')    etTax    += amt;
+      else if (et.account === 'OC')     etOC     += amt;
+      else if (et.account === 'OPEX')   etOPEX   += amt;
     });
+    const totalET = etProfit + etTax + etOC + etOPEX;
 
     const hasPayroll = payrollOC > 0.005 || payrollOPEX > 0.005 || payrollTax > 0.005;
-    const adjTax  = taxD  - payrollTax;
-    const adjOC   = ocD   - payrollOC;
-    const adjOPEX = opexD - payrollOPEX;
+    const hasET      = totalET > 0.005;
 
-    // Returns an "→ $X" line shown below the base allocation when payroll applies
-    function adjLine(adj) {
-      if (!hasPayroll) return '';
+    const adjProfit = profitD - etProfit;
+    const adjTax    = taxD   - payrollTax - etTax;
+    const adjOC     = ocD    - payrollOC  - etOC;
+    const adjOPEX   = opexD  - payrollOPEX - etOPEX;
+
+    // Shows "→ $X" below a cell when payroll or early transfers affect this account.
+    // base = full allocation, payroll = W2 already pulled, et = early transfer already sent.
+    function adjLine(base, payroll, et) {
+      if (payroll < 0.005 && et < 0.005) return '';
+      const adj = base - payroll - et;
       const cls = adj > 0.005 ? 'pos' : (adj < -0.005 ? 'neg' : 'zero');
-      return `<span class="adj-line ${cls}" title="After payroll deductions">→ ${fmt$(adj)}</span>`;
+      let tip = `Base: ${fmt$(base)}`;
+      if (payroll > 0.005) tip += ` | Payroll: −${fmt$(payroll)}`;
+      if (et > 0.005)      tip += ` | Early transfer: −${fmt$(et)}`;
+      tip += ` | Remaining: ${fmt$(adj)}`;
+      return `<span class="adj-line ${cls}" title="${tip}">→ ${fmt$(adj)}</span>`;
+    }
+
+    // Shows remaining income to distribute on allocation day when early transfers exist.
+    function incomeAdjLine() {
+      if (!hasET) return '';
+      const remaining = total - totalET;
+      const cls = remaining > 0.005 ? 'pos' : (remaining < -0.005 ? 'neg' : 'zero');
+      return `<span class="adj-line ${cls}" title="${fmt$(totalET)} already sent early — this is what still needs to move from Income on allocation day">→ ${fmt$(remaining)} remaining</span>`;
     }
 
     // ── W2 badge toggles ─────────────────────────────────
@@ -2222,23 +2244,22 @@ function renderTable() {
     }
     w2Html += '</div>';
 
-    const hasET   = earlyTransfers.length > 0;
-    const etLabel = hasET ? `ET (${earlyTransfers.length})` : 'ET';
+    const etLabel = earlyTransfers.length > 0 ? `ET (${earlyTransfers.length})` : 'ET';
 
     const tr = document.createElement('tr');
     if (isError) tr.classList.add('row-error');
 
     tr.innerHTML = `
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="date" onblur="cellEdit(this)">${escHtml(row.date)}</span></td>
-      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span></td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span>${incomeAdjLine()}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="profit" onblur="cellEdit(this)">${row.profit}</span>%</td>
-      <td>${fmt$(profitD)}</td>
+      <td>${fmt$(profitD)}${adjLine(profitD, 0, etProfit)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="tax" onblur="cellEdit(this)">${row.tax}</span>%</td>
-      <td>${fmt$(taxD)}${adjLine(adjTax)}</td>
+      <td>${fmt$(taxD)}${adjLine(taxD, payrollTax, etTax)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="oc" onblur="cellEdit(this)">${row.oc}</span>%</td>
-      <td>${fmt$(ocD)}${adjLine(adjOC)}</td>
+      <td>${fmt$(ocD)}${adjLine(ocD, payrollOC, etOC)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="opex" onblur="cellEdit(this)">${row.opex}</span>%</td>
-      <td>${fmt$(opexD)}${adjLine(adjOPEX)}</td>
+      <td>${fmt$(opexD)}${adjLine(opexD, payrollOPEX, etOPEX)}</td>
       <td>${w2Html}</td>
       <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
       <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
