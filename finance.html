@@ -1360,6 +1360,100 @@
     opacity: 0.5;
     margin-left: 4px;
   }
+
+  /* ── Excluded Tax Payments Panel (hidden, restorable) ── */
+  .tax-excluded-panel {
+    margin-bottom: 14px; padding: 8px 14px;
+    background: var(--card);
+    border: 1px dashed var(--rule-2);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .tax-excluded-panel summary {
+    cursor: pointer;
+    font-weight: 500;
+    list-style: none;
+    user-select: none;
+  }
+  .tax-excluded-panel summary::-webkit-details-marker { display: none; }
+  .tax-excluded-panel[open] summary { margin-bottom: 8px; }
+  .tax-excluded-panel .items {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .tax-excluded-item {
+    padding: 4px 8px;
+    background: var(--card);
+    border-radius: 6px;
+    border: 1px dashed var(--rule-2);
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: background 120ms, color 120ms, border-color 120ms;
+  }
+  .tax-excluded-item:hover {
+    background: var(--hover);
+    color: var(--ink);
+    border-color: var(--ink-3);
+    border-style: solid;
+  }
+  .tax-excluded-item::after {
+    content: ' ↺';
+    opacity: 0.6;
+    margin-left: 4px;
+  }
+
+  .payment-picker .pp-exclude,
+  .payment-picker .pp-restore {
+    flex: 1; margin-top: 0;
+    padding: 6px;
+    background: transparent;
+    border: 1px solid var(--rule-2);
+    border-radius: 6px;
+    color: var(--ink-3);
+    font-size: 11px; font-weight: 600;
+    cursor: pointer;
+  }
+  .payment-picker .pp-exclude:hover { background: var(--hover); color: var(--ink); }
+  .payment-picker .pp-restore {
+    background: rgba(52, 199, 89, 0.10);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .payment-picker .pp-restore:hover { filter: brightness(0.95); }
+
+  /* ── Final Payment / Rollover toggle ── */
+  .ff-toggle {
+    display: inline-flex; gap: 2px;
+    margin-left: 8px;
+    background: var(--rule);
+    border-radius: 999px;
+    padding: 2px;
+    vertical-align: middle;
+  }
+  .ff-opt {
+    font-family: var(--font-sans);
+    font-size: 10px; font-weight: 600;
+    padding: 2px 9px;
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    border-radius: 999px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: background 120ms, color 120ms;
+  }
+  .ff-opt:hover { color: var(--ink); }
+  .ff-opt.active {
+    background: var(--card);
+    color: var(--navy);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  }
 </style>
 </head>
 <body>
@@ -1554,7 +1648,7 @@
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Final Payment / Rollover</td>
+                  <td>Final<span class="ff-toggle" data-fed-final-year="2024"><button type="button" class="ff-opt" data-type="rollover" onclick="setFedFinalType('2024','rollover')">Rollover</button><button type="button" class="ff-opt" data-type="payment" onclick="setFedFinalType('2024','payment')">Payment</button></span></td>
                   <td class="amount">—</td>
                   <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2024" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">—</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2024" onclick="toggleCheck(this)"></div></td>
@@ -1562,7 +1656,7 @@
                 <tr class="totals-row na-row">
                   <td>2024 Total</td>
                   <td class="amount">—</td>
-                  <td class="amount">—</td>
+                  <td class="amount" id="fed-total-2024">—</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
               </tbody>
@@ -1845,7 +1939,7 @@
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" data-amount="4000" data-due="2026-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Final Payment / Rollover</td>
+                  <td>Final<span class="ff-toggle" data-fed-final-year="2025"><button type="button" class="ff-opt" data-type="rollover" onclick="setFedFinalType('2025','rollover')">Rollover</button><button type="button" class="ff-opt" data-type="payment" onclick="setFedFinalType('2025','payment')">Payment</button></span></td>
                   <td class="amount">—</td>
                   <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2025" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">$7,285.00</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2025" onclick="toggleCheck(this)"></div></td>
@@ -1853,7 +1947,7 @@
                 <tr class="totals-row na-row">
                   <td>2025 Total</td>
                   <td class="amount">$52,996.00 → $45,711.00</td>
-                  <td class="amount">$52,996.00</td>
+                  <td class="amount" id="fed-total-2025">$52,996.00</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
               </tbody>
@@ -2155,7 +2249,7 @@
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" data-amount="12580" data-due="2027-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Final Payment / Rollover</td>
+                  <td>Final<span class="ff-toggle" data-fed-final-year="2026"><button type="button" class="ff-opt" data-type="rollover" onclick="setFedFinalType('2026','rollover')">Rollover</button><button type="button" class="ff-opt" data-type="payment" onclick="setFedFinalType('2026','payment')">Payment</button></span></td>
                   <td class="amount">—</td>
                   <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2026" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">—</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2026" onclick="toggleCheck(this)"></div></td>
@@ -2594,8 +2688,9 @@ function saveToFirestore() {
     });
     const mnSalesTax     = JSON.parse(localStorage.getItem('mnSalesTax')        || '{}');
     const fedRollover    = JSON.parse(localStorage.getItem('fedRollover')       || '{}');
+    const fedFinalType   = JSON.parse(localStorage.getItem('fedFinalType')      || '{}');
     const qboManualMatch = JSON.parse(localStorage.getItem('qbo_manual_matches') || '{}');
-    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover, qboManualMatch })
+    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover, fedFinalType, qboManualMatch })
       .then(()  => setSyncBadge('synced'))
       .catch(()  => setSyncBadge('error'));
   } catch(e) { setSyncBadge('error'); }
@@ -2619,6 +2714,7 @@ async function syncFromFirestore() {
     }
     if (d.mnSalesTax)     localStorage.setItem('mnSalesTax',         JSON.stringify(d.mnSalesTax));
     if (d.fedRollover)    localStorage.setItem('fedRollover',        JSON.stringify(d.fedRollover));
+    if (d.fedFinalType)   localStorage.setItem('fedFinalType',       JSON.stringify(d.fedFinalType));
     if (d.qboManualMatch) localStorage.setItem('qbo_manual_matches', JSON.stringify(d.qboManualMatch));
     setSyncBadge('synced');
     // Re-render with fresh cloud data
@@ -3948,7 +4044,7 @@ function parseTaxPaymentsCSV(csvText) {
 }
 
 function clearTaxBadges() {
-  document.querySelectorAll('.tax-detected, .tax-unmatched-panel, .tax-misc-panel').forEach(n => n.remove());
+  document.querySelectorAll('.tax-detected, .tax-unmatched-panel, .tax-misc-panel, .tax-excluded-panel').forEach(n => n.remove());
 }
 
 function paymentId(p) {
@@ -3988,7 +4084,7 @@ function assignPaymentToRow(payId, rowKey) {
   saveManualMatches(m);
 
   // Auto-check the row's "Paid?" box only when assigning to a real row
-  if (rowKey && rowKey !== '__none__' && !isMiscKey(rowKey)) {
+  if (rowKey && rowKey !== '__none__' && rowKey !== '__excluded__' && !isMiscKey(rowKey)) {
     const [key, year] = rowKey.split('|');
     if (key && year) {
       const checks = loadCheckboxes(year);
@@ -4038,10 +4134,12 @@ function openPaymentPicker(payId, anchorEl) {
   });
 
   // Determine current assignment for the payment being assigned
-  const currentVal = manual[payId];  // rowKey | '__none__' | '__misc__:cat' | undefined
+  const currentVal = manual[payId];  // rowKey | '__none__' | '__misc__:cat' | '__excluded__' | undefined
   let currentDescription = '';
   if (currentVal === '__none__') {
     currentDescription = 'Forced unmatched';
+  } else if (currentVal === '__excluded__') {
+    currentDescription = 'Excluded (hidden)';
   } else if (isMiscKey(currentVal)) {
     currentDescription = 'Misc · ' + miscLabelOf(currentVal);
   } else if (currentVal) {
@@ -4215,6 +4313,9 @@ function openPaymentPicker(payId, anchorEl) {
   const clearBtn = showClear
     ? '<button type="button" class="pp-clear">Mark as unmatched</button>'
     : '';
+  const excludeBtn = currentVal === '__excluded__'
+    ? '<button type="button" class="pp-restore">Restore (un-exclude)</button>'
+    : '<button type="button" class="pp-exclude">Exclude (hide)</button>';
 
   picker.innerHTML =
     '<div class="pp-header">Assign ' + fmt$(payment.amount) + ' · ' + dateLabel +
@@ -4223,7 +4324,7 @@ function openPaymentPicker(payId, anchorEl) {
     '<div class="pp-list">' + optionsHtml +
       '<div class="pp-section-title">Misc</div>' + miscHtml +
     '</div>' +
-    '<div class="pp-actions">' + clearBtn +
+    '<div class="pp-actions">' + clearBtn + excludeBtn +
       '<button type="button" class="pp-close">Cancel</button>' +
     '</div>';
 
@@ -4239,6 +4340,16 @@ function openPaymentPicker(payId, anchorEl) {
   if (clearEl) clearEl.addEventListener('click', function(e) {
     e.stopPropagation();
     assignPaymentToRow(payId, '__none__');
+  });
+  const excludeEl = picker.querySelector('.pp-exclude');
+  if (excludeEl) excludeEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    assignPaymentToRow(payId, '__excluded__');
+  });
+  const restoreEl = picker.querySelector('.pp-restore');
+  if (restoreEl) restoreEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    assignPaymentToRow(payId, null);
   });
   picker.querySelector('.pp-close').addEventListener('click', function(e) {
     e.stopPropagation();
@@ -4270,6 +4381,13 @@ document.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
     openPaymentPicker(misc.dataset.pid, misc);
+    return;
+  }
+  const excl = e.target.closest('.tax-excluded-item');
+  if (excl && excl.dataset.pid) {
+    e.preventDefault();
+    e.stopPropagation();
+    openPaymentPicker(excl.dataset.pid, excl);
     return;
   }
   const badge = e.target.closest('.tax-detected');
@@ -4330,12 +4448,19 @@ function detectTaxPayments() {
   const manual = loadManualMatches();
   const skipAuto = new Set();   // payment indexes that should not be auto-matched
   const miscPayments = [];      // [{ p, idx, category }]
+  const excludedPayments = [];  // [{ p, idx }] — hidden from all panels but persisted
 
   // 1. Apply manual entries first
   payments.forEach((p, idx) => {
     const pid = paymentId(p);
     const v = manual[pid];
     if (!v) return;
+    if (v === '__excluded__') {
+      matchedPayments.add(idx);
+      skipAuto.add(idx);
+      excludedPayments.push({ p, idx });
+      return;
+    }
     if (v === '__none__') {
       skipAuto.add(idx);
       return;
@@ -4418,7 +4543,26 @@ function detectTaxPayments() {
     activeYearEl.insertBefore(miscPanel, activeYearEl.firstChild);
   }
 
-  // 4. Unmatched panel (payments without any assignment, including __none__)
+  // 4. Excluded panel (hidden — click to restore individually)
+  if (excludedPayments.length && activeYearEl) {
+    const sum = excludedPayments.reduce((s, x) => s + x.p.amount, 0);
+    const itemsHtml = excludedPayments.map(({ p }) => {
+      const d = new Date(p.date + 'T12:00:00');
+      const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+      return '<span class="tax-excluded-item" data-pid="' + escAttr(paymentId(p)) +
+        '" title="' + escAttr((p.payee || '') + ' — click to restore') + '">' +
+        fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() + ', ' + d.getFullYear() +
+        (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
+    }).join('');
+    const exPanel = document.createElement('details');
+    exPanel.className = 'tax-excluded-panel';
+    exPanel.innerHTML =
+      '<summary>👁‍🗨 ' + excludedPayments.length + ' excluded · ' + fmt$(sum) + ' · click to manage</summary>' +
+      '<div class="items">' + itemsHtml + '</div>';
+    activeYearEl.insertBefore(exPanel, activeYearEl.firstChild);
+  }
+
+  // 5. Unmatched panel (payments without any assignment, including __none__)
   const unmatched = payments
     .map((p, i) => ({ p, i }))
     .filter(x => !matchedPayments.has(x.i));
@@ -4637,6 +4781,10 @@ function loadFedRollover() {
   return JSON.parse(localStorage.getItem('fedRollover') || '{}');
 }
 
+function loadFedFinalType() {
+  return JSON.parse(localStorage.getItem('fedFinalType') || '{}');
+}
+
 function saveFedRolloverAmt(el) {
   const year = el.dataset.fedRollover;
   const raw  = el.innerText.replace(/[^0-9.]/g, '');
@@ -4651,14 +4799,55 @@ function saveFedRolloverAmt(el) {
   saveToFirestore();
 }
 
+function setFedFinalType(year, type) {
+  const d = loadFedFinalType();
+  d[year] = type;
+  localStorage.setItem('fedFinalType', JSON.stringify(d));
+  applyFedFinalTypeUI();
+  updateFedRolloverDisplay();
+  saveToFirestore();
+}
+
+function applyFedFinalTypeUI() {
+  const d = loadFedFinalType();
+  document.querySelectorAll('.ff-toggle').forEach(tog => {
+    const yr = tog.dataset.fedFinalYear;
+    const cur = d[yr] || 'rollover';
+    tog.querySelectorAll('.ff-opt').forEach(b => {
+      b.classList.toggle('active', b.dataset.type === cur);
+    });
+  });
+}
+
+function updateFedYearTotals() {
+  const types = loadFedFinalType();
+  const amts  = loadFedRollover();
+  document.querySelectorAll('[id^="fed-total-"]').forEach(el => {
+    const yr = el.id.slice('fed-total-'.length);
+    let sum = 0;
+    document.querySelectorAll(`.checkbox-custom[data-year="${yr}"][data-amount]`).forEach(cb => {
+      const k = cb.dataset.key || '';
+      if (k.startsWith('fed_q')) sum += parseFloat(cb.dataset.amount) || 0;
+    });
+    if ((types[yr] || 'rollover') === 'payment') {
+      sum += parseFloat(amts[yr]) || 0;
+    }
+    if (sum > 0) {
+      el.textContent = sum.toLocaleString('en-US', {style:'currency', currency:'USD', minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+  });
+}
+
 function updateFedRolloverDisplay() {
-  const data = loadFedRollover();
+  const data  = loadFedRollover();
+  const types = loadFedFinalType();
   ['2025','2026','2027'].forEach(yr => {
     const prevYr = String(parseInt(yr) - 1);
     const amt = data[prevYr];
+    const isPayment = (types[prevYr] || 'rollover') === 'payment';
     const inEl = document.getElementById('fed-rollover-in-' + yr);
     if (inEl) {
-      inEl.textContent = amt != null
+      inEl.textContent = (amt != null && !isPayment)
         ? amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
         : '—';
     }
@@ -4667,6 +4856,7 @@ function updateFedRolloverDisplay() {
       srcEl.textContent = amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
     }
   });
+  updateFedYearTotals();
 }
 
 // On first load, seed fedRollover from any hardcoded DOM values so the
@@ -4681,6 +4871,7 @@ function initFedRollovers() {
     }
   });
   localStorage.setItem('fedRollover', JSON.stringify(data));
+  applyFedFinalTypeUI();
   updateFedRolloverDisplay();
 }
 
