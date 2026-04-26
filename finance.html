@@ -3834,8 +3834,23 @@ function assignPaymentToRow(payId, rowKey) {
   if (rowKey) m[payId] = rowKey;
   else delete m[payId];
   saveManualMatches(m);
+
+  // When assigning, auto-check the row's "Paid?" box (user can still override)
+  if (rowKey) {
+    const [key, year] = rowKey.split('|');
+    if (key && year) {
+      const checks = loadCheckboxes(year);
+      checks[key] = true;
+      saveCheckboxes(year, checks);
+      const cb = document.querySelector('.checkbox-custom[data-key="' + key + '"][data-year="' + year + '"]');
+      if (cb) cb.classList.add('checked');
+    }
+  }
+
   closePaymentPicker();
   detectTaxPayments();
+  updateOutstandingBadges();
+  renderHeroStrip();
 }
 
 function closePaymentPicker() {
@@ -3991,10 +4006,11 @@ function detectTaxPayments() {
   const DAY_WINDOW   = 60;             // match within ±60 days of due date
   const MS_PER_DAY   = 86400000;
 
-  // Every tax row with a data-amount is a match candidate
+  // Auto-match candidates need data-amount; manual matches can target any keyed row
   const rows = Array.from(document.querySelectorAll('.checkbox-custom[data-amount]'));
+  const allKeyedRows = Array.from(document.querySelectorAll('.checkbox-custom[data-key][data-year]'));
   const rowsByKey = new Map();
-  rows.forEach(rowEl => {
+  allKeyedRows.forEach(rowEl => {
     rowsByKey.set(rowEl.dataset.key + '|' + rowEl.dataset.year, rowEl);
   });
 
