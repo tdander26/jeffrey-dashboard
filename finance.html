@@ -1617,8 +1617,7 @@
               <thead>
                 <tr>
                   <th>Quarter</th>
-                  <th class="amount">Estimated</th>
-                  <th class="amount">Quarter Amount</th>
+                  <th class="amount">Amount</th>
                   <th class="check-cell">Paid?</th>
                 </tr>
               </thead>
@@ -1626,36 +1625,30 @@
                 <tr>
                   <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2024" onblur="saveDeadlineDate(this)">April 15th</span></td>
                   <td class="amount">—</td>
-                  <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q2_2024" onblur="saveDeadlineDate(this)">June 15th</span></td>
-                  <td class="amount">—</td>
                   <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q3_2024" onblur="saveDeadlineDate(this)">Sept 15th</span></td>
                   <td class="amount">—</td>
-                  <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q4_2024" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
                   <td class="amount">—</td>
-                  <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Final<span class="ff-toggle" data-fed-final-year="2024"><button type="button" class="ff-opt" data-type="rollover" onclick="setFedFinalType('2024','rollover')">Rollover</button><button type="button" class="ff-opt" data-type="payment" onclick="setFedFinalType('2024','payment')">Payment</button></span></td>
-                  <td class="amount">—</td>
                   <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2024" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">—</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row na-row">
                   <td>2024 Total</td>
-                  <td class="amount">—</td>
                   <td class="amount" id="fed-total-2024">—</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
@@ -1896,57 +1889,48 @@
               <thead>
                 <tr>
                   <th>Quarter</th>
-                  <th class="amount">Estimated</th>
                   <th class="amount">Quarter Amount</th>
                   <th class="check-cell">Paid?</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="na-row">
-                  <td>Last Year @ 110%</td>
-                  <td class="amount">$65,431.30</td>
-                  <td class="amount">$16,357.83</td>
+                  <td>Last Year @ 110%<div class="panel-subtitle">$65,431.30 yearly · $16,357.83 / quarter</div></td>
+                  <td class="amount">—</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
                 <tr class="na-row" style="background:rgba(52,199,89,0.06)">
                   <td>Rollover from 2024</td>
-                  <td class="amount">—</td>
                   <td class="amount" id="fed-rollover-in-2025">—</td>
                   <td class="check-cell"><span class="badge badge-green">Incl.</span></td>
                 </tr>
                 <tr>
                   <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2025" onblur="saveDeadlineDate(this)">April 18th</span></td>
-                  <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2025" data-amount="16332" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q2_2025" onblur="saveDeadlineDate(this)">June 15th</span></td>
-                  <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2025" data-amount="16332" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q3_2025" onblur="saveDeadlineDate(this)">Sept 16th</span></td>
-                  <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2025" data-amount="16332" data-due="2025-09-16" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q4_2025" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
-                  <td class="amount">—</td>
                   <td class="amount">$4,000.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" data-amount="4000" data-due="2026-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Final<span class="ff-toggle" data-fed-final-year="2025"><button type="button" class="ff-opt" data-type="rollover" onclick="setFedFinalType('2025','rollover')">Rollover</button><button type="button" class="ff-opt" data-type="payment" onclick="setFedFinalType('2025','payment')">Payment</button></span></td>
-                  <td class="amount">—</td>
                   <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2025" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">$7,285.00</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2025" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row na-row">
-                  <td>2025 Total</td>
-                  <td class="amount">$52,996.00 → $45,711.00</td>
+                  <td>2025 Total<div class="panel-subtitle">$52,996.00 → $45,711.00</div></td>
                   <td class="amount" id="fed-total-2025">$52,996.00</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
@@ -2206,57 +2190,48 @@
               <thead>
                 <tr>
                   <th>Quarter</th>
-                  <th class="amount">Estimated</th>
                   <th class="amount">Quarter Amount</th>
                   <th class="check-cell">Paid?</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="na-row">
-                  <td>Last Year at 110%</td>
-                  <td class="amount">$50,282.10</td>
-                  <td class="amount">$12,570.53</td>
+                  <td>Last Year at 110%<div class="panel-subtitle">$50,282.10 yearly · $12,570.53 / quarter</div></td>
+                  <td class="amount">—</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
                 <tr class="na-row" style="background:rgba(52,199,89,0.06)">
                   <td>Rollover from 2025</td>
-                  <td class="amount">—</td>
                   <td class="amount" id="fed-rollover-in-2026">—</td>
                   <td class="check-cell"><span class="badge badge-green">Incl.</span></td>
                 </tr>
                 <tr>
                   <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2026" onblur="saveDeadlineDate(this)">April 18th</span></td>
-                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$5,290.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2026" data-amount="5290" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q2_2026" onblur="saveDeadlineDate(this)">June 15th</span></td>
-                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2026" data-amount="12580" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q3_2026" onblur="saveDeadlineDate(this)">Sept 16th</span></td>
-                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2026" data-amount="12580" data-due="2026-09-16" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q4_2026" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
-                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" data-amount="12580" data-due="2027-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
                   <td>Final<span class="ff-toggle" data-fed-final-year="2026"><button type="button" class="ff-opt" data-type="rollover" onclick="setFedFinalType('2026','rollover')">Rollover</button><button type="button" class="ff-opt" data-type="payment" onclick="setFedFinalType('2026','payment')">Payment</button></span></td>
-                  <td class="amount">—</td>
                   <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2026" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">—</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2026" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr class="totals-row na-row">
                   <td>2026 Total</td>
-                  <td class="amount">—</td>
                   <td class="amount" id="fed-total-2026">$50,315.00</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
@@ -4893,6 +4868,8 @@ function toggleCheck(el) {
 // OUTSTANDING BADGES — auto-update per tax panel
 // ─────────────────────────────────────────────
 function updateOutstandingBadges() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
   document.querySelectorAll('.panel').forEach(panel => {
     const table = panel.querySelector('table.tax-table');
     if (!table) return;
@@ -4906,6 +4883,15 @@ function updateOutstandingBadges() {
       const cb = tr.querySelector('.checkbox-custom');
       if (!cb) return;
       if (cb.classList.contains('checked')) return;
+
+      // Only count items that are overdue or due within 30 days
+      const dueStr = cb.dataset.due;
+      if (!dueStr) return;
+      const due = new Date(dueStr + 'T00:00:00');
+      if (isNaN(due.getTime())) return;
+      const diff = due.getTime() - today.getTime();
+      if (diff > WINDOW_MS) return; // due more than 30 days out → skip
+
       let amt = parseFloat(cb.dataset.amount);
       if (isNaN(amt)) {
         const amtCell = tr.querySelector('td.amount');
