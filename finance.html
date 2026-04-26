@@ -1894,7 +1894,10 @@
           <div class="panel-title">Payroll / W2 Settings</div>
           <div class="panel-subtitle" id="w2PanelSummary"></div>
         </div>
-        <button class="btn btn-primary" onclick="addW2Employee()">+ Add Employee</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-secondary btn-sm" id="w2LockBtn" onclick="toggleW2Lock()" title="Lock payroll to prevent accidental edits">🔓 Unlocked</button>
+          <button class="btn btn-primary" id="addEmpBtn" onclick="addW2Employee()">+ Add Employee</button>
+        </div>
       </header>
       <div style="padding: 14px 16px 16px">
         <div id="w2SettingsContent"></div>
@@ -2208,10 +2211,33 @@ function toggleW2Panel() {
   document.getElementById('w2Arrow').classList.toggle('open');
 }
 
+function isW2Locked() {
+  return localStorage.getItem('w2Locked') === 'true';
+}
+
+function toggleW2Lock() {
+  localStorage.setItem('w2Locked', String(!isW2Locked()));
+  renderW2Panel();
+}
+
 function renderW2Panel() {
-  const emps = loadW2Employees();
+  const locked  = isW2Locked();
+  const emps    = loadW2Employees();
   const content = document.getElementById('w2SettingsContent');
   const summary = document.getElementById('w2PanelSummary');
+
+  // Sync header buttons with lock state
+  const lockBtn = document.getElementById('w2LockBtn');
+  const addBtn  = document.getElementById('addEmpBtn');
+  if (lockBtn) {
+    lockBtn.textContent = locked ? '🔒 Locked' : '🔓 Unlocked';
+    lockBtn.style.color = locked ? '#FF3B30' : '';
+  }
+  if (addBtn) {
+    addBtn.disabled = locked;
+    addBtn.style.opacity = locked ? '0.4' : '';
+    addBtn.style.pointerEvents = locked ? 'none' : '';
+  }
 
   // Helper: accumulate payroll totals by account
   function w2Totals(empList) {
@@ -2251,6 +2277,7 @@ function renderW2Panel() {
       <th>Name</th>
       <th>Salary Acct</th>
       <th>Salary / Period</th>
+      <th title="Rows dated before this date skip this employee">Effective</th>
       <th>Emp Tax</th>
       <th>Emp Tax $</th>
       <th>Er Tax</th>
@@ -2260,10 +2287,10 @@ function renderW2Panel() {
     <tbody>`;
 
   const ACCTS = ['Tax','OC','OPEX','Profit'];
+  const ce = locked ? 'false' : 'true'; // contenteditable
   emps.forEach(emp => {
     const empTaxCalc = emp.salary * emp.empTaxPct / 100;
     const erTaxCalc  = emp.salary * emp.erTaxPct  / 100;
-    // Use fixed dollar amount if explicitly set, otherwise fall back to % calculation
     const empTaxAmt  = emp.empTaxFixed != null ? emp.empTaxFixed : empTaxCalc;
     const erTaxAmt   = emp.erTaxFixed  != null ? emp.erTaxFixed  : erTaxCalc;
     const empTaxSrc  = emp.empTaxSource || 'Tax';
@@ -2274,20 +2301,27 @@ function renderW2Panel() {
     const erFixedTip  = emp.erTaxFixed != null
       ? `Exact amount — overrides % calc (${fmt$(erTaxCalc)} from ${emp.erTaxPct}%)`
       : `Computed from ${emp.erTaxPct}% — click to enter exact payroll amount`;
-    html += `<tr>
-      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="name" onblur="w2FieldEdit(this)">${escHtml(emp.name)}</span></td>
-      <td>
-        <div class="src-toggle">
-          <button class="st-oc${emp.source==='OC'?' active':''}" onclick="setW2Source('${emp.id}','OC')">OC</button>
-          <button class="st-opex${emp.source==='OPEX'?' active':''}" onclick="setW2Source('${emp.id}','OPEX')">OPEX</button>
-        </div>
-      </td>
-      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-      <td>${srcSel(emp.id,'empTaxSource',empTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
-      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxFixed" onblur="w2FieldEdit(this)" title="${empFixedTip}" style="color:#FF3B30;font-weight:500">${empTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-      <td>${srcSel(emp.id,'erTaxSource',erTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
-      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxFixed" onblur="w2FieldEdit(this)" title="${erFixedTip}" style="color:#FF9500;font-weight:500">${erTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-      <td><button class="delete-btn" style="opacity:1" onclick="deleteW2Employee('${emp.id}')" title="Remove">🗑</button></td>
+    const effectiveDisplay = emp.effectiveDate || '—';
+    const srcBtns = locked
+      ? `<div class="src-toggle"><button class="st-oc${emp.source==='OC'?' active':''}" disabled>OC</button><button class="st-opex${emp.source==='OPEX'?' active':''}" disabled>OPEX</button></div>`
+      : `<div class="src-toggle"><button class="st-oc${emp.source==='OC'?' active':''}" onclick="setW2Source('${emp.id}','OC')">OC</button><button class="st-opex${emp.source==='OPEX'?' active':''}" onclick="setW2Source('${emp.id}','OPEX')">OPEX</button></div>`;
+    const empTaxSrcSel = locked
+      ? `<span style="font-size:11px;color:#636366">${empTaxSrc}</span>`
+      : srcSel(emp.id,'empTaxSource',empTaxSrc,ACCTS);
+    const erTaxSrcSel = locked
+      ? `<span style="font-size:11px;color:#636366">${erTaxSrc}</span>`
+      : srcSel(emp.id,'erTaxSource',erTaxSrc,ACCTS);
+    const delBtn = locked ? '' : `<button class="delete-btn" style="opacity:1" onclick="deleteW2Employee('${emp.id}')" title="Remove">🗑</button>`;
+    html += `<tr style="${locked ? 'opacity:0.75' : ''}">
+      <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="name" onblur="w2FieldEdit(this)">${escHtml(emp.name)}</span></td>
+      <td>${srcBtns}</td>
+      <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+      <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="effectiveDate" onblur="w2FieldEdit(this)" title="Effective date — rows before this date ignore this employee" style="font-size:11px;color:#636366">${effectiveDisplay}</span></td>
+      <td>${empTaxSrcSel} <span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
+      <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="empTaxFixed" onblur="w2FieldEdit(this)" title="${empFixedTip}" style="color:#FF3B30;font-weight:500">${empTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+      <td>${erTaxSrcSel} <span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
+      <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="erTaxFixed" onblur="w2FieldEdit(this)" title="${erFixedTip}" style="color:#FF9500;font-weight:500">${erTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+      <td>${delBtn}</td>
     </tr>`;
   });
 
@@ -2311,7 +2345,7 @@ function setW2TaxSource(el) {
 
 function addW2Employee() {
   const emps = loadW2Employees();
-  emps.push({ id: 'emp_' + Date.now(), name: 'New Employee', source: 'OPEX', salary: 0, empTaxSource: 'Tax', empTaxPct: 0, erTaxSource: 'OPEX', erTaxPct: 0 });
+  emps.push({ id: 'emp_' + Date.now(), name: 'New Employee', source: 'OPEX', salary: 0, empTaxSource: 'Tax', empTaxPct: 0, erTaxSource: 'OPEX', erTaxPct: 0, effectiveDate: null });
   saveW2Employees(emps);
   renderW2Panel();
   renderTable();
@@ -2333,6 +2367,7 @@ function w2FieldEdit(el) {
   const field  = el.dataset.field;
   let val = el.innerText.trim();
   if (['salary','empTaxPct','erTaxPct','empTaxFixed','erTaxFixed'].includes(field)) val = parseFloat(val) || 0;
+  if (field === 'effectiveDate') val = val || null;
   const emps = loadW2Employees();
   const emp  = emps.find(e => e.id === empId);
   if (emp) {
@@ -2464,6 +2499,35 @@ function deleteEarlyTransfer(etIdx) {
 }
 
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// DATE HELPERS
+// ─────────────────────────────────────────────
+
+// Parse a row date string + inferred year into a Date (midnight local).
+function parseRowDate(dateStr, year) {
+  if (!dateStr) return null;
+  const full = new Date(dateStr);
+  if (!isNaN(full)) return full;
+  const numMatch = dateStr.match(/(\d{1,2})[\/\-](\d{1,2})/);
+  if (numMatch) return new Date(year, parseInt(numMatch[1]) - 1, parseInt(numMatch[2]));
+  const MA = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,sept:8};
+  const lower = dateStr.toLowerCase();
+  for (const [k,v] of Object.entries(MA)) {
+    if (lower.includes(k)) {
+      const dm = lower.match(/\d+/);
+      return new Date(year, v, dm ? parseInt(dm[0]) : 1);
+    }
+  }
+  return null;
+}
+
+// Parse a user-typed effective date string ("3/1/2025", "2025-03-01", etc.).
+function parseEffectiveDate(s) {
+  if (!s || s === '—') return null;
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
 // YEAR INFERENCE (handles mixed date formats)
 // ─────────────────────────────────────────────
 function inferYears(data) {
@@ -2625,8 +2689,14 @@ function renderTable() {
       else if (account === 'OPEX') payrollOPEX += amt;
       else if (account === 'Tax')  payrollTax  += amt;
     }
+    const rowDate = parseRowDate(row.date, entryYears[idx]);
     w2Emps.forEach(emp => {
       if (w2Active[emp.id] === false) return;
+      // Skip if this row is before the employee's effective date
+      if (emp.effectiveDate) {
+        const effDate = parseEffectiveDate(emp.effectiveDate);
+        if (effDate && rowDate && rowDate < effDate) return;
+      }
       const empTaxAmt = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
       const erTaxAmt  = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
       addPayroll(emp.source,                      emp.salary);
