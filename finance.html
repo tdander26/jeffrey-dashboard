@@ -1245,6 +1245,7 @@
               <th id="w2ColHeader" style="min-width:50px;text-align:center">W2</th>
               <th class="col-notes" style="min-width:160px">Notes</th>
               <th>100%</th>
+              <th class="check-cell" title="Matched to bank transaction" style="text-align:center">✓</th>
               <th></th>
             </tr>
           </thead>
@@ -1296,25 +1297,25 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Q1 — April 15th</td>
+                  <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2024" onblur="saveDeadlineDate(this)">April 15th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q2 — June 15th</td>
+                  <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q2_2024" onblur="saveDeadlineDate(this)">June 15th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q3 — Sept 15th</td>
+                  <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q3_2024" onblur="saveDeadlineDate(this)">Sept 15th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q4 — Jan 15th</td>
+                  <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q4_2024" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
@@ -1350,22 +1351,22 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Q1 — April 15th</td>
+                  <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q1_2024" onblur="saveDeadlineDate(this)">April 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="mn_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">—</td>
                 </tr>
                 <tr>
-                  <td>Q2 — June 15th</td>
+                  <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q2_2024" onblur="saveDeadlineDate(this)">June 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="mn_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">—</td>
                 </tr>
                 <tr>
-                  <td>Q3 — Sept 15th</td>
+                  <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q3_2024" onblur="saveDeadlineDate(this)">Sept 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="mn_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">—</td>
                 </tr>
                 <tr>
-                  <td>Q4 — Jan 15th</td>
+                  <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q4_2024" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">—</td>
                 </tr>
@@ -1454,6 +1455,94 @@
           <div class="tax-note placeholder-note">Add your 2024 data here</div>
         </div>
 
+        <!-- MN Sales Tax 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Sales Tax 2024</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue — Ally Tax Account</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>January — due Feb 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="jan" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jan" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>February — due Mar 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="feb" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_feb" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>March — due Apr 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="mar" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_mar" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>April — due May 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="apr" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_apr" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>May — due Jun 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="may" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_may" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>June — due Jul 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="jun" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jun" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>July — due Aug 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="jul" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jul" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>August — due Sep 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="aug" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_aug" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>September — due Oct 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="sep" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_sep" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>October — due Nov 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="oct" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_oct" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>November — due Dec 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="nov" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_nov" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>December — due Jan 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2024" data-mnst-month="dec" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_dec" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount" id="mnsales-total-2024">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div><!-- end taxes-grid 2024 -->
     </div><!-- end tax-year-2024 -->
 
@@ -1487,25 +1576,25 @@
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
                 <tr>
-                  <td>Q1 — April 18th</td>
+                  <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2025" onblur="saveDeadlineDate(this)">April 18th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2025" data-amount="16332" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q2 — June 15th</td>
+                  <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q2_2025" onblur="saveDeadlineDate(this)">June 15th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2025" data-amount="16332" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q3 — Sept 16th</td>
+                  <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q3_2025" onblur="saveDeadlineDate(this)">Sept 16th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">$16,332.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2025" data-amount="16332" data-due="2025-09-16" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q4 — Jan 15th</td>
+                  <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q4_2025" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
                   <td class="amount">—</td>
                   <td class="amount">$4,000.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" data-amount="4000" data-due="2026-01-15" onclick="toggleCheck(this)"></div></td>
@@ -1552,22 +1641,22 @@
                   <td class="amount">—</td>
                 </tr>
                 <tr>
-                  <td>Q1 — April 18th</td>
+                  <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q1_2025" onblur="saveDeadlineDate(this)">April 18th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2025" data-amount="3298" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr>
-                  <td>Q2 — June 15th</td>
+                  <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q2_2025" onblur="saveDeadlineDate(this)">June 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2025" data-amount="3298" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr>
-                  <td>Q3 — Sept 15th</td>
+                  <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q3_2025" onblur="saveDeadlineDate(this)">Sept 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2025" data-amount="3298" data-due="2025-09-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
                 <tr>
-                  <td>Q4 — Jan 16th</td>
+                  <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q4_2025" onblur="saveDeadlineDate(this)">Jan 16th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q4" data-year="2025" data-amount="3298" data-due="2026-01-16" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,298.00</td>
                 </tr>
@@ -1664,6 +1753,94 @@
           </div>
         </div>
 
+        <!-- MN Sales Tax 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Sales Tax 2025</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue — Ally Tax Account</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>January — due Feb 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="jan" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jan" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>February — due Mar 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="feb" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_feb" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>March — due Apr 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="mar" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_mar" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>April — due May 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="apr" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_apr" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>May — due Jun 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="may" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_may" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>June — due Jul 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="jun" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jun" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>July — due Aug 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="jul" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jul" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>August — due Sep 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="aug" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_aug" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>September — due Oct 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="sep" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_sep" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>October — due Nov 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="oct" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_oct" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>November — due Dec 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="nov" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_nov" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>December — due Jan 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2025" data-mnst-month="dec" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_dec" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount" id="mnsales-total-2025">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div><!-- end taxes-grid 2025 -->
     </div><!-- end tax-year-2025 -->
 
@@ -1697,25 +1874,25 @@
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
                 <tr>
-                  <td>Q1 — April 18th</td>
+                  <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2026" onblur="saveDeadlineDate(this)">April 18th</span></td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$5,290.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2026" data-amount="5290" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q2 — June 15th</td>
+                  <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q2_2026" onblur="saveDeadlineDate(this)">June 15th</span></td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2026" data-amount="12580" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q3 — Sept 16th</td>
+                  <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q3_2026" onblur="saveDeadlineDate(this)">Sept 16th</span></td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2026" data-amount="12580" data-due="2026-09-16" onclick="toggleCheck(this)"></div></td>
                 </tr>
                 <tr>
-                  <td>Q4 — Jan 15th</td>
+                  <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q4_2026" onblur="saveDeadlineDate(this)">Jan 15th</span></td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" data-amount="12580" data-due="2027-01-15" onclick="toggleCheck(this)"></div></td>
@@ -1762,22 +1939,22 @@
                   <td class="amount">$3,109.70</td>
                 </tr>
                 <tr>
-                  <td>Q1 — April 18th</td>
+                  <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q1_2026" onblur="saveDeadlineDate(this)">April 18th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2026" data-amount="1226" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$1,226.00</td>
                 </tr>
                 <tr>
-                  <td>Q2 — June 15th</td>
+                  <td>Q2 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q2_2026" onblur="saveDeadlineDate(this)">June 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2026" data-amount="3110" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,110.00</td>
                 </tr>
                 <tr>
-                  <td>Q3 — Sept 15th</td>
+                  <td>Q3 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q3_2026" onblur="saveDeadlineDate(this)">Sept 15th</span></td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2026" data-amount="3110" data-due="2026-09-15" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,110.00</td>
                 </tr>
                 <tr>
-                  <td>Q4 — Jan 16th</td>
+                  <td>Q4 — <span class="dl-date editable" contenteditable="true" data-dl-key="mn_q4_2026" onblur="saveDeadlineDate(this)">Jan 16th</span></td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2026" data-amount="3110" data-due="2027-01-16" onclick="toggleCheck(this)"></div></td>
                   <td class="amount">$3,110.00</td>
                 </tr>
@@ -1878,6 +2055,94 @@
           </div>
           <div class="tax-note">
             ⚠️ 2025 includes underpayment on estimate penalty &nbsp;|&nbsp; <strong>DUE: April 15, 2027</strong>
+          </div>
+        </div>
+
+        <!-- MN Sales Tax 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Sales Tax 2026</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue — Ally Tax Account</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>January — due Feb 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="jan" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jan" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>February — due Mar 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="feb" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_feb" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>March — due Apr 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="mar" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_mar" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>April — due May 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="apr" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_apr" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>May — due Jun 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="may" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_may" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>June — due Jul 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="jun" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jun" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>July — due Aug 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="jul" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_jul" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>August — due Sep 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="aug" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_aug" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>September — due Oct 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="sep" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_sep" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>October — due Nov 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="oct" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_oct" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>November — due Dec 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="nov" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_nov" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>December — due Jan 20</td>
+                  <td class="amount"><span class="editable tax-amount" contenteditable="true" data-mnst-year="2026" data-mnst-month="dec" onblur="saveMnStAmt(this)">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mnsales_dec" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount" id="mnsales-total-2026">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -2064,7 +2329,8 @@ function saveToFirestore() {
       const raw = localStorage.getItem('tax_checkboxes_' + yr);
       if (raw) taxCheckboxes[yr] = JSON.parse(raw);
     });
-    doc.set({ entries, w2Employees, taxCheckboxes })
+    const mnSalesTax = JSON.parse(localStorage.getItem('mnSalesTax') || '{}');
+    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax })
       .then(()  => setSyncBadge('synced'))
       .catch(()  => setSyncBadge('error'));
   } catch(e) { setSyncBadge('error'); }
@@ -2086,6 +2352,7 @@ async function syncFromFirestore() {
         localStorage.setItem('tax_checkboxes_' + yr, JSON.stringify(v))
       );
     }
+    if (d.mnSalesTax) localStorage.setItem('mnSalesTax', JSON.stringify(d.mnSalesTax));
     setSyncBadge('synced');
     // Re-render with fresh cloud data
     renderTable();
@@ -2094,6 +2361,10 @@ async function syncFromFirestore() {
     initCheckboxes('2024');
     initCheckboxes('2025');
     initCheckboxes('2026');
+    initMnSalesTax('2024');
+    initMnSalesTax('2025');
+    initMnSalesTax('2026');
+    initDeadlineDates();
   } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
 }
 
@@ -2764,6 +3035,9 @@ function renderTable() {
       <td>${w2Html}</td>
       <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
       <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
+      <td class="check-cell" style="text-align:center">
+        <div class="checkbox-custom${row.matched ? ' checked' : ''}" onclick="toggleRowMatch(${idx})" title="Mark as matched to bank transaction"></div>
+      </td>
       <td>
         <button class="et-btn${hasET ? ' has-et' : ''}" onclick="openETModal(${idx})" title="Log early transfer">${etLabel}</button>
         <button class="delete-btn" onclick="deleteRow(${idx})" title="Delete row">🗑</button>
@@ -2785,7 +3059,7 @@ function renderTable() {
       <td style="text-align:right"><strong>${fmt$(sumOC)}</strong></td>
       <td>—</td>
       <td style="text-align:right"><strong>${fmt$(sumOPEX)}</strong></td>
-      <td colspan="4"></td>
+      <td colspan="5"></td>
     </tr>
   `;
 
@@ -2935,6 +3209,17 @@ function cellEdit(el) {
 
   pfData[idx][field] = val;
   saveData(pfData);
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// TOGGLE ROW MATCH
+// ─────────────────────────────────────────────
+function toggleRowMatch(idx) {
+  const data = loadData();
+  data[idx].matched = !data[idx].matched;
+  saveData(data);
+  pfData = data;
   renderTable();
 }
 
@@ -3614,6 +3899,64 @@ function switchTaxYear(year, btn) {
 }
 
 // ─────────────────────────────────────────────
+// MN SALES TAX — monthly amounts
+// ─────────────────────────────────────────────
+function loadMnSalesTax() {
+  return JSON.parse(localStorage.getItem('mnSalesTax') || '{}');
+}
+function saveMnSalesTax(data) {
+  localStorage.setItem('mnSalesTax', JSON.stringify(data));
+  saveToFirestore();
+}
+function saveMnStAmt(el) {
+  const year  = el.dataset.mnstYear;
+  const month = el.dataset.mnstMonth;
+  const raw   = el.innerText.replace(/[^0-9.]/g, '');
+  const val   = raw ? parseFloat(raw) : null;
+  const data  = loadMnSalesTax();
+  if (!data[year]) data[year] = {};
+  if (val != null) data[year][month] = val; else delete data[year][month];
+  saveMnSalesTax(data);
+  el.textContent = val != null ? val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+  updateMnStTotal(year);
+}
+function updateMnStTotal(year) {
+  const data   = loadMnSalesTax();
+  const months = Object.values(data[year] || {});
+  const total  = months.reduce((s,v) => s + (v||0), 0);
+  const el     = document.getElementById('mnsales-total-' + year);
+  if (el) el.textContent = total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+}
+function initMnSalesTax(year) {
+  const data = loadMnSalesTax();
+  const yr   = data[year] || {};
+  document.querySelectorAll(`[data-mnst-year="${year}"]`).forEach(el => {
+    const m = el.dataset.mnstMonth;
+    const v = yr[m];
+    el.textContent = v != null ? v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+  });
+  updateMnStTotal(year);
+}
+
+// ─────────────────────────────────────────────
+// DEADLINE DATES — inline editable
+// ─────────────────────────────────────────────
+function saveDeadlineDate(el) {
+  const key = el.dataset.dlKey;
+  const val = el.textContent.trim();
+  const dl  = JSON.parse(localStorage.getItem('taxDeadlines') || '{}');
+  dl[key] = val;
+  localStorage.setItem('taxDeadlines', JSON.stringify(dl));
+  saveToFirestore();
+}
+function initDeadlineDates() {
+  const dl = JSON.parse(localStorage.getItem('taxDeadlines') || '{}');
+  document.querySelectorAll('[data-dl-key]').forEach(el => {
+    if (dl[el.dataset.dlKey]) el.textContent = dl[el.dataset.dlKey];
+  });
+}
+
+// ─────────────────────────────────────────────
 // CHECKBOXES (Tax tab) — year-aware
 // ─────────────────────────────────────────────
 function toggleCheck(el) {
@@ -3658,6 +4001,10 @@ renderFooter();
 initCheckboxes('2024');
 initCheckboxes('2025');
 initCheckboxes('2026');
+initMnSalesTax('2024');
+initMnSalesTax('2025');
+initMnSalesTax('2026');
+initDeadlineDates();
 renderHeroStrip();
 syncFromFirestore(); // then pull latest from cloud in background
 
