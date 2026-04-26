@@ -1181,6 +1181,21 @@
   .payment-picker .pp-section-title:first-child {
     margin-top: 0; border-top: none;
   }
+  .payment-picker .pp-item.pp-near {
+    background: rgba(52, 199, 89, 0.06);
+  }
+  .payment-picker .pp-close-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--green-bg);
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    vertical-align: middle;
+  }
   .payment-picker .pp-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 8px;
@@ -3876,6 +3891,34 @@ function openPaymentPicker(payId, anchorEl) {
   const manual = loadManualMatches();
   const claimed = new Set(Object.values(manual));
 
+  const payDateMs = new Date(payment.date + 'T12:00:00').getTime();
+  const MS_PER_DAY = 86400000;
+  const CLOSE_DAYS = 7;
+  const MNST_MONTH_IDX = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+
+  // For MN Sales Tax rows: derive due date as period-month + 1, day 20
+  function deriveDue(rowEl, tr) {
+    if (rowEl.dataset.due) return rowEl.dataset.due;
+    const mnstEl = tr.querySelector('[data-mnst-month]');
+    if (mnstEl) {
+      const m = MNST_MONTH_IDX[mnstEl.dataset.mnstMonth];
+      const y = parseInt(mnstEl.dataset.mnstYear);
+      if (m != null && y) {
+        let dueM = m + 1, dueY = y;
+        if (dueM > 11) { dueM = 0; dueY++; }
+        return dueY + '-' + String(dueM + 1).padStart(2, '0') + '-20';
+      }
+    }
+    return '';
+  }
+
+  function dateDeltaDays(due) {
+    if (!due) return Infinity;
+    const t = new Date(due + 'T12:00:00').getTime();
+    if (isNaN(t)) return Infinity;
+    return Math.abs(t - payDateMs) / MS_PER_DAY;
+  }
+
   const allRows = Array.from(document.querySelectorAll('.checkbox-custom[data-key][data-year]'));
   const groups = new Map(); // groupTitle -> [option, ...]
   allRows.forEach(rowEl => {
@@ -3903,28 +3946,43 @@ function openPaymentPicker(payId, anchorEl) {
     }
     if (isNaN(amt)) amt = 0;
 
+    const due = deriveDue(rowEl, tr);
+    const dDays = dateDeltaDays(due);
     const opt = {
-      rowKey, label, amt,
-      due: rowEl.dataset.due || '',
+      rowKey, label, amt, due,
       yr:  rowEl.dataset.year || '',
       claimedBy: claimed.has(rowKey),
+      isClose: dDays <= CLOSE_DAYS,
+      dDays,
     };
     if (!groups.has(groupTitle)) groups.set(groupTitle, []);
     groups.get(groupTitle).push(opt);
   });
 
+  // Within each group: claimed last, close-date first, then amount distance, then date distance
   const groupArr = Array.from(groups.entries()).map(([title, opts]) => {
     opts.sort((a, b) => {
       if (a.claimedBy !== b.claimedBy) return a.claimedBy ? 1 : -1;
+      if (a.isClose !== b.isClose)     return a.isClose ? -1 : 1;
       const da = a.amt > 0 ? Math.abs(a.amt - payment.amount) : Infinity;
       const db = b.amt > 0 ? Math.abs(b.amt - payment.amount) : Infinity;
-      return da - db;
+      if (da !== db) return da - db;
+      return a.dDays - b.dDays;
     });
-    const best = opts.find(o => !o.claimedBy && o.amt > 0);
-    const score = best ? Math.abs(best.amt - payment.amount) : Infinity;
-    return { title, opts, score };
+    const best = opts.find(o => !o.claimedBy);
+    return {
+      title, opts,
+      bestClose: !!(best && best.isClose),
+      score:     best ? (best.amt > 0 ? Math.abs(best.amt - payment.amount) : Infinity) : Infinity,
+      bestDDays: best ? best.dDays : Infinity,
+    };
   });
-  groupArr.sort((a, b) => a.score - b.score);
+  // Group order: any group with a close-date row first, then by amount-match
+  groupArr.sort((a, b) => {
+    if (a.bestClose !== b.bestClose) return a.bestClose ? -1 : 1;
+    if (a.score !== b.score)         return a.score - b.score;
+    return a.bestDDays - b.bestDDays;
+  });
 
   const pDate = new Date(payment.date + 'T12:00:00');
   const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
@@ -3934,14 +3992,19 @@ function openPaymentPicker(payId, anchorEl) {
   picker.className = 'payment-picker';
 
   const optionsHtml = groupArr.map(g => {
-    const itemsHtml = g.opts.map(o =>
-      '<button type="button" class="pp-item' + (o.claimedBy ? ' pp-claimed' : '') + '" ' +
+    const itemsHtml = g.opts.map(o => {
+      const closeBadge = o.isClose
+        ? '<span class="pp-close-tag" title="Due ' + (o.due || '') + ' — within ' + CLOSE_DAYS + ' days of payment">' + Math.round(o.dDays) + 'd</span>'
+        : '';
+      return '<button type="button" class="pp-item' +
+        (o.claimedBy ? ' pp-claimed' : '') +
+        (o.isClose   ? ' pp-near'    : '') + '" ' +
         'data-row="' + escAttr(o.rowKey) + '">' +
-        '<span class="pp-label">' + escHtml(o.label) + '</span>' +
+        '<span class="pp-label">' + escHtml(o.label) + closeBadge + '</span>' +
         '<span class="pp-amt">' + (o.amt > 0 ? fmt$(o.amt) : '—') + '</span>' +
         (o.claimedBy ? '<span class="pp-claim">claimed</span>' : '') +
-      '</button>'
-    ).join('');
+      '</button>';
+    }).join('');
     return '<div class="pp-section-title">' + escHtml(g.title) + '</div>' + itemsHtml;
   }).join('');
 
