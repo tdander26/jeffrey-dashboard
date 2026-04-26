@@ -1320,6 +1320,12 @@
                   <td class="amount">—</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
                 </tr>
+                <tr>
+                  <td>Final Payment / Rollover</td>
+                  <td class="amount">—</td>
+                  <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2024" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
                 <tr class="totals-row na-row">
                   <td>2024 Total</td>
                   <td class="amount">—</td>
@@ -1575,6 +1581,12 @@
                   <td class="amount">$16,357.83</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
+                <tr class="na-row" style="background:rgba(52,199,89,0.06)">
+                  <td>Rollover from 2024</td>
+                  <td class="amount">—</td>
+                  <td class="amount" id="fed-rollover-in-2025">—</td>
+                  <td class="check-cell"><span class="badge badge-green">Incl.</span></td>
+                </tr>
                 <tr>
                   <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2025" onblur="saveDeadlineDate(this)">April 18th</span></td>
                   <td class="amount">—</td>
@@ -1599,8 +1611,14 @@
                   <td class="amount">$4,000.00</td>
                   <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" data-amount="4000" data-due="2026-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
+                <tr>
+                  <td>Final Payment / Rollover</td>
+                  <td class="amount">—</td>
+                  <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2025" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">$7,285.00</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
                 <tr class="totals-row na-row">
-                  <td>2025 Total <span style="font-weight:400;font-size:11px;color:#86868b">(7285 rolled over)</span></td>
+                  <td>2025 Total</td>
                   <td class="amount">$52,996.00 → $45,711.00</td>
                   <td class="amount">$52,996.00</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
@@ -1873,6 +1891,12 @@
                   <td class="amount">$12,570.53</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
+                <tr class="na-row" style="background:rgba(52,199,89,0.06)">
+                  <td>Rollover from 2025</td>
+                  <td class="amount">—</td>
+                  <td class="amount" id="fed-rollover-in-2026">—</td>
+                  <td class="check-cell"><span class="badge badge-green">Incl.</span></td>
+                </tr>
                 <tr>
                   <td>Q1 — <span class="dl-date editable" contenteditable="true" data-dl-key="fed_q1_2026" onblur="saveDeadlineDate(this)">April 18th</span></td>
                   <td class="amount"><span class="auto-badge">AUTO SET</span></td>
@@ -1897,10 +1921,16 @@
                   <td class="amount">$12,580.00</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" data-amount="12580" data-due="2027-01-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
-                <tr class="totals-row na-row">
-                  <td>2025 Total</td>
+                <tr>
+                  <td>Final Payment / Rollover</td>
                   <td class="amount">—</td>
-                  <td class="amount">$50,315.00</td>
+                  <td class="amount"><span class="editable" contenteditable="true" data-fed-rollover="2026" onblur="saveFedRolloverAmt(this)" title="Extra payment or amount rolling into next year">—</span></td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_rollover" data-year="2026" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2026 Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount" id="fed-total-2026">$50,315.00</td>
                   <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
                 </tr>
               </tbody>
@@ -2329,8 +2359,9 @@ function saveToFirestore() {
       const raw = localStorage.getItem('tax_checkboxes_' + yr);
       if (raw) taxCheckboxes[yr] = JSON.parse(raw);
     });
-    const mnSalesTax = JSON.parse(localStorage.getItem('mnSalesTax') || '{}');
-    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax })
+    const mnSalesTax  = JSON.parse(localStorage.getItem('mnSalesTax')  || '{}');
+    const fedRollover = JSON.parse(localStorage.getItem('fedRollover') || '{}');
+    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover })
       .then(()  => setSyncBadge('synced'))
       .catch(()  => setSyncBadge('error'));
   } catch(e) { setSyncBadge('error'); }
@@ -2352,7 +2383,8 @@ async function syncFromFirestore() {
         localStorage.setItem('tax_checkboxes_' + yr, JSON.stringify(v))
       );
     }
-    if (d.mnSalesTax) localStorage.setItem('mnSalesTax', JSON.stringify(d.mnSalesTax));
+    if (d.mnSalesTax)  localStorage.setItem('mnSalesTax',  JSON.stringify(d.mnSalesTax));
+    if (d.fedRollover) localStorage.setItem('fedRollover', JSON.stringify(d.fedRollover));
     setSyncBadge('synced');
     // Re-render with fresh cloud data
     renderTable();
@@ -2365,6 +2397,7 @@ async function syncFromFirestore() {
     initMnSalesTax('2025');
     initMnSalesTax('2026');
     initDeadlineDates();
+    initFedRollovers();
   } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
 }
 
@@ -3957,6 +3990,60 @@ function initDeadlineDates() {
 }
 
 // ─────────────────────────────────────────────
+// FEDERAL QUARTERLY ROLLOVER
+// ─────────────────────────────────────────────
+function loadFedRollover() {
+  return JSON.parse(localStorage.getItem('fedRollover') || '{}');
+}
+
+function saveFedRolloverAmt(el) {
+  const year = el.dataset.fedRollover;
+  const raw  = el.innerText.replace(/[^0-9.]/g, '');
+  const val  = raw ? parseFloat(raw) : null;
+  const data = loadFedRollover();
+  data[year] = val;
+  localStorage.setItem('fedRollover', JSON.stringify(data));
+  el.textContent = val != null
+    ? val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '—';
+  updateFedRolloverDisplay();
+  saveToFirestore();
+}
+
+function updateFedRolloverDisplay() {
+  const data = loadFedRollover();
+  ['2025','2026','2027'].forEach(yr => {
+    const prevYr = String(parseInt(yr) - 1);
+    const amt = data[prevYr];
+    const inEl = document.getElementById('fed-rollover-in-' + yr);
+    if (inEl) {
+      inEl.textContent = amt != null
+        ? amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+        : '—';
+    }
+    const srcEl = document.querySelector(`[data-fed-rollover="${prevYr}"]`);
+    if (srcEl && amt != null && srcEl.textContent.trim() === '—') {
+      srcEl.textContent = amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    }
+  });
+}
+
+// On first load, seed fedRollover from any hardcoded DOM values so the
+// "Rollover from YYYY" display rows populate correctly across years.
+function initFedRollovers() {
+  const data = loadFedRollover();
+  document.querySelectorAll('[data-fed-rollover]').forEach(el => {
+    const yr  = el.dataset.fedRollover;
+    if (data[yr] == null) {
+      const raw = el.textContent.replace(/[^0-9.]/g, '');
+      if (raw) data[yr] = parseFloat(raw);
+    }
+  });
+  localStorage.setItem('fedRollover', JSON.stringify(data));
+  updateFedRolloverDisplay();
+}
+
+// ─────────────────────────────────────────────
 // CHECKBOXES (Tax tab) — year-aware
 // ─────────────────────────────────────────────
 function toggleCheck(el) {
@@ -4005,6 +4092,7 @@ initMnSalesTax('2024');
 initMnSalesTax('2025');
 initMnSalesTax('2026');
 initDeadlineDates();
+initFedRollovers();
 renderHeroStrip();
 syncFromFirestore(); // then pull latest from cloud in background
 
