@@ -1126,7 +1126,92 @@
     font-size: 11px; font-weight: 600;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, transform 120ms;
   }
+  .tax-unmatched-item:hover {
+    background: var(--amber-bg);
+    border-color: var(--amber);
+    transform: translateY(-1px);
+  }
+  .tax-unmatched-item::after {
+    content: ' →';
+    opacity: 0.5;
+    margin-left: 4px;
+  }
+  .tax-detected.manual {
+    cursor: pointer;
+    background: rgba(0, 122, 255, 0.10);
+    color: #007aff;
+  }
+  .tax-detected.manual:hover { filter: brightness(0.95); }
+
+  .payment-picker {
+    position: absolute;
+    z-index: 9999;
+    min-width: 320px; max-width: 420px;
+    max-height: 380px;
+    overflow-y: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    font-family: var(--font-sans);
+    padding: 8px;
+  }
+  .payment-picker .pp-header {
+    font-size: 12px; font-weight: 600;
+    padding: 6px 8px 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .payment-picker .pp-list {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .payment-picker .pp-item {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .payment-picker .pp-item:hover {
+    background: var(--hover);
+    border-color: var(--border);
+  }
+  .payment-picker .pp-item.pp-claimed {
+    opacity: 0.5;
+  }
+  .payment-picker .pp-label { flex: 1; }
+  .payment-picker .pp-amt {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  .payment-picker .pp-claim {
+    font-size: 10px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .payment-picker .pp-close {
+    width: 100%;
+    margin-top: 6px;
+    padding: 6px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .payment-picker .pp-close:hover { background: var(--hover); }
 </style>
 </head>
 <body>
@@ -2359,9 +2444,10 @@ function saveToFirestore() {
       const raw = localStorage.getItem('tax_checkboxes_' + yr);
       if (raw) taxCheckboxes[yr] = JSON.parse(raw);
     });
-    const mnSalesTax  = JSON.parse(localStorage.getItem('mnSalesTax')  || '{}');
-    const fedRollover = JSON.parse(localStorage.getItem('fedRollover') || '{}');
-    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover })
+    const mnSalesTax     = JSON.parse(localStorage.getItem('mnSalesTax')        || '{}');
+    const fedRollover    = JSON.parse(localStorage.getItem('fedRollover')       || '{}');
+    const qboManualMatch = JSON.parse(localStorage.getItem('qbo_manual_matches') || '{}');
+    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover, qboManualMatch })
       .then(()  => setSyncBadge('synced'))
       .catch(()  => setSyncBadge('error'));
   } catch(e) { setSyncBadge('error'); }
@@ -2383,8 +2469,9 @@ async function syncFromFirestore() {
         localStorage.setItem('tax_checkboxes_' + yr, JSON.stringify(v))
       );
     }
-    if (d.mnSalesTax)  localStorage.setItem('mnSalesTax',  JSON.stringify(d.mnSalesTax));
-    if (d.fedRollover) localStorage.setItem('fedRollover', JSON.stringify(d.fedRollover));
+    if (d.mnSalesTax)     localStorage.setItem('mnSalesTax',         JSON.stringify(d.mnSalesTax));
+    if (d.fedRollover)    localStorage.setItem('fedRollover',        JSON.stringify(d.fedRollover));
+    if (d.qboManualMatch) localStorage.setItem('qbo_manual_matches', JSON.stringify(d.qboManualMatch));
     setSyncBadge('synced');
     // Re-render with fresh cloud data
     renderTable();
@@ -2398,6 +2485,7 @@ async function syncFromFirestore() {
     initMnSalesTax('2026');
     initDeadlineDates();
     initFedRollovers();
+    if (typeof detectTaxPayments === 'function') detectTaxPayments();
   } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
 }
 
@@ -3706,6 +3794,141 @@ function clearTaxBadges() {
   document.querySelectorAll('.tax-detected, .tax-unmatched-panel').forEach(n => n.remove());
 }
 
+function paymentId(p) {
+  return p.date + '|' + Number(p.amount).toFixed(2) + '|' + (p.payee || '');
+}
+
+function loadManualMatches() {
+  try { return JSON.parse(localStorage.getItem('qbo_manual_matches') || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveManualMatches(m) {
+  localStorage.setItem('qbo_manual_matches', JSON.stringify(m));
+  if (typeof saveToFirestore === 'function') saveToFirestore();
+}
+
+function assignPaymentToRow(payId, rowKey) {
+  const m = loadManualMatches();
+  if (rowKey) m[payId] = rowKey;
+  else delete m[payId];
+  saveManualMatches(m);
+  closePaymentPicker();
+  detectTaxPayments();
+}
+
+function closePaymentPicker() {
+  document.removeEventListener('click', _pickerOutside, true);
+  document.querySelectorAll('.payment-picker').forEach(n => n.remove());
+}
+
+function _pickerOutside(e) {
+  const picker = document.querySelector('.payment-picker');
+  if (picker && !picker.contains(e.target)) closePaymentPicker();
+}
+
+function openPaymentPicker(payId, anchorEl) {
+  closePaymentPicker();
+  let cache;
+  try { cache = JSON.parse(localStorage.getItem('qbo_tax_payments_cache') || 'null'); }
+  catch(e) { return; }
+  if (!cache || !cache.payments) return;
+
+  const payment = cache.payments.find(p => paymentId(p) === payId);
+  if (!payment) return;
+
+  const manual = loadManualMatches();
+  const claimed = new Set(Object.values(manual));
+
+  const allRows = Array.from(document.querySelectorAll('.checkbox-custom[data-amount]'));
+  const options = allRows.map(rowEl => {
+    const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
+    const tr = rowEl.closest('tr');
+    let label = rowKey;
+    if (tr) {
+      const labelCell = tr.querySelector('td:not(.check-cell)');
+      if (labelCell) {
+        label = (labelCell.innerText || '').replace(/✓.*$/s, '').trim().split('\n')[0];
+      }
+    }
+    const amt = parseFloat(rowEl.dataset.amount) || 0;
+    const due = rowEl.dataset.due || '';
+    const yr  = rowEl.dataset.year || '';
+    return { rowKey, label, amt, due, yr, claimedBy: claimed.has(rowKey) };
+  });
+
+  options.sort((a, b) => {
+    if (a.claimedBy !== b.claimedBy) return a.claimedBy ? 1 : -1;
+    const da = Math.abs(a.amt - payment.amount);
+    const db = Math.abs(b.amt - payment.amount);
+    return da - db;
+  });
+
+  const pDate = new Date(payment.date + 'T12:00:00');
+  const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
+  const dateLabel = mName + ' ' + pDate.getDate();
+
+  const picker = document.createElement('div');
+  picker.className = 'payment-picker';
+
+  const optionsHtml = options.map(o =>
+    '<button type="button" class="pp-item' + (o.claimedBy ? ' pp-claimed' : '') + '" ' +
+      'data-row="' + escAttr(o.rowKey) + '">' +
+      '<span class="pp-label">' + escHtml(o.label) + (o.yr ? ' <span style="opacity:.5">· ' + o.yr + '</span>' : '') + '</span>' +
+      '<span class="pp-amt">' + fmt$(o.amt) + '</span>' +
+      (o.claimedBy ? '<span class="pp-claim">claimed</span>' : '') +
+    '</button>'
+  ).join('');
+
+  picker.innerHTML =
+    '<div class="pp-header">Assign ' + fmt$(payment.amount) + ' · ' + dateLabel +
+      (payment.payee ? ' · ' + escHtml(payment.payee) : '') + '</div>' +
+    '<div class="pp-list">' + optionsHtml + '</div>' +
+    '<button type="button" class="pp-close">Cancel</button>';
+
+  document.body.appendChild(picker);
+
+  picker.querySelectorAll('.pp-item').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      assignPaymentToRow(payId, this.dataset.row);
+    });
+  });
+  picker.querySelector('.pp-close').addEventListener('click', function(e) {
+    e.stopPropagation();
+    closePaymentPicker();
+  });
+
+  const r = anchorEl.getBoundingClientRect();
+  const top  = r.bottom + window.scrollY + 6;
+  let left = r.left + window.scrollX;
+  const maxLeft = window.scrollX + document.documentElement.clientWidth - 440;
+  if (left > maxLeft) left = maxLeft;
+  if (left < window.scrollX + 8) left = window.scrollX + 8;
+  picker.style.top  = top + 'px';
+  picker.style.left = left + 'px';
+
+  setTimeout(() => document.addEventListener('click', _pickerOutside, true), 0);
+}
+
+document.addEventListener('click', function(e) {
+  const item = e.target.closest('.tax-unmatched-item');
+  if (item && item.dataset.pid) {
+    e.preventDefault();
+    e.stopPropagation();
+    openPaymentPicker(item.dataset.pid, item);
+    return;
+  }
+  const badge = e.target.closest('.tax-detected.manual');
+  if (badge && badge.dataset.pid) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('Unassign this manually-matched payment?')) {
+      assignPaymentToRow(badge.dataset.pid, null);
+    }
+  }
+});
+
 function detectTaxPayments() {
   clearTaxBadges();
 
@@ -3720,6 +3943,10 @@ function detectTaxPayments() {
 
   // Every tax row with a data-amount is a match candidate
   const rows = Array.from(document.querySelectorAll('.checkbox-custom[data-amount]'));
+  const rowsByKey = new Map();
+  rows.forEach(rowEl => {
+    rowsByKey.set(rowEl.dataset.key + '|' + rowEl.dataset.year, rowEl);
+  });
 
   // Track which payments were matched (to identify unmatched ones)
   const matchedPayments = new Set();
@@ -3729,6 +3956,38 @@ function detectTaxPayments() {
   // Sort payments by date (oldest first) so earliest payment wins for each row
   const payments = cache.payments.slice().sort((a, b) => a.date.localeCompare(b.date));
 
+  function injectBadge(rowEl, p, manual) {
+    const tr = rowEl.closest('tr');
+    if (!tr) return;
+    const labelCell = tr.querySelector('td:not(.check-cell)');
+    if (!labelCell) return;
+    const pDate = new Date(p.date + 'T12:00:00');
+    const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
+    const dateStr = mName + ' ' + pDate.getDate();
+    const badge = document.createElement('span');
+    badge.className = 'tax-detected' + (manual ? ' manual' : '');
+    badge.textContent = (manual ? '✓ Assigned ' : '✓ Detected ') + fmt$(p.amount) + ' on ' + dateStr;
+    badge.title = (manual ? 'Manually assigned' : 'From QBO') +
+      (p.payee ? ': ' + p.payee : '') + (p.memo ? ' — ' + p.memo : '') +
+      (manual ? ' (click to unassign)' : '');
+    if (manual) badge.dataset.pid = paymentId(p);
+    labelCell.appendChild(badge);
+  }
+
+  // 1. Apply manual matches first
+  const manual = loadManualMatches();
+  payments.forEach((p, idx) => {
+    const pid = paymentId(p);
+    const rowKey = manual[pid];
+    if (!rowKey) return;
+    const rowEl = rowsByKey.get(rowKey);
+    if (!rowEl) return;
+    matchedPayments.add(idx);
+    matchedRowKeys.add(rowKey);
+    injectBadge(rowEl, p, true);
+  });
+
+  // 2. Auto-match remaining
   rows.forEach(rowEl => {
     const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
     if (matchedRowKeys.has(rowKey)) return;
@@ -3760,27 +4019,13 @@ function detectTaxPayments() {
     const p = payments[bestIdx];
     matchedPayments.add(bestIdx);
     matchedRowKeys.add(rowKey);
-
-    // Inject badge into the row's label cell (first <td> of the parent <tr>)
-    const tr = rowEl.closest('tr');
-    if (!tr) return;
-    const labelCell = tr.querySelector('td');
-    if (!labelCell) return;
-
-    // Format payment date as "Apr 10"
-    const pDate = new Date(p.date + 'T12:00:00');
-    const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
-    const dateStr = mName + ' ' + pDate.getDate();
-
-    const badge = document.createElement('span');
-    badge.className = 'tax-detected';
-    badge.textContent = '✓ Detected ' + fmt$(p.amount) + ' on ' + dateStr;
-    if (p.payee) badge.title = 'From QBO: ' + p.payee + (p.memo ? ' — ' + p.memo : '');
-    labelCell.appendChild(badge);
+    injectBadge(rowEl, p, false);
   });
 
   // Unmatched payments → small panel at the top of the currently-visible tax year
-  const unmatched = payments.filter((_, i) => !matchedPayments.has(i));
+  const unmatched = payments
+    .map((p, i) => ({ p, i }))
+    .filter(x => !matchedPayments.has(x.i));
   if (!unmatched.length) return;
 
   const activeYearEl = document.querySelector('.tax-year-content.active');
@@ -3788,15 +4033,16 @@ function detectTaxPayments() {
 
   const panel = document.createElement('div');
   panel.className = 'tax-unmatched-panel';
-  const items = unmatched.map(p => {
+  const items = unmatched.map(({ p }) => {
     const d = new Date(p.date + 'T12:00:00');
     const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
-    return '<span class="tax-unmatched-item" title="' + escHtml(p.payee || '') + '">' +
+    return '<span class="tax-unmatched-item" data-pid="' + escAttr(paymentId(p)) +
+      '" title="' + escAttr((p.payee || '') + ' — click to assign to a row') + '">' +
       fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() +
       (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
   }).join('');
   panel.innerHTML =
-    '<div class="title">⚠ ' + unmatched.length + ' QBO tax payment(s) didn\'t match a row</div>' +
+    '<div class="title">⚠ ' + unmatched.length + ' QBO tax payment(s) didn\'t match a row · click to assign</div>' +
     '<div class="items">' + items + '</div>';
   activeYearEl.insertBefore(panel, activeYearEl.firstChild);
 }
