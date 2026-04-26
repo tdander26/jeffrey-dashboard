@@ -2094,7 +2094,7 @@
               <div class="panel-title">MN Care Tax 2024–2025</div>
               <div class="panel-subtitle">Minnesota Care Provider Tax</div>
             </div>
-            <span class="badge badge-orange">2 Outstanding</span>
+            <span class="badge badge-orange outstanding-badge">2 Outstanding</span>
           </div>
           <div class="pf-table-wrap">
             <table class="tax-table">
@@ -2486,6 +2486,7 @@ async function syncFromFirestore() {
     initDeadlineDates();
     initFedRollovers();
     if (typeof detectTaxPayments === 'function') detectTaxPayments();
+    updateOutstandingBadges();
   } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
 }
 
@@ -4206,6 +4207,7 @@ function saveMnStAmt(el) {
   saveMnSalesTax(data);
   el.textContent = val != null ? val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
   updateMnStTotal(year);
+  updateOutstandingBadges();
 }
 function updateMnStTotal(year) {
   const data   = loadMnSalesTax();
@@ -4308,6 +4310,55 @@ function toggleCheck(el) {
   checks[key] = el.classList.contains('checked');
   saveCheckboxes(year, checks);
   renderHeroStrip();
+  updateOutstandingBadges();
+}
+
+// ─────────────────────────────────────────────
+// OUTSTANDING BADGES — auto-update per tax panel
+// ─────────────────────────────────────────────
+function updateOutstandingBadges() {
+  document.querySelectorAll('.panel').forEach(panel => {
+    const table = panel.querySelector('table.tax-table');
+    if (!table) return;
+    const header = panel.querySelector('.panel-header');
+    if (!header) return;
+
+    let count = 0, sum = 0;
+    table.querySelectorAll('tbody > tr').forEach(tr => {
+      if (tr.classList.contains('totals-row')) return;
+      if (tr.classList.contains('na-row'))     return;
+      const cb = tr.querySelector('.checkbox-custom');
+      if (!cb) return;
+      if (cb.classList.contains('checked')) return;
+      let amt = parseFloat(cb.dataset.amount);
+      if (isNaN(amt)) {
+        const amtCell = tr.querySelector('td.amount');
+        if (amtCell) {
+          const txt = (amtCell.innerText || '').replace(/[^0-9.\-]/g, '');
+          amt = parseFloat(txt);
+        }
+      }
+      count++;
+      if (!isNaN(amt) && amt > 0) sum += amt;
+    });
+
+    let badge = header.querySelector('.outstanding-badge');
+    if (count === 0) {
+      if (badge) {
+        badge.className = 'badge badge-green outstanding-badge';
+        badge.textContent = '✓ All paid';
+      }
+      return;
+    }
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'badge badge-orange outstanding-badge';
+      header.appendChild(badge);
+    } else {
+      badge.className = 'badge badge-orange outstanding-badge';
+    }
+    badge.textContent = count + ' outstanding' + (sum > 0 ? ' · ' + fmt$(sum) : '');
+  });
 }
 
 function initCheckboxes(year) {
@@ -4348,6 +4399,7 @@ initMnSalesTax('2026');
 initDeadlineDates();
 initFedRollovers();
 renderHeroStrip();
+updateOutstandingBadges();
 syncFromFirestore(); // then pull latest from cloud in background
 
 // QBO — restore URL fields, populate summary badge, run tax detection from cache
