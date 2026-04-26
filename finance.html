@@ -2687,11 +2687,19 @@ function renderW2Panel() {
     const erTaxAmt   = emp.erTaxFixed  != null ? emp.erTaxFixed  : erTaxCalc;
     const empTaxSrc  = emp.empTaxSource || 'Tax';
     const erTaxSrc   = emp.erTaxSource  || emp.source;
+    const empTaxEffPct = (emp.empTaxFixed != null && emp.salary > 0) ? (emp.empTaxFixed / emp.salary * 100) : null;
+    const erTaxEffPct  = (emp.erTaxFixed  != null && emp.salary > 0) ? (emp.erTaxFixed  / emp.salary * 100) : null;
+    const empEffSuffix = empTaxEffPct != null
+      ? ` <span style="color:#FF3B30;font-size:10px;font-style:italic" title="Effective % from fixed amount ${fmt$(emp.empTaxFixed)} ÷ salary ${fmt$(emp.salary)}">→ ${empTaxEffPct.toFixed(2)}% eff</span>`
+      : '';
+    const erEffSuffix = erTaxEffPct != null
+      ? ` <span style="color:#FF9500;font-size:10px;font-style:italic" title="Effective % from fixed amount ${fmt$(emp.erTaxFixed)} ÷ salary ${fmt$(emp.salary)}">→ ${erTaxEffPct.toFixed(2)}% eff</span>`
+      : '';
     const empFixedTip = emp.empTaxFixed != null
-      ? `Exact amount — overrides % calc (${fmt$(empTaxCalc)} from ${emp.empTaxPct}%)`
+      ? `Exact amount — overrides % calc (${fmt$(empTaxCalc)} from ${emp.empTaxPct}%, effective ${empTaxEffPct != null ? empTaxEffPct.toFixed(2) + '%' : '—'})`
       : `Computed from ${emp.empTaxPct}% — click to enter exact payroll amount`;
     const erFixedTip  = emp.erTaxFixed != null
-      ? `Exact amount — overrides % calc (${fmt$(erTaxCalc)} from ${emp.erTaxPct}%)`
+      ? `Exact amount — overrides % calc (${fmt$(erTaxCalc)} from ${emp.erTaxPct}%, effective ${erTaxEffPct != null ? erTaxEffPct.toFixed(2) + '%' : '—'})`
       : `Computed from ${emp.erTaxPct}% — click to enter exact payroll amount`;
     const effectiveDisplay = emp.effectiveDate || '—';
     const srcBtns = locked
@@ -2709,9 +2717,9 @@ function renderW2Panel() {
       <td>${srcBtns}</td>
       <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
       <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="effectiveDate" onblur="w2FieldEdit(this)" title="Effective date — rows before this date ignore this employee" style="font-size:11px;color:#636366">${effectiveDisplay}</span></td>
-      <td>${empTaxSrcSel} <span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
+      <td>${empTaxSrcSel} <span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%${empEffSuffix}</td>
       <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="empTaxFixed" onblur="w2FieldEdit(this)" title="${empFixedTip}" style="color:#FF3B30;font-weight:500">${empTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
-      <td>${erTaxSrcSel} <span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
+      <td>${erTaxSrcSel} <span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%${erEffSuffix}</td>
       <td><span class="editable" contenteditable="${ce}" data-empid="${emp.id}" data-field="erTaxFixed" onblur="w2FieldEdit(this)" title="${erFixedTip}" style="color:#FF9500;font-weight:500">${erTaxAmt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
       <td>${delBtn}</td>
     </tr>`;
