@@ -271,6 +271,7 @@
   .hero-dot.green { background: var(--green); }
   .hero-dot.amber { background: var(--amber-dot); }
   .hero-dot.navy  { background: var(--navy); }
+  .hero-dot.red   { background: var(--red); }
 
   /* ── Panel (Card) ─────────────────────────────────────────── */
   .panel {
@@ -3425,6 +3426,73 @@ function fmtMoney0(n) {
   return sign + '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
 }
 
+function collectUpcomingDue(windowDays) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayMs = today.getTime();
+  const MS_DAY = 86400000;
+  const windowMs = windowDays * MS_DAY;
+  const MNST = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+
+  function deriveDue(rowEl, tr) {
+    if (rowEl.dataset.due) return rowEl.dataset.due;
+    const mnstEl = tr.querySelector('[data-mnst-month]');
+    if (mnstEl) {
+      const m = MNST[mnstEl.dataset.mnstMonth];
+      const y = parseInt(mnstEl.dataset.mnstYear);
+      if (m != null && y) {
+        let dueM = m + 1, dueY = y;
+        if (dueM > 11) { dueM = 0; dueY++; }
+        return dueY + '-' + String(dueM + 1).padStart(2, '0') + '-20';
+      }
+    }
+    return '';
+  }
+
+  const items = [];
+  document.querySelectorAll('.checkbox-custom[data-key][data-year]').forEach(cb => {
+    if (cb.classList.contains('checked')) return;
+    const tr = cb.closest('tr');
+    if (!tr) return;
+    if (tr.classList.contains('totals-row')) return;
+    if (tr.classList.contains('na-row'))     return;
+
+    const due = deriveDue(cb, tr);
+    if (!due) return;
+    const dueT = new Date(due + 'T00:00:00').getTime();
+    if (isNaN(dueT)) return;
+    const diff = dueT - todayMs;
+    if (diff > windowMs) return;
+
+    let amt = parseFloat(cb.dataset.amount);
+    if (isNaN(amt)) {
+      const amtCell = tr.querySelector('td.amount');
+      if (amtCell) {
+        const txt = (amtCell.innerText || '').replace(/[^0-9.\-]/g, '');
+        const parsed = parseFloat(txt);
+        if (!isNaN(parsed)) amt = parsed;
+      }
+    }
+    if (isNaN(amt)) amt = 0;
+
+    let label = cb.dataset.key;
+    const labelCell = tr.querySelector('td:not(.check-cell)');
+    if (labelCell) {
+      label = (labelCell.innerText || '').replace(/✓.*$/s, '').trim().split('\n')[0];
+    }
+    const shortLabel = label.split('—')[0].trim() || label;
+
+    items.push({
+      key: cb.dataset.key,
+      year: cb.dataset.year,
+      label, shortLabel, amt, due,
+      dDays: Math.round(diff / MS_DAY),
+    });
+  });
+
+  items.sort((a, b) => a.dDays - b.dDays);
+  return items;
+}
+
 function renderHeroStrip() {
   const el = document.getElementById('heroStrip');
   if (!el) return;
@@ -3467,14 +3535,12 @@ function renderHeroStrip() {
     healthPct = totalRows > 0 ? Math.round(compliant / totalRows * 100) : 100;
   } catch(e) {}
 
-  // ── 3. Federal Quarterly — paid count for current year ──
-  let fedPaid = 0, fedTotal = 4;
-  try {
-    const checks = JSON.parse(localStorage.getItem('tax_checkboxes_2026') || '{}');
-    ['fed_q1','fed_q2','fed_q3','fed_q4'].forEach(k => { if (checks[k]) fedPaid++; });
-  } catch(e) {}
+  // ── 3. Upcoming Due — unchecked tax items due in next 30 days ──
+  const upcoming = collectUpcomingDue(30);
+  const dueCount = upcoming.length;
+  const dueSum   = upcoming.reduce((s, x) => s + (x.amt || 0), 0);
+  const nextItem = upcoming[0];
 
-  const fedComplete = fedPaid === fedTotal;
   const hasUnassigned = unassigned > 0.005;
 
   const cards = [
@@ -3500,12 +3566,40 @@ function renderHeroStrip() {
               : 'All accounts assigned',
       tone:  hasUnassigned ? 'amber' : 'green',
     },
-    {
-      label: 'Fed Quarterly',
-      value: fedPaid + '/' + fedTotal,
-      sub:   fedComplete ? 'All quarters paid' : 'Q' + (fedPaid + 1) + ' due next',
-      tone:  fedComplete ? 'green' : 'navy',
-    },
+    (function() {
+      if (dueCount === 0) {
+        return {
+          label: 'Upcoming Due',
+          value: '$0',
+          sub:   'Nothing due in 30 days',
+          tone:  'green',
+        };
+      }
+      const overdue = upcoming.filter(x => x.dDays < 0).length;
+      const todayMs = Date.now();
+      const niceDate = (s) => {
+        const d = new Date(s + 'T12:00:00');
+        if (isNaN(d.getTime())) return s;
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      };
+      const subParts = [];
+      if (overdue > 0) subParts.push(overdue + ' overdue');
+      subParts.push(dueCount + (dueCount === 1 ? ' item' : ' items'));
+      if (nextItem) {
+        const when = nextItem.dDays < 0
+          ? 'overdue'
+          : nextItem.dDays === 0
+            ? 'today'
+            : niceDate(nextItem.due);
+        subParts.push(nextItem.shortLabel + ' · ' + when);
+      }
+      return {
+        label: 'Upcoming Due',
+        value: fmtMoney0(dueSum),
+        sub:   subParts.join(' · '),
+        tone:  overdue > 0 ? 'red' : 'amber',
+      };
+    })(),
   ];
 
   el.innerHTML = cards.map(c => {
