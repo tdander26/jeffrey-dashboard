@@ -1099,7 +1099,10 @@
     font-size: 11px; font-weight: 600;
     font-variant-numeric: tabular-nums;
     vertical-align: middle;
+    cursor: pointer;
+    transition: filter 120ms;
   }
+  .tax-detected:hover { filter: brightness(0.95); }
   .tax-unmatched-panel {
     margin-bottom: 14px; padding: 10px 14px;
     background: var(--amber-banner);
@@ -1239,6 +1242,123 @@
     cursor: pointer;
   }
   .payment-picker .pp-close:hover { background: var(--hover); }
+  .payment-picker .pp-actions {
+    display: flex; gap: 6px;
+    margin-top: 6px;
+  }
+  .payment-picker .pp-actions .pp-close,
+  .payment-picker .pp-actions .pp-clear {
+    flex: 1; margin-top: 0;
+  }
+  .payment-picker .pp-clear {
+    padding: 6px;
+    background: var(--amber-banner);
+    border: 1px solid var(--amber-bg);
+    border-radius: 6px;
+    color: var(--amber);
+    font-size: 11px; font-weight: 600;
+    cursor: pointer;
+  }
+  .payment-picker .pp-clear:hover { filter: brightness(0.95); }
+  .payment-picker .pp-current-line {
+    font-size: 11px; color: var(--muted);
+    padding: 4px 8px 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed var(--border);
+  }
+  .payment-picker .pp-complete-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(52, 199, 89, 0.18);
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+  }
+  .payment-picker .pp-current-tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(0, 122, 255, 0.12);
+    color: #007aff;
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    vertical-align: middle;
+  }
+  .payment-picker .pp-assigned-note {
+    font-size: 10.5px; color: var(--muted);
+    margin-top: 2px;
+    font-family: var(--font-mono);
+  }
+  .payment-picker .pp-item.pp-completes {
+    background: rgba(52, 199, 89, 0.10);
+  }
+  .payment-picker .pp-item.pp-current {
+    background: rgba(0, 122, 255, 0.06);
+    border-color: rgba(0, 122, 255, 0.20);
+  }
+  .payment-picker .pp-item.pp-misc {
+    color: #6b4a8a;
+  }
+
+  /* ── Misc Tax Payments Panel (penalties / fees / interest) ── */
+  .tax-misc-panel {
+    margin-bottom: 14px; padding: 10px 14px;
+    background: rgba(107, 74, 138, 0.06);
+    border: 1px solid rgba(107, 74, 138, 0.20);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+  }
+  .tax-misc-panel .title {
+    font-weight: 500; color: #6b4a8a;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tax-misc-section {
+    margin-top: 6px;
+  }
+  .tax-misc-section:first-of-type { margin-top: 0; }
+  .tax-misc-cat {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b4a8a;
+    margin-bottom: 4px;
+  }
+  .tax-misc-section .items {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .tax-misc-item {
+    padding: 4px 8px;
+    background: var(--card);
+    border-radius: 6px;
+    border: 1px solid rgba(107, 74, 138, 0.20);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, transform 120ms;
+  }
+  .tax-misc-item:hover {
+    background: rgba(107, 74, 138, 0.08);
+    border-color: #6b4a8a;
+    transform: translateY(-1px);
+  }
+  .tax-misc-item::after {
+    content: ' ⇆';
+    opacity: 0.5;
+    margin-left: 4px;
+  }
 </style>
 </head>
 <body>
@@ -3827,11 +3947,26 @@ function parseTaxPaymentsCSV(csvText) {
 }
 
 function clearTaxBadges() {
-  document.querySelectorAll('.tax-detected, .tax-unmatched-panel').forEach(n => n.remove());
+  document.querySelectorAll('.tax-detected, .tax-unmatched-panel, .tax-misc-panel').forEach(n => n.remove());
 }
 
 function paymentId(p) {
   return p.date + '|' + Number(p.amount).toFixed(2) + '|' + (p.payee || '');
+}
+
+const MISC_CATEGORIES = [
+  { key: 'penalty',  label: 'Penalty' },
+  { key: 'interest', label: 'Interest' },
+  { key: 'fee',      label: 'Fee' },
+  { key: 'other',    label: 'Other' },
+];
+function isMiscKey(rk) { return typeof rk === 'string' && rk.indexOf('__misc__:') === 0; }
+function miscCategoryOf(rk) { return isMiscKey(rk) ? rk.slice('__misc__:'.length) : null; }
+function miscLabelOf(rk) {
+  const cat = miscCategoryOf(rk);
+  if (!cat) return '';
+  const m = MISC_CATEGORIES.find(c => c.key === cat);
+  return m ? m.label : cat;
 }
 
 function loadManualMatches() {
@@ -3844,14 +3979,15 @@ function saveManualMatches(m) {
   if (typeof saveToFirestore === 'function') saveToFirestore();
 }
 
+// rowKey values: a real key like "fed_q1|2025", or "__none__" (force unmatched), or null (clear override)
 function assignPaymentToRow(payId, rowKey) {
   const m = loadManualMatches();
   if (rowKey) m[payId] = rowKey;
   else delete m[payId];
   saveManualMatches(m);
 
-  // When assigning, auto-check the row's "Paid?" box (user can still override)
-  if (rowKey) {
+  // Auto-check the row's "Paid?" box only when assigning to a real row
+  if (rowKey && rowKey !== '__none__' && !isMiscKey(rowKey)) {
     const [key, year] = rowKey.split('|');
     if (key && year) {
       const checks = loadCheckboxes(year);
@@ -3889,7 +4025,36 @@ function openPaymentPicker(payId, anchorEl) {
   if (!payment) return;
 
   const manual = loadManualMatches();
-  const claimed = new Set(Object.values(manual));
+
+  // Sum of payment amounts already assigned to each rowKey (for multi-payment)
+  const rowAssignments = {}; // rowKey -> { sum, items: [{p, payee}] }
+  cache.payments.forEach(pp => {
+    const v = manual[paymentId(pp)];
+    if (!v || v === '__none__' || isMiscKey(v)) return;
+    const a = rowAssignments[v] || (rowAssignments[v] = { sum: 0, items: [] });
+    a.sum += pp.amount;
+    a.items.push(pp);
+  });
+
+  // Determine current assignment for the payment being assigned
+  const currentVal = manual[payId];  // rowKey | '__none__' | '__misc__:cat' | undefined
+  let currentDescription = '';
+  if (currentVal === '__none__') {
+    currentDescription = 'Forced unmatched';
+  } else if (isMiscKey(currentVal)) {
+    currentDescription = 'Misc · ' + miscLabelOf(currentVal);
+  } else if (currentVal) {
+    currentDescription = 'Manually assigned to: ' + currentVal;
+  } else {
+    // Check if currently shown as auto-detected
+    const autoBadge = document.querySelector('.tax-detected:not(.manual)[data-pid="' + (window.CSS && CSS.escape ? CSS.escape(payId) : payId.replace(/"/g,'\\"')) + '"]');
+    if (autoBadge) {
+      const tr = autoBadge.closest('tr');
+      const cb = tr ? tr.querySelector('.checkbox-custom[data-key]') : null;
+      if (cb) currentDescription = 'Auto-matched to: ' + cb.dataset.key + '|' + cb.dataset.year;
+      else    currentDescription = 'Auto-matched';
+    }
+  }
 
   const payDateMs = new Date(payment.date + 'T12:00:00').getTime();
   const MS_PER_DAY = 86400000;
@@ -3948,10 +4113,17 @@ function openPaymentPicker(payId, anchorEl) {
 
     const due = deriveDue(rowEl, tr);
     const dDays = dateDeltaDays(due);
+    const assigned = rowAssignments[rowKey] ? rowAssignments[rowKey].sum : 0;
+    const remaining = amt - assigned;
+    // "would complete" = adding this payment makes sum match row amount within $0.50
+    const wouldComplete = amt > 0 && Math.abs(remaining - payment.amount) <= 0.5;
+    // Mark as "fully assigned" only when nothing more is needed (acts as soft hint, not block)
+    const fullyAssigned = amt > 0 && assigned >= amt - 0.005;
+    const isCurrent = currentVal === rowKey;
     const opt = {
       rowKey, label, amt, due,
       yr:  rowEl.dataset.year || '',
-      claimedBy: claimed.has(rowKey),
+      assigned, remaining, wouldComplete, fullyAssigned, isCurrent,
       isClose: dDays <= CLOSE_DAYS,
       dDays,
     };
@@ -3959,28 +4131,35 @@ function openPaymentPicker(payId, anchorEl) {
     groups.get(groupTitle).push(opt);
   });
 
-  // Within each group: claimed last, close-date first, then amount distance, then date distance
+  // Within each group: wouldComplete first, then close-date, then amount distance to (remaining if assigned else amt)
   const groupArr = Array.from(groups.entries()).map(([title, opts]) => {
     opts.sort((a, b) => {
-      if (a.claimedBy !== b.claimedBy) return a.claimedBy ? 1 : -1;
-      if (a.isClose !== b.isClose)     return a.isClose ? -1 : 1;
-      const da = a.amt > 0 ? Math.abs(a.amt - payment.amount) : Infinity;
-      const db = b.amt > 0 ? Math.abs(b.amt - payment.amount) : Infinity;
+      if (a.wouldComplete !== b.wouldComplete) return a.wouldComplete ? -1 : 1;
+      if (a.fullyAssigned !== b.fullyAssigned) return a.fullyAssigned ? 1 : -1;
+      if (a.isClose !== b.isClose)             return a.isClose ? -1 : 1;
+      const aTarget = a.assigned > 0 ? a.remaining : a.amt;
+      const bTarget = b.assigned > 0 ? b.remaining : b.amt;
+      const da = aTarget > 0 ? Math.abs(aTarget - payment.amount) : Infinity;
+      const db = bTarget > 0 ? Math.abs(bTarget - payment.amount) : Infinity;
       if (da !== db) return da - db;
       return a.dDays - b.dDays;
     });
-    const best = opts.find(o => !o.claimedBy);
+    const best = opts[0];
     return {
       title, opts,
-      bestClose: !!(best && best.isClose),
-      score:     best ? (best.amt > 0 ? Math.abs(best.amt - payment.amount) : Infinity) : Infinity,
+      bestComplete: !!(best && best.wouldComplete),
+      bestClose:    !!(best && best.isClose),
+      score: best ? (() => {
+        const t = best.assigned > 0 ? best.remaining : best.amt;
+        return t > 0 ? Math.abs(t - payment.amount) : Infinity;
+      })() : Infinity,
       bestDDays: best ? best.dDays : Infinity,
     };
   });
-  // Group order: any group with a close-date row first, then by amount-match
   groupArr.sort((a, b) => {
-    if (a.bestClose !== b.bestClose) return a.bestClose ? -1 : 1;
-    if (a.score !== b.score)         return a.score - b.score;
+    if (a.bestComplete !== b.bestComplete) return a.bestComplete ? -1 : 1;
+    if (a.bestClose !== b.bestClose)       return a.bestClose ? -1 : 1;
+    if (a.score !== b.score)               return a.score - b.score;
     return a.bestDDays - b.bestDDays;
   });
 
@@ -3996,23 +4175,56 @@ function openPaymentPicker(payId, anchorEl) {
       const closeBadge = o.isClose
         ? '<span class="pp-close-tag" title="Due ' + (o.due || '') + ' — within ' + CLOSE_DAYS + ' days of payment">' + Math.round(o.dDays) + 'd</span>'
         : '';
+      const completeBadge = o.wouldComplete
+        ? '<span class="pp-complete-tag" title="Adding this payment completes the row total">completes</span>'
+        : '';
+      const assignedNote = o.assigned > 0
+        ? '<div class="pp-assigned-note">' + fmt$(o.assigned) + ' already assigned' +
+          (o.amt > 0 ? ' · ' + fmt$(o.remaining) + ' remaining' : '') + '</div>'
+        : '';
+      const currentMark = o.isCurrent ? '<span class="pp-current-tag">current</span>' : '';
       return '<button type="button" class="pp-item' +
-        (o.claimedBy ? ' pp-claimed' : '') +
-        (o.isClose   ? ' pp-near'    : '') + '" ' +
+        (o.fullyAssigned ? ' pp-claimed' : '') +
+        (o.isClose       ? ' pp-near'    : '') +
+        (o.wouldComplete ? ' pp-completes': '') +
+        (o.isCurrent     ? ' pp-current'  : '') + '" ' +
         'data-row="' + escAttr(o.rowKey) + '">' +
-        '<span class="pp-label">' + escHtml(o.label) + closeBadge + '</span>' +
+        '<span class="pp-label">' + escHtml(o.label) + closeBadge + completeBadge + currentMark + assignedNote + '</span>' +
         '<span class="pp-amt">' + (o.amt > 0 ? fmt$(o.amt) : '—') + '</span>' +
-        (o.claimedBy ? '<span class="pp-claim">claimed</span>' : '') +
       '</button>';
     }).join('');
     return '<div class="pp-section-title">' + escHtml(g.title) + '</div>' + itemsHtml;
   }).join('');
 
+  const miscHtml = MISC_CATEGORIES.map(c => {
+    const rk = '__misc__:' + c.key;
+    const isCur = currentVal === rk;
+    return '<button type="button" class="pp-item pp-misc' + (isCur ? ' pp-current' : '') + '" ' +
+      'data-row="' + escAttr(rk) + '">' +
+      '<span class="pp-label">Misc · ' + escHtml(c.label) +
+        (isCur ? '<span class="pp-current-tag">current</span>' : '') + '</span>' +
+      '<span class="pp-amt">—</span>' +
+    '</button>';
+  }).join('');
+
+  const currentLine = currentDescription
+    ? '<div class="pp-current-line">Current: ' + escHtml(currentDescription) + '</div>'
+    : '';
+  const showClear = !!currentVal || currentDescription.startsWith('Auto-matched');
+  const clearBtn = showClear
+    ? '<button type="button" class="pp-clear">Mark as unmatched</button>'
+    : '';
+
   picker.innerHTML =
     '<div class="pp-header">Assign ' + fmt$(payment.amount) + ' · ' + dateLabel +
       (payment.payee ? ' · ' + escHtml(payment.payee) : '') + '</div>' +
-    '<div class="pp-list">' + optionsHtml + '</div>' +
-    '<button type="button" class="pp-close">Cancel</button>';
+    currentLine +
+    '<div class="pp-list">' + optionsHtml +
+      '<div class="pp-section-title">Misc</div>' + miscHtml +
+    '</div>' +
+    '<div class="pp-actions">' + clearBtn +
+      '<button type="button" class="pp-close">Cancel</button>' +
+    '</div>';
 
   document.body.appendChild(picker);
 
@@ -4021,6 +4233,11 @@ function openPaymentPicker(payId, anchorEl) {
       e.stopPropagation();
       assignPaymentToRow(payId, this.dataset.row);
     });
+  });
+  const clearEl = picker.querySelector('.pp-clear');
+  if (clearEl) clearEl.addEventListener('click', function(e) {
+    e.stopPropagation();
+    assignPaymentToRow(payId, '__none__');
   });
   picker.querySelector('.pp-close').addEventListener('click', function(e) {
     e.stopPropagation();
@@ -4047,13 +4264,18 @@ document.addEventListener('click', function(e) {
     openPaymentPicker(item.dataset.pid, item);
     return;
   }
-  const badge = e.target.closest('.tax-detected.manual');
+  const misc = e.target.closest('.tax-misc-item');
+  if (misc && misc.dataset.pid) {
+    e.preventDefault();
+    e.stopPropagation();
+    openPaymentPicker(misc.dataset.pid, misc);
+    return;
+  }
+  const badge = e.target.closest('.tax-detected');
   if (badge && badge.dataset.pid) {
     e.preventDefault();
     e.stopPropagation();
-    if (confirm('Unassign this manually-matched payment?')) {
-      assignPaymentToRow(badge.dataset.pid, null);
-    }
+    openPaymentPicker(badge.dataset.pid, badge);
   }
 });
 
@@ -4085,6 +4307,7 @@ function detectTaxPayments() {
   // Sort payments by date (oldest first) so earliest payment wins for each row
   const payments = cache.payments.slice().sort((a, b) => a.date.localeCompare(b.date));
 
+  // Always inject a clickable badge so user can reassign or remove
   function injectBadge(rowEl, p, manual) {
     const tr = rowEl.closest('tr');
     if (!tr) return;
@@ -4098,25 +4321,37 @@ function detectTaxPayments() {
     badge.textContent = (manual ? '✓ Assigned ' : '✓ Detected ') + fmt$(p.amount) + ' on ' + dateStr;
     badge.title = (manual ? 'Manually assigned' : 'From QBO') +
       (p.payee ? ': ' + p.payee : '') + (p.memo ? ' — ' + p.memo : '') +
-      (manual ? ' (click to unassign)' : '');
-    if (manual) badge.dataset.pid = paymentId(p);
+      ' — click to reassign or remove';
+    badge.dataset.pid = paymentId(p);
     labelCell.appendChild(badge);
   }
 
-  // 1. Apply manual matches first
   const manual = loadManualMatches();
+  const skipAuto = new Set();   // payment indexes that should not be auto-matched
+  const miscPayments = [];      // [{ p, idx, category }]
+
+  // 1. Apply manual entries first
   payments.forEach((p, idx) => {
     const pid = paymentId(p);
-    const rowKey = manual[pid];
-    if (!rowKey) return;
-    const rowEl = rowsByKey.get(rowKey);
+    const v = manual[pid];
+    if (!v) return;
+    if (v === '__none__') {
+      skipAuto.add(idx);
+      return;
+    }
+    if (isMiscKey(v)) {
+      matchedPayments.add(idx);
+      miscPayments.push({ p, idx, category: miscCategoryOf(v) });
+      return;
+    }
+    const rowEl = rowsByKey.get(v);
     if (!rowEl) return;
     matchedPayments.add(idx);
-    matchedRowKeys.add(rowKey);
+    matchedRowKeys.add(v);  // blocks auto-match for this row (multi-payment is manual-only)
     injectBadge(rowEl, p, true);
   });
 
-  // 2. Auto-match remaining
+  // 2. Auto-match remaining (one payment per row, one row per payment)
   rows.forEach(rowEl => {
     const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
     if (matchedRowKeys.has(rowKey)) return;
@@ -4127,11 +4362,10 @@ function detectTaxPayments() {
 
     const dueMs = new Date(dueStr + 'T12:00:00').getTime();
 
-    // Find the best payment match for this row
     let bestIdx = -1;
     let bestDeltaAmt = Infinity;
     payments.forEach((p, idx) => {
-      if (matchedPayments.has(idx)) return;
+      if (matchedPayments.has(idx) || skipAuto.has(idx)) return;
       const deltaAmt = Math.abs(p.amount - expectedAmt);
       if (deltaAmt > AMOUNT_TOL) return;
       const pMs = new Date(p.date + 'T12:00:00').getTime();
@@ -4151,13 +4385,43 @@ function detectTaxPayments() {
     injectBadge(rowEl, p, false);
   });
 
-  // Unmatched payments → small panel at the top of the currently-visible tax year
+  const activeYearEl = document.querySelector('.tax-year-content.active');
+
+  // 3. Misc panel (informational — payments tagged as penalty/interest/fee/other)
+  if (miscPayments.length && activeYearEl) {
+    const byCat = {};
+    miscPayments.forEach(({ p, category }) => {
+      (byCat[category] = byCat[category] || []).push(p);
+    });
+    const sectionsHtml = Object.entries(byCat).map(([cat, list]) => {
+      const label = (MISC_CATEGORIES.find(c => c.key === cat) || {}).label || cat;
+      const itemsHtml = list.map(p => {
+        const d = new Date(p.date + 'T12:00:00');
+        const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+        return '<span class="tax-misc-item" data-pid="' + escAttr(paymentId(p)) +
+          '" title="' + escAttr((p.payee || '') + ' — click to reassign') + '">' +
+          fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() + ', ' + d.getFullYear() +
+          (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
+      }).join('');
+      const sum = list.reduce((s, x) => s + x.amount, 0);
+      return '<div class="tax-misc-section">' +
+        '<div class="tax-misc-cat">' + escHtml(label) + ' · ' + fmt$(sum) + '</div>' +
+        '<div class="items">' + itemsHtml + '</div>' +
+      '</div>';
+    }).join('');
+    const miscPanel = document.createElement('div');
+    miscPanel.className = 'tax-misc-panel';
+    miscPanel.innerHTML =
+      '<div class="title">ℹ ' + miscPayments.length + ' misc payment(s) — penalties / interest / fees</div>' +
+      sectionsHtml;
+    activeYearEl.insertBefore(miscPanel, activeYearEl.firstChild);
+  }
+
+  // 4. Unmatched panel (payments without any assignment, including __none__)
   const unmatched = payments
     .map((p, i) => ({ p, i }))
     .filter(x => !matchedPayments.has(x.i));
   if (!unmatched.length) return;
-
-  const activeYearEl = document.querySelector('.tax-year-content.active');
   if (!activeYearEl) return;
 
   const panel = document.createElement('div');
