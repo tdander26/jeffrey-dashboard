@@ -544,6 +544,193 @@
     display: flex; gap: 8px; justify-content: flex-end;
   }
 
+  /* ── Tax Inbox modal ───────────────────────────────────── */
+  .modal.tax-inbox-modal {
+    width: 760px;
+    max-width: 95vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .ti-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .ti-title {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .ti-subtitle {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .ti-owed {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--amber);
+    font-variant-numeric: tabular-nums;
+  }
+  .ti-owed-label {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-left: 6px;
+  }
+  .ti-filters {
+    padding: 10px 20px 12px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .ti-pill {
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink-2);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .12s, border-color .12s, color .12s;
+  }
+  .ti-pill:hover { background: var(--hover); }
+  .ti-pill.active {
+    background: var(--ink);
+    color: var(--card);
+    border-color: var(--ink);
+  }
+  .ti-pill .ti-pill-count {
+    font-variant-numeric: tabular-nums;
+    color: inherit;
+    opacity: 0.75;
+  }
+  .ti-body {
+    overflow-y: auto;
+    padding: 0;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .ti-section-head {
+    padding: 12px 20px 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--card-subtle);
+  }
+  .ti-section-head .ti-section-total {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .ti-item {
+    display: grid;
+    grid-template-columns: 96px 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--rule-2, #efece6);
+  }
+  .ti-item:last-child { border-bottom: none; }
+  .ti-item:hover { background: var(--hover); }
+  .ti-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--chip);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--ink-2);
+    line-height: 1.15;
+    justify-self: start;
+    white-space: nowrap;
+  }
+  .ti-cat-dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .ti-cat.cat-fed     { background: #e6ecf4; color: #2c3e6b; }
+  .ti-cat.cat-fed     .ti-cat-dot { background: #2c3e6b; }
+  .ti-cat.cat-mn      { background: #e3efe5; color: #3a6b48; }
+  .ti-cat.cat-mn      .ti-cat-dot { background: #3a6b48; }
+  .ti-cat.cat-mnsales { background: #f0e5d2; color: #7a5a25; }
+  .ti-cat.cat-mnsales .ti-cat-dot { background: #b8956a; }
+  .ti-cat.cat-care    { background: #f3e0dc; color: #9a3a2c; }
+  .ti-cat.cat-care    .ti-cat-dot { background: #9a3a2c; }
+  .ti-cat.cat-scorp   { background: #ece5d6; color: #6b5a25; }
+  .ti-cat.cat-scorp   .ti-cat-dot { background: #b8956a; }
+  .ti-cat.cat-other   { background: var(--chip); color: var(--ink-3); }
+  .ti-cat.cat-other   .ti-cat-dot { background: var(--ink-3); }
+  .ti-item-main {
+    min-width: 0;
+  }
+  .ti-item-title {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .ti-item-sub {
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+  .ti-item-amt {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .ti-item.done .ti-item-title,
+  .ti-item.done .ti-item-sub {
+    text-decoration: line-through;
+    color: var(--ink-3);
+  }
+  .ti-item.done .ti-item-amt { color: var(--ink-3); }
+  .ti-item.overdue .ti-item-sub { color: var(--red); font-weight: 500; }
+  .ti-empty {
+    padding: 28px 20px;
+    text-align: center;
+    color: var(--ink-3);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+  /* clickable hero card */
+  .hero-card.clickable { cursor: pointer; transition: background .12s, border-color .12s; }
+  .hero-card.clickable:hover { background: var(--hover); border-color: var(--ink-3); }
+
   .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .form-group { display: flex; flex-direction: column; gap: 4px; }
   .form-group.full { grid-column: 1 / -1; }
@@ -2563,6 +2750,24 @@
   </div>
 </div>
 
+<!-- Tax Inbox Modal -->
+<div class="modal-overlay" id="taxInboxOverlay">
+  <div class="modal tax-inbox-modal">
+    <div class="ti-header">
+      <div>
+        <div class="ti-title">Tax Inbox</div>
+        <div class="ti-subtitle" id="ti_subtitle">All obligations, prioritized.</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div><span class="ti-owed" id="ti_owed">$0</span><span class="ti-owed-label">owed</span></div>
+        <button class="modal-close" onclick="closeTaxInbox()">✕</button>
+      </div>
+    </div>
+    <div class="ti-filters" id="ti_filters"></div>
+    <div class="ti-body" id="ti_body"></div>
+  </div>
+</div>
+
 <!-- Firebase SDK (compat — works in plain HTML without a bundler) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -3493,6 +3698,237 @@ function collectUpcomingDue(windowDays) {
   return items;
 }
 
+// ─────────────────────────────────────────────
+// TAX INBOX — modal listing all obligations
+// ─────────────────────────────────────────────
+const TI_MNST = { jan:0, feb:1, mar:2, apr:3, may:4, jun:5, jul:6, aug:7, sep:8, oct:9, nov:10, dec:11 };
+const TI_MNST_NAME = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function tiDeriveDue(rowEl, tr) {
+  if (rowEl.dataset.due) return rowEl.dataset.due;
+  const mnstEl = tr.querySelector('[data-mnst-month]');
+  if (mnstEl) {
+    const m = TI_MNST[mnstEl.dataset.mnstMonth];
+    const y = parseInt(mnstEl.dataset.mnstYear);
+    if (m != null && y) {
+      let dueM = m + 1, dueY = y;
+      if (dueM > 11) { dueM = 0; dueY++; }
+      return dueY + '-' + String(dueM + 1).padStart(2, '0') + '-20';
+    }
+  }
+  return '';
+}
+
+function tiCategorize(key, panelTitle) {
+  const k = (key || '').toLowerCase();
+  const pt = (panelTitle || '').toLowerCase();
+  if (k.startsWith('fed_'))     return { id: 'fed',     label: 'Federal',    cls: 'cat-fed',     source: 'IRS · 1040-ES' };
+  if (k.startsWith('mn_q'))     return { id: 'mn',      label: 'MN Income',  cls: 'cat-mn',      source: 'MN Dept of Revenue' };
+  if (k.startsWith('mnsales_')) return { id: 'mnsales', label: 'MN Sales',   cls: 'cat-mnsales', source: 'MN Dept of Revenue' };
+  if (k.startsWith('mncare_'))  return { id: 'care',    label: 'Care Tax',   cls: 'cat-care',    source: 'MN Care Provider Tax' };
+  if (k.startsWith('scorp_'))   return { id: 'scorp',   label: 'S-Corp',     cls: 'cat-scorp',   source: 'Annual fee' };
+  return { id: 'other', label: panelTitle || 'Other', cls: 'cat-other', source: panelTitle || '' };
+}
+
+function collectAllTaxItems() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayMs = today.getTime();
+  const MS_DAY = 86400000;
+
+  const items = [];
+  document.querySelectorAll('.checkbox-custom[data-key][data-year]').forEach(cb => {
+    const tr = cb.closest('tr');
+    if (!tr) return;
+    if (tr.classList.contains('totals-row')) return;
+    if (tr.classList.contains('na-row'))     return;
+
+    const panel = cb.closest('.panel');
+    const panelTitle = panel ? (panel.querySelector('.panel-title')?.textContent || '').trim() : '';
+    const key = cb.dataset.key;
+    const year = cb.dataset.year;
+    const cat = tiCategorize(key, panelTitle);
+
+    let title = key;
+    const labelCell = tr.querySelector('td:not(.check-cell)');
+    if (labelCell) {
+      title = (labelCell.innerText || '').replace(/✓.*$/s, '').trim().split('\n')[0];
+    }
+
+    let amt = parseFloat(cb.dataset.amount);
+    if (isNaN(amt)) {
+      const amtCell = tr.querySelector('td.amount');
+      if (amtCell) {
+        const txt = (amtCell.innerText || '').replace(/[^0-9.\-]/g, '');
+        const parsed = parseFloat(txt);
+        if (!isNaN(parsed)) amt = parsed;
+      }
+    }
+    if (isNaN(amt)) amt = 0;
+
+    const due = tiDeriveDue(cb, tr);
+    let dDays = null, dueT = null;
+    if (due) {
+      dueT = new Date(due + 'T00:00:00').getTime();
+      if (!isNaN(dueT)) dDays = Math.round((dueT - todayMs) / MS_DAY);
+    }
+
+    items.push({
+      key, year,
+      catId:    cat.id,
+      catLabel: cat.label,
+      catCls:   cat.cls,
+      source:   cat.source,
+      title, amt, due, dueT, dDays,
+      done:     cb.classList.contains('checked'),
+    });
+  });
+  return items;
+}
+
+let _tiActiveFilter = 'all';
+
+function tiNiceDate(due) {
+  if (!due) return '';
+  const d = new Date(due + 'T12:00:00');
+  if (isNaN(d.getTime())) return due;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function tiItemSubtitle(item) {
+  // For monthly mnsales items, build "Month YYYY — Due M D"
+  if (item.catId === 'mnsales' && item.due) {
+    const monthMatch = (item.title || '').match(/^([A-Za-z]+)/);
+    const monthName = monthMatch ? monthMatch[0] : '';
+    return monthName + ' · Due ' + tiNiceDate(item.due);
+  }
+  // For everything else: source · Due Mon D (or "Overdue · Mon D")
+  let dateStr = '';
+  if (item.due) {
+    if (item.dDays != null && item.dDays < 0) dateStr = 'Overdue · ' + tiNiceDate(item.due);
+    else if (item.dDays === 0)                dateStr = 'Due today';
+    else                                       dateStr = 'Due ' + tiNiceDate(item.due);
+  }
+  return [item.source, dateStr].filter(Boolean).join(' · ');
+}
+
+function tiItemTitle(item) {
+  // Strip leading "Q1 — April 18th" → keep "Q1 — April 18th"
+  // Strip toggle button text from Final-row label cells
+  return (item.title || '').replace(/\s*Rollover\s*Payment\s*$/, '').trim();
+}
+
+function openTaxInbox() {
+  const overlay = document.getElementById('taxInboxOverlay');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  renderTaxInbox();
+}
+
+function closeTaxInbox() {
+  const overlay = document.getElementById('taxInboxOverlay');
+  if (overlay) overlay.classList.remove('open');
+}
+
+function setTaxInboxFilter(catId) {
+  _tiActiveFilter = catId;
+  renderTaxInbox();
+}
+
+function toggleTaxInboxItem(key, year) {
+  const cb = document.querySelector('.checkbox-custom[data-key="' + key + '"][data-year="' + year + '"]');
+  if (!cb) return;
+  if (typeof toggleCheck === 'function') toggleCheck(cb);
+  else cb.classList.toggle('checked');
+  renderTaxInbox();
+}
+
+function renderTaxInbox() {
+  const body = document.getElementById('ti_body');
+  const filtersEl = document.getElementById('ti_filters');
+  const subtitleEl = document.getElementById('ti_subtitle');
+  const owedEl = document.getElementById('ti_owed');
+  if (!body || !filtersEl) return;
+
+  const allItems = collectAllTaxItems();
+
+  // Filter pills definition (preserve display order)
+  const catOrder = [
+    { id: 'all',     label: 'All' },
+    { id: 'fed',     label: 'Federal' },
+    { id: 'mn',      label: 'MN Income' },
+    { id: 'mnsales', label: 'MN Sales' },
+    { id: 'care',    label: 'Care Tax' },
+    { id: 'scorp',   label: 'S-Corp' },
+    { id: 'other',   label: 'Other' },
+  ];
+
+  const counts = {};
+  allItems.forEach(it => { counts[it.catId] = (counts[it.catId] || 0) + 1; });
+  counts.all = allItems.length;
+
+  filtersEl.innerHTML = catOrder
+    .filter(c => c.id === 'all' || counts[c.id] > 0)
+    .map(c => {
+      const active = c.id === _tiActiveFilter ? ' active' : '';
+      const n = counts[c.id] || 0;
+      return '<button type="button" class="ti-pill' + active + '" onclick="setTaxInboxFilter(\'' + c.id + '\')">'
+        + escHtml(c.label) + '<span class="ti-pill-count">' + n + '</span></button>';
+    }).join('');
+
+  const filtered = _tiActiveFilter === 'all'
+    ? allItems
+    : allItems.filter(it => it.catId === _tiActiveFilter);
+
+  const due = filtered.filter(it => !it.done);
+  const done = filtered.filter(it => it.done);
+
+  // Sort due: by dDays asc (overdue first, items without dates last)
+  due.sort((a, b) => {
+    const ad = a.dDays == null ? Infinity : a.dDays;
+    const bd = b.dDays == null ? Infinity : b.dDays;
+    return ad - bd;
+  });
+  // Sort done: most-recently-due first (highest dueT)
+  done.sort((a, b) => (b.dueT || 0) - (a.dueT || 0));
+
+  const dueSum  = due.reduce((s, x) => s + (x.amt || 0), 0);
+  const doneSum = done.reduce((s, x) => s + (x.amt || 0), 0);
+
+  if (subtitleEl) subtitleEl.textContent = 'All obligations, prioritized. ' + due.length + ' due · ' + done.length + ' done.';
+  if (owedEl)     owedEl.textContent = fmtMoney0(dueSum);
+
+  function renderItem(it, isDone) {
+    const cls = isDone ? ' done' : (it.dDays != null && it.dDays < 0 ? ' overdue' : '');
+    const checked = isDone ? 'checked' : '';
+    const onClick = "toggleTaxInboxItem('" + it.key + "','" + it.year + "')";
+    return '<div class="ti-item' + cls + '">'
+      +    '<span class="ti-cat ' + it.catCls + '"><span class="ti-cat-dot"></span>' + escHtml(it.catLabel) + '</span>'
+      +    '<div class="ti-item-main">'
+      +      '<div class="ti-item-title">' + escHtml(tiItemTitle(it)) + '</div>'
+      +      '<div class="ti-item-sub">' + escHtml(tiItemSubtitle(it)) + '</div>'
+      +    '</div>'
+      +    '<div class="ti-item-amt">' + (it.amt > 0 ? fmtMoney0(it.amt) : '—') + '</div>'
+      +    '<div class="checkbox-custom ' + checked + '" onclick="' + onClick + '"></div>'
+      +  '</div>';
+  }
+
+  let html = '';
+  if (due.length) {
+    html += '<div class="ti-section-head">DUE NOW · ' + due.length
+      + '<span class="ti-section-total">' + fmtMoney0(dueSum) + '</span></div>';
+    html += due.map(it => renderItem(it, false)).join('');
+  }
+  if (done.length) {
+    html += '<div class="ti-section-head">COMPLETED · ' + done.length
+      + '<span class="ti-section-total">' + fmtMoney0(doneSum) + '</span></div>';
+    html += done.map(it => renderItem(it, true)).join('');
+  }
+  if (!due.length && !done.length) {
+    html = '<div class="ti-empty">Nothing in this category.</div>';
+  }
+  body.innerHTML = html;
+}
+
 function renderHeroStrip() {
   const el = document.getElementById('heroStrip');
   if (!el) return;
@@ -3573,10 +4009,10 @@ function renderHeroStrip() {
           value: '$0',
           sub:   'Nothing due in 30 days',
           tone:  'green',
+          onClick: 'openTaxInbox()',
         };
       }
       const overdue = upcoming.filter(x => x.dDays < 0).length;
-      const todayMs = Date.now();
       const niceDate = (s) => {
         const d = new Date(s + 'T12:00:00');
         if (isNaN(d.getTime())) return s;
@@ -3598,6 +4034,7 @@ function renderHeroStrip() {
         value: fmtMoney0(dueSum),
         sub:   subParts.join(' · '),
         tone:  overdue > 0 ? 'red' : 'amber',
+        onClick: 'openTaxInbox()',
       };
     })(),
   ];
@@ -3607,7 +4044,9 @@ function renderHeroStrip() {
     const dot = c.tone && c.tone !== 'neutral'
       ? '<span class="' + dotClass.trim() + '"></span>'
       : '';
-    return '<div class="hero-card' + (c.hero ? ' hero-primary' : '') + '">'
+    const clickable = c.onClick ? ' clickable' : '';
+    const clickAttr = c.onClick ? ' onclick="' + c.onClick + '"' : '';
+    return '<div class="hero-card' + (c.hero ? ' hero-primary' : '') + clickable + '"' + clickAttr + '>'
       +    '<div class="hero-label">' + escHtml(c.label) + '</div>'
       +    '<div class="hero-value">' + escHtml(c.value) + '</div>'
       +    '<div class="hero-sub">' + dot + escHtml(c.sub) + '</div>'
@@ -5037,6 +5476,15 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
 });
 document.getElementById('etOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeETModal();
+});
+document.getElementById('taxInboxOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeTaxInbox();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const ov = document.getElementById('taxInboxOverlay');
+    if (ov && ov.classList.contains('open')) closeTaxInbox();
+  }
 });
 
 // ─────────────────────────────────────────────
