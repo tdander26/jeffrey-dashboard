@@ -1169,6 +1169,18 @@
   .payment-picker .pp-list {
     display: flex; flex-direction: column; gap: 2px;
   }
+  .payment-picker .pp-section-title {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding: 8px 8px 4px;
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+  .payment-picker .pp-section-title:first-child {
+    margin-top: 0; border-top: none;
+  }
   .payment-picker .pp-item {
     display: flex; align-items: center; justify-content: space-between;
     gap: 8px;
@@ -3849,29 +3861,55 @@ function openPaymentPicker(payId, anchorEl) {
   const manual = loadManualMatches();
   const claimed = new Set(Object.values(manual));
 
-  const allRows = Array.from(document.querySelectorAll('.checkbox-custom[data-amount]'));
-  const options = allRows.map(rowEl => {
-    const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
+  const allRows = Array.from(document.querySelectorAll('.checkbox-custom[data-key][data-year]'));
+  const groups = new Map(); // groupTitle -> [option, ...]
+  allRows.forEach(rowEl => {
     const tr = rowEl.closest('tr');
+    if (!tr) return;
+    const panel = rowEl.closest('.panel');
+    if (!panel) return;
+    const titleEl = panel.querySelector('.panel-title');
+    const groupTitle = titleEl ? titleEl.textContent.trim() : 'Other';
+
+    const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
     let label = rowKey;
-    if (tr) {
-      const labelCell = tr.querySelector('td:not(.check-cell)');
-      if (labelCell) {
-        label = (labelCell.innerText || '').replace(/✓.*$/s, '').trim().split('\n')[0];
+    const labelCell = tr.querySelector('td:not(.check-cell)');
+    if (labelCell) {
+      label = (labelCell.innerText || '').replace(/✓.*$/s, '').trim().split('\n')[0];
+    }
+    let amt = parseFloat(rowEl.dataset.amount);
+    if (isNaN(amt)) {
+      const amtCell = tr.querySelector('td.amount');
+      if (amtCell) {
+        const txt = (amtCell.innerText || '').replace(/[^0-9.\-]/g, '');
+        const parsed = parseFloat(txt);
+        if (!isNaN(parsed)) amt = parsed;
       }
     }
-    const amt = parseFloat(rowEl.dataset.amount) || 0;
-    const due = rowEl.dataset.due || '';
-    const yr  = rowEl.dataset.year || '';
-    return { rowKey, label, amt, due, yr, claimedBy: claimed.has(rowKey) };
+    if (isNaN(amt)) amt = 0;
+
+    const opt = {
+      rowKey, label, amt,
+      due: rowEl.dataset.due || '',
+      yr:  rowEl.dataset.year || '',
+      claimedBy: claimed.has(rowKey),
+    };
+    if (!groups.has(groupTitle)) groups.set(groupTitle, []);
+    groups.get(groupTitle).push(opt);
   });
 
-  options.sort((a, b) => {
-    if (a.claimedBy !== b.claimedBy) return a.claimedBy ? 1 : -1;
-    const da = Math.abs(a.amt - payment.amount);
-    const db = Math.abs(b.amt - payment.amount);
-    return da - db;
+  const groupArr = Array.from(groups.entries()).map(([title, opts]) => {
+    opts.sort((a, b) => {
+      if (a.claimedBy !== b.claimedBy) return a.claimedBy ? 1 : -1;
+      const da = a.amt > 0 ? Math.abs(a.amt - payment.amount) : Infinity;
+      const db = b.amt > 0 ? Math.abs(b.amt - payment.amount) : Infinity;
+      return da - db;
+    });
+    const best = opts.find(o => !o.claimedBy && o.amt > 0);
+    const score = best ? Math.abs(best.amt - payment.amount) : Infinity;
+    return { title, opts, score };
   });
+  groupArr.sort((a, b) => a.score - b.score);
 
   const pDate = new Date(payment.date + 'T12:00:00');
   const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
@@ -3880,14 +3918,17 @@ function openPaymentPicker(payId, anchorEl) {
   const picker = document.createElement('div');
   picker.className = 'payment-picker';
 
-  const optionsHtml = options.map(o =>
-    '<button type="button" class="pp-item' + (o.claimedBy ? ' pp-claimed' : '') + '" ' +
-      'data-row="' + escAttr(o.rowKey) + '">' +
-      '<span class="pp-label">' + escHtml(o.label) + (o.yr ? ' <span style="opacity:.5">· ' + o.yr + '</span>' : '') + '</span>' +
-      '<span class="pp-amt">' + fmt$(o.amt) + '</span>' +
-      (o.claimedBy ? '<span class="pp-claim">claimed</span>' : '') +
-    '</button>'
-  ).join('');
+  const optionsHtml = groupArr.map(g => {
+    const itemsHtml = g.opts.map(o =>
+      '<button type="button" class="pp-item' + (o.claimedBy ? ' pp-claimed' : '') + '" ' +
+        'data-row="' + escAttr(o.rowKey) + '">' +
+        '<span class="pp-label">' + escHtml(o.label) + '</span>' +
+        '<span class="pp-amt">' + (o.amt > 0 ? fmt$(o.amt) : '—') + '</span>' +
+        (o.claimedBy ? '<span class="pp-claim">claimed</span>' : '') +
+      '</button>'
+    ).join('');
+    return '<div class="pp-section-title">' + escHtml(g.title) + '</div>' + itemsHtml;
+  }).join('');
 
   picker.innerHTML =
     '<div class="pp-header">Assign ' + fmt$(payment.amount) + ' · ' + dateLabel +
