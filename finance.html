@@ -3928,7 +3928,7 @@ function openPaymentPicker(payId, anchorEl) {
 
   const pDate = new Date(payment.date + 'T12:00:00');
   const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
-  const dateLabel = mName + ' ' + pDate.getDate();
+  const dateLabel = mName + ' ' + pDate.getDate() + ', ' + pDate.getFullYear();
 
   const picker = document.createElement('div');
   picker.className = 'payment-picker';
@@ -4029,7 +4029,7 @@ function detectTaxPayments() {
     if (!labelCell) return;
     const pDate = new Date(p.date + 'T12:00:00');
     const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
-    const dateStr = mName + ' ' + pDate.getDate();
+    const dateStr = mName + ' ' + pDate.getDate() + ', ' + pDate.getFullYear();
     const badge = document.createElement('span');
     badge.className = 'tax-detected' + (manual ? ' manual' : '');
     badge.textContent = (manual ? '✓ Assigned ' : '✓ Detected ') + fmt$(p.amount) + ' on ' + dateStr;
@@ -4104,7 +4104,7 @@ function detectTaxPayments() {
     const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
     return '<span class="tax-unmatched-item" data-pid="' + escAttr(paymentId(p)) +
       '" title="' + escAttr((p.payee || '') + ' — click to assign to a row') + '">' +
-      fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() +
+      fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() + ', ' + d.getFullYear() +
       (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
   }).join('');
   panel.innerHTML =
