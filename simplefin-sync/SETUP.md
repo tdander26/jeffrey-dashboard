@@ -43,15 +43,23 @@ let me know and we'll figure out a fallback.
 
 ## Step 3 — Generate a Setup Token
 
-Still in the bridge dashboard:
+Still in the bridge dashboard, on the **My Account** page:
 
-1. **Settings** → **Setup Token** → **Generate**
-2. Copy the long base64 string. **It's one-time use** — once we claim it (next
-   step), it's burned and can't be re-used. That's fine; the resulting Access
-   URL is what gets re-used forever.
+1. Scroll to the **Apps** section (it's below Financial Institutions and above
+   Access Log)
+2. Click **New app connection**
+3. The page will show a long base64 string — **that** is the setup token. Copy
+   it.
 
-If you ever lose the Access URL (e.g. you reset Apps Script), come back here and
-generate a new setup token.
+The token is **one-time use** — once we claim it (next step), it's burned and
+can't be re-used. That's fine; the resulting Access URL is what gets re-used
+forever.
+
+If you ever lose the Access URL (e.g. you reset Apps Script), come back here
+and click **New app connection** again to mint a fresh setup token.
+
+Note: the SimpleFIN docs and some third-party guides call this thing a "Setup
+Token" — same thing. The UI just labels the button "New app connection".
 
 ---
 
