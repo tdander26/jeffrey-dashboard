@@ -6237,7 +6237,10 @@ function parseSpendCSV(csvText) {
       date:        cols[dateIdx],
       accountId:   cols[accIdIdx],
       accountName: cols[accNmIdx] || '',
-      amount:      parseFloat(cols[amtIdx]) || 0,
+      // Google Sheets exports currency-formatted cells as "$1,620.00", so
+      // strip $ , and whitespace before parseFloat (mirrors the Balances
+      // and Tax Payments CSV parsers above).
+      amount:      parseFloat((cols[amtIdx] || '').replace(/[^0-9.\-]/g, '')) || 0,
       direction:   (cols[dirIdx] || 'out').toLowerCase(),
       payee:       cols[payIdx] || '',
       description: cols[descIdx] || '',

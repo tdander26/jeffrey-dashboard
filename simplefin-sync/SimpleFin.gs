@@ -419,7 +419,11 @@ function writeAllTransactions_(accounts) {
 
   if (rows.length) {
     sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
-    sheet.getRange(2, 4, rows.length, 1).setNumberFormat('$#,##0.00');
+    // Plain number format on the Amount column. Currency formatting (e.g.
+    // "$#,##0.00") causes Google's CSV publish to export the FORMATTED
+    // string ("$1,620.00") instead of the raw number, which then breaks
+    // parseFloat downstream in the dashboard.
+    sheet.getRange(2, 4, rows.length, 1).setNumberFormat('0.00');
   }
   Logger.log('✓ Transactions saved (' + rows.length + ' rows across ' + accounts.length + ' accounts).');
 }
