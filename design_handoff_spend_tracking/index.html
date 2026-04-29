@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Spend Tracking — Pace Dials (design reference)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #FAF8F4; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1F1D1A; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  button { font-family: inherit; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="chrome.jsx"></script>
+<script type="text/babel" src="option3-pace-dials.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+function App() {
+  const allocPct = { opex: 38, oc: 41, tax: 20, profit: 1 };
+  const currentDay = 4;
+  const today = { ...WINDOWS[WINDOWS.length - 1], dayIndex: currentDay };
+  const derived = deriveWindow(today, allocPct);
+  const totalSpent = derived.buckets.reduce((s, b) => s + b.spent, 0);
+  const totalAlloc = derived.buckets.reduce((s, b) => s + b.alloc, 0);
+  const offPaceCount = derived.buckets.filter(b => b.status !== "on-pace").length;
+  const kpis = [
+    { label: "Window inflow", value: fmtUSD(today.inflow), sub: `${today.start} – ${today.end} · day ${currentDay} of ${today.days}` },
+    { label: "Spent so far", value: fmtUSD(totalSpent), sub: `${derived.txnCount} transactions · ${Math.round(totalSpent/totalAlloc*100)}% of allocation`, dotColor: "#7BA89A" },
+    { label: "Pacing health", value: offPaceCount === 0 ? "On pace" : `${offPaceCount} off pace`, sub: offPaceCount === 0 ? "All buckets within expected range" : "Subtle warnings shown below", dotColor: offPaceCount === 0 ? "#7BA89A" : "#C7A876" },
+    { label: "Allocation total", value: "100%", sub: "32 of 32 rows compliant", dotColor: "#7BA89A" },
+  ];
+  return (
+    <div style={{ width: "100%", minHeight: "100vh", background: "#FAF8F4", paddingBottom: 24 }}>
+      <HeaderBar activeTab="Spend" />
+      <KpiStrip kpis={kpis} />
+      <PaceDials allocPct={allocPct} currentDay={currentDay} />
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

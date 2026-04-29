@@ -46,6 +46,34 @@
 
     --chip:         #eeeae0;
 
+    /* ─── Spend tab tokens (from design handoff) ─── */
+    --spend-card-soft:  #fdfcf8;   /* DialCard surface */
+    --spend-border-soft:#efebe3;   /* internal dividers in dial cards */
+
+    /* Bucket palette */
+    --bucket-opex:       #7ba89a;
+    --bucket-opex-chip:  #e6efea;
+    --bucket-opex-text:  #3f6757;
+    --bucket-oc:         #9ab3cc;
+    --bucket-oc-chip:    #e6ecf3;
+    --bucket-oc-text:    #3f5878;
+    --bucket-tax:        #d4a8a8;
+    --bucket-tax-chip:   #f1e3e3;
+    --bucket-tax-text:   #7c4848;
+    --bucket-profit:     #b7a4c9;
+    --bucket-profit-chip:#ece4f1;
+    --bucket-profit-text:#5f4878;
+    --bucket-income:     #c8b994;  /* income bucket — warm sand */
+    --bucket-income-chip:#f1ebd9;
+    --bucket-income-text:#6b5a2e;
+
+    /* Sparkline / gauge */
+    --spark-safe:        #eef3ec;
+    --spark-over:        #f7ead9;
+    --spark-budget:      #8a6a2b;
+    --gauge-track:       #f1ede3;
+    --gauge-overflow:    #c7a876;
+
     --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --font-serif:   'Fraunces', 'Charter', 'Iowan Old Style', Georgia, serif;
     --font-mono:    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -1642,6 +1670,379 @@
     color: var(--navy);
     box-shadow: 0 1px 2px rgba(0,0,0,0.08);
   }
+
+  /* ─────────────────────────────────────────────
+     SPEND TAB
+     Translation of design_handoff_spend_tracking → vanilla
+     ─────────────────────────────────────────────  */
+  .spend-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .spend-kpi-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .spend-kpi-label {
+    font-size: 10px;
+    color: var(--ink-4);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .spend-kpi-value {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
+  }
+  .spend-kpi-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .spend-kpi-dot {
+    width: 6px; height: 6px; border-radius: 6px; display: inline-block;
+  }
+
+  .spend-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .spend-legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .spend-legend-line {
+    display: inline-block;
+    width: 16px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  /* Allocation Pacing — 4 dial cards in a grid */
+  .spend-dial-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .spend-dial {
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 16px 16px 14px;
+    background: var(--spend-card-soft);
+    display: flex;
+    flex-direction: column;
+  }
+  .spend-dial-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .spend-dial-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .spend-dial-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+  .spend-dial-pct {
+    font-size: 10.5px;
+    color: var(--ink-4);
+    font-variant-numeric: tabular-nums;
+  }
+  .spend-dial-pace {
+    text-align: center;
+    font-size: 11px;
+    margin-top: -6px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+  .spend-dial-pace.warn { color: var(--spark-budget); }
+  .spend-dial-numbers {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--spend-border-soft);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  .spend-dial-numbers .lbl {
+    font-size: 10px;
+    color: var(--ink-4);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .spend-dial-numbers .val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 1px;
+  }
+  .spend-dial-spark-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 12px 0 4px;
+  }
+  .spend-dial-spark-head .ttl {
+    font-size: 10px;
+    color: var(--ink-4);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .spend-dial-spark-head .legend {
+    font-size: 9.5px;
+    color: var(--ink-4);
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .spend-dial-spark-head .legend .swatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 3px;
+    vertical-align: middle;
+  }
+  .spend-dial-toggle {
+    margin-top: 12px;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 11.5px;
+    background: transparent;
+    color: var(--ink-3);
+    border: 1px solid var(--spend-border-soft);
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .spend-dial-toggle:hover { border-color: var(--rule-2); color: var(--ink); }
+  .spend-dial-toggle.active {
+    border-color: transparent;
+  }
+
+  /* Window-over-window table */
+  .spend-wow-grid {
+    display: grid;
+    grid-template-columns: 170px repeat(6, 1fr);
+    column-gap: 8px;
+    align-items: center;
+  }
+  .spend-wow-head {
+    font-size: 10px;
+    color: var(--ink-4);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 0 6px;
+  }
+  .spend-wow-head.current { color: var(--ink); opacity: 1; }
+  .spend-wow-head.prior   { opacity: 0.6; }
+  .spend-wow-row-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .spend-wow-cell {
+    padding: 0 6px;
+  }
+  .spend-wow-cell.prior { opacity: 0.5; }
+  .spend-wow-cell .pct {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .spend-wow-cell .amt {
+    font-size: 10.5px;
+    color: var(--ink-4);
+    font-variant-numeric: tabular-nums;
+  }
+  .spend-wow-cell.over .pct { color: var(--spark-budget); }
+
+  /* DialTxns drill-in table */
+  .spend-txn-table {
+    border: 1px solid var(--spend-border-soft);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .spend-txn-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr 110px 120px;
+    padding: 9px 14px;
+    font-size: 12px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    border-top: 1px solid var(--spend-border-soft);
+    align-items: center;
+  }
+  .spend-txn-row.head {
+    background: #fbf8f1;
+    font-size: 10px;
+    color: var(--ink-4);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-top: 0;
+    padding: 10px 14px;
+  }
+  .spend-txn-row .date  { color: var(--ink-3); }
+  .spend-txn-row .memo  { color: var(--ink-3); }
+  .spend-txn-row .amt   { text-align: right; }
+  .spend-txn-row .tag   { text-align: right; font-size: 10.5px; }
+  .spend-txn-empty {
+    padding: 8px 4px;
+    font-size: 12px;
+    color: var(--ink-4);
+  }
+  .spend-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .spend-tag.spend       { background: var(--rule); color: var(--ink-3); }
+  .spend-tag.alloc       { background: var(--spend-border-soft); color: var(--ink-4); }
+  .spend-tag.early       { background: var(--amber-bg); color: var(--amber); }
+  .spend-tag.rebalance   { background: var(--bronze-bg); color: var(--bronze-dark); }
+  .spend-tag.ignore      { background: transparent; color: var(--ink-4); border: 1px dashed var(--rule); }
+
+  /* Account mapping panel */
+  .spend-mapping-grid {
+    display: grid;
+    grid-template-columns: 1fr 200px 100px;
+    gap: 10px 14px;
+    align-items: center;
+  }
+  .spend-mapping-head {
+    font-size: 10px;
+    color: var(--ink-4);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--spend-border-soft);
+  }
+  .spend-mapping-name {
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .spend-mapping-name small {
+    display: block;
+    font-size: 10.5px;
+    color: var(--ink-4);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+  .spend-mapping-select {
+    padding: 6px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    background: var(--card);
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .spend-mapping-bal {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .spend-empty {
+    padding: 36px 18px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .spend-empty strong { color: var(--ink); font-weight: 600; display: block; margin-bottom: 4px; font-size: 14px; }
+
+  .spend-footer {
+    display: flex;
+    justify-content: space-between;
+    margin: 16px 0 0;
+    padding: 10px 4px;
+    font-size: 11px;
+    color: var(--ink-4);
+  }
+
+  /* Manual transfer linker — small modal/popover */
+  .spend-link-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 18px;
+    box-shadow: var(--shadow-hi);
+    width: 480px;
+    max-width: 92vw;
+    max-height: 70vh;
+    overflow: auto;
+    z-index: 1001;
+    display: none;
+  }
+  .spend-link-modal.open { display: block; }
+  .spend-link-backdrop {
+    position: fixed; inset: 0; background: rgba(20,18,12,0.32);
+    z-index: 1000; display: none;
+  }
+  .spend-link-backdrop.open { display: block; }
+  .spend-link-cand {
+    display: grid;
+    grid-template-columns: 80px 1fr 90px 80px;
+    padding: 8px 10px;
+    border-top: 1px solid var(--spend-border-soft);
+    font-size: 12px;
+    align-items: center;
+    cursor: pointer;
+  }
+  .spend-link-cand:hover { background: var(--card-subtle); }
+  .spend-link-cand .amt { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Pending data state */
+  .spend-loading {
+    padding: 36px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 1100px) {
+    .spend-dial-grid { grid-template-columns: repeat(2, 1fr); }
+    .spend-kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -1666,6 +2067,7 @@
       <button class="seg-btn active" onclick="switchTab('profitfirst', this)"><span class="seg-glyph">◆</span>Profit First</button>
       <button class="seg-btn" onclick="switchTab('taxes', this)"><span class="seg-glyph">▲</span>Taxes</button>
       <button class="seg-btn" onclick="switchTab('payroll', this)"><span class="seg-glyph">●</span>Payroll</button>
+      <button class="seg-btn" onclick="switchTab('spend', this)"><span class="seg-glyph">◐</span>Spend</button>
     </div>
   </div>
   <div class="toolbar-spacer"></div>
@@ -2688,6 +3090,65 @@
         <div id="w2SettingsContent"></div>
       </div>
     </div>
+  </div>
+
+  <!-- ─────────── SPEND TAB ─────────── -->
+  <div id="tab-spend" class="tab-content">
+    <!-- Spend KPI strip (replaces hero strip when on this tab) -->
+    <div class="spend-kpi-strip" id="spendKpiStrip"></div>
+
+    <!-- Account mapping settings — shown when no transactions yet, or expandable from a gear -->
+    <div class="panel" id="spendMappingPanel" style="margin-top:16px">
+      <header class="panel-header">
+        <div>
+          <div class="panel-title">Account Mapping</div>
+          <div class="panel-subtitle">Tell the dashboard which bank account is which Profit First bucket. Required before pacing math works.</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="toggleSpendMapping()" id="spendMappingToggle">Hide</button>
+      </header>
+      <div style="padding:14px 16px 16px" id="spendMappingContent"></div>
+    </div>
+
+    <!-- Allocation pacing card (4 dial cards) -->
+    <div class="panel" id="spendDialsPanel" style="margin-top:16px">
+      <header class="panel-header">
+        <div>
+          <div class="panel-title">Allocation pacing</div>
+          <div class="panel-subtitle" id="spendDialsSubtitle">—</div>
+        </div>
+        <div class="spend-legend">
+          <span><span class="spend-legend-line" style="background:var(--ink)"></span>On pace</span>
+          <span><span class="spend-legend-line" style="background:var(--spark-budget)"></span>Off pace</span>
+        </div>
+      </header>
+      <div style="padding:18px" id="spendDialsContent"></div>
+    </div>
+
+    <!-- Transaction drill-in (revealed when a dial's "View N transactions" is clicked) -->
+    <div class="panel" id="spendDrillPanel" style="margin-top:16px;display:none">
+      <header class="panel-header">
+        <div>
+          <div class="panel-title" id="spendDrillTitle">Transactions</div>
+          <div class="panel-subtitle" id="spendDrillSubtitle">—</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="closeSpendDrill()">Close</button>
+      </header>
+      <div style="padding:18px" id="spendDrillContent"></div>
+    </div>
+
+    <!-- Window-over-window table -->
+    <div class="panel" id="spendWowPanel" style="margin-top:16px">
+      <header class="panel-header">
+        <div>
+          <div class="panel-title">Window-over-window</div>
+          <div class="panel-subtitle">% of allocation consumed by close of window</div>
+        </div>
+      </header>
+      <div style="padding:18px" id="spendWowContent"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="spend-footer" id="spendFooter"></div>
   </div>
 
 </div><!-- end main -->
@@ -4137,6 +4598,8 @@ function toggleQBOPanel() {
 // which is saved in localStorage and takes precedence.
 const DEFAULT_QBO_BALANCES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=1270621260&single=true&output=csv';
 const DEFAULT_QBO_TAX_PAYMENTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=2087166635&single=true&output=csv';
+// SimpleFIN Transactions tab — written by SimpleFin.gs writeAllTransactions_()
+const DEFAULT_SPEND_TRANSACTIONS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=1812719483&single=true&output=csv';
 
 function saveQBOUrl() {
   const url = (document.getElementById('qboSheetUrl').value || '').trim();
@@ -5208,6 +5671,17 @@ function switchTab(tab, btn) {
     footer.classList.remove('visible');
     addBtn.style.display = 'none';
   }
+
+  // Hero strip is dashboard-wide context for the PF view; hide it on Spend
+  // so the Spend KPI strip is the only one showing.
+  const hero = document.getElementById('heroStrip');
+  if (hero) hero.style.display = (tab === 'spend') ? 'none' : '';
+
+  // Lazy-init the Spend tab on first entry; subsequent entries just re-render
+  // off the in-memory cache (initSpend is idempotent).
+  if (tab === 'spend' && typeof initSpend === 'function') {
+    try { initSpend(); } catch (e) { console.error('initSpend failed', e); }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -5561,6 +6035,795 @@ syncFromFirestore(); // then pull latest from cloud in background
     }
   } catch(e) {}
 })();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SPEND TAB — pacing analysis from SimpleFIN transactions
+//
+// Reads the Transactions tab written by SimpleFin.gs writeAllTransactions_(),
+// classifies each transaction (spend / regular_allocation / early_transfer /
+// rebalance / ignore), bins outflows into 15-day allocation windows, and
+// renders pacing dials matching design_handoff_spend_tracking/.
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SPEND_BUCKETS = [
+  { id: 'income', label: 'Income',       pct: 0,  color: 'var(--bucket-income)', chip: 'var(--bucket-income-chip)', text: 'var(--bucket-income-text)', hex: '#c8b994' },
+  { id: 'opex',   label: 'OpEx',         pct: 47, color: 'var(--bucket-opex)',   chip: 'var(--bucket-opex-chip)',   text: 'var(--bucket-opex-text)',   hex: '#7ba89a' },
+  { id: 'oc',     label: "Owner's Pay",  pct: 29, color: 'var(--bucket-oc)',     chip: 'var(--bucket-oc-chip)',     text: 'var(--bucket-oc-text)',     hex: '#9ab3cc' },
+  { id: 'tax',    label: 'Tax',          pct: 20, color: 'var(--bucket-tax)',    chip: 'var(--bucket-tax-chip)',    text: 'var(--bucket-tax-text)',    hex: '#d4a8a8' },
+  { id: 'profit', label: 'Profit',       pct: 4,  color: 'var(--bucket-profit)', chip: 'var(--bucket-profit-chip)', text: 'var(--bucket-profit-text)', hex: '#b7a4c9' },
+];
+// Buckets that show in the pacing dials (Income excluded — it's the source, not a target).
+const SPEND_DIAL_BUCKETS = SPEND_BUCKETS.filter(b => b.id !== 'income');
+// Allocation grace: a transfer 0-3 days AFTER the 10th/25th counts as the regular allocation.
+const SPEND_ALLOC_GRACE_DAYS = 3;
+// Internal transfer matching: ±N days, ±$ tolerance.
+const SPEND_MATCH_DAYS = 3;
+const SPEND_MATCH_DOLLARS = 1.00;
+
+// ─── Storage ────────────────────────────────────────────────────────────────
+
+function loadSpendMapping() {
+  try { return JSON.parse(localStorage.getItem('spend_account_mapping') || '{}'); }
+  catch(e) { return {}; }
+}
+function saveSpendMapping(m) {
+  localStorage.setItem('spend_account_mapping', JSON.stringify(m));
+  if (typeof saveToFirestore === 'function') saveToFirestore();
+}
+function loadSpendOverrides() {
+  // { txnId: { tag?: 'spend'|'alloc'|'early'|'rebalance'|'ignore', linkedTxnId?: string } }
+  try { return JSON.parse(localStorage.getItem('spend_txn_overrides') || '{}'); }
+  catch(e) { return {}; }
+}
+function saveSpendOverrides(o) {
+  localStorage.setItem('spend_txn_overrides', JSON.stringify(o));
+  if (typeof saveToFirestore === 'function') saveToFirestore();
+}
+function loadSpendTxnsCache() {
+  try {
+    const raw = localStorage.getItem('spend_transactions_cache');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+function saveSpendTxnsCache(payload) {
+  localStorage.setItem('spend_transactions_cache', JSON.stringify(payload));
+}
+
+// ─── Module state ───────────────────────────────────────────────────────────
+
+const spendState = {
+  txns: [],             // array of normalized transactions
+  accounts: [],         // distinct {id, name} pairs from txns
+  fetchedAt: null,
+  loading: false,
+  error: null,
+  expandedBucket: null,
+  classified: [],       // txns annotated with .tag and .bucketId
+  windowsCache: null,   // memoized windows derived from PF rows + dates
+};
+
+// ─── CSV fetch + parse ─────────────────────────────────────────────────────
+
+async function fetchSpendTransactions() {
+  if (spendState.loading) return;
+  spendState.loading = true;
+  spendState.error = null;
+  renderSpend();
+  try {
+    const url = DEFAULT_SPEND_TRANSACTIONS_URL + '&_=' + Date.now();
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const txns = parseSpendCSV(text);
+    spendState.txns = txns;
+    spendState.accounts = collectSpendAccounts(txns);
+    spendState.fetchedAt = Date.now();
+    saveSpendTxnsCache({ txns, fetchedAt: spendState.fetchedAt });
+    classifySpendTransactions();
+  } catch(err) {
+    spendState.error = err.message;
+  } finally {
+    spendState.loading = false;
+    renderSpend();
+  }
+}
+
+function parseSpendCSV(csvText) {
+  function parseRow(line) {
+    const out = []; let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+  const idx = (name) => headers.indexOf(name);
+  const dateIdx = idx('date');
+  const accIdIdx = idx('account id');
+  const accNmIdx = idx('account name');
+  const amtIdx  = idx('amount');
+  const dirIdx  = idx('direction');
+  const payIdx  = idx('payee');
+  const descIdx = idx('description');
+  const memoIdx = idx('memo');
+  const pndIdx  = idx('pending');
+  const tidIdx  = idx('txn id');
+  if (dateIdx < 0 || accIdIdx < 0 || amtIdx < 0) return [];
+
+  const out = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const cols = parseRow(lines[i]);
+    out.push({
+      date:        cols[dateIdx],
+      accountId:   cols[accIdIdx],
+      accountName: cols[accNmIdx] || '',
+      amount:      parseFloat(cols[amtIdx]) || 0,
+      direction:   (cols[dirIdx] || 'out').toLowerCase(),
+      payee:       cols[payIdx] || '',
+      description: cols[descIdx] || '',
+      memo:        cols[memoIdx] || '',
+      pending:     (cols[pndIdx] || '').toLowerCase() === 'pending',
+      txnId:       cols[tidIdx] || (cols[dateIdx] + '|' + cols[amtIdx] + '|' + (cols[payIdx] || '') + '|' + cols[accIdIdx]),
+    });
+  }
+  return out;
+}
+
+function collectSpendAccounts(txns) {
+  const seen = new Map();
+  txns.forEach(t => {
+    if (!seen.has(t.accountId)) seen.set(t.accountId, { id: t.accountId, name: t.accountName });
+  });
+  return Array.from(seen.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// ─── Account mapping helpers ───────────────────────────────────────────────
+
+function getBucketIdForAccount(accountId) {
+  const mapping = loadSpendMapping();
+  return mapping[accountId] || null;  // null = unmapped
+}
+function bucketById(id) { return SPEND_BUCKETS.find(b => b.id === id); }
+function getIncomeAccountId() {
+  const m = loadSpendMapping();
+  return Object.keys(m).find(k => m[k] === 'income');
+}
+
+// ─── Window math ───────────────────────────────────────────────────────────
+
+// 10th-24th and 25th-(9th of next month) windows.
+// A date on or after the 25th: belongs to [25, next-9] window.
+// A date on the 10th-24th: belongs to [10, 24].
+// A date before the 10th: belongs to PREVIOUS month's [25, 9] window.
+function getSpendWindowForDate(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d.getTime())) return null;
+  const day = d.getDate(), m = d.getMonth(), y = d.getFullYear();
+  let startY, startM, startD, endY, endM, endD;
+  if (day >= 25) { startY = y; startM = m; startD = 25; endY = y; endM = m + 1; endD = 9; }
+  else if (day >= 10) { startY = y; startM = m; startD = 10; endY = y; endM = m; endD = 24; }
+  else { startY = y; startM = m - 1; startD = 25; endY = y; endM = m; endD = 9; }
+  const start = new Date(startY, startM, startD);
+  const end   = new Date(endY, endM, endD);
+  return spendWindowMeta(start, end);
+}
+
+function spendWindowMeta(start, end) {
+  const id = isoDate(start);
+  const days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  return { id, start, end, days, monthLabel: shortRange(start, end) };
+}
+
+function shortRange(s, e) {
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const sStr = M[s.getMonth()] + ' ' + s.getDate();
+  const eStr = (s.getMonth() === e.getMonth()) ? String(e.getDate()) : (M[e.getMonth()] + ' ' + e.getDate());
+  return sStr + ' \u2013 ' + eStr;
+}
+function isoDate(d) {
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + dd;
+}
+
+function getRecentSpendWindows(n) {
+  // Walk backwards from "today" producing the last n windows oldest-first.
+  const today = new Date(); today.setHours(0,0,0,0);
+  const wins = [];
+  let cursor = today;
+  for (let i = 0; i < n; i++) {
+    const w = getSpendWindowForDate(isoDate(cursor));
+    if (!w) break;
+    wins.push(w);
+    // Walk back to the previous window: subtract 1 from window.start to land in the prior window.
+    const prevDay = new Date(w.start); prevDay.setDate(prevDay.getDate() - 1);
+    cursor = prevDay;
+  }
+  wins.reverse();
+  // Mark current
+  if (wins.length) {
+    const cur = wins[wins.length - 1];
+    cur.status = 'current';
+    cur.dayIndex = Math.min(cur.days, Math.round((today - cur.start) / 86400000) + 1);
+    for (let i = 0; i < wins.length - 1; i++) wins[i].status = 'closed';
+  }
+  return wins;
+}
+
+// Inflow per window: sum of `in` transactions to the income account during the window.
+function getSpendInflowForWindow(win) {
+  const incomeId = getIncomeAccountId();
+  if (!incomeId) return 0;
+  let total = 0;
+  spendState.txns.forEach(t => {
+    if (t.accountId !== incomeId) return;
+    if (t.direction !== 'in') return;
+    const d = new Date(t.date + 'T00:00:00');
+    if (d < win.start || d > new Date(win.end.getFullYear(), win.end.getMonth(), win.end.getDate(), 23, 59, 59)) return;
+    total += t.amount;
+  });
+  return total;
+}
+
+// ─── Classifier ────────────────────────────────────────────────────────────
+
+function classifySpendTransactions() {
+  const overrides = loadSpendOverrides();
+  const incomeId = getIncomeAccountId();
+  const txns = spendState.txns;
+
+  // Pre-bucket by date for fast match lookup
+  const byDate = {};
+  txns.forEach((t, i) => {
+    (byDate[t.date] = byDate[t.date] || []).push({ t, i });
+  });
+  function neighborsOf(dateStr, dollars) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const out = [];
+    for (let off = -SPEND_MATCH_DAYS; off <= SPEND_MATCH_DAYS; off++) {
+      const check = new Date(d); check.setDate(check.getDate() + off);
+      const list = byDate[isoDate(check)] || [];
+      list.forEach(({ t, i }) => {
+        if (Math.abs(t.amount - dollars) <= SPEND_MATCH_DOLLARS) out.push({ t, i });
+      });
+    }
+    return out;
+  }
+
+  const result = txns.map((t, i) => {
+    const bucketId = getBucketIdForAccount(t.accountId);
+    const overrideKey = t.txnId;
+    const ov = overrides[overrideKey] || {};
+
+    // Manual override wins
+    if (ov.tag) return { ...t, bucketId, tag: ov.tag, linkedTo: ov.linkedTxnId, overridden: true };
+
+    // Unmapped or ignored accounts are noise
+    if (!bucketId || bucketId === 'ignore') return { ...t, bucketId, tag: 'ignore' };
+
+    // Inflows: not "spend." Could be income deposits or matched internal transfers.
+    if (t.direction === 'in') {
+      // Income deposits land in income account → tag as 'income'
+      if (bucketId === 'income') return { ...t, bucketId, tag: 'income' };
+      // Inflow into a bucket account = receiving end of a transfer. Tag based on source if matched.
+      const matches = neighborsOf(t.date, t.amount).filter(m => m.t.direction === 'out' && m.t.accountId !== t.accountId);
+      const fromIncome = matches.find(m => getBucketIdForAccount(m.t.accountId) === 'income');
+      if (fromIncome) {
+        return { ...t, bucketId, tag: classifyTransferTiming(t.date, fromIncome.t.date), linkedTxnId: fromIncome.t.txnId };
+      }
+      // From another bucket → rebalance receive
+      if (matches.length) return { ...t, bucketId, tag: 'rebalance', linkedTxnId: matches[0].t.txnId };
+      return { ...t, bucketId, tag: 'income-other' };
+    }
+
+    // Outflows: real spend OR a transfer leg
+    const matches = neighborsOf(t.date, t.amount).filter(m => m.t.direction === 'in' && m.t.accountId !== t.accountId);
+    if (matches.length) {
+      const toBucket = matches.find(m => {
+        const b = getBucketIdForAccount(m.t.accountId);
+        return b && b !== 'ignore';
+      });
+      if (toBucket) {
+        const destBucket = getBucketIdForAccount(toBucket.t.accountId);
+        if (bucketId === 'income' && destBucket && destBucket !== 'income') {
+          // Income → bucket: regular allocation or early transfer
+          return { ...t, bucketId, destBucketId: destBucket, tag: classifyTransferTiming(t.date, toBucket.t.date), linkedTxnId: toBucket.t.txnId };
+        }
+        // Bucket → bucket OR bucket → income: rebalance
+        return { ...t, bucketId, destBucketId: destBucket, tag: 'rebalance', linkedTxnId: toBucket.t.txnId };
+      }
+    }
+    // Real outflow (spend) — only if account is a bucket (income outflows w/o match are anomalies)
+    if (bucketId === 'income') return { ...t, bucketId, tag: 'income-out' };
+    return { ...t, bucketId, tag: 'spend' };
+  });
+
+  spendState.classified = result;
+  return result;
+}
+
+// Returns 'allocation' if date is within [allocDay, allocDay+SPEND_ALLOC_GRACE_DAYS], else 'early'.
+function classifyTransferTiming(outDate, inDate) {
+  // Use the earlier of the two legs (the actual initiation date).
+  const a = new Date(outDate + 'T00:00:00');
+  const b = inDate ? new Date(inDate + 'T00:00:00') : a;
+  const d = a < b ? a : b;
+  const day = d.getDate();
+  if (day >= 10 && day <= 10 + SPEND_ALLOC_GRACE_DAYS) return 'allocation';
+  if (day >= 25 && day <= 25 + SPEND_ALLOC_GRACE_DAYS) return 'allocation';
+  return 'early';
+}
+
+// ─── Pace derivation ───────────────────────────────────────────────────────
+
+function deriveSpendForWindow(win) {
+  const inflow = getSpendInflowForWindow(win);
+  const allocPct = currentSpendAllocPct();
+  const wStart = win.start, wEnd = new Date(win.end.getFullYear(), win.end.getMonth(), win.end.getDate(), 23, 59, 59);
+
+  const buckets = SPEND_DIAL_BUCKETS.map(b => {
+    const alloc = inflow * (allocPct[b.id] / 100);
+    let spent = 0, txnCount = 0;
+    spendState.classified.forEach(t => {
+      if (t.bucketId !== b.id) return;
+      if (t.tag !== 'spend') return;
+      const d = new Date(t.date + 'T00:00:00');
+      if (d < wStart || d > wEnd) return;
+      spent += t.amount;
+      txnCount++;
+    });
+    const pctConsumed = alloc > 0 ? (spent / alloc) * 100 : 0;
+    const elapsedPct = win.status === 'current' ? (win.dayIndex / win.days) * 100 : 100;
+    const pace = pctConsumed - elapsedPct;
+    let status = 'on-pace';
+    if (pctConsumed > 100) status = 'over';
+    else if (pctConsumed > elapsedPct + 8) status = 'warn';
+    return { ...b, alloc, spent, remaining: alloc - spent, pctConsumed, elapsedPct, pace, status, txnCount };
+  });
+  const totalTxns = buckets.reduce((s, b) => s + b.txnCount, 0);
+  return { win, inflow, buckets, totalTxns };
+}
+
+function currentSpendAllocPct() {
+  // Use the most recent PF row's percentages. Fall back to bucket defaults.
+  try {
+    const data = (typeof loadData === 'function') ? loadData() : [];
+    if (data && data.length) {
+      const r = data[data.length - 1];
+      return { opex: +r.opex || 0, oc: +r.oc || 0, tax: +r.tax || 0, profit: +r.profit || 0 };
+    }
+  } catch(e) {}
+  return Object.fromEntries(SPEND_DIAL_BUCKETS.map(b => [b.id, b.pct]));
+}
+
+// ─── Render: top-level ─────────────────────────────────────────────────────
+
+function renderSpend() {
+  // Bail if Spend tab not in DOM yet
+  if (!document.getElementById('tab-spend')) return;
+  renderSpendMappingPanel();
+  renderSpendKpiStrip();
+  renderSpendDials();
+  renderSpendWow();
+  renderSpendFooter();
+  if (spendState.expandedBucket) renderSpendDrill(spendState.expandedBucket);
+}
+
+function spendIsReady() {
+  // Need at least one transaction AND an income account mapped
+  return spendState.txns.length > 0 && !!getIncomeAccountId();
+}
+
+// ─── Render: KPI strip ─────────────────────────────────────────────────────
+
+function renderSpendKpiStrip() {
+  const el = document.getElementById('spendKpiStrip');
+  if (!el) return;
+  if (!spendIsReady()) { el.innerHTML = ''; return; }
+
+  const wins = getRecentSpendWindows(6);
+  if (!wins.length) { el.innerHTML = ''; return; }
+  const cur = wins[wins.length - 1];
+  const d = deriveSpendForWindow(cur);
+  const totalSpent = d.buckets.reduce((s, b) => s + b.spent, 0);
+  const totalAlloc = d.buckets.reduce((s, b) => s + b.alloc, 0);
+  const offPace = d.buckets.filter(b => b.status !== 'on-pace').length;
+  const dayLabel = `${shortDate(cur.start)} \u2013 ${shortDate(cur.end)} \u00b7 day ${cur.dayIndex || 1} of ${cur.days}`;
+
+  const cards = [
+    { label: 'Window inflow', value: fmtMoney0(d.inflow), sub: dayLabel },
+    { label: 'Spent so far',  value: fmtMoney0(totalSpent), sub: `${d.totalTxns} transactions \u00b7 ${totalAlloc > 0 ? Math.round(totalSpent/totalAlloc*100) : 0}% of allocation`, dot: 'var(--bucket-opex)' },
+    { label: 'Pacing health', value: offPace === 0 ? 'On pace' : `${offPace} off pace`, sub: offPace === 0 ? 'All buckets within expected range' : 'Subtle warnings shown below', dot: offPace === 0 ? 'var(--bucket-opex)' : 'var(--gauge-overflow)' },
+    { label: 'Allocation total', value: '100%', sub: 'Profit First %s in sync', dot: 'var(--bucket-opex)' },
+  ];
+  el.innerHTML = cards.map(c => `
+    <div class="spend-kpi-card">
+      <div class="spend-kpi-label">${c.label}</div>
+      <div class="spend-kpi-value">${c.value}</div>
+      <div class="spend-kpi-sub">${c.dot ? `<span class="spend-kpi-dot" style="background:${c.dot}"></span>` : ''}${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+function shortDate(d) {
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return M[d.getMonth()] + ' ' + d.getDate();
+}
+
+// ─── Render: Account mapping panel ─────────────────────────────────────────
+
+function renderSpendMappingPanel() {
+  const content = document.getElementById('spendMappingContent');
+  if (!content) return;
+  const accounts = spendState.accounts;
+  if (!accounts.length) {
+    if (spendState.loading) {
+      content.innerHTML = '<div class="spend-loading">Loading transactions from Google Sheet…</div>';
+    } else if (spendState.error) {
+      content.innerHTML = `<div class="spend-empty"><strong>Couldn't load transactions</strong>${spendState.error}<br><br><button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">Retry</button></div>`;
+    } else {
+      content.innerHTML = `<div class="spend-empty"><strong>No transactions yet</strong>Run <code>fetchSimpleFinTransactions</code> in Apps Script first, then click below.<br><br><button class="btn btn-primary btn-sm" onclick="fetchSpendTransactions()">Load transactions</button></div>`;
+    }
+    return;
+  }
+  const mapping = loadSpendMapping();
+  const balances = (function() {
+    const out = {};
+    spendState.txns.forEach(t => { out[t.accountId] = (out[t.accountId] || 0) + (t.direction === 'in' ? t.amount : -t.amount); });
+    return out;
+  })();
+  const options = SPEND_BUCKETS.map(b => `<option value="${b.id}">${b.label}</option>`).join('') + '<option value="ignore">— Ignore —</option>';
+
+  const rows = accounts.map(a => {
+    const cur = mapping[a.id] || '';
+    const sel = SPEND_BUCKETS.map(b => `<option value="${b.id}" ${cur === b.id ? 'selected' : ''}>${b.label}</option>`).join('') +
+                `<option value="ignore" ${cur === 'ignore' ? 'selected' : ''}>— Ignore —</option>` +
+                `<option value="" ${!cur ? 'selected' : ''}>— Unassigned —</option>`;
+    const bal = balances[a.id] != null ? fmtMoney0(balances[a.id]) : '';
+    return `
+      <div class="spend-mapping-name">${a.name}<small>${a.id.slice(0, 28)}…</small></div>
+      <select class="spend-mapping-select" onchange="setSpendMapping('${a.id.replace(/'/g, "\\'")}', this.value)">${sel}</select>
+      <div class="spend-mapping-bal" title="Net flow over loaded window">${bal}</div>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="spend-mapping-grid">
+      <div class="spend-mapping-head">Account</div>
+      <div class="spend-mapping-head">PF Bucket</div>
+      <div class="spend-mapping-head" style="text-align:right">Net flow</div>
+      ${rows}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--spend-border-soft)">
+      <div style="font-size:11.5px;color:var(--ink-3)">${accounts.length} account${accounts.length === 1 ? '' : 's'} \u00b7 ${spendState.txns.length} transactions loaded${spendState.fetchedAt ? ` \u00b7 fetched ${new Date(spendState.fetchedAt).toLocaleString([], {hour: 'numeric', minute: '2-digit'})}` : ''}</div>
+      <button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">${spendState.loading ? 'Loading…' : 'Refresh'}</button>
+    </div>
+  `;
+}
+
+function setSpendMapping(accountId, bucketId) {
+  const m = loadSpendMapping();
+  if (bucketId) m[accountId] = bucketId; else delete m[accountId];
+  saveSpendMapping(m);
+  classifySpendTransactions();
+  renderSpend();
+}
+
+function toggleSpendMapping() {
+  const c = document.getElementById('spendMappingContent');
+  const b = document.getElementById('spendMappingToggle');
+  if (!c || !b) return;
+  const hidden = c.style.display === 'none';
+  c.style.display = hidden ? '' : 'none';
+  b.textContent = hidden ? 'Hide' : 'Show';
+}
+
+// ─── Render: Allocation pacing dials ───────────────────────────────────────
+
+function renderSpendDials() {
+  const content = document.getElementById('spendDialsContent');
+  const subtitle = document.getElementById('spendDialsSubtitle');
+  if (!content) return;
+  if (!spendIsReady()) {
+    content.innerHTML = '<div class="spend-empty">Map your accounts above to see pacing.</div>';
+    if (subtitle) subtitle.textContent = '—';
+    return;
+  }
+  const wins = getRecentSpendWindows(6);
+  if (!wins.length) { content.innerHTML = '<div class="spend-empty">No allocation windows in transaction history.</div>'; return; }
+  const cur = wins[wins.length - 1];
+  const d = deriveSpendForWindow(cur);
+
+  if (subtitle) {
+    subtitle.textContent = `${shortDate(cur.start)} \u2013 ${shortDate(cur.end)}  \u00b7  Day ${cur.dayIndex || 1} of ${cur.days}  \u00b7  Window inflow ${fmtMoney0(d.inflow)}`;
+  }
+
+  // Sparkline data per bucket: pctConsumed across the 6 windows
+  const sparkByBucket = {};
+  SPEND_DIAL_BUCKETS.forEach(b => sparkByBucket[b.id] = []);
+  wins.forEach(w => {
+    const dw = deriveSpendForWindow(w);
+    dw.buckets.forEach(b => sparkByBucket[b.id].push(Math.min(b.pctConsumed, 130)));
+  });
+
+  content.innerHTML = '<div class="spend-dial-grid">' + d.buckets.map(b => {
+    const isWarn = b.status !== 'on-pace';
+    const paceTxt = b.pace > 0 ? `+${Math.round(b.pace)}% ahead` : `${Math.round(Math.abs(b.pace))}% under`;
+    const expanded = spendState.expandedBucket === b.id;
+    return `
+      <div class="spend-dial">
+        <div class="spend-dial-head">
+          <span class="spend-dial-title"><span class="spend-dial-dot" style="background:${b.hex}"></span>${b.label}</span>
+          <span class="spend-dial-pct">${(currentSpendAllocPct()[b.id] || 0).toFixed(0)}%</span>
+        </div>
+        ${svgSpendGauge(b.pctConsumed, b.elapsedPct, b.hex)}
+        <div class="spend-dial-pace ${isWarn ? 'warn' : ''}">${paceTxt}</div>
+        <div class="spend-dial-numbers">
+          <div><div class="lbl">Spent</div><div class="val">${fmtMoney0(b.spent)}</div></div>
+          <div style="text-align:right"><div class="lbl">Remaining</div><div class="val">${fmtMoney0(b.remaining)}</div></div>
+        </div>
+        <div class="spend-dial-spark-head">
+          <span class="ttl">Last ${wins.length} windows vs budget</span>
+          <span class="legend"><span class="swatch" style="background:var(--spark-safe)"></span>safe<span class="swatch" style="background:var(--spark-over);margin-left:6px"></span>over</span>
+        </div>
+        ${svgSpendSparkline(sparkByBucket[b.id], b.hex)}
+        <button class="spend-dial-toggle ${expanded ? 'active' : ''}" style="${expanded ? `background:${b.color};color:${b.text};border-color:${b.color}` : ''}" onclick="viewSpendBucket('${b.id}')">
+          ${expanded ? 'Hide' : 'View'} ${b.txnCount} transaction${b.txnCount === 1 ? '' : 's'}
+        </button>
+      </div>
+    `;
+  }).join('') + '</div>';
+}
+
+// ─── SVG: Gauge ────────────────────────────────────────────────────────────
+
+function svgSpendGauge(pctConsumed, elapsedPct, color) {
+  const r = 58, cx = 80, cy = 78;
+  function arcPath(pct) {
+    const angle = Math.min(pct, 130) / 100 * 180;
+    const rad = (angle - 180) * Math.PI / 180;
+    const x = cx + r * Math.cos(rad);
+    const y = cy + r * Math.sin(rad);
+    const large = angle > 180 ? 1 : 0;
+    return `M ${cx - r} ${cy} A ${r} ${r} 0 ${large} 1 ${x.toFixed(2)} ${y.toFixed(2)}`;
+  }
+  const tickAngle = (elapsedPct / 100) * 180 - 180;
+  const trad = tickAngle * Math.PI / 180;
+  const tx1 = cx + (r - 10) * Math.cos(trad);
+  const ty1 = cy + (r - 10) * Math.sin(trad);
+  const tx2 = cx + (r + 6) * Math.cos(trad);
+  const ty2 = cy + (r + 6) * Math.sin(trad);
+  const overflow = Math.max(0, pctConsumed - 100);
+  let overflowPath = '';
+  if (overflow > 0) {
+    const oAng = Math.min(overflow, 30) / 100 * 180;
+    const oRad = oAng * Math.PI / 180;
+    const ox = cx + r * Math.cos(oRad);
+    const oy = cy + r * Math.sin(oRad);
+    overflowPath = `<path d="M ${cx + r} ${cy} A ${r} ${r} 0 0 1 ${ox.toFixed(2)} ${oy.toFixed(2)}" fill="none" stroke="var(--gauge-overflow)" stroke-width="10" stroke-linecap="round" />`;
+  }
+  return `
+    <div style="display:flex;justify-content:center;margin-top:6px">
+      <svg width="160" height="100" viewBox="0 0 160 100">
+        <path d="${arcPath(100)}" fill="none" stroke="var(--gauge-track)" stroke-width="10" stroke-linecap="round" />
+        <path d="${arcPath(Math.min(pctConsumed, 100))}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" />
+        ${overflowPath}
+        <line x1="${tx1.toFixed(2)}" y1="${ty1.toFixed(2)}" x2="${tx2.toFixed(2)}" y2="${ty2.toFixed(2)}" stroke="var(--ink)" stroke-width="2" stroke-linecap="round" />
+        <text x="${cx}" y="${cy - 12}" text-anchor="middle" font-size="22" font-weight="600" fill="var(--ink)" style="font-variant-numeric:tabular-nums;letter-spacing:-0.5px">${Math.round(pctConsumed)}%</text>
+        <text x="${cx}" y="${cy + 2}" text-anchor="middle" font-size="9" fill="var(--ink-4)" style="letter-spacing:0.4px;text-transform:uppercase">consumed</text>
+      </svg>
+    </div>
+  `;
+}
+
+// ─── SVG: Sparkline ────────────────────────────────────────────────────────
+
+function svgSpendSparkline(data, color) {
+  const w = 240, h = 88;
+  const padL = 28, padR = 8, padT = 14, padB = 16;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+  const dataMax = data.length ? Math.max(...data) : 0;
+  const max = Math.max(130, dataMax + 10);
+  const yFor = v => padT + innerH - (v / max) * innerH;
+  const xFor = i => data.length === 1 ? padL + innerW / 2 : padL + (i / (data.length - 1)) * innerW;
+  const points = data.map((v, i) => [xFor(i), yFor(v)]);
+  const pathD = points.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const y0 = yFor(0), y100 = yFor(100), y50 = yFor(50), yTop = padT;
+  const ptMarkup = points.map(([x, y], i) => {
+    const isLast = i === points.length - 1;
+    const v = Math.round(data[i]);
+    const over = v > 100;
+    const labelColor = over ? '#8a6a2b' : (isLast ? '#1f1d1a' : '#9a958c');
+    return `
+      <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${isLast ? 3 : 2.2}" fill="${isLast ? '#1f1d1a' : color}" stroke="#fff" stroke-width="1" />
+      <text x="${x.toFixed(2)}" y="${(y - 6).toFixed(2)}" text-anchor="middle" font-size="8.5" font-weight="${isLast ? 600 : 500}" fill="${labelColor}" style="font-variant-numeric:tabular-nums">${v}%</text>
+    `;
+  }).join('');
+  return `
+    <svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible">
+      <rect x="${padL}" y="${y100.toFixed(2)}" width="${innerW}" height="${(y0 - y100).toFixed(2)}" fill="var(--spark-safe)" />
+      <rect x="${padL}" y="${yTop}" width="${innerW}" height="${(y100 - yTop).toFixed(2)}" fill="var(--spark-over)" opacity="0.55" />
+      <text x="${padL - 4}" y="${(y100 + 3).toFixed(2)}" text-anchor="end" font-size="8.5" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">100%</text>
+      <text x="${padL - 4}" y="${(y50 + 3).toFixed(2)}" text-anchor="end" font-size="8.5" fill="var(--ink-4)" style="font-variant-numeric:tabular-nums">50%</text>
+      <text x="${padL - 4}" y="${(y0 + 3).toFixed(2)}" text-anchor="end" font-size="8.5" fill="var(--ink-4)" style="font-variant-numeric:tabular-nums">0</text>
+      <line x1="${padL}" x2="${padL + innerW}" y1="${y50.toFixed(2)}" y2="${y50.toFixed(2)}" stroke="var(--spend-border-soft)" stroke-width="1" stroke-dasharray="1 3" />
+      <line x1="${padL}" x2="${padL + innerW}" y1="${y100.toFixed(2)}" y2="${y100.toFixed(2)}" stroke="var(--spark-budget)" stroke-width="1.25" stroke-dasharray="3 2" />
+      <text x="${padL + innerW}" y="${(y100 - 3).toFixed(2)}" text-anchor="end" font-size="8.5" font-weight="600" fill="var(--spark-budget)" style="letter-spacing:0.5px;text-transform:uppercase">budget</text>
+      <line x1="${padL}" x2="${padL}" y1="${yTop}" y2="${y0.toFixed(2)}" stroke="var(--rule)" stroke-width="1" />
+      <line x1="${padL}" x2="${padL + innerW}" y1="${y0.toFixed(2)}" y2="${y0.toFixed(2)}" stroke="var(--rule)" stroke-width="1" />
+      <path d="${pathD}" fill="none" stroke="${color}" stroke-width="1.75" />
+      ${ptMarkup}
+    </svg>
+  `;
+}
+
+// ─── Render: Window-over-window table ──────────────────────────────────────
+
+function renderSpendWow() {
+  const content = document.getElementById('spendWowContent');
+  if (!content) return;
+  if (!spendIsReady()) { content.innerHTML = '<div class="spend-empty">Map your accounts to see history.</div>'; return; }
+  const wins = getRecentSpendWindows(6);
+  if (!wins.length) { content.innerHTML = ''; return; }
+
+  // Header row
+  let html = '<div class="spend-wow-grid">';
+  html += '<div class="spend-wow-head">Bucket</div>';
+  wins.forEach((w, i) => {
+    const isCur = i === wins.length - 1;
+    html += `<div class="spend-wow-head ${isCur ? 'current' : 'prior'}">${w.monthLabel}</div>`;
+  });
+
+  // Rows: bucket × windows
+  SPEND_DIAL_BUCKETS.forEach(b => {
+    html += `<div class="spend-wow-row-label"><span class="spend-dial-dot" style="background:${b.hex}"></span>${b.label}</div>`;
+    wins.forEach((w, i) => {
+      const isCur = i === wins.length - 1;
+      const dw = deriveSpendForWindow(w);
+      const bb = dw.buckets.find(x => x.id === b.id);
+      const pct = Math.round(bb.pctConsumed || 0);
+      const over = pct > 100;
+      html += `
+        <div class="spend-wow-cell ${isCur ? 'current' : 'prior'} ${over ? 'over' : ''}">
+          <div class="pct">${pct}%</div>
+          <div class="amt">${fmtMoney0(bb.spent)}</div>
+        </div>
+      `;
+    });
+  });
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+// ─── Render: Drill-in transactions ─────────────────────────────────────────
+
+function viewSpendBucket(bucketId) {
+  spendState.expandedBucket = (spendState.expandedBucket === bucketId) ? null : bucketId;
+  if (spendState.expandedBucket) {
+    document.getElementById('spendDrillPanel').style.display = '';
+    renderSpendDrill(spendState.expandedBucket);
+  } else {
+    document.getElementById('spendDrillPanel').style.display = 'none';
+  }
+  renderSpendDials();  // re-render to update toggle button states
+}
+
+function closeSpendDrill() {
+  spendState.expandedBucket = null;
+  document.getElementById('spendDrillPanel').style.display = 'none';
+  renderSpendDials();
+}
+
+function renderSpendDrill(bucketId) {
+  const b = bucketById(bucketId);
+  if (!b) return;
+  const titleEl = document.getElementById('spendDrillTitle');
+  const subEl = document.getElementById('spendDrillSubtitle');
+  const contentEl = document.getElementById('spendDrillContent');
+  if (!titleEl || !contentEl) return;
+
+  const wins = getRecentSpendWindows(6);
+  const cur = wins[wins.length - 1];
+  const wStart = cur.start, wEnd = new Date(cur.end.getFullYear(), cur.end.getMonth(), cur.end.getDate(), 23, 59, 59);
+
+  // Pull EVERY classified transaction for this bucket in current window (all tags, not just spend)
+  const txns = spendState.classified.filter(t => {
+    if (t.bucketId !== bucketId) return false;
+    const d = new Date(t.date + 'T00:00:00');
+    return d >= wStart && d <= wEnd;
+  }).sort((a, b) => b.date.localeCompare(a.date));
+
+  titleEl.textContent = `${b.label} \u00b7 transactions this window`;
+  subEl.textContent = `${txns.length} transaction${txns.length === 1 ? '' : 's'}  \u00b7  ${shortDate(cur.start)} \u2013 ${shortDate(cur.end)}`;
+
+  if (!txns.length) {
+    contentEl.innerHTML = '<div class="spend-txn-empty">No transactions yet this window.</div>';
+    return;
+  }
+  let html = '<div class="spend-txn-table">';
+  html += '<div class="spend-txn-row head"><div>Date</div><div>Payee</div><div>Memo</div><div class="amt">Amount</div><div class="tag">Tag</div></div>';
+  txns.forEach(t => {
+    const tagLabel = ({
+      spend: 'spend', allocation: 'allocation', early: 'early', rebalance: 'rebalance',
+      ignore: 'ignore', income: 'income', 'income-out': 'income out', 'income-other': 'income'
+    })[t.tag] || t.tag;
+    const tagClass = ({
+      spend: 'spend', allocation: 'alloc', early: 'early', rebalance: 'rebalance', ignore: 'ignore',
+      income: 'alloc', 'income-out': 'ignore', 'income-other': 'alloc'
+    })[t.tag] || 'spend';
+    const sign = t.direction === 'in' ? '+' : '−';
+    html += `
+      <div class="spend-txn-row" data-txn="${t.txnId}">
+        <div class="date">${t.date}</div>
+        <div>${t.payee || t.description || '<span style="color:var(--ink-4)">—</span>'}</div>
+        <div class="memo">${t.memo || t.description || ''}</div>
+        <div class="amt">${sign}${fmt$(t.amount)}</div>
+        <div class="tag"><span class="spend-tag ${tagClass}" title="Click to override" onclick="cycleSpendTag('${t.txnId.replace(/'/g, "\\'")}')">${tagLabel}</span></div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  html += '<div style="margin-top:10px;font-size:11px;color:var(--ink-4)">Click a tag to override. Manual matches override the classifier.</div>';
+  contentEl.innerHTML = html;
+}
+
+// Cycle a transaction's tag via manual override (spend → allocation → early → rebalance → ignore → clear)
+function cycleSpendTag(txnId) {
+  const order = ['spend', 'allocation', 'early', 'rebalance', 'ignore', null];
+  const o = loadSpendOverrides();
+  const cur = (o[txnId] && o[txnId].tag) || null;
+  const idx = order.indexOf(cur);
+  const next = order[(idx + 1) % order.length];
+  if (next == null) {
+    if (o[txnId]) { delete o[txnId].tag; if (Object.keys(o[txnId]).length === 0) delete o[txnId]; }
+  } else {
+    o[txnId] = { ...(o[txnId] || {}), tag: next };
+  }
+  saveSpendOverrides(o);
+  classifySpendTransactions();
+  renderSpend();
+}
+
+// ─── Render: Footer ────────────────────────────────────────────────────────
+
+function renderSpendFooter() {
+  const f = document.getElementById('spendFooter');
+  if (!f) return;
+  if (!spendState.fetchedAt) { f.innerHTML = ''; return; }
+  const dt = new Date(spendState.fetchedAt);
+  const datePart = dt.toLocaleDateString();
+  const timePart = dt.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+  f.innerHTML = `
+    <div>Bank data fetched ${datePart} at ${timePart}  \u00b7  ${spendState.txns.length} transactions</div>
+    <div>SimpleFIN /accounts \u2192 Transactions tab</div>
+  `;
+}
+
+// ─── Lifecycle ─────────────────────────────────────────────────────────────
+
+function initSpend() {
+  // Load cache (so the tab feels instant) then refresh in background.
+  const cached = loadSpendTxnsCache();
+  if (cached && cached.txns) {
+    spendState.txns = cached.txns;
+    spendState.accounts = collectSpendAccounts(cached.txns);
+    spendState.fetchedAt = cached.fetchedAt;
+    classifySpendTransactions();
+  }
+  // Always re-fetch so the user sees fresh data on tab open
+  fetchSpendTransactions();
+}
 </script>
 </body>
 </html>

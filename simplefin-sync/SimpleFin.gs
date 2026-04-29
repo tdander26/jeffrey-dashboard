@@ -24,6 +24,7 @@
 
 var SHEET_NAME     = 'Balances';
 var TAX_SHEET_NAME = 'Tax Payments';
+var TXN_SHEET_NAME = 'Transactions';
 
 // How far back to pull transactions for tax-payment detection.
 // SimpleFIN typically returns 90 days by default; we explicitly request more.
@@ -166,11 +167,12 @@ function claimSimpleFinSetupToken(setupToken) {
 
 function fetchAll() {
   // Single SimpleFIN /accounts call returns BOTH balances and transactions —
-  // we just shape it two different ways into the two sheets.
+  // we just shape it three different ways into the three sheets.
   try {
     var data = fetchAccountsWithTransactions_(TAX_LOOKBACK_DAYS);
     writeBalances_(data.accounts);
     writeTaxPayments_(extractTaxPayments_(data.accounts));
+    writeAllTransactions_(data.accounts);
   } catch(err) {
     Logger.log('✗ fetchAll failed: ' + err.message);
     throw err;
@@ -210,6 +212,17 @@ function fetchSimpleFinTaxPayments() {
   payments.forEach(function(r) {
     Logger.log('  ' + r.date + ' · ' + r.payee + ' · $' + r.amount.toFixed(2));
   });
+}
+
+/**
+ * Standalone: all transactions across all accounts, written to the
+ * Transactions tab. The dashboard's Spend view reads from here to compute
+ * per-bucket burn, internal transfer detection, and early-transfer auto-tag.
+ */
+function fetchSimpleFinTransactions() {
+  Logger.log('Starting SimpleFIN transaction sync — ' + new Date().toLocaleString());
+  var data = fetchAccountsWithTransactions_(TAX_LOOKBACK_DAYS);
+  writeAllTransactions_(data.accounts);
 }
 
 /** Pull /accounts with N days of transactions. */
@@ -341,6 +354,74 @@ function isTaxTransaction_(t) {
     if (fields.indexOf(TAX_KEYWORDS[i]) >= 0) return true;
   }
   return false;
+}
+
+/**
+ * Write every transaction across every account to the Transactions sheet.
+ * Schema is wide on purpose — the dashboard classifier needs account ID
+ * (stable across name changes), payee, description, and memo separately so
+ * matching logic can pick the best signal.
+ *
+ * Outflows are stored as POSITIVE numbers (Math.abs) with a Direction column
+ * so the dashboard doesn't have to remember SimpleFIN's negative convention.
+ *
+ * Sheet is fully rewritten each sync (clear + repopulate). The 400-day window
+ * means we re-fetch the same window each time, so any dashboard-side overrides
+ * (manual transfer linking, etc.) need to live in localStorage keyed by Txn ID.
+ */
+function writeAllTransactions_(accounts) {
+  var ss = getTargetSpreadsheet_();
+  var sheet = ss.getSheetByName(TXN_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(TXN_SHEET_NAME);
+    sheet.setColumnWidth(1, 100); // Date
+    sheet.setColumnWidth(2, 220); // Account ID
+    sheet.setColumnWidth(3, 200); // Account Name
+    sheet.setColumnWidth(4,  90); // Amount
+    sheet.setColumnWidth(5,  80); // Direction
+    sheet.setColumnWidth(6, 220); // Payee
+    sheet.setColumnWidth(7, 280); // Description
+    sheet.setColumnWidth(8, 200); // Memo
+    sheet.setColumnWidth(9,  80); // Pending
+    sheet.setColumnWidth(10, 220); // Txn ID
+  }
+  sheet.clear();
+
+  var headers = ['Date', 'Account ID', 'Account Name', 'Amount', 'Direction',
+                 'Payee', 'Description', 'Memo', 'Pending', 'Txn ID'];
+  var hdrRange = sheet.getRange(1, 1, 1, headers.length);
+  hdrRange.setValues([headers]);
+  hdrRange.setFontWeight('bold').setBackground('#f5f5f7');
+  sheet.setFrozenRows(1);
+
+  var rows = [];
+  accounts.forEach(function(a) {
+    var displayName = a.bankName ? (a.bankName + ' · ' + a.name) : a.name;
+    (a.transactions || []).forEach(function(t) {
+      var direction = (t.amount < 0) ? 'out' : 'in';
+      rows.push([
+        t.date,
+        a.id,
+        displayName,
+        Math.abs(t.amount),
+        direction,
+        t.payee,
+        t.description,
+        t.memo,
+        t.pending ? 'pending' : '',
+        t.id
+      ]);
+    });
+  });
+
+  // Newest first
+  rows.sort(function(a, b) { return String(b[0]).localeCompare(String(a[0])); });
+
+  if (rows.length) {
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+    sheet.getRange(2, 4, rows.length, 1).setNumberFormat('$#,##0.00');
+  }
+  Logger.log('✓ Transactions saved (' + rows.length + ' rows across ' + accounts.length + ' accounts).');
 }
 
 function writeTaxPayments_(payments) {
