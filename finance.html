@@ -1954,10 +1954,20 @@
   /* Window-over-window table */
   .spend-wow-grid {
     display: grid;
-    grid-template-columns: 170px repeat(6, 1fr);
+    /* grid-template-columns set inline per-render so it adapts to window count + the Avg column */
     column-gap: 8px;
     align-items: center;
   }
+  .spend-wow-head.avg, .spend-wow-cell.avg {
+    border-left: 1px solid var(--rule);
+    padding-left: 12px;
+    margin-left: 4px;
+  }
+  .spend-wow-head.avg { font-weight: 700; color: var(--ink-2); }
+  .spend-wow-cell.avg { cursor: default; }
+  .spend-wow-cell.avg:hover { background: transparent; }
+  .spend-wow-cell.avg .pct { color: var(--ink); }
+  .spend-wow-cell.avg.over .pct { color: var(--spark-budget); }
   .spend-wow-head {
     font-size: 10px;
     color: var(--ink-4);
@@ -7287,8 +7297,14 @@ function renderSpendWow() {
   const active = getActiveSpendWindow();
   const activeId = active ? active.id : null;
 
+  // Pre-compute derived data per window (so we can sum + average without recomputing)
+  const derivedByWin = wins.map(w => deriveSpendForWindow(w));
+
+  // Grid template adapts to # of windows + 1 for the Avg column at the right
+  const gridCols = `170px repeat(${wins.length}, 1fr) 110px`;
+
   // Header row — each window header is clickable to jump
-  let html = '<div class="spend-wow-grid">';
+  let html = `<div class="spend-wow-grid" style="grid-template-columns:${gridCols}">`;
   html += '<div class="spend-wow-head">Bucket</div>';
   wins.forEach((w, i) => {
     const isCur = i === wins.length - 1;
@@ -7296,18 +7312,24 @@ function renderSpendWow() {
     const safeId = w.id.replace(/'/g, "\\'");
     html += `<div class="spend-wow-head clickable ${isCur ? 'current' : 'prior'} ${isActive ? 'active' : ''}" onclick="setSelectedSpendWindow('${safeId}')" title="Click to view this window">${w.monthLabel}</div>`;
   });
+  html += `<div class="spend-wow-head avg" title="Average across the ${wins.length} windows shown">Avg (${wins.length} win)</div>`;
 
-  // Rows: bucket × windows — cells also clickable
+  // Rows: bucket × windows + Avg
   SPEND_DIAL_BUCKETS.forEach(b => {
     html += `<div class="spend-wow-row-label"><span class="spend-dial-dot" style="background:${b.hex}"></span>${b.label}</div>`;
+    let sumSpent = 0, sumAlloc = 0, sumPct = 0, n = 0;
     wins.forEach((w, i) => {
       const isCur = i === wins.length - 1;
       const isActive = w.id === activeId;
-      const dw = deriveSpendForWindow(w);
+      const dw = derivedByWin[i];
       const bb = dw.buckets.find(x => x.id === b.id);
       const pct = Math.round(bb.pctConsumed || 0);
       const over = pct > 100;
       const safeId = w.id.replace(/'/g, "\\'");
+      sumSpent += bb.spent;
+      sumAlloc += bb.alloc;
+      sumPct   += (bb.pctConsumed || 0);
+      n++;
       html += `
         <div class="spend-wow-cell ${isCur ? 'current' : 'prior'} ${over ? 'over' : ''} ${isActive ? 'active' : ''}" onclick="setSelectedSpendWindow('${safeId}')" title="Click to view ${w.monthLabel}">
           <div class="pct">${pct}%</div>
@@ -7315,6 +7337,16 @@ function renderSpendWow() {
         </div>
       `;
     });
+    // Avg cell: average pct across windows + average $ spent per window
+    const avgPct = n > 0 ? Math.round(sumPct / n) : 0;
+    const avgSpent = n > 0 ? sumSpent / n : 0;
+    const avgOver = avgPct > 100;
+    html += `
+      <div class="spend-wow-cell avg ${avgOver ? 'over' : ''}" title="Avg ${avgPct}% of allocation consumed per window across last ${n} windows. Avg spend per window: ${fmtMoney0(avgSpent)}. Total spent across all windows: ${fmtMoney0(sumSpent)}.">
+        <div class="pct">${avgPct}%</div>
+        <div class="amt">${fmtMoney0(avgSpent)}/win</div>
+      </div>
+    `;
   });
   html += '</div>';
 
