@@ -1773,6 +1773,74 @@
     border-radius: 2px;
   }
 
+  /* Window navigation bar (between header and dials) */
+  .spend-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 18px;
+    background: var(--card-subtle);
+    border-bottom: 1px solid var(--spend-border-soft);
+    font-size: 12px;
+  }
+  .spend-nav-bar.viewing-prior {
+    background: var(--bronze-bg);
+    border-bottom-color: var(--bronze-dark);
+  }
+  .spend-nav-arrows {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .spend-nav-btn {
+    height: 28px;
+    min-width: 28px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--rule);
+    background: var(--card);
+    color: var(--ink-2);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .spend-nav-btn:hover:not(:disabled) {
+    background: var(--chip);
+    color: var(--ink);
+    border-color: var(--ink-4);
+  }
+  .spend-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .spend-nav-btn.today { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .spend-nav-btn.today:hover { background: var(--ink-2); border-color: var(--ink-2); color: var(--bg); }
+  .spend-nav-label {
+    flex: 1;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .spend-nav-label .status {
+    margin-left: 8px;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--rule);
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .spend-nav-label .status.current { background: var(--bucket-opex); color: white; }
+  .spend-nav-label .status.viewing-prior { background: var(--bronze-dark); color: white; }
+
   /* Allocation Pacing — 4 dial cards in a grid */
   .spend-dial-grid {
     display: grid;
@@ -1895,7 +1963,16 @@
     color: var(--ink-4);
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    padding: 0 6px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background .12s;
+  }
+  .spend-wow-head.clickable { cursor: pointer; }
+  .spend-wow-head.clickable:hover { background: var(--card-subtle); color: var(--ink); }
+  .spend-wow-head.active {
+    background: var(--ink);
+    color: var(--bg);
+    opacity: 1;
   }
   .spend-wow-head.current { color: var(--ink); opacity: 1; }
   .spend-wow-head.prior   { opacity: 0.6; }
@@ -1909,9 +1986,20 @@
     font-weight: 500;
   }
   .spend-wow-cell {
-    padding: 0 6px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .12s;
   }
+  .spend-wow-cell:hover { background: var(--card-subtle); }
   .spend-wow-cell.prior { opacity: 0.5; }
+  .spend-wow-cell.prior:hover { opacity: 1; background: var(--card-subtle); }
+  .spend-wow-cell.active {
+    background: var(--ink);
+    opacity: 1;
+  }
+  .spend-wow-cell.active .pct { color: var(--bg); }
+  .spend-wow-cell.active .amt { color: rgba(255,255,255,0.7); }
   .spend-wow-cell .pct {
     font-size: 14px;
     font-weight: 600;
@@ -1924,6 +2012,7 @@
     font-variant-numeric: tabular-nums;
   }
   .spend-wow-cell.over .pct { color: var(--spark-budget); }
+  .spend-wow-cell.active.over .pct { color: var(--spark-budget); }
 
   /* DialTxns drill-in table */
   .spend-txn-table {
@@ -3186,6 +3275,7 @@
           <span><span class="spend-legend-line" style="background:var(--spark-budget)"></span>Off pace</span>
         </div>
       </header>
+      <div id="spendNavBar"></div>
       <div style="padding:18px" id="spendDialsContent"></div>
     </div>
 
@@ -6284,7 +6374,69 @@ const spendState = {
   expandedBucket: null,
   classified: [],       // txns annotated with .tag and .bucketId
   windowsCache: null,   // memoized windows derived from PF rows + dates
+  selectedWindowId: null, // null = current window; otherwise id of selected window from getRecentSpendWindows
+  windowsViewCount: 6,    // how many windows back we render in nav/wow (extendable via "Older")
 };
+
+// ── Active window resolution ──────────────────────────────────────────────
+// All renderers go through this helper so they show the same window.
+function getActiveSpendWindow() {
+  const wins = getRecentSpendWindows(spendState.windowsViewCount);
+  if (!wins.length) return null;
+  if (spendState.selectedWindowId) {
+    const found = wins.find(w => w.id === spendState.selectedWindowId);
+    if (found) return found;
+    // Fell off the end — clear selection
+    spendState.selectedWindowId = null;
+  }
+  return wins[wins.length - 1];
+}
+
+function setSelectedSpendWindow(windowId) {
+  // Clicking the current window resets selection (back to "live" mode)
+  const wins = getRecentSpendWindows(spendState.windowsViewCount);
+  if (!wins.length) return;
+  const cur = wins[wins.length - 1];
+  spendState.selectedWindowId = (windowId === cur.id) ? null : windowId;
+  // Close drill-in if open — different window may have different bucket data
+  if (spendState.expandedBucket) {
+    spendState.expandedBucket = null;
+    const dp = document.getElementById('spendDrillPanel');
+    if (dp) dp.style.display = 'none';
+  }
+  renderSpend();
+}
+
+function shiftSelectedSpendWindow(delta) {
+  const wins = getRecentSpendWindows(spendState.windowsViewCount);
+  if (!wins.length) return;
+  const active = getActiveSpendWindow();
+  if (!active) return;
+  const idx = wins.findIndex(w => w.id === active.id);
+  if (idx < 0) return;
+  const next = idx + delta;
+  // Going OLDER past the start? Extend the window count and try again.
+  if (next < 0) {
+    spendState.windowsViewCount += 6;
+    const ext = getRecentSpendWindows(spendState.windowsViewCount);
+    const newIdx = ext.findIndex(w => w.id === active.id);
+    if (newIdx > 0) setSelectedSpendWindow(ext[newIdx - 1].id);
+    return;
+  }
+  // Going NEWER past the end is a no-op (we're already at current)
+  if (next >= wins.length) return;
+  setSelectedSpendWindow(wins[next].id);
+}
+
+function jumpToCurrentSpendWindow() {
+  spendState.selectedWindowId = null;
+  if (spendState.expandedBucket) {
+    spendState.expandedBucket = null;
+    const dp = document.getElementById('spendDrillPanel');
+    if (dp) dp.style.display = 'none';
+  }
+  renderSpend();
+}
 
 // ─── CSV fetch + parse ─────────────────────────────────────────────────────
 
@@ -6678,18 +6830,19 @@ function renderSpendKpiStrip() {
   if (!el) return;
   if (!spendIsReady()) { el.innerHTML = ''; return; }
 
-  const wins = getRecentSpendWindows(6);
-  if (!wins.length) { el.innerHTML = ''; return; }
-  const cur = wins[wins.length - 1];
-  const d = deriveSpendForWindow(cur);
+  const active = getActiveSpendWindow();
+  if (!active) { el.innerHTML = ''; return; }
+  const d = deriveSpendForWindow(active);
   const totalSpent = d.buckets.reduce((s, b) => s + b.spent, 0);
   const totalAlloc = d.buckets.reduce((s, b) => s + b.alloc, 0);
   const offPace = d.buckets.filter(b => b.status !== 'on-pace').length;
-  const dayLabel = `${shortDate(cur.start)} \u2013 ${shortDate(cur.end)} \u00b7 day ${cur.dayIndex || 1} of ${cur.days}`;
+  const dayLabel = active.status === 'current'
+    ? `${shortDate(active.start)} \u2013 ${shortDate(active.end)} \u00b7 day ${active.dayIndex || 1} of ${active.days}`
+    : `${shortDate(active.start)} \u2013 ${shortDate(active.end)} \u00b7 closed`;
 
   const cards = [
     { label: 'Window inflow', value: fmtMoney0(d.inflow), sub: dayLabel },
-    { label: 'Spent so far',  value: fmtMoney0(totalSpent), sub: `${d.totalTxns} transactions \u00b7 ${totalAlloc > 0 ? Math.round(totalSpent/totalAlloc*100) : 0}% of allocation`, dot: 'var(--bucket-opex)' },
+    { label: active.status === 'current' ? 'Spent so far' : 'Total spent',  value: fmtMoney0(totalSpent), sub: `${d.totalTxns} transactions \u00b7 ${totalAlloc > 0 ? Math.round(totalSpent/totalAlloc*100) : 0}% of allocation`, dot: 'var(--bucket-opex)' },
     { label: 'Pacing health', value: offPace === 0 ? 'On pace' : `${offPace} off pace`, sub: offPace === 0 ? 'All buckets within expected range' : 'Subtle warnings shown below', dot: offPace === 0 ? 'var(--bucket-opex)' : 'var(--gauge-overflow)' },
     { label: 'Allocation total', value: '100%', sub: 'Profit First %s in sync', dot: 'var(--bucket-opex)' },
   ];
@@ -6938,6 +7091,42 @@ function toggleSpendMapping() {
 
 // ─── Render: Allocation pacing dials ───────────────────────────────────────
 
+// Render the window-navigation bar (◀ / window-name / ▶ / Today)
+function renderSpendNav() {
+  const bar = document.getElementById('spendNavBar');
+  if (!bar) return;
+  if (!spendIsReady()) { bar.innerHTML = ''; return; }
+
+  const wins = getRecentSpendWindows(spendState.windowsViewCount);
+  if (!wins.length) { bar.innerHTML = ''; return; }
+  const active = getActiveSpendWindow();
+  if (!active) { bar.innerHTML = ''; return; }
+
+  const idx = wins.findIndex(w => w.id === active.id);
+  const isCurrent = active.status === 'current';
+  // Prev = older window (smaller idx); Next = newer (larger idx)
+  const canGoOlder = true;  // we extend windowsViewCount on demand
+  const canGoNewer = idx < wins.length - 1;
+
+  const statusBadge = isCurrent
+    ? '<span class="status current">Live</span>'
+    : '<span class="status viewing-prior">Closed window</span>';
+
+  bar.className = 'spend-nav-bar' + (isCurrent ? '' : ' viewing-prior');
+  bar.innerHTML = `
+    <div class="spend-nav-arrows">
+      <button class="spend-nav-btn" onclick="shiftSelectedSpendWindow(-1)" ${canGoOlder ? '' : 'disabled'} title="Previous window (older)">◀</button>
+      <button class="spend-nav-btn" onclick="shiftSelectedSpendWindow(1)" ${canGoNewer ? '' : 'disabled'} title="Next window (newer)">▶</button>
+    </div>
+    <div class="spend-nav-label">${active.monthLabel} ${statusBadge}</div>
+    <div>
+      ${isCurrent
+        ? '<span style="font-size:11px;color:var(--ink-3)">Showing live window</span>'
+        : '<button class="spend-nav-btn today" onclick="jumpToCurrentSpendWindow()">Jump to today</button>'}
+    </div>
+  `;
+}
+
 function renderSpendDials() {
   const content = document.getElementById('spendDialsContent');
   const subtitle = document.getElementById('spendDialsSubtitle');
@@ -6945,18 +7134,25 @@ function renderSpendDials() {
   if (!spendIsReady()) {
     content.innerHTML = '<div class="spend-empty">Map your accounts above to see pacing.</div>';
     if (subtitle) subtitle.textContent = '—';
+    renderSpendNav();
     return;
   }
-  const wins = getRecentSpendWindows(6);
-  if (!wins.length) { content.innerHTML = '<div class="spend-empty">No allocation windows in transaction history.</div>'; return; }
-  const cur = wins[wins.length - 1];
-  const d = deriveSpendForWindow(cur);
+  const wins = getRecentSpendWindows(spendState.windowsViewCount);
+  if (!wins.length) { content.innerHTML = '<div class="spend-empty">No allocation windows in transaction history.</div>'; renderSpendNav(); return; }
+  const active = getActiveSpendWindow();
+  const d = deriveSpendForWindow(active);
 
   if (subtitle) {
-    subtitle.textContent = `${shortDate(cur.start)} \u2013 ${shortDate(cur.end)}  \u00b7  Day ${cur.dayIndex || 1} of ${cur.days}  \u00b7  Window inflow ${fmtMoney0(d.inflow)}`;
+    const dayBit = active.status === 'current'
+      ? `Day ${active.dayIndex || 1} of ${active.days}`
+      : `Closed window`;
+    subtitle.textContent = `${shortDate(active.start)} \u2013 ${shortDate(active.end)}  \u00b7  ${dayBit}  \u00b7  Window inflow ${fmtMoney0(d.inflow)}`;
   }
 
-  // Sparkline data per bucket: pctConsumed across the 6 windows
+  // Update the nav bar (arrows + Today button + viewing-prior banner)
+  renderSpendNav();
+
+  // Sparkline data per bucket: pctConsumed across recent windows
   const sparkByBucket = {};
   SPEND_DIAL_BUCKETS.forEach(b => sparkByBucket[b.id] = []);
   wins.forEach(w => {
@@ -7085,28 +7281,34 @@ function renderSpendWow() {
   const content = document.getElementById('spendWowContent');
   if (!content) return;
   if (!spendIsReady()) { content.innerHTML = '<div class="spend-empty">Map your accounts to see history.</div>'; return; }
-  const wins = getRecentSpendWindows(6);
+  const wins = getRecentSpendWindows(spendState.windowsViewCount);
   if (!wins.length) { content.innerHTML = ''; return; }
+  const active = getActiveSpendWindow();
+  const activeId = active ? active.id : null;
 
-  // Header row
+  // Header row — each window header is clickable to jump
   let html = '<div class="spend-wow-grid">';
   html += '<div class="spend-wow-head">Bucket</div>';
   wins.forEach((w, i) => {
     const isCur = i === wins.length - 1;
-    html += `<div class="spend-wow-head ${isCur ? 'current' : 'prior'}">${w.monthLabel}</div>`;
+    const isActive = w.id === activeId;
+    const safeId = w.id.replace(/'/g, "\\'");
+    html += `<div class="spend-wow-head clickable ${isCur ? 'current' : 'prior'} ${isActive ? 'active' : ''}" onclick="setSelectedSpendWindow('${safeId}')" title="Click to view this window">${w.monthLabel}</div>`;
   });
 
-  // Rows: bucket × windows
+  // Rows: bucket × windows — cells also clickable
   SPEND_DIAL_BUCKETS.forEach(b => {
     html += `<div class="spend-wow-row-label"><span class="spend-dial-dot" style="background:${b.hex}"></span>${b.label}</div>`;
     wins.forEach((w, i) => {
       const isCur = i === wins.length - 1;
+      const isActive = w.id === activeId;
       const dw = deriveSpendForWindow(w);
       const bb = dw.buckets.find(x => x.id === b.id);
       const pct = Math.round(bb.pctConsumed || 0);
       const over = pct > 100;
+      const safeId = w.id.replace(/'/g, "\\'");
       html += `
-        <div class="spend-wow-cell ${isCur ? 'current' : 'prior'} ${over ? 'over' : ''}">
+        <div class="spend-wow-cell ${isCur ? 'current' : 'prior'} ${over ? 'over' : ''} ${isActive ? 'active' : ''}" onclick="setSelectedSpendWindow('${safeId}')" title="Click to view ${w.monthLabel}">
           <div class="pct">${pct}%</div>
           <div class="amt">${fmtMoney0(bb.spent)}</div>
         </div>
@@ -7114,7 +7316,16 @@ function renderSpendWow() {
     });
   });
   html += '</div>';
+
+  // "Show older windows" link
+  html += `<div style="margin-top:14px;text-align:center"><button class="spend-nav-btn" onclick="loadOlderSpendWindows()">Show older windows</button></div>`;
+
   content.innerHTML = html;
+}
+
+function loadOlderSpendWindows() {
+  spendState.windowsViewCount += 6;
+  renderSpend();
 }
 
 // ─── Render: Drill-in transactions ─────────────────────────────────────────
@@ -7144,19 +7355,20 @@ function renderSpendDrill(bucketId) {
   const contentEl = document.getElementById('spendDrillContent');
   if (!titleEl || !contentEl) return;
 
-  const wins = getRecentSpendWindows(6);
-  const cur = wins[wins.length - 1];
-  const wStart = cur.start, wEnd = new Date(cur.end.getFullYear(), cur.end.getMonth(), cur.end.getDate(), 23, 59, 59);
+  const active = getActiveSpendWindow();
+  if (!active) { contentEl.innerHTML = '<div class="spend-txn-empty">No window selected.</div>'; return; }
+  const wStart = active.start, wEnd = new Date(active.end.getFullYear(), active.end.getMonth(), active.end.getDate(), 23, 59, 59);
 
-  // Pull EVERY classified transaction for this bucket in current window (all tags, not just spend)
+  // Pull EVERY classified transaction for this bucket in active window (all tags, not just spend)
   const txns = spendState.classified.filter(t => {
     if (t.bucketId !== bucketId) return false;
     const d = new Date(t.date + 'T00:00:00');
     return d >= wStart && d <= wEnd;
   }).sort((a, b) => b.date.localeCompare(a.date));
 
-  titleEl.textContent = `${b.label} \u00b7 transactions this window`;
-  subEl.textContent = `${txns.length} transaction${txns.length === 1 ? '' : 's'}  \u00b7  ${shortDate(cur.start)} \u2013 ${shortDate(cur.end)}`;
+  const windowBadge = active.status === 'current' ? '' : ' <span style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;background:var(--bronze-bg);color:var(--bronze-dark);padding:2px 7px;border-radius:999px;margin-left:6px;font-weight:500">Closed window</span>';
+  titleEl.innerHTML = `${b.label} \u00b7 transactions${windowBadge}`;
+  subEl.textContent = `${txns.length} transaction${txns.length === 1 ? '' : 's'}  \u00b7  ${shortDate(active.start)} \u2013 ${shortDate(active.end)}`;
 
   if (!txns.length) {
     contentEl.innerHTML = '<div class="spend-txn-empty">No transactions yet this window.</div>';
