@@ -1933,7 +1933,8 @@
   }
   .spend-txn-row {
     display: grid;
-    grid-template-columns: 80px 1fr 1fr 110px 120px;
+    grid-template-columns: 72px 1fr 100px 105px 100px;
+    gap: 10px;
     padding: 9px 14px;
     font-size: 12px;
     color: var(--ink);
@@ -1941,6 +1942,43 @@
     border-top: 1px solid var(--spend-border-soft);
     align-items: center;
   }
+  .spend-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--rule);
+    background: var(--card);
+    color: var(--ink-3);
+    font-size: 10.5px;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: background .12s, color .12s, border-color .12s;
+    white-space: nowrap;
+  }
+  .spend-link-btn:hover { background: var(--chip); color: var(--ink); border-color: var(--ink-4); }
+  .spend-link-btn.linked { background: var(--bronze-bg); color: var(--bronze-dark); border-color: transparent; }
+  .spend-link-btn.linked:hover { background: var(--amber-bg); color: var(--amber); }
+  /* Manual link picker rows */
+  .spend-link-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 90px 100px;
+    gap: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    align-items: center;
+    border-top: 1px solid var(--spend-border-soft);
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .spend-link-row:hover { background: var(--card-subtle); }
+  .spend-link-row.head { background: #fbf8f1; cursor: default; font-size: 10px; color: var(--ink-4); text-transform: uppercase; letter-spacing: 0.5px; border-top: 0; }
+  .spend-link-row.head:hover { background: #fbf8f1; }
+  .spend-link-row .acct { color: var(--ink-3); font-size: 11px; }
+  .spend-link-row .amt { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; }
+  .spend-link-row .pick { text-align: right; }
+  .spend-link-empty { padding: 30px 12px; text-align: center; color: var(--ink-4); font-size: 12px; }
   .spend-txn-row.head {
     background: #fbf8f1;
     font-size: 10px;
@@ -2387,23 +2425,15 @@
               <thead>
                 <tr>
                   <th>Year</th>
-                  <th class="amount">Service Amount</th>
                   <th class="amount">Amount Due</th>
                   <th class="check-cell">Paid?</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>2024</td>
+                  <td>2024 — due April 15, 2025</td>
                   <td class="amount">—</td>
-                  <td class="amount">—</td>
-                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2024" data-year="2024" onclick="toggleCheck(this)"></div></td>
-                </tr>
-                <tr class="totals-row">
-                  <td>Total</td>
-                  <td class="amount">—</td>
-                  <td class="amount">—</td>
-                  <td class="check-cell">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2024" data-year="2024" data-due="2025-04-15" onclick="toggleCheck(this)"></div></td>
                 </tr>
               </tbody>
             </table>
@@ -2994,23 +3024,15 @@
               <thead>
                 <tr>
                   <th>Year</th>
-                  <th class="amount">Service Amount</th>
                   <th class="amount">Amount Due</th>
                   <th class="check-cell">Paid?</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>2026</td>
-                  <td class="amount">$200.00</td>
+                  <td>2026 — due April 15, 2027</td>
                   <td class="amount">$200.00</td>
                   <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" data-year="2026" data-amount="200" data-due="2027-04-15" onclick="toggleCheck(this)"></div></td>
-                </tr>
-                <tr class="totals-row">
-                  <td>Total</td>
-                  <td class="amount">$200.00</td>
-                  <td class="amount">$200.00</td>
-                  <td class="check-cell">—</td>
                 </tr>
               </tbody>
             </table>
@@ -3144,7 +3166,10 @@
           <div class="panel-title">Account Mapping</div>
           <div class="panel-subtitle">Tell the dashboard which bank account is which Profit First bucket. Required before pacing math works.</div>
         </div>
-        <button class="btn btn-secondary btn-sm" onclick="toggleSpendMapping()" id="spendMappingToggle">Hide</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary btn-sm" onclick="openSpendSettings()" title="Spend settings (CSV URL etc.)" style="font-size:14px;line-height:1">⚙</button>
+          <button class="btn btn-secondary btn-sm" onclick="toggleSpendMapping()" id="spendMappingToggle">Hide</button>
+        </div>
       </header>
       <div style="padding:14px 16px 16px" id="spendMappingContent"></div>
     </div>
@@ -3272,6 +3297,51 @@
 <!-- Firebase SDK (compat — works in plain HTML without a bundler) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Spend Settings Modal (CSV URL + future settings) -->
+<div class="modal-overlay" id="spendSettingsOverlay" onclick="if(event.target===this)closeSpendSettings()">
+  <div class="modal" style="width:520px">
+    <div class="modal-header">
+      <div class="modal-title">Spend Settings</div>
+      <button class="modal-close" onclick="closeSpendSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Transactions CSV URL</div>
+      <input id="spendSettingsCsvUrl" type="url" style="width:100%;height:32px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;font-family:var(--font-sans);font-size:12px;color:var(--ink-2);background:var(--card)" />
+      <div style="font-size:11px;color:var(--ink-3);margin-top:8px;line-height:1.5">
+        Default points to the published <code>Transactions</code> tab of your sync sheet. If you see "tab isn't published", in Google Sheets: <strong>File → Share → Publish to web</strong>, add the Transactions tab to the publish list, then click <strong>Republish</strong>.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeSpendSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSpendSettings()">Save & Refresh</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manual Link Picker Modal -->
+<div class="modal-overlay" id="spendLinkOverlay" onclick="if(event.target===this)closeLinkPicker()">
+  <div class="modal" style="width:720px;max-height:88vh;display:flex;flex-direction:column">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Link transfer leg</div>
+        <div id="spendLinkSource" style="font-size:11.5px;color:var(--ink-3);margin-top:4px"></div>
+      </div>
+      <button class="modal-close" onclick="closeLinkPicker()">✕</button>
+    </div>
+    <div class="modal-body" style="overflow:auto;flex:1;min-height:0">
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <input id="spendLinkSearch" type="text" placeholder="Search payee, account, memo…" style="flex:1;height:30px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;font-size:12px;background:var(--card)" oninput="renderLinkPickerList()" />
+        <label style="font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:5px;white-space:nowrap"><input type="checkbox" id="spendLinkAmtOnly" checked onchange="renderLinkPickerList()" /> ±$5 only</label>
+        <label style="font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:5px;white-space:nowrap"><input type="checkbox" id="spendLinkDateOnly" checked onchange="renderLinkPickerList()" /> ±14 days</label>
+      </div>
+      <div id="spendLinkList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeLinkPicker()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- Early Transfers Modal -->
 <div class="et-overlay" id="etOverlay">
@@ -4304,6 +4374,12 @@ function collectAllTaxItems() {
 }
 
 let _tiActiveFilter = 'all';
+let _tiShowUpcoming = false;
+let _tiShowNoDate   = false;
+const TI_DUE_SOON_DAYS = 30;  // "Due Now" cutoff: items due within this many days (or overdue)
+
+function tiToggleUpcoming() { _tiShowUpcoming = !_tiShowUpcoming; renderTaxInbox(); }
+function tiToggleNoDate()   { _tiShowNoDate   = !_tiShowNoDate;   renderTaxInbox(); }
 
 function tiNiceDate(due) {
   if (!due) return '';
@@ -4397,23 +4473,30 @@ function renderTaxInbox() {
     ? allItems
     : allItems.filter(it => it.catId === _tiActiveFilter);
 
-  const due = filtered.filter(it => !it.done);
+  const open = filtered.filter(it => !it.done);
   const done = filtered.filter(it => it.done);
 
-  // Sort due: by dDays asc (overdue first, items without dates last)
-  due.sort((a, b) => {
-    const ad = a.dDays == null ? Infinity : a.dDays;
-    const bd = b.dDays == null ? Infinity : b.dDays;
-    return ad - bd;
-  });
-  // Sort done: most-recently-due first (highest dueT)
+  // Split open items into Due Now (within TI_DUE_SOON_DAYS or overdue), Upcoming (>cutoff), No Date
+  const dueSoon = open.filter(it => it.dDays != null && it.dDays <= TI_DUE_SOON_DAYS);
+  const upcoming = open.filter(it => it.dDays != null && it.dDays > TI_DUE_SOON_DAYS);
+  const noDate = open.filter(it => it.dDays == null);
+
+  // Sort: dueSoon = overdue first, then nearest-due; upcoming = soonest first
+  const byDays = (a, b) => (a.dDays || 0) - (b.dDays || 0);
+  dueSoon.sort(byDays);
+  upcoming.sort(byDays);
+  // done: most-recently-due first
   done.sort((a, b) => (b.dueT || 0) - (a.dueT || 0));
 
-  const dueSum  = due.reduce((s, x) => s + (x.amt || 0), 0);
-  const doneSum = done.reduce((s, x) => s + (x.amt || 0), 0);
+  const dueSoonSum  = dueSoon.reduce((s, x) => s + (x.amt || 0), 0);
+  const upcomingSum = upcoming.reduce((s, x) => s + (x.amt || 0), 0);
+  const noDateSum   = noDate.reduce((s, x) => s + (x.amt || 0), 0);
+  const doneSum     = done.reduce((s, x) => s + (x.amt || 0), 0);
 
-  if (subtitleEl) subtitleEl.textContent = 'All obligations, prioritized. ' + due.length + ' due · ' + done.length + ' done.';
-  if (owedEl)     owedEl.textContent = fmtMoney0(dueSum);
+  if (subtitleEl) subtitleEl.textContent =
+    dueSoon.length + ' due in next ' + TI_DUE_SOON_DAYS + ' days · ' +
+    upcoming.length + ' upcoming · ' + done.length + ' done';
+  if (owedEl) owedEl.textContent = fmtMoney0(dueSoonSum);
 
   function renderItem(it, isDone) {
     const cls = isDone ? ' done' : (it.dDays != null && it.dDays < 0 ? ' overdue' : '');
@@ -4430,18 +4513,41 @@ function renderTaxInbox() {
       +  '</div>';
   }
 
+  function collapsibleHead(label, count, sum, isOpen, onClickFn) {
+    const arrow = isOpen ? '▾' : '▸';
+    return '<div class="ti-section-head" style="cursor:pointer;user-select:none" onclick="' + onClickFn + '">'
+      +      '<span>' + arrow + ' ' + label + ' · ' + count + '</span>'
+      +      '<span class="ti-section-total">' + fmtMoney0(sum) + '</span>'
+      +    '</div>';
+  }
+
   let html = '';
-  if (due.length) {
-    html += '<div class="ti-section-head">DUE NOW · ' + due.length
-      + '<span class="ti-section-total">' + fmtMoney0(dueSum) + '</span></div>';
-    html += due.map(it => renderItem(it, false)).join('');
+  if (dueSoon.length) {
+    html += '<div class="ti-section-head">DUE NOW · ' + dueSoon.length
+      + '<span class="ti-section-total">' + fmtMoney0(dueSoonSum) + '</span></div>';
+    html += dueSoon.map(it => renderItem(it, false)).join('');
+  } else if (open.length) {
+    // No items in next 30 days but there ARE upcoming/no-date items — give the user a reassuring message
+    html += '<div class="ti-empty" style="padding:24px 20px;text-align:center;color:var(--ink-3)">'
+      +     '<strong style="color:var(--ink-2);font-size:14px">Nothing due in the next ' + TI_DUE_SOON_DAYS + ' days.</strong>'
+      +     '<div style="margin-top:6px;font-size:12px">' + (upcoming.length + noDate.length) + ' obligations queued below.</div>'
+      +    '</div>';
+  }
+
+  if (upcoming.length) {
+    html += collapsibleHead('UPCOMING', upcoming.length, upcomingSum, _tiShowUpcoming, 'tiToggleUpcoming()');
+    if (_tiShowUpcoming) html += upcoming.map(it => renderItem(it, false)).join('');
+  }
+  if (noDate.length) {
+    html += collapsibleHead('NO DUE DATE', noDate.length, noDateSum, _tiShowNoDate, 'tiToggleNoDate()');
+    if (_tiShowNoDate) html += noDate.map(it => renderItem(it, false)).join('');
   }
   if (done.length) {
     html += '<div class="ti-section-head">COMPLETED · ' + done.length
       + '<span class="ti-section-total">' + fmtMoney0(doneSum) + '</span></div>';
     html += done.map(it => renderItem(it, true)).join('');
   }
-  if (!due.length && !done.length) {
+  if (!open.length && !done.length) {
     html = '<div class="ti-empty">Nothing in this category.</div>';
   }
   body.innerHTML = html;
@@ -6444,7 +6550,7 @@ function classifySpendTransactions() {
     const ov = overrides[overrideKey] || {};
 
     // Manual override wins
-    if (ov.tag) return { ...t, bucketId, tag: ov.tag, linkedTo: ov.linkedTxnId, overridden: true };
+    if (ov.tag) return { ...t, bucketId, tag: ov.tag, linkedTxnId: ov.linkedTxnId, overridden: true };
 
     // Unmapped or ignored accounts are noise
     if (!bucketId || bucketId === 'ignore') return { ...t, bucketId, tag: 'ignore' };
@@ -6607,32 +6713,17 @@ function renderSpendMappingPanel() {
   const content = document.getElementById('spendMappingContent');
   if (!content) return;
   const accounts = spendState.accounts;
-  const currentUrl = loadSpendCsvUrl();
-  // URL row is always visible at the bottom of the panel — works in every state
-  // (empty / error / loaded) so the user can always paste a different URL.
-  const urlRow = `
-    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--spend-border-soft)">
-      <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Transactions CSV URL</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="spendCsvUrlInput" type="url" value="${currentUrl.replace(/"/g, '&quot;')}" style="flex:1;height:28px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;font-family:var(--font-sans);font-size:11.5px;color:var(--ink-2);background:var(--card)" />
-        <button class="btn btn-secondary btn-sm" onclick="applySpendCsvUrl()">${spendState.loading ? 'Loading…' : 'Save & Refresh'}</button>
-      </div>
-      <div style="font-size:10.5px;color:var(--ink-3);margin-top:6px;line-height:1.5">
-        Default points to the published <code>Transactions</code> tab of your sync sheet. If you see "tab isn't published", in Google Sheets: <strong>File → Share → Publish to web</strong>, add the Transactions tab to the publish list, then click <strong>Republish</strong>.
-      </div>
-    </div>
-  `;
 
   if (!accounts.length) {
     let body;
     if (spendState.loading) {
       body = '<div class="spend-loading">Loading transactions from Google Sheet…</div>';
     } else if (spendState.error) {
-      body = `<div class="spend-empty"><strong>Couldn't load transactions</strong><div style="margin:6px 0 12px;color:var(--ink-3)">${spendState.error}</div><button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">Retry</button></div>`;
+      body = `<div class="spend-empty"><strong>Couldn't load transactions</strong><div style="margin:6px 0 12px;color:var(--ink-3)">${spendState.error}</div><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">Retry</button><button class="btn btn-secondary btn-sm" onclick="openSpendSettings()">⚙ Settings</button></div></div>`;
     } else {
-      body = `<div class="spend-empty"><strong>No transactions yet</strong><div style="margin:6px 0 12px;color:var(--ink-3)">Run <code>fetchSimpleFinTransactions</code> in Apps Script, publish the Transactions tab, then click below.</div><button class="btn btn-primary btn-sm" onclick="fetchSpendTransactions()">Load transactions</button></div>`;
+      body = `<div class="spend-empty"><strong>No transactions yet</strong><div style="margin:6px 0 12px;color:var(--ink-3)">Run <code>fetchSimpleFinTransactions</code> in Apps Script, publish the Transactions tab, then click below.</div><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-primary btn-sm" onclick="fetchSpendTransactions()">Load transactions</button><button class="btn btn-secondary btn-sm" onclick="openSpendSettings()">⚙ Settings</button></div></div>`;
     }
-    content.innerHTML = body + urlRow;
+    content.innerHTML = body;
     return;
   }
   const mapping = loadSpendMapping();
@@ -6666,15 +6757,166 @@ function renderSpendMappingPanel() {
       <div style="font-size:11.5px;color:var(--ink-3)">${accounts.length} account${accounts.length === 1 ? '' : 's'} \u00b7 ${spendState.txns.length} transactions loaded${spendState.fetchedAt ? ` \u00b7 fetched ${new Date(spendState.fetchedAt).toLocaleString([], {hour: 'numeric', minute: '2-digit'})}` : ''}</div>
       <button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">${spendState.loading ? 'Loading…' : 'Refresh'}</button>
     </div>
-    ${urlRow}
   `;
 }
 
-function applySpendCsvUrl() {
-  const input = document.getElementById('spendCsvUrlInput');
-  if (!input) return;
-  saveSpendCsvUrl(input.value);
+// ─── Spend Settings modal ──────────────────────────────────────────────────
+function openSpendSettings() {
+  const ov = document.getElementById('spendSettingsOverlay');
+  const inp = document.getElementById('spendSettingsCsvUrl');
+  if (!ov || !inp) return;
+  inp.value = loadSpendCsvUrl();
+  ov.classList.add('open');
+  setTimeout(() => inp.focus(), 50);
+}
+function closeSpendSettings() {
+  const ov = document.getElementById('spendSettingsOverlay');
+  if (ov) ov.classList.remove('open');
+}
+function saveSpendSettings() {
+  const inp = document.getElementById('spendSettingsCsvUrl');
+  if (!inp) return;
+  saveSpendCsvUrl(inp.value);
+  closeSpendSettings();
   fetchSpendTransactions();
+}
+
+// ─── Manual Link Picker ────────────────────────────────────────────────────
+let _linkPickerSourceId = null;
+
+function openLinkPicker(srcTxnId) {
+  const src = spendState.txns.find(t => t.txnId === srcTxnId);
+  if (!src) return;
+  _linkPickerSourceId = srcTxnId;
+  const ov = document.getElementById('spendLinkOverlay');
+  const subEl = document.getElementById('spendLinkSource');
+  if (!ov || !subEl) return;
+  const acct = (spendState.accounts.find(a => a.id === src.accountId) || {}).name || src.accountId;
+  const sign = src.direction === 'in' ? '+' : '−';
+  subEl.innerHTML = `Source: <strong>${src.payee || src.description || '—'}</strong> &middot; ${src.date} &middot; ${sign}${fmt$(src.amount)} &middot; <em>${acct}</em>`;
+  document.getElementById('spendLinkSearch').value = '';
+  document.getElementById('spendLinkAmtOnly').checked = true;
+  document.getElementById('spendLinkDateOnly').checked = true;
+  ov.classList.add('open');
+  renderLinkPickerList();
+}
+
+function closeLinkPicker() {
+  _linkPickerSourceId = null;
+  const ov = document.getElementById('spendLinkOverlay');
+  if (ov) ov.classList.remove('open');
+}
+
+function renderLinkPickerList() {
+  const listEl = document.getElementById('spendLinkList');
+  if (!listEl || !_linkPickerSourceId) return;
+  const src = spendState.txns.find(t => t.txnId === _linkPickerSourceId);
+  if (!src) { listEl.innerHTML = '<div class="spend-link-empty">Source transaction not found.</div>'; return; }
+
+  const q = (document.getElementById('spendLinkSearch').value || '').trim().toLowerCase();
+  const amtOnly = document.getElementById('spendLinkAmtOnly').checked;
+  const dateOnly = document.getElementById('spendLinkDateOnly').checked;
+  const srcDate = new Date(src.date + 'T00:00:00');
+  const accountsById = Object.fromEntries(spendState.accounts.map(a => [a.id, a]));
+
+  // Candidates: opposite direction, different account.
+  const candidates = spendState.txns.filter(t => {
+    if (t.txnId === src.txnId) return false;
+    if (t.accountId === src.accountId) return false;
+    if (t.direction === src.direction) return false;
+    if (amtOnly && Math.abs(t.amount - src.amount) > 5) return false;
+    if (dateOnly) {
+      const td = new Date(t.date + 'T00:00:00');
+      if (Math.abs(td - srcDate) / 86400000 > 14) return false;
+    }
+    if (q) {
+      const hay = ((t.payee||'') + ' ' + (t.memo||'') + ' ' + (t.description||'') + ' ' + ((accountsById[t.accountId]||{}).name||'')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Sort by best match: amount diff, then date diff
+  candidates.sort((a, b) => {
+    const aAmt = Math.abs(a.amount - src.amount);
+    const bAmt = Math.abs(b.amount - src.amount);
+    if (aAmt !== bAmt) return aAmt - bAmt;
+    const aDate = Math.abs(new Date(a.date+'T00:00:00') - srcDate);
+    const bDate = Math.abs(new Date(b.date+'T00:00:00') - srcDate);
+    return aDate - bDate;
+  });
+
+  if (!candidates.length) {
+    listEl.innerHTML = `<div class="spend-link-empty">No candidate transactions match those filters.<br><span style="font-size:11px">Try unchecking the filters above to widen the search.</span></div>`;
+    return;
+  }
+
+  let html = '<div class="spend-link-row head"><div>Date</div><div>Payee · Account</div><div class="amt">Amount</div><div class="pick"></div></div>';
+  candidates.slice(0, 200).forEach(t => {
+    const safeId = t.txnId.replace(/'/g, "\\'");
+    const sign = t.direction === 'in' ? '+' : '−';
+    const acctName = (accountsById[t.accountId] || {}).name || t.accountId.slice(0, 12);
+    const payee = t.payee || t.description || '—';
+    const amtDiff = Math.abs(t.amount - src.amount);
+    const diffNote = amtDiff < 0.01 ? '' : ` <span style="color:var(--ink-4);font-size:10.5px">(±$${amtDiff.toFixed(2)})</span>`;
+    html += `
+      <div class="spend-link-row" onclick="applyManualLink('${safeId}')">
+        <div>${t.date}</div>
+        <div>${payee}<div class="acct">${acctName}</div></div>
+        <div class="amt">${sign}${fmt$(t.amount)}${diffNote}</div>
+        <div class="pick"><button class="spend-link-btn" onclick="event.stopPropagation();applyManualLink('${safeId}')">Pick</button></div>
+      </div>
+    `;
+  });
+  if (candidates.length > 200) {
+    html += `<div class="spend-link-empty" style="padding:10px;font-size:11px">… ${candidates.length - 200} more hidden. Refine search.</div>`;
+  }
+  listEl.innerHTML = html;
+}
+
+function applyManualLink(otherTxnId) {
+  if (!_linkPickerSourceId) return;
+  const srcId = _linkPickerSourceId;
+  const src = spendState.txns.find(t => t.txnId === srcId);
+  const other = spendState.txns.find(t => t.txnId === otherTxnId);
+  if (!src || !other) return;
+
+  // Decide tag: Income → bucket gets 'allocation'/'early', else 'rebalance'
+  const srcBucket = getBucketIdForAccount(src.accountId);
+  const otherBucket = getBucketIdForAccount(other.accountId);
+  let tag = 'rebalance';
+  // If one side is income and the other is a real bucket, use timing classifier
+  const incomeSide = (srcBucket === 'income') ? src : (otherBucket === 'income') ? other : null;
+  const bucketSide = incomeSide === src ? other : (incomeSide === other ? src : null);
+  if (incomeSide && bucketSide && getBucketIdForAccount(bucketSide.accountId) !== 'ignore') {
+    tag = classifyTransferTiming(incomeSide.date, bucketSide.date);
+  }
+
+  const o = loadSpendOverrides();
+  o[srcId]   = { ...(o[srcId]   || {}), tag, linkedTxnId: otherTxnId };
+  o[otherTxnId] = { ...(o[otherTxnId] || {}), tag, linkedTxnId: srcId };
+  saveSpendOverrides(o);
+  classifySpendTransactions();
+  closeLinkPicker();
+  renderSpend();
+}
+
+function unlinkTxn(txnId) {
+  const o = loadSpendOverrides();
+  const partner = o[txnId] && o[txnId].linkedTxnId;
+  if (o[txnId]) {
+    delete o[txnId].tag;
+    delete o[txnId].linkedTxnId;
+    if (Object.keys(o[txnId]).length === 0) delete o[txnId];
+  }
+  if (partner && o[partner]) {
+    delete o[partner].tag;
+    delete o[partner].linkedTxnId;
+    if (Object.keys(o[partner]).length === 0) delete o[partner];
+  }
+  saveSpendOverrides(o);
+  classifySpendTransactions();
+  renderSpend();
 }
 
 function setSpendMapping(accountId, bucketId) {
@@ -6921,7 +7163,7 @@ function renderSpendDrill(bucketId) {
     return;
   }
   let html = '<div class="spend-txn-table">';
-  html += '<div class="spend-txn-row head"><div>Date</div><div>Payee</div><div>Memo</div><div class="amt">Amount</div><div class="tag">Tag</div></div>';
+  html += '<div class="spend-txn-row head"><div>Date</div><div>Payee</div><div>Amount</div><div>Tag</div><div>Link</div></div>';
   txns.forEach(t => {
     const tagLabel = ({
       spend: 'spend', allocation: 'allocation', early: 'early', rebalance: 'rebalance',
@@ -6932,18 +7174,24 @@ function renderSpendDrill(bucketId) {
       income: 'alloc', 'income-out': 'ignore', 'income-other': 'alloc'
     })[t.tag] || 'spend';
     const sign = t.direction === 'in' ? '+' : '−';
+    const safeId = t.txnId.replace(/'/g, "\\'");
+    const linkBtn = t.linkedTxnId
+      ? `<button class="spend-link-btn linked" onclick="unlinkTxn('${safeId}')" title="Unlink (currently linked to ${t.linkedTxnId.slice(0,10)}…)">✕ Unlink</button>`
+      : `<button class="spend-link-btn" onclick="openLinkPicker('${safeId}')" title="Manually link to the matching transfer leg">🔗 Link…</button>`;
+    const payeeText = t.payee || t.description || '—';
+    const memoText = t.memo || t.description || '';
     html += `
       <div class="spend-txn-row" data-txn="${t.txnId}">
         <div class="date">${t.date}</div>
-        <div>${t.payee || t.description || '<span style="color:var(--ink-4)">—</span>'}</div>
-        <div class="memo">${t.memo || t.description || ''}</div>
+        <div><div>${payeeText}</div>${memoText && memoText !== payeeText ? `<div class="memo" style="font-size:10.5px;color:var(--ink-4);margin-top:2px">${memoText}</div>` : ''}</div>
         <div class="amt">${sign}${fmt$(t.amount)}</div>
-        <div class="tag"><span class="spend-tag ${tagClass}" title="Click to override" onclick="cycleSpendTag('${t.txnId.replace(/'/g, "\\'")}')">${tagLabel}</span></div>
+        <div><span class="spend-tag ${tagClass}" title="Click to cycle tag" onclick="cycleSpendTag('${safeId}')">${tagLabel}</span></div>
+        <div>${linkBtn}</div>
       </div>
     `;
   });
   html += '</div>';
-  html += '<div style="margin-top:10px;font-size:11px;color:var(--ink-4)">Click a tag to override. Manual matches override the classifier.</div>';
+  html += '<div style="margin-top:10px;font-size:11px;color:var(--ink-4)">Click a tag to cycle override · Click <strong>Link</strong> to manually pair a transfer leg. Both legs become <code>rebalance</code> (or <code>allocation</code>/<code>early</code> if Income → bucket).</div>';
   contentEl.innerHTML = html;
 }
 
