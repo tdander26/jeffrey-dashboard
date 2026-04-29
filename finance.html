@@ -1279,6 +1279,7 @@
   .qbo-chip-tax     { background: var(--green-bg);  color: var(--green); }
   .qbo-chip-oc      { background: var(--bronze-bg); color: var(--bronze-dark); }
   .qbo-chip-opex    { background: var(--navy-bg);   color: var(--navy); }
+  .qbo-chip-income  { background: #f1ebd9;          color: #6b5a2e; }
   .qbo-chip-unmap   { background: var(--amber-bg);  color: var(--amber); }
   .qbo-chip-total   { background: var(--chip);      color: var(--ink); }
   .qbo-error {
@@ -4444,13 +4445,15 @@ function renderHeroStrip() {
       const { accounts } = JSON.parse(raw);
       const hidden  = loadQBOHidden ? loadQBOHidden() : [];
       const mapping = loadQBOMapping ? loadQBOMapping() : {};
-      const BUCKETS = ['Profit','Tax','OC','OPEX'];
+      // Income counts as ASSIGNED (the user made an explicit choice for it),
+      // it's just not a destination bucket.
+      const ASSIGNED = ['Income','Profit','Tax','OC','OPEX'];
       const visible = accounts.filter(a => hidden.indexOf(a.name) < 0);
       acctCount = visible.length;
       visible.forEach(a => {
         totalCash += (parseFloat(a.balance) || 0);
         const bucket = mapping[a.name];
-        if (!BUCKETS.includes(bucket)) {
+        if (!ASSIGNED.includes(bucket)) {
           unassigned += (parseFloat(a.balance) || 0);
           unassignedAcctCount++;
         }
@@ -4787,8 +4790,12 @@ function renderQBOFromCache() {
 function renderQBOAccounts(accounts, fetchedAt) {
   const mapping = loadQBOMapping();
   const hidden  = loadQBOHidden();
+  // Destination buckets (where allocated $ lands).
   const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
-  const CHIP_CLASS = { Profit: 'qbo-chip-profit', Tax: 'qbo-chip-tax', OC: 'qbo-chip-oc', OPEX: 'qbo-chip-opex' };
+  // Income is the SOURCE account — selectable in the dropdown, but not
+  // summed into allocation totals (its balance IS the pre-split pool).
+  const ALL_OPTIONS = ['Income'].concat(BUCKETS);
+  const CHIP_CLASS = { Income: 'qbo-chip-income', Profit: 'qbo-chip-profit', Tax: 'qbo-chip-tax', OC: 'qbo-chip-oc', OPEX: 'qbo-chip-opex' };
 
   // Split visible / hidden
   const visible      = accounts.filter(function(a) { return hidden.indexOf(a.name) < 0; });
@@ -4809,7 +4816,7 @@ function renderQBOAccounts(accounts, fetchedAt) {
 
   visible.forEach(function(a) {
     const safeName = a.name.replace(/'/g, "\\'");
-    const opts = BUCKETS.map(function(b) {
+    const opts = ALL_OPTIONS.map(function(b) {
       return '<option value="' + b + '"' + (mapping[a.name] === b ? ' selected' : '') + '>' + b + '</option>';
     }).join('');
     html += '<tr>' +
@@ -4844,17 +4851,18 @@ function renderQBOAccounts(accounts, fetchedAt) {
 
   document.getElementById('qboContent').innerHTML = html;
 
-  // Bucket totals — only count visible accounts
-  const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0, _unassigned: 0 };
+  // Bucket totals — only count visible accounts. Income tracked separately
+  // so it shows its own chip but doesn't sum into the PF allocation total.
+  const totals = { Income: 0, Profit: 0, Tax: 0, OC: 0, OPEX: 0, _unassigned: 0 };
   visible.forEach(function(a) {
     const bucket = mapping[a.name];
     if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
     else totals._unassigned += a.balance;
   });
 
-  const grandTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0) + totals._unassigned;
+  const grandTotal = ALL_OPTIONS.reduce(function(s, b) { return s + totals[b]; }, 0) + totals._unassigned;
 
-  let chips = BUCKETS.filter(function(b) { return totals[b] > 0; }).map(function(b) {
+  let chips = ALL_OPTIONS.filter(function(b) { return totals[b] > 0; }).map(function(b) {
     return '<span class="qbo-bucket-chip ' + CHIP_CLASS[b] + '">' + b + ': ' + fmt$(totals[b]) + '</span>';
   });
   if (totals._unassigned > 0) {
@@ -4864,8 +4872,9 @@ function renderQBOAccounts(accounts, fetchedAt) {
 
   document.getElementById('qboBucketTotals').innerHTML = chips.join('');
 
-  // Update summary badge in panel header
-  const assignedTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
+  // Update summary badge in panel header — "assigned" counts both PF buckets
+  // and the Income source (any explicit user choice).
+  const assignedTotal = ALL_OPTIONS.reduce(function(s, b) { return s + totals[b]; }, 0);
   document.getElementById('qboPanelSummary').textContent =
     visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
     (hiddenAccts.length ? ' · ' + hiddenAccts.length + ' hidden' : '');
@@ -6037,11 +6046,12 @@ syncFromFirestore(); // then pull latest from cloud in background
       const { accounts } = JSON.parse(raw);
       const mapping = loadQBOMapping();
       const hidden  = loadQBOHidden();
-      const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+      // Income counts as assigned in the panel summary too.
+      const ASSIGNED = ['Income', 'Profit', 'Tax', 'OC', 'OPEX'];
       const visible = accounts.filter(function(a) { return hidden.indexOf(a.name) < 0; });
       const assignedTotal = visible.reduce(function(s, a) {
         const b = mapping[a.name];
-        return s + (BUCKETS.includes(b) ? a.balance : 0);
+        return s + (ASSIGNED.includes(b) ? a.balance : 0);
       }, 0);
       document.getElementById('qboPanelSummary').textContent =
         visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
