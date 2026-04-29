@@ -3372,7 +3372,16 @@ function saveToFirestore() {
     const fedRollover    = JSON.parse(localStorage.getItem('fedRollover')       || '{}');
     const fedFinalType   = JSON.parse(localStorage.getItem('fedFinalType')      || '{}');
     const qboManualMatch = JSON.parse(localStorage.getItem('qbo_manual_matches') || '{}');
-    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover, fedFinalType, qboManualMatch })
+    // Account-mapping settings — without these, the dashboard works but you'd
+    // have to remap accounts to buckets on every new device.
+    const qboMapping     = JSON.parse(localStorage.getItem('qboAccountMapping')   || '{}');
+    const qboHidden      = JSON.parse(localStorage.getItem('qbo_hidden_accounts') || '[]');
+    const qboSheetUrl    = localStorage.getItem('qbo_sheet_url') || '';
+    const spendMapping   = JSON.parse(localStorage.getItem('spend_account_mapping') || '{}');
+    const spendOverrides = JSON.parse(localStorage.getItem('spend_txn_overrides')   || '{}');
+    const spendCsvUrl    = localStorage.getItem('spend_csv_url') || '';
+    doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover, fedFinalType, qboManualMatch,
+              qboMapping, qboHidden, qboSheetUrl, spendMapping, spendOverrides, spendCsvUrl })
       .then(()  => setSyncBadge('synced'))
       .catch(()  => setSyncBadge('error'));
   } catch(e) { setSyncBadge('error'); }
@@ -3398,6 +3407,14 @@ async function syncFromFirestore() {
     if (d.fedRollover)    localStorage.setItem('fedRollover',        JSON.stringify(d.fedRollover));
     if (d.fedFinalType)   localStorage.setItem('fedFinalType',       JSON.stringify(d.fedFinalType));
     if (d.qboManualMatch) localStorage.setItem('qbo_manual_matches', JSON.stringify(d.qboManualMatch));
+    // Account mapping + Spend tab settings — restored so a new device
+    // doesn't need to remap accounts or repaste the CSV URL.
+    if (d.qboMapping)     localStorage.setItem('qboAccountMapping',   JSON.stringify(d.qboMapping));
+    if (d.qboHidden)      localStorage.setItem('qbo_hidden_accounts', JSON.stringify(d.qboHidden));
+    if (d.qboSheetUrl)    localStorage.setItem('qbo_sheet_url',       d.qboSheetUrl);
+    if (d.spendMapping)   localStorage.setItem('spend_account_mapping', JSON.stringify(d.spendMapping));
+    if (d.spendOverrides) localStorage.setItem('spend_txn_overrides',   JSON.stringify(d.spendOverrides));
+    if (d.spendCsvUrl)    localStorage.setItem('spend_csv_url',         d.spendCsvUrl);
     setSyncBadge('synced');
     // Re-render with fresh cloud data
     renderTable();
@@ -4646,6 +4663,7 @@ const DEFAULT_SPEND_TRANSACTIONS_URL = 'https://docs.google.com/spreadsheets/d/e
 function saveQBOUrl() {
   const url = (document.getElementById('qboSheetUrl').value || '').trim();
   if (url) localStorage.setItem('qbo_sheet_url', url);
+  if (typeof saveToFirestore === 'function') saveToFirestore();
 }
 
 function loadQBOMapping() {
@@ -4655,6 +4673,7 @@ function loadQBOMapping() {
 
 function saveQBOMapping(mapping) {
   localStorage.setItem('qboAccountMapping', JSON.stringify(mapping));
+  if (typeof saveToFirestore === 'function') saveToFirestore();
 }
 
 function loadQBOHidden() {
@@ -4664,6 +4683,7 @@ function loadQBOHidden() {
 
 function saveQBOHidden(list) {
   localStorage.setItem('qbo_hidden_accounts', JSON.stringify(list));
+  if (typeof saveToFirestore === 'function') saveToFirestore();
 }
 
 function hideQBOAccount(name) {
@@ -6348,6 +6368,51 @@ function getSpendInflowForWindow(win) {
   return total;
 }
 
+// Allocation per bucket per window. PROFIT FIRST REALITY: allocation transfers
+// happen at the START of a window from the PREVIOUS window's accumulated income.
+// So the "budget" for window N's bucket isn't this window's inflow × % — it's
+// the actual money transferred IN from Income during this window.
+//
+// Returns { actual, source } where source is 'transfer' (real allocation moved)
+// or 'forecast' (estimated from inflow × % when no transfer has happened yet).
+function getBucketAllocationForWindow(win, bucketId, pct) {
+  const incomeId = getIncomeAccountId();
+  const wStart = win.start;
+  const wEnd = new Date(win.end.getFullYear(), win.end.getMonth(), win.end.getDate(), 23, 59, 59);
+  let actual = 0;
+  if (incomeId) {
+    spendState.txns.forEach(t => {
+      // Inflow into THIS bucket account
+      if (t.direction !== 'in') return;
+      if (getBucketIdForAccount(t.accountId) !== bucketId) return;
+      const d = new Date(t.date + 'T00:00:00');
+      if (d < wStart || d > wEnd) return;
+      // Must be matched to an outflow from Income on a nearby date (±3d, ±$1)
+      const outDate = new Date(t.date + 'T00:00:00');
+      for (let off = -SPEND_MATCH_DAYS; off <= SPEND_MATCH_DAYS; off++) {
+        const check = new Date(outDate); check.setDate(check.getDate() + off);
+        const checkIso = isoDate(check);
+        const matched = spendState.txns.some(o =>
+          o.accountId === incomeId &&
+          o.direction === 'out' &&
+          o.date === checkIso &&
+          Math.abs(o.amount - t.amount) <= SPEND_MATCH_DOLLARS
+        );
+        if (matched) { actual += t.amount; break; }
+      }
+    });
+  }
+  if (actual > 0) return { actual, source: 'transfer' };
+  // Fall back to forecast: previous window's inflow × pct (more accurate than
+  // current window's inflow since allocations come from prior accumulation)
+  const prevWin = (function() {
+    const prevDay = new Date(win.start); prevDay.setDate(prevDay.getDate() - 1);
+    return getSpendWindowForDate(isoDate(prevDay));
+  })();
+  const forecastBase = prevWin ? getSpendInflowForWindow(prevWin) : getSpendInflowForWindow(win);
+  return { actual: forecastBase * (pct / 100), source: 'forecast' };
+}
+
 // ─── Classifier ────────────────────────────────────────────────────────────
 
 function classifySpendTransactions() {
@@ -6445,7 +6510,10 @@ function deriveSpendForWindow(win) {
   const wStart = win.start, wEnd = new Date(win.end.getFullYear(), win.end.getMonth(), win.end.getDate(), 23, 59, 59);
 
   const buckets = SPEND_DIAL_BUCKETS.map(b => {
-    const alloc = inflow * (allocPct[b.id] / 100);
+    // Allocation = real transfers received this window, with forecast fallback.
+    const a = getBucketAllocationForWindow(win, b.id, allocPct[b.id] || 0);
+    const alloc = a.actual;
+    const allocSource = a.source;
     let spent = 0, txnCount = 0;
     spendState.classified.forEach(t => {
       if (t.bucketId !== b.id) return;
@@ -6461,7 +6529,7 @@ function deriveSpendForWindow(win) {
     let status = 'on-pace';
     if (pctConsumed > 100) status = 'over';
     else if (pctConsumed > elapsedPct + 8) status = 'warn';
-    return { ...b, alloc, spent, remaining: alloc - spent, pctConsumed, elapsedPct, pace, status, txnCount };
+    return { ...b, alloc, allocSource, spent, remaining: alloc - spent, pctConsumed, elapsedPct, pace, status, txnCount };
   });
   const totalTxns = buckets.reduce((s, b) => s + b.txnCount, 0);
   return { win, inflow, buckets, totalTxns };
@@ -6669,6 +6737,9 @@ function renderSpendDials() {
         <div class="spend-dial-numbers">
           <div><div class="lbl">Spent</div><div class="val">${fmtMoney0(b.spent)}</div></div>
           <div style="text-align:right"><div class="lbl">Remaining</div><div class="val">${fmtMoney0(b.remaining)}</div></div>
+        </div>
+        <div style="font-size:10px;color:var(--ink-3);text-align:center;margin-top:4px" title="${b.allocSource === 'transfer' ? 'Allocation = actual transfer received from Income' : 'No allocation transfer detected yet — using forecast based on previous window inflow × ' + (currentSpendAllocPct()[b.id] || 0) + '%'}">
+          ${b.allocSource === 'transfer' ? 'Budget' : 'Forecast'}: ${fmtMoney0(b.alloc)}
         </div>
         <div class="spend-dial-spark-head">
           <span class="ttl">Last ${wins.length} windows vs budget</span>
