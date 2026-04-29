@@ -1815,8 +1815,8 @@
     border-color: var(--ink-4);
   }
   .spend-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .spend-nav-btn.today { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  .spend-nav-btn.today:hover { background: var(--ink-2); border-color: var(--ink-2); color: var(--bg); }
+  .spend-nav-btn.today { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 500; }
+  .spend-nav-btn.today:hover { background: var(--ink-2); border-color: var(--ink-2); color: #fff; }
   .spend-nav-label {
     flex: 1;
     text-align: center;
@@ -1970,9 +1970,11 @@
   .spend-wow-head.clickable { cursor: pointer; }
   .spend-wow-head.clickable:hover { background: var(--card-subtle); color: var(--ink); }
   .spend-wow-head.active {
-    background: var(--ink);
-    color: var(--bg);
-    opacity: 1;
+    background: var(--bronze-bg);
+    color: var(--bronze-dark);
+    font-weight: 700;
+    opacity: 1 !important;
+    box-shadow: inset 0 -2px 0 var(--bronze-dark);
   }
   .spend-wow-head.current { color: var(--ink); opacity: 1; }
   .spend-wow-head.prior   { opacity: 0.6; }
@@ -1995,11 +1997,10 @@
   .spend-wow-cell.prior { opacity: 0.5; }
   .spend-wow-cell.prior:hover { opacity: 1; background: var(--card-subtle); }
   .spend-wow-cell.active {
-    background: var(--ink);
-    opacity: 1;
+    background: var(--bronze-bg);
+    opacity: 1 !important;
+    box-shadow: inset 2px 0 0 var(--bronze-dark);
   }
-  .spend-wow-cell.active .pct { color: var(--bg); }
-  .spend-wow-cell.active .amt { color: rgba(255,255,255,0.7); }
   .spend-wow-cell .pct {
     font-size: 14px;
     font-weight: 600;
@@ -2011,8 +2012,8 @@
     color: var(--ink-4);
     font-variant-numeric: tabular-nums;
   }
+  .spend-wow-cell.active .amt { color: var(--bronze-dark); font-weight: 500; }
   .spend-wow-cell.over .pct { color: var(--spark-budget); }
-  .spend-wow-cell.active.over .pct { color: var(--spark-budget); }
 
   /* DialTxns drill-in table */
   .spend-txn-table {
