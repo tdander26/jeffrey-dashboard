@@ -139,6 +139,45 @@
     margin-top: 1px;
   }
 
+  /* ── Toolbar: tablet & mobile ─────────────────────────────── */
+  /* Below 900px the single-row layout can't fit icon+title+4 tabs+3 buttons.
+     Wrap to two rows: row 1 = brand + right-side actions, row 2 = tab bar.
+     Hide the long subtitle and let the title container shrink (min-width:0). */
+  @media (max-width: 900px) {
+    .toolbar {
+      height: auto;
+      min-height: 52px;
+      padding: 8px 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .toolbar-left {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .toolbar-left > div { min-width: 0; overflow: hidden; }
+    .app-title,
+    .app-subtitle {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .app-subtitle { display: none; }
+    .toolbar-spacer { display: none; }
+    .tab-bar {
+      order: 3;
+      flex: 1 1 100%;
+      justify-content: center;
+    }
+    .toolbar-right { flex: 0 0 auto; }
+    .main { padding: 12px 12px 120px; }
+  }
+  /* Phone-sized: also hide the sync badge so the action buttons keep room. */
+  @media (max-width: 480px) {
+    .toolbar-right #syncBadge { display: none; }
+    .seg-btn { padding: 0 9px; font-size: 11.5px; }
+  }
+
   /* ── Buttons ─────────────────────────────────────────────── */
   .btn {
     display: inline-flex; align-items: center; gap: 6px;
