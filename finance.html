@@ -6128,6 +6128,14 @@ function loadSpendTxnsCache() {
 function saveSpendTxnsCache(payload) {
   localStorage.setItem('spend_transactions_cache', JSON.stringify(payload));
 }
+function loadSpendCsvUrl() {
+  return (localStorage.getItem('spend_csv_url') || '').trim() || DEFAULT_SPEND_TRANSACTIONS_URL;
+}
+function saveSpendCsvUrl(url) {
+  const trimmed = (url || '').trim();
+  if (trimmed) localStorage.setItem('spend_csv_url', trimmed);
+  else localStorage.removeItem('spend_csv_url');
+}
 
 // ─── Module state ───────────────────────────────────────────────────────────
 
@@ -6150,11 +6158,24 @@ async function fetchSpendTransactions() {
   spendState.error = null;
   renderSpend();
   try {
-    const url = DEFAULT_SPEND_TRANSACTIONS_URL + '&_=' + Date.now();
+    const baseUrl = loadSpendCsvUrl();
+    const url = baseUrl + (baseUrl.includes('?') ? '&' : '?') + '_=' + Date.now();
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const text = await resp.text();
+    // Google's "Publish to web" returns a 302 → login HTML page when the
+    // requested gid isn't in the published-tab list. The redirect lands on
+    // a real 200 response, but the body is HTML, not CSV. Detect that here
+    // so the user gets a clear "publish this tab" error instead of silently
+    // ending up with zero transactions.
+    const head = text.slice(0, 200).trimStart().toLowerCase();
+    if (head.startsWith('<!doctype') || head.startsWith('<html')) {
+      throw new Error("This tab isn't published. In Google Sheets: File → Share → Publish to web → add the Transactions tab → Republish.");
+    }
     const txns = parseSpendCSV(text);
+    if (!txns.length) {
+      throw new Error('CSV loaded but contained no transaction rows. Check the column headers (Date, Account ID, Account Name, Amount, Direction, Payee, Description, Memo, Pending, Txn ID).');
+    }
     spendState.txns = txns;
     spendState.accounts = collectSpendAccounts(txns);
     spendState.fetchedAt = Date.now();
@@ -6505,14 +6526,32 @@ function renderSpendMappingPanel() {
   const content = document.getElementById('spendMappingContent');
   if (!content) return;
   const accounts = spendState.accounts;
+  const currentUrl = loadSpendCsvUrl();
+  // URL row is always visible at the bottom of the panel — works in every state
+  // (empty / error / loaded) so the user can always paste a different URL.
+  const urlRow = `
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--spend-border-soft)">
+      <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px">Transactions CSV URL</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="spendCsvUrlInput" type="url" value="${currentUrl.replace(/"/g, '&quot;')}" style="flex:1;height:28px;padding:0 10px;border:1px solid var(--rule);border-radius:6px;font-family:var(--font-sans);font-size:11.5px;color:var(--ink-2);background:var(--card)" />
+        <button class="btn btn-secondary btn-sm" onclick="applySpendCsvUrl()">${spendState.loading ? 'Loading…' : 'Save & Refresh'}</button>
+      </div>
+      <div style="font-size:10.5px;color:var(--ink-3);margin-top:6px;line-height:1.5">
+        Default points to the published <code>Transactions</code> tab of your sync sheet. If you see "tab isn't published", in Google Sheets: <strong>File → Share → Publish to web</strong>, add the Transactions tab to the publish list, then click <strong>Republish</strong>.
+      </div>
+    </div>
+  `;
+
   if (!accounts.length) {
+    let body;
     if (spendState.loading) {
-      content.innerHTML = '<div class="spend-loading">Loading transactions from Google Sheet…</div>';
+      body = '<div class="spend-loading">Loading transactions from Google Sheet…</div>';
     } else if (spendState.error) {
-      content.innerHTML = `<div class="spend-empty"><strong>Couldn't load transactions</strong>${spendState.error}<br><br><button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">Retry</button></div>`;
+      body = `<div class="spend-empty"><strong>Couldn't load transactions</strong><div style="margin:6px 0 12px;color:var(--ink-3)">${spendState.error}</div><button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">Retry</button></div>`;
     } else {
-      content.innerHTML = `<div class="spend-empty"><strong>No transactions yet</strong>Run <code>fetchSimpleFinTransactions</code> in Apps Script first, then click below.<br><br><button class="btn btn-primary btn-sm" onclick="fetchSpendTransactions()">Load transactions</button></div>`;
+      body = `<div class="spend-empty"><strong>No transactions yet</strong><div style="margin:6px 0 12px;color:var(--ink-3)">Run <code>fetchSimpleFinTransactions</code> in Apps Script, publish the Transactions tab, then click below.</div><button class="btn btn-primary btn-sm" onclick="fetchSpendTransactions()">Load transactions</button></div>`;
     }
+    content.innerHTML = body + urlRow;
     return;
   }
   const mapping = loadSpendMapping();
@@ -6521,7 +6560,6 @@ function renderSpendMappingPanel() {
     spendState.txns.forEach(t => { out[t.accountId] = (out[t.accountId] || 0) + (t.direction === 'in' ? t.amount : -t.amount); });
     return out;
   })();
-  const options = SPEND_BUCKETS.map(b => `<option value="${b.id}">${b.label}</option>`).join('') + '<option value="ignore">— Ignore —</option>';
 
   const rows = accounts.map(a => {
     const cur = mapping[a.id] || '';
@@ -6547,7 +6585,15 @@ function renderSpendMappingPanel() {
       <div style="font-size:11.5px;color:var(--ink-3)">${accounts.length} account${accounts.length === 1 ? '' : 's'} \u00b7 ${spendState.txns.length} transactions loaded${spendState.fetchedAt ? ` \u00b7 fetched ${new Date(spendState.fetchedAt).toLocaleString([], {hour: 'numeric', minute: '2-digit'})}` : ''}</div>
       <button class="btn btn-secondary btn-sm" onclick="fetchSpendTransactions()">${spendState.loading ? 'Loading…' : 'Refresh'}</button>
     </div>
+    ${urlRow}
   `;
+}
+
+function applySpendCsvUrl() {
+  const input = document.getElementById('spendCsvUrlInput');
+  if (!input) return;
+  saveSpendCsvUrl(input.value);
+  fetchSpendTransactions();
 }
 
 function setSpendMapping(accountId, bucketId) {
