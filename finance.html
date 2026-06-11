@@ -3534,7 +3534,7 @@
     </div>
     <div class="modal-body">
       <p style="font-size:12px;color:#636366;margin-bottom:14px;line-height:1.6">
-        Log outside funds you're putting <em>into</em> a bucket from a personal or external account — not pulled from the Owner's Comp bucket. Each entry credits the chosen account but is <strong>not</strong> counted as revenue, so your Profit/Tax/OC/OPEX allocation percentages stay clean. Book these in your books as Owner's Equity, not income.
+        Log outside funds you're putting in from a personal or external account — not pulled from the Owner's Comp bucket. <strong>Deposit the cash into the Income account</strong>: any part covering a bucket shortfall stays in Income (so the other buckets still get their full transfers), and the table shows how much of the rest to move on to the bucket. CAP is <strong>not</strong> counted as revenue, so your Profit/Tax/OC/OPEX allocation percentages stay clean. Book it as Owner's Equity, not income.
       </p>
       <div id="ocList"></div>
       <div class="et-add-row">
@@ -4427,13 +4427,21 @@ function renderTable() {
     // plus a second line for what must physically move from Income into the
     // bucket account. Full breakdown on hover.
     function bucketCell(base, payroll, et, ownerC, label, pct) {
-      const transfer = base - payroll - et + ownerC;
+      const preCap   = base - payroll - et;   // transfer needed before any CAP
+      const transfer = preCap + ownerC;
       const hasAdj = payroll > 0.005 || et > 0.005 || ownerC > 0.005;
       const lines = [`${label} ${pct}% = ${fmt$(base)} category total`];
       if (payroll > 0.005) lines.push(`− Payroll (stays in Income for Gusto)  ${fmt$(payroll)}`);
       if (et > 0.005)      lines.push(`− Early transfer (already moved)  ${fmt$(et)}`);
-      if (ownerC > 0.005)  lines.push(`+ Capital  ${fmt$(ownerC)}`);
+      if (ownerC > 0.005)  lines.push(`+ Capital (deposit into Income)  ${fmt$(ownerC)}`);
       if (hasAdj)          lines.push(`= Transfer from Income  ${fmt$(transfer)}`);
+      const capCovers = ownerC > 0.005 && preCap < -0.005;
+      if (capCovers) {
+        lines.push('');
+        lines.push(`CAP covers the ${fmt$(-preCap)} shortfall — that part stays in`);
+        lines.push(`Income so the other buckets still get their full transfers.`);
+        if (transfer > 0.005) lines.push(`The remaining ${fmt$(transfer)} of your CAP belongs in ${label}.`);
+      }
       const tip = escAttr(lines.join('\n'));
       if (!hasAdj) return `<span class="amt-cell" title="${tip}">${fmt$(base)}</span>`;
       if (transfer < -0.005) {
@@ -4442,7 +4450,12 @@ function renderTable() {
              + `<span class="adj-line neg adj-action" onclick="openOCModalPrefill(${idx},'${label}',${(-transfer).toFixed(2)})" title="${shortTip}">⚠ short ${fmt$(-transfer)} · +CAP</span>`;
       }
       const cls = transfer > 0.005 ? 'pos' : 'zero';
-      const moveTxt = transfer > 0.005 ? `→ move ${fmt$(transfer)}` : '✓ covered';
+      let moveTxt;
+      if (capCovers) {
+        moveTxt = transfer > 0.005 ? `✓ CAP covers · move ${fmt$(transfer)} extra CAP` : '✓ covered by CAP';
+      } else {
+        moveTxt = transfer > 0.005 ? `→ move ${fmt$(transfer)}` : '✓ covered';
+      }
       return `<span class="amt-cell amt-adj" title="${tip}">${fmt$(base)}</span><span class="adj-line ${cls}" title="${tip}">${moveTxt}</span>`;
     }
 
@@ -4479,7 +4492,13 @@ function renderTable() {
       latestPlan = {
         date: row.date,
         hold: payrollHold,
-        transfers: { Profit: adjProfit, Tax: adjTax, OC: adjOC, OPEX: adjOPEX }
+        transfers: { Profit: adjProfit, Tax: adjTax, OC: adjOC, OPEX: adjOPEX },
+        preCap: {
+          Profit: profitD - etProfit,
+          Tax:    taxD   - payrollTax  - etTax,
+          OC:     ocD    - payrollOC   - etOC,
+          OPEX:   opexD  - payrollOPEX - etOPEX
+        }
       };
     }
 
@@ -4520,8 +4539,13 @@ function renderTable() {
       const lastIdx = pfData.length - 1;
       const chips = ['Profit','Tax','OC','OPEX'].map(k => {
         const v = latestPlan.transfers[k];
+        const pre = latestPlan.preCap[k];
         if (v < -0.005) {
           return `<span class="tp-chip neg adj-action" onclick="openOCModalPrefill(${lastIdx},'${k}',${(-v).toFixed(2)})" title="Already over-committed vs the ${k} allocation — click to log a CAP contribution covering it"><b>${k}</b> short ${fmt$(-v)} · +CAP</span>`;
+        }
+        if (pre < -0.005) { // CAP covered a shortfall
+          const txt = v > 0.005 ? `✓ CAP · move ${fmt$(v)} extra` : '✓ covered by CAP';
+          return `<span class="tp-chip pos" title="CAP covers the ${fmt$(-pre)} shortfall (stays in Income); any extra CAP moves on to ${k}"><b>${k}</b> ${txt}</span>`;
         }
         return `<span class="tp-chip pos"><b>${k}</b> ${fmt$(v)}</span>`;
       }).join('');
