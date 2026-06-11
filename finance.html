@@ -1082,6 +1082,30 @@
   .adj-line.neg  { color: var(--red); }
   .adj-line.zero { color: var(--ink-4); }
 
+  /* ── Transfer plan strip ── */
+  .transfer-plan {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 10px 14px; margin: 0 0 12px;
+    background: var(--card-subtle); border: 1px solid var(--rule);
+    border-radius: 8px; font-size: 12px;
+  }
+  .tp-title { font-weight: 600; color: var(--ink-2); margin-right: 4px; }
+  .tp-chip {
+    font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+    background: var(--chip); color: var(--ink-2);
+  }
+  .tp-chip b { font-weight: 600; margin-right: 4px; }
+  .tp-chip.pos  { background: var(--green-bg); color: var(--green); }
+  .tp-chip.neg  { background: var(--red-bg); color: var(--red); }
+  .tp-chip.hold { background: var(--amber-bg); color: var(--amber); cursor: help; }
+
+  /* Clickable shortfall — opens the CAP modal prefilled */
+  .adj-action { cursor: pointer; }
+  .adj-line.adj-action { text-decoration: underline dotted; text-underline-offset: 2px; }
+  .adj-line.adj-action:hover { opacity: 0.75; }
+  .tp-chip.adj-action:hover { box-shadow: inset 0 0 0 1px var(--red); }
+
   /* Amount cells in the allocation table — single number with hover breakdown */
   .amt-cell {
     cursor: help;
@@ -1112,6 +1136,21 @@
   tr:hover .et-btn { opacity: 1; }
   .et-btn.has-et { opacity: 1; }
   .et-btn:hover { background: #ecdcb4; }
+
+  /* ── Owner Contribution button ── */
+  .oc-btn {
+    background: var(--green-bg); border: 1px solid var(--green-bg);
+    color: var(--green); border-radius: 4px;
+    padding: 2px 6px;
+    font-family: var(--font-sans);
+    font-size: 10px; font-weight: 600; cursor: pointer;
+    opacity: 0; transition: opacity .15s, background .12s;
+    white-space: nowrap; margin-right: 4px;
+    letter-spacing: 0.02em;
+  }
+  tr:hover .oc-btn { opacity: 1; }
+  .oc-btn.has-oc { opacity: 1; }
+  .oc-btn:hover { background: #d4e5d2; }
 
   /* ── Early Transfer Modal ── */
   .et-overlay {
@@ -2323,6 +2362,7 @@
         <button class="btn-toggle" id="pfToggleBtn" onclick="toggleShowAll()">Show All (<span id="pfTotalCount">0</span> rows)</button>
         <span class="toggle-info" id="pfToggleInfo">Showing most recent 10 rows</span>
       </div>
+      <div id="transferPlan"></div>
       <div class="pf-table-wrap">
         <table id="pfTable">
           <thead>
@@ -3485,6 +3525,47 @@
   </div>
 </div>
 
+<!-- Owner Contributions Modal -->
+<div class="et-overlay" id="ocOverlay">
+  <div class="et-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="ocModalTitle">Capital Contributions</div>
+      <button class="modal-close" onclick="closeOCModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#636366;margin-bottom:14px;line-height:1.6">
+        Log outside funds you're putting <em>into</em> a bucket from a personal or external account — not pulled from the Owner's Comp bucket. Each entry credits the chosen account but is <strong>not</strong> counted as revenue, so your Profit/Tax/OC/OPEX allocation percentages stay clean. Book these in your books as Owner's Equity, not income.
+      </p>
+      <div id="ocList"></div>
+      <div class="et-add-row">
+        <div>
+          <div class="form-label">Account</div>
+          <select id="oc_account">
+            <option value="OPEX">OPEX</option>
+            <option value="Tax">Tax</option>
+            <option value="OC">OC</option>
+            <option value="Profit">Profit</option>
+          </select>
+        </div>
+        <div>
+          <div class="form-label">Amount ($)</div>
+          <input id="oc_amount" type="number" step="0.01" placeholder="0.00" />
+        </div>
+        <div>
+          <div class="form-label">Reason / Note</div>
+          <input id="oc_note" type="text" placeholder="e.g. Training-period payroll support" />
+        </div>
+        <div style="padding-top:20px">
+          <button class="btn btn-primary btn-sm" onclick="addOwnerContribution()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeOCModal()">Done</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─────────────────────────────────────────────
 // FIREBASE — CONFIG & SYNC
@@ -3684,10 +3765,17 @@ function calcDollar(total, pct) {
 // ─────────────────────────────────────────────
 // W2 EMPLOYEES — STORAGE & DEFAULTS
 // ─────────────────────────────────────────────
+// Amounts from the Gusto payroll journal, Jun 1–15 2026 run (semi-monthly).
+// salary = NET pay (the part deposited to the employee); withholding and
+// employer taxes are carried separately so the bucket math sees all three.
 const W2_DEFAULTS = [
-  { id: 'emp_1', name: 'Dr. Todd (W2)', source: 'OC',   salary: 3004.56, empTaxSource: 'Tax',  empTaxPct: 24.79, erTaxSource: 'OPEX', erTaxPct: 12.50 },
-  { id: 'emp_2', name: 'Employee',      source: 'OPEX', salary: 2307.00, empTaxSource: 'Tax',  empTaxPct:  8.67, erTaxSource: 'OPEX', erTaxPct:  0.00 }
+  { id: 'emp_1', name: 'Dr. Todd (W2)', source: 'OC',   salary: 3006.53, empTaxSource: 'Tax',  empTaxPct: 24.73, empTaxFixed: 743.47, erTaxSource: 'OPEX', erTaxPct: 11.75, erTaxFixed: 353.41 },
+  { id: 'emp_2', name: 'Anna Payne',    source: 'OPEX', salary: 2097.41, empTaxSource: 'Tax',  empTaxPct: 19.20, empTaxFixed: 402.59, erTaxSource: 'OPEX', erTaxPct: 11.95, erTaxFixed: 250.67 }
 ];
+
+// Pre-Jun-2026 stored amounts, matched by value so the refresh is idempotent
+// even if an old copy comes back down from Firestore.
+const W2_STALE_SALARIES = { emp_1: 3004.56, emp_2: 2307.00 };
 
 function loadW2Employees() {
   try {
@@ -3699,6 +3787,16 @@ function loadW2Employees() {
         if (!e.empTaxSource) e.empTaxSource = 'Tax';
         if (!e.erTaxSource)  e.erTaxSource  = e.source || 'OPEX';
       });
+      // Refresh records still carrying pre-Jun-2026 payroll amounts
+      let refreshed = false;
+      emps.forEach(e => {
+        const stale = W2_STALE_SALARIES[e.id];
+        if (stale != null && Math.abs((e.salary || 0) - stale) < 0.01) {
+          const def = W2_DEFAULTS.find(d => d.id === e.id);
+          if (def) { Object.assign(e, def); refreshed = true; }
+        }
+      });
+      if (refreshed) localStorage.setItem('w2_employees', JSON.stringify(emps));
       return emps;
     }
   } catch(e) {}
@@ -3938,10 +4036,11 @@ function renderFooter() {
       addFoot(emp.erTaxSource  || emp.source, erTax);
       const empSrc = emp.empTaxSource || 'Tax';
       const erSrc  = emp.erTaxSource  || emp.source;
-      html += `<div class="footer-note">💵 <strong>${escHtml(emp.name)}:</strong> ${fmt$(emp.salary)} ${emp.source} · ${fmt$(eTax)} ${empSrc} · ${fmt$(erTax)} ${erSrc}</div>`;
+      html += `<div class="footer-note">💵 <strong>${escHtml(emp.name)}:</strong> net ${fmt$(emp.salary)} → ${emp.source} · withholding ${fmt$(eTax)} → ${empSrc} · employer tax ${fmt$(erTax)} → ${erSrc}</div>`;
     });
+    const grand = tot.OC + tot.OPEX + tot.Tax + tot.Profit;
     const totalParts = ['OC','Tax','OPEX','Profit'].filter(k => tot[k] > 0).map(k => fmt$(tot[k]) + ' ' + k);
-    html += `<div class="footer-note warn">👷 <strong>Total Payroll / Period:</strong> ${totalParts.join(' · ')}</div>`;
+    html += `<div class="footer-note warn">🏦 <strong>Payroll stays in Income — Gusto debits ${fmt$(grand)} / period.</strong> It counts toward: ${totalParts.join(' · ')}</div>`;
   }
   el.innerHTML = html;
 }
@@ -4014,6 +4113,82 @@ function deleteEarlyTransfer(etIdx) {
 }
 
 // ─────────────────────────────────────────────
+// OWNER CONTRIBUTIONS
+// ─────────────────────────────────────────────
+let ocCurrentRowIdx = null;
+
+function openOCModal(rowIdx) {
+  ocCurrentRowIdx = rowIdx;
+  const data = loadData();
+  document.getElementById('ocModalTitle').textContent = 'Capital Contributions — ' + data[rowIdx].date;
+  renderOCList();
+  document.getElementById('ocOverlay').classList.add('open');
+}
+
+// Open the CAP modal prefilled to cover a bucket shortfall (clicked from a
+// "⚠ short" line in the allocation table or the transfer plan strip).
+function openOCModalPrefill(rowIdx, account, amount) {
+  openOCModal(rowIdx);
+  document.getElementById('oc_account').value = account;
+  document.getElementById('oc_amount').value  = amount.toFixed(2);
+  document.getElementById('oc_note').value    = 'Cover ' + account + ' payroll shortfall';
+}
+
+function closeOCModal() {
+  document.getElementById('ocOverlay').classList.remove('open');
+  ocCurrentRowIdx = null;
+}
+
+function renderOCList() {
+  const data = loadData();
+  const ocs  = (data[ocCurrentRowIdx].ownerContributions) || [];
+  const el   = document.getElementById('ocList');
+  if (ocs.length === 0) {
+    el.innerHTML = '<div class="et-empty">No capital contributions logged for this period.</div>';
+    return;
+  }
+  let html = '<div class="et-list">';
+  ocs.forEach((oc, i) => {
+    const acctCls = 'acct-' + oc.account.toLowerCase();
+    html += `<div class="et-item">
+      <span class="et-acct ${acctCls}">${escHtml(oc.account)}</span>
+      <span class="et-amt">+${fmt$(oc.amount)}</span>
+      <span class="et-note">${escHtml(oc.note || '')}</span>
+      <button class="et-del-btn" onclick="deleteOwnerContribution(${i})" title="Remove">🗑</button>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function addOwnerContribution() {
+  const account = document.getElementById('oc_account').value;
+  const amount  = parseFloat(document.getElementById('oc_amount').value) || 0;
+  const note    = document.getElementById('oc_note').value.trim();
+  if (!amount) { alert('Please enter an amount.'); return; }
+  const data = loadData();
+  const row  = data[ocCurrentRowIdx];
+  if (!row.ownerContributions) row.ownerContributions = [];
+  row.ownerContributions.push({ account, amount, note });
+  saveData(data);
+  pfData = data;
+  document.getElementById('oc_amount').value = '';
+  document.getElementById('oc_note').value   = '';
+  renderOCList();
+  renderTable();
+}
+
+function deleteOwnerContribution(ocIdx) {
+  const data = loadData();
+  const row  = data[ocCurrentRowIdx];
+  row.ownerContributions.splice(ocIdx, 1);
+  saveData(data);
+  pfData = data;
+  renderOCList();
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
 // ─────────────────────────────────────────────
 // DATE HELPERS
 // ─────────────────────────────────────────────
@@ -4021,8 +4196,13 @@ function deleteEarlyTransfer(etIdx) {
 // Parse a row date string + inferred year into a Date (midnight local).
 function parseRowDate(dateStr, year) {
   if (!dateStr) return null;
-  const full = new Date(dateStr);
-  if (!isNaN(full)) return full;
+  // Only trust native parsing when the string carries its own year —
+  // new Date("June 10") lands in 2001, which made every row predate the
+  // employees' effective dates and silently skipped all payroll.
+  if (/\b\d{4}\b/.test(dateStr)) {
+    const full = new Date(dateStr);
+    if (!isNaN(full)) return full;
+  }
   const numMatch = dateStr.match(/(\d{1,2})[\/\-](\d{1,2})/);
   if (numMatch) return new Date(year, parseInt(numMatch[1]) - 1, parseInt(numMatch[2]));
   const MA = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,sept:8};
@@ -4169,6 +4349,8 @@ function renderTable() {
     sumOPEX   += calcDollar(rowGross, row.opex);
   });
 
+  let latestPlan = null; // transfer plan for the most recent row
+
   displayData.forEach((row, localIdx) => {
     const idx = displayOffset + localIdx; // actual index in pfData
     const pSum = (parseFloat(row.profit)||0) + (parseFloat(row.tax)||0) + (parseFloat(row.oc)||0) + (parseFloat(row.opex)||0);
@@ -4219,25 +4401,49 @@ function renderTable() {
       addPayroll(emp.erTaxSource  || emp.source,   erTaxAmt);
     });
 
+    // ── Owner contributions for this row ─────────────────
+    const ownerContribs = row.ownerContributions || [];
+    let ocProfit = 0, ocTax = 0, ocCC = 0, ocOPEX = 0;
+    ownerContribs.forEach(oc => {
+      const amt = parseFloat(oc.amount) || 0;
+      if      (oc.account === 'Profit') ocProfit += amt;
+      else if (oc.account === 'Tax')    ocTax    += amt;
+      else if (oc.account === 'OC')     ocCC     += amt;
+      else if (oc.account === 'OPEX')   ocOPEX   += amt;
+    });
+    const totalOC = ocProfit + ocTax + ocCC + ocOPEX;
+
     const hasPayroll = payrollOC > 0.005 || payrollOPEX > 0.005 || payrollTax > 0.005;
     const hasET      = totalET > 0.005;
+    const hasOC      = totalOC > 0.005;
 
-    const adjProfit = profitD - etProfit;
-    const adjTax    = taxD   - payrollTax - etTax;
-    const adjOC     = ocD    - payrollOC  - etOC;
-    const adjOPEX   = opexD  - payrollOPEX - etOPEX;
+    const adjProfit = profitD - etProfit + ocProfit;
+    const adjTax    = taxD   - payrollTax - etTax + ocTax;
+    const adjOC     = ocD    - payrollOC  - etOC + ocCC;
+    const adjOPEX   = opexD  - payrollOPEX - etOPEX + ocOPEX;
 
-    // Returns the remaining amount as a single span with full breakdown
-    // surfaced via the title attribute (mouse hover).
-    function remainingCell(base, payroll, et, label, pct) {
-      const remaining = base - payroll - et;
-      const lines = [`${label} ${pct}% = ${fmt$(base)}`];
-      if (payroll > 0.005) lines.push(`− Payroll  ${fmt$(payroll)}`);
-      if (et > 0.005)      lines.push(`− Early transfer  ${fmt$(et)}`);
-      if (payroll > 0.005 || et > 0.005) lines.push(`= Remaining  ${fmt$(remaining)}`);
+    // Each bucket cell shows the FULL category amount (salaries count toward
+    // OC/OPEX even though that cash stays in Income for the Gusto debit),
+    // plus a second line for what must physically move from Income into the
+    // bucket account. Full breakdown on hover.
+    function bucketCell(base, payroll, et, ownerC, label, pct) {
+      const transfer = base - payroll - et + ownerC;
+      const hasAdj = payroll > 0.005 || et > 0.005 || ownerC > 0.005;
+      const lines = [`${label} ${pct}% = ${fmt$(base)} category total`];
+      if (payroll > 0.005) lines.push(`− Payroll (stays in Income for Gusto)  ${fmt$(payroll)}`);
+      if (et > 0.005)      lines.push(`− Early transfer (already moved)  ${fmt$(et)}`);
+      if (ownerC > 0.005)  lines.push(`+ Capital  ${fmt$(ownerC)}`);
+      if (hasAdj)          lines.push(`= Transfer from Income  ${fmt$(transfer)}`);
       const tip = escAttr(lines.join('\n'));
-      const cls = remaining < -0.005 ? ' amt-neg' : (remaining > 0.005 && (payroll > 0.005 || et > 0.005) ? ' amt-adj' : '');
-      return `<span class="amt-cell${cls}" title="${tip}">${fmt$(remaining)}</span>`;
+      if (!hasAdj) return `<span class="amt-cell" title="${tip}">${fmt$(base)}</span>`;
+      if (transfer < -0.005) {
+        const shortTip = escAttr(lines.join('\n') + '\n\nClick to log a CAP contribution covering the shortfall.');
+        return `<span class="amt-cell amt-adj" title="${tip}">${fmt$(base)}</span>`
+             + `<span class="adj-line neg adj-action" onclick="openOCModalPrefill(${idx},'${label}',${(-transfer).toFixed(2)})" title="${shortTip}">⚠ short ${fmt$(-transfer)} · +CAP</span>`;
+      }
+      const cls = transfer > 0.005 ? 'pos' : 'zero';
+      const moveTxt = transfer > 0.005 ? `→ move ${fmt$(transfer)}` : '✓ covered';
+      return `<span class="amt-cell amt-adj" title="${tip}">${fmt$(base)}</span><span class="adj-line ${cls}" title="${tip}">${moveTxt}</span>`;
     }
 
     // Tooltip text for the Total cell — shows true gross income when ETs exist.
@@ -4261,21 +4467,36 @@ function renderTable() {
     w2Html += '</div>';
 
     const etLabel = earlyTransfers.length > 0 ? `ET (${earlyTransfers.length})` : 'ET';
+    const ocLabel = ownerContribs.length > 0 ? `CAP (${ownerContribs.length})` : 'CAP';
+
+    // Payroll never leaves Income by hand — Gusto debits it. Show the
+    // hold-back under the row total, and capture the latest row's plan.
+    const payrollHold = payrollOC + payrollOPEX + payrollTax;
+    const holdLine = payrollHold > 0.005
+      ? `<span class="adj-line zero" title="Payroll stays in Income — Gusto debits it directly">🏦 hold ${fmt$(payrollHold)}</span>`
+      : '';
+    if (idx === pfData.length - 1) {
+      latestPlan = {
+        date: row.date,
+        hold: payrollHold,
+        transfers: { Profit: adjProfit, Tax: adjTax, OC: adjOC, OPEX: adjOPEX }
+      };
+    }
 
     const tr = document.createElement('tr');
     if (isError) tr.classList.add('row-error');
 
     tr.innerHTML = `
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="date" onblur="cellEdit(this)">${escHtml(row.date)}</span></td>
-      <td${totalTip()}><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span></td>
+      <td${totalTip()}><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span>${holdLine}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="profit" onblur="cellEdit(this)">${row.profit}</span>%</td>
-      <td>${remainingCell(profitD, 0, etProfit, 'Profit', row.profit)}</td>
+      <td>${bucketCell(profitD, 0, etProfit, ocProfit, 'Profit', row.profit)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="tax" onblur="cellEdit(this)">${row.tax}</span>%</td>
-      <td>${remainingCell(taxD, payrollTax, etTax, 'Tax', row.tax)}</td>
+      <td>${bucketCell(taxD, payrollTax, etTax, ocTax, 'Tax', row.tax)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="oc" onblur="cellEdit(this)">${row.oc}</span>%</td>
-      <td>${remainingCell(ocD, payrollOC, etOC, 'OC', row.oc)}</td>
+      <td>${bucketCell(ocD, payrollOC, etOC, ocCC, 'OC', row.oc)}</td>
       <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="opex" onblur="cellEdit(this)">${row.opex}</span>%</td>
-      <td>${remainingCell(opexD, payrollOPEX, etOPEX, 'OPEX', row.opex)}</td>
+      <td>${bucketCell(opexD, payrollOPEX, etOPEX, ocOPEX, 'OPEX', row.opex)}</td>
       <td>${w2Html}</td>
       <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
       <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
@@ -4284,11 +4505,37 @@ function renderTable() {
       </td>
       <td>
         <button class="et-btn${hasET ? ' has-et' : ''}" onclick="openETModal(${idx})" title="Log early transfer">${etLabel}</button>
+        <button class="oc-btn${hasOC ? ' has-oc' : ''}" onclick="openOCModal(${idx})" title="Log capital contribution — outside funds added into a bucket (not from Owner's Comp)">${ocLabel}</button>
         <button class="delete-btn" onclick="deleteRow(${idx})" title="Delete row">🗑</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
+
+  // Transfer plan strip — what to physically move from Income for the
+  // latest allocation, with payroll held back for the Gusto debit.
+  const planEl = document.getElementById('transferPlan');
+  if (planEl) {
+    if (latestPlan) {
+      const lastIdx = pfData.length - 1;
+      const chips = ['Profit','Tax','OC','OPEX'].map(k => {
+        const v = latestPlan.transfers[k];
+        if (v < -0.005) {
+          return `<span class="tp-chip neg adj-action" onclick="openOCModalPrefill(${lastIdx},'${k}',${(-v).toFixed(2)})" title="Already over-committed vs the ${k} allocation — click to log a CAP contribution covering it"><b>${k}</b> short ${fmt$(-v)} · +CAP</span>`;
+        }
+        return `<span class="tp-chip pos"><b>${k}</b> ${fmt$(v)}</span>`;
+      }).join('');
+      const holdChip = latestPlan.hold > 0.005
+        ? `<span class="tp-chip hold" title="Gusto debits this from the Income account — do not transfer it out"><b>Keep in Income</b> ${fmt$(latestPlan.hold)} payroll</span>`
+        : '';
+      planEl.innerHTML = `<div class="transfer-plan">
+        <span class="tp-title">↗ Transfers from Income — ${escHtml(latestPlan.date)}</span>
+        ${holdChip}${chips}
+      </div>`;
+    } else {
+      planEl.innerHTML = '';
+    }
+  }
 
   // Totals row (colspan updated for new W2 column)
   tfoot.innerHTML = `
@@ -5167,7 +5414,7 @@ function useQBOBalances() {
   document.getElementById('m_tax_pct').value    = pcts['Tax'];
   document.getElementById('m_oc_pct').value     = pcts['OC'];
   document.getElementById('m_opex_pct').value   = pcts['OPEX'];
-  document.getElementById('m_notes').value      = 'QBO balance snapshot';
+  document.getElementById('m_notes').value      = 'Balance snapshot';
 
   if (typeof updateModalPreview === 'function') updateModalPreview();
 }
@@ -5191,7 +5438,7 @@ function approveBalance(accountName, balance) {
   document.getElementById('m_tax_pct').value    = defaults.tax;
   document.getElementById('m_oc_pct').value     = defaults.oc;
   document.getElementById('m_opex_pct').value   = defaults.opex;
-  document.getElementById('m_notes').value      = 'QBO: ' + accountName;
+  document.getElementById('m_notes').value      = accountName;
 
   if (typeof updateModalPreview === 'function') updateModalPreview();
 }

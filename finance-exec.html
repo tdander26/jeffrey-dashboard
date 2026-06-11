@@ -1,0 +1,3932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Dashboard · Executive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+    background: #f5f5f7;
+    color: #1d1d1f;
+    min-height: 100vh;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 12px; }
+  .app-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff;
+  }
+  .app-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .app-subtitle { font-size: 12px; color: #86868b; margin-top: 1px; }
+  .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .btn-primary { background: #007AFF; color: #fff; }
+  .btn-primary:hover { background: #0066d6; }
+  .btn-secondary {
+    background: rgba(0,0,0,0.05);
+    color: #1d1d1f;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  .btn-secondary:hover { background: rgba(0,0,0,0.08); }
+  .btn-danger { background: #FF3B30; color: #fff; }
+  .btn-danger:hover { background: #d63029; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* ── Segmented Control / Tabs ── */
+  .tab-bar {
+    display: flex; justify-content: center;
+    padding: 16px 24px 0;
+  }
+  .segmented-control {
+    display: inline-flex;
+    background: rgba(0,0,0,0.06);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg-btn {
+    padding: 7px 20px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    color: #3c3c43;
+  }
+  .seg-btn.active {
+    background: #fff;
+    color: #007AFF;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.04);
+  }
+
+  /* ── Year sub-tabs ── */
+  .year-tab-bar {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 16px;
+  }
+  .segmented-sm {
+    padding: 2px;
+    border-radius: 8px;
+  }
+  .segmented-sm .seg-btn {
+    padding: 5px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+  .tax-year-content { display: none; }
+  .tax-year-content.active { display: block; }
+
+  /* ── Main Content ── */
+  .main { padding: 20px 24px 120px; max-width: 1600px; margin: 0 auto; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── Panel ── */
+  .panel {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .panel-subtitle { font-size: 12px; color: #86868b; margin-top: 2px; }
+
+  /* ── Profit First Table ── */
+  .pf-table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: #f5f5f7;
+    padding: 10px 10px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 600;
+    color: #86868b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    white-space: nowrap;
+  }
+  th:first-child, th:last-child { text-align: left; }
+  th.col-notes { text-align: left; }
+  td {
+    padding: 9px 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    text-align: right;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; font-weight: 500; }
+  td.col-notes { text-align: left; white-space: normal; min-width: 140px; max-width: 220px; color: #636366; font-size: 12px; }
+  tr:hover td { background: #f9f9fb; }
+  tr.row-error td { background: #fff2f1 !important; }
+  tr.row-error:hover td { background: #ffe9e8 !important; }
+
+  .total-pct {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .total-pct.ok { background: #e8f8f0; color: #34c759; }
+  .total-pct.bad { background: #ffe9e8; color: #FF3B30; }
+
+  /* Editable cells */
+  .editable {
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 3px 5px;
+    transition: background 0.12s;
+    display: inline-block;
+    min-width: 40px;
+  }
+  .editable:hover { background: rgba(0,122,255,0.08); }
+  .editable:focus {
+    outline: 2px solid #007AFF;
+    background: rgba(0,122,255,0.06);
+  }
+
+  .delete-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #FF3B30;
+    font-size: 14px;
+    padding: 3px 6px;
+    border-radius: 5px;
+    transition: opacity 0.15s, background 0.12s;
+  }
+  tr:hover .delete-btn { opacity: 1; }
+  .delete-btn:hover { background: rgba(255,59,48,0.1); }
+
+  /* Totals row */
+  .totals-row td {
+    font-weight: 700;
+    border-top: 2px solid rgba(0,0,0,0.08);
+    background: #f5f5f7 !important;
+    color: #1d1d1f;
+  }
+
+  /* Show all toggle bar */
+  .pf-show-toggle {
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pf-show-toggle .btn-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    background: rgba(0,122,255,0.07);
+    color: #007AFF;
+    border: 1px solid rgba(0,122,255,0.2);
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .pf-show-toggle .btn-toggle:hover { background: rgba(0,122,255,0.13); }
+  .pf-show-toggle .toggle-info {
+    font-size: 12px;
+    color: #86868b;
+  }
+
+  /* Footer notes */
+  .pf-footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 10px 24px;
+    z-index: 90;
+    display: none;
+  }
+  .pf-footer.visible { display: block; }
+  .footer-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 20px;
+    align-items: center;
+  }
+  .footer-note {
+    font-size: 11.5px;
+    color: #636366;
+    padding: 3px 8px;
+    background: rgba(0,0,0,0.04);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .footer-note strong { color: #1d1d1f; }
+  .footer-note.warn { background: rgba(255,149,0,0.1); color: #995700; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+    width: 480px;
+    max-width: 95vw;
+    overflow: hidden;
+    animation: modal-in 0.2s ease;
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .modal-close {
+    background: rgba(0,0,0,0.06);
+    border: none;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #636366;
+    transition: background 0.12s;
+  }
+  .modal-close:hover { background: rgba(0,0,0,0.12); }
+  .modal-body { padding: 20px; }
+  .modal-footer { padding: 16px 20px; border-top: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; justify-content: flex-end; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 12px; font-weight: 600; color: #636366; text-transform: uppercase; letter-spacing: 0.3px; }
+  .form-input {
+    padding: 9px 12px;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1d1d1f;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: #007AFF;
+    box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
+  .pct-sum-preview {
+    padding: 10px 12px;
+    background: #f5f5f7;
+    border-radius: 9px;
+    font-size: 13px;
+    color: #636366;
+    text-align: center;
+  }
+  .pct-sum-preview .sum { font-weight: 700; font-size: 16px; }
+  .pct-sum-preview .sum.ok { color: #34c759; }
+  .pct-sum-preview .sum.bad { color: #FF3B30; }
+
+  /* ── Taxes Tab ── */
+  .taxes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) { .taxes-grid { grid-template-columns: 1fr; } }
+
+  .tax-id-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #007AFF15, #5856D615);
+    border: 1px solid rgba(0,122,255,0.2);
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #007AFF;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+  .tax-id-badge span { font-size: 12px; font-weight: 500; color: #86868b; }
+
+  .tax-table th { text-align: left; }
+  .tax-table td { text-align: left; }
+  .tax-table td.amount { text-align: right; font-variant-numeric: tabular-nums; }
+  .tax-table tr.totals-row td { font-weight: 700; }
+  .tax-table tr.na-row td { color: #86868b; font-style: italic; }
+  .tax-table tr.na-row td:first-child { font-style: normal; font-weight: 500; color: #1d1d1f; }
+
+  .check-cell { text-align: center !important; }
+  .checkbox-custom {
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: 2px solid #c7c7cc;
+    background: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    vertical-align: middle;
+  }
+  .checkbox-custom.checked {
+    background: #007AFF;
+    border-color: #007AFF;
+  }
+  .checkbox-custom.checked::after {
+    content: '';
+    width: 10px; height: 6px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+
+  .tax-note {
+    padding: 12px 16px;
+    background: #f5f5f7;
+    border-radius: 0 0 12px 12px;
+    font-size: 12px;
+    color: #636366;
+    line-height: 1.6;
+    border-top: 1px solid rgba(0,0,0,0.05);
+  }
+  .tax-note a { color: #007AFF; text-decoration: none; }
+  .tax-note a:hover { text-decoration: underline; }
+
+  .due-badge {
+    display: inline-flex;
+    background: rgba(255,59,48,0.1);
+    color: #FF3B30;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  .auto-badge {
+    display: inline-flex;
+    background: rgba(52,199,89,0.1);
+    color: #34c759;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .placeholder-note {
+    padding: 24px;
+    text-align: center;
+    color: #86868b;
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+  /* ── Print ── */
+  @media print {
+    .toolbar, .tab-bar, .pf-footer, .delete-btn, .btn, .modal-overlay { display: none !important; }
+    body { background: #fff; }
+    .panel { box-shadow: none; border: 1px solid #ddd; }
+    .tab-content { display: block !important; page-break-before: always; }
+    .tab-content:first-of-type { page-break-before: auto; }
+    .main { padding: 10px; }
+  }
+
+  .badge {
+    display: inline-flex;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-blue { background: rgba(0,122,255,0.1); color: #007AFF; }
+  .badge-green { background: rgba(52,199,89,0.1); color: #34c759; }
+  .badge-orange { background: rgba(255,149,0,0.1); color: #FF9500; }
+  .badge-red { background: rgba(255,59,48,0.1); color: #FF3B30; }
+
+  /* ── W2 / Payroll Settings Panel ── */
+  .w2-panel-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 20px; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    user-select: none; transition: background 0.12s;
+  }
+  .w2-panel-toggle:hover { background: #f9f9fb; }
+  .w2-arrow { display: inline-block; transition: transform 0.18s; font-size: 11px; color: #86868b; }
+  .w2-arrow.open { transform: rotate(90deg); }
+  .w2-panel-body { display: none; padding: 16px 20px 20px; }
+  .w2-panel-body.open { display: block; }
+
+  .w2-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .w2-tbl th { background: #f5f5f7; padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 600; color: #86868b; text-transform: uppercase; letter-spacing: 0.3px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .w2-tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .w2-tbl tr:last-child td { border-bottom: none; }
+  .w2-tbl tr:hover td { background: #f9f9fb; }
+
+  .src-toggle { display: inline-flex; border-radius: 6px; overflow: hidden; border: 1px solid rgba(0,0,0,0.12); }
+  .src-toggle button { border: none; background: transparent; padding: 3px 10px; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 600; color: #86868b; transition: all 0.12s; }
+  .src-toggle .st-oc.active  { background: #34c759; color: #fff; }
+  .src-toggle .st-opex.active { background: #FF9500; color: #fff; }
+
+  /* ── W2 Row Badges ── */
+  .w2-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 5px;
+    font-size: 10px; font-weight: 700; cursor: pointer;
+    border: 1.5px solid transparent; transition: all 0.12s; user-select: none;
+  }
+  .w2-badge.on-oc   { background: rgba(52,199,89,0.12); color: #34c759; border-color: rgba(52,199,89,0.3); }
+  .w2-badge.on-opex { background: rgba(255,149,0,0.12); color: #FF9500; border-color: rgba(255,149,0,0.3); }
+  .w2-badge.off     { background: rgba(0,0,0,0.04); color: #c7c7cc; border-color: rgba(0,0,0,0.1); }
+  .w2-cell { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; min-width: 44px; }
+
+  /* ── Adj amounts (inline in Tax$, OC$, OPEX$ cells) ── */
+  .adj-line { font-size: 10.5px; font-weight: 600; display: block; margin-top: 2px; white-space: nowrap; }
+  .adj-line.pos  { color: #34c759; }
+  .adj-line.neg  { color: #FF3B30; }
+  .adj-line.zero { color: #86868b; }
+
+  /* ── Early Transfer button (appears in last column on row hover) ── */
+  .et-btn {
+    background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2);
+    color: #FF9500; border-radius: 4px; padding: 2px 5px; font-size: 10px;
+    font-weight: 600; cursor: pointer; font-family: inherit;
+    opacity: 0; transition: opacity 0.15s; white-space: nowrap;
+    margin-right: 4px;
+  }
+  tr:hover .et-btn { opacity: 1; }
+  .et-btn.has-et { opacity: 1; }
+  .et-btn:hover { background: rgba(255,149,0,0.18); }
+
+  /* ── Early Transfer Modal ── */
+  .et-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .et-overlay.open { display: flex; }
+  .et-modal {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+    width: 540px; max-width: 95vw; overflow: hidden;
+    animation: modal-in 0.2s ease;
+  }
+  .et-list { display: flex; flex-direction: column; gap: 8px; }
+  .et-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; background: #f5f5f7; border-radius: 8px; font-size: 13px;
+  }
+  .et-acct { font-weight: 700; padding: 2px 7px; border-radius: 5px; font-size: 11px; flex-shrink: 0; }
+  .et-acct.acct-opex   { background: rgba(255,149,0,0.12); color: #FF9500; }
+  .et-acct.acct-tax    { background: rgba(255,59,48,0.1);  color: #FF3B30; }
+  .et-acct.acct-oc     { background: rgba(52,199,89,0.1);  color: #34c759; }
+  .et-acct.acct-profit { background: rgba(0,122,255,0.1);  color: #007AFF; }
+  .et-amt  { font-weight: 600; min-width: 75px; }
+  .et-note { color: #636366; flex: 1; font-size: 12px; }
+  .et-del-btn { background: none; border: none; cursor: pointer; color: #FF3B30; opacity: 0.4; font-size: 13px; padding: 2px 5px; border-radius: 4px; transition: opacity 0.12s, background 0.12s; flex-shrink: 0; }
+  .et-del-btn:hover { opacity: 1; background: rgba(255,59,48,0.1); }
+  .et-empty { text-align: center; color: #86868b; font-size: 13px; padding: 20px 0; font-style: italic; }
+  .et-add-row {
+    display: grid; grid-template-columns: 110px 110px 1fr auto;
+    gap: 8px; align-items: end;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .et-add-row .form-label { margin-bottom: 4px; }
+
+  /* ── W2 compact account select ── */
+  .w2-src-sel {
+    padding: 2px 4px; border: 1px solid rgba(0,0,0,0.14); border-radius: 5px;
+    font-size: 11px; font-weight: 600; font-family: inherit; color: #1d1d1f;
+    background: #fff; cursor: pointer; margin-right: 3px;
+    transition: border-color 0.12s;
+  }
+  .w2-src-sel:focus { outline: none; border-color: #007AFF; }
+  .w2-src-sel option { font-weight: 600; }
+  .et-add-row select, .et-add-row input {
+    padding: 8px 10px; border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 8px; font-size: 13px; font-family: inherit;
+    background: #fff; outline: none; color: #1d1d1f;
+    transition: border-color 0.15s, box-shadow 0.15s; width: 100%;
+  }
+  .et-add-row select:focus, .et-add-row input:focus {
+    border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
+
+  /* ── QBO Live Balances Panel ── */
+  .qbo-panel-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 20px; cursor: pointer;
+    font-size: 14px; font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    user-select: none; transition: background 0.12s;
+  }
+  .qbo-panel-toggle:hover { background: #f9f9fb; }
+  .qbo-arrow { display: inline-block; transition: transform 0.18s; font-size: 11px; color: #86868b; }
+  .qbo-arrow.open { transform: rotate(90deg); }
+  .qbo-panel-body { display: none; padding: 16px 20px 20px; }
+  .qbo-panel-body.open { display: block; }
+
+  .qbo-url-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 14px;
+  }
+  .qbo-url-row input {
+    flex: 1; padding: 8px 12px; border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 8px; font-size: 13px; font-family: inherit;
+    color: #1d1d1f; outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    background: #fff;
+  }
+  .qbo-url-row input:focus {
+    border-color: #007AFF; box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+  }
+  .qbo-meta {
+    font-size: 12px; color: #86868b; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .qbo-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .qbo-tbl th {
+    background: #f5f5f7; padding: 8px 10px; text-align: left;
+    font-size: 11px; font-weight: 600; color: #86868b;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .qbo-tbl td { padding: 8px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .qbo-tbl tr:last-child td { border-bottom: none; }
+  .qbo-tbl tr:hover td { background: #f9f9fb; }
+  .qbo-tbl td.amt { text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .qbo-bucket-totals {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+  }
+  .qbo-bucket-chip {
+    padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  }
+  .qbo-chip-profit  { background: rgba(0,122,255,0.1);  color: #007AFF; }
+  .qbo-chip-tax     { background: rgba(255,59,48,0.1);   color: #FF3B30; }
+  .qbo-chip-oc      { background: rgba(52,199,89,0.1);   color: #34c759; }
+  .qbo-chip-opex    { background: rgba(255,149,0,0.1);   color: #FF9500; }
+  .qbo-chip-unmap   { background: rgba(0,0,0,0.06);      color: #86868b; }
+  .qbo-chip-total   { background: #f5f5f7; color: #1d1d1f; }
+  .qbo-error {
+    padding: 12px 16px; background: #fff2f1; border-radius: 8px;
+    color: #FF3B30; font-size: 13px; line-height: 1.5;
+  }
+  .qbo-loading { padding: 12px; color: #86868b; font-size: 13px; font-style: italic; }
+
+  .qbo-approve-btn {
+    padding: 4px 10px; border-radius: 6px; border: none;
+    background: rgba(0,122,255,0.1); color: #007AFF;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+    transition: background 0.12s;
+  }
+  .qbo-approve-btn:hover { background: rgba(0,122,255,0.22); }
+
+  .qbo-hide-btn {
+    padding: 3px 8px; border-radius: 6px; border: none;
+    background: transparent; color: #86868b;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; line-height: 1;
+    transition: background 0.12s, color 0.12s;
+  }
+  .qbo-hide-btn:hover { background: rgba(255,59,48,0.1); color: #FF3B30; }
+
+  .qbo-hidden-row {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed rgba(0,0,0,0.08);
+    font-size: 12px; color: #86868b;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .qbo-unhide-chip {
+    padding: 3px 8px; border-radius: 6px; border: none;
+    background: rgba(0,0,0,0.05); color: #1d1d1f;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+  }
+  .qbo-unhide-chip:hover { background: rgba(0,122,255,0.1); color: #007AFF; }
+
+  .qbo-url-advanced {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed rgba(0,0,0,0.08);
+  }
+  .qbo-url-advanced summary {
+    cursor: pointer; font-size: 11px; font-weight: 600;
+    color: #86868b; user-select: none; margin-bottom: 8px;
+  }
+  .qbo-url-advanced summary:hover { color: #1d1d1f; }
+
+  /* ── Tax Payment Detected Badge ── */
+  .tax-detected {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-left: 8px; padding: 2px 8px; border-radius: 6px;
+    background: rgba(52,199,89,0.14); color: #2ea44f;
+    font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+    vertical-align: middle;
+  }
+  .tax-unmatched-panel {
+    margin-bottom: 14px; padding: 10px 14px;
+    background: rgba(255,149,0,0.07); border: 1px solid rgba(255,149,0,0.18);
+    border-radius: 8px; font-size: 12px;
+  }
+  .tax-unmatched-panel .title {
+    font-weight: 600; color: #1d1d1f; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tax-unmatched-panel .items {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .tax-unmatched-item {
+    padding: 3px 10px; background: #fff; border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.08); color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     EXECUTIVE DESIGN OVERRIDES
+     Warm paper + navy + bronze, Fraunces serif, JetBrains Mono
+     ══════════════════════════════════════════════════════════ */
+  :root {
+    --paper:       #fbfaf7;
+    --card:        #ffffff;
+    --card-subtle: #fdfcf7;
+    --ink:   #141414;
+    --ink-2: #3a3a3a;
+    --ink-3: #6b6a66;
+    --ink-4: #a8a6a0;
+    --rule:   #e8e4db;
+    --rule-2: #d4cfc3;
+    --navy:      #1d3557;
+    --navy-dark: #152840;
+    --bronze:      #b8956a;
+    --bronze-dark: #8f7047;
+    --green:    #3b7a4e;
+    --green-bg: #e6efe5;
+    --red:      #9a3a2c;
+    --red-bg:   #f3e4df;
+    --amber:     #7c5a12;
+    --amber-bg:  #f4ead3;
+    --amber-dot: #c69224;
+    --chip-bg: #eeeae0;
+    --shadow-tab-active: 0 1px 2px rgba(20,18,12,.08);
+    --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-serif: 'Fraunces', 'Charter', 'Iowan Old Style', Georgia, serif;
+    --font-mono:  'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  }
+
+  /* Body / typography */
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+
+  /* ── Shell (toolbar redressed as Executive shell) ─────── */
+  .toolbar {
+    background: var(--card);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid var(--rule);
+    padding: 0 20px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .toolbar-left { gap: 12px; }
+  .toolbar-right { gap: 8px; }
+
+  .app-icon {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    background: var(--navy);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    font-size: 0;
+  }
+  .app-title {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+  .app-subtitle {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  /* Shell spacer — pushes tabs center, right-group right */
+  .shell-spacer { flex: 1; }
+
+  /* ── Pill-group tabs ──────────────────────────────────── */
+  .tab-bar {
+    padding: 0;
+    display: contents; /* let the pill-group flow inline in shell */
+  }
+  .segmented-control {
+    display: inline-flex;
+    background: var(--chip-bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    height: 26px;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink-3);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: background .12s, color .12s, box-shadow .12s;
+  }
+  .seg-btn:hover { color: var(--ink-2); }
+  .seg-btn.active {
+    background: var(--card);
+    color: var(--ink);
+    box-shadow: var(--shadow-tab-active);
+  }
+  .seg-glyph { opacity: 0.75; font-size: 11px; }
+
+  /* Year sub-tabs inherit pill-group; just smaller */
+  .segmented-sm { padding: 2px; }
+  .segmented-sm .seg-btn { height: 24px; padding: 0 12px; font-size: 11.5px; }
+
+  /* ── Buttons (reskinned) ──────────────────────────────── */
+  .btn {
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--ink-2);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .btn:hover { background: var(--card-subtle); }
+  .btn-primary {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--navy-dark); border-color: var(--navy-dark); }
+  .btn-secondary {
+    background: var(--card);
+    border-color: var(--rule);
+    color: var(--ink-2);
+  }
+  .btn-secondary:hover { background: var(--card-subtle); }
+  .btn-danger {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .btn-danger:hover { background: #7a2d22; border-color: #7a2d22; }
+  .btn-dark {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .btn-dark:hover { background: #000; border-color: #000; }
+  .btn-sm { height: 24px; padding: 0 10px; font-size: 11px; }
+
+  /* ── Main layout ──────────────────────────────────────── */
+  .main {
+    padding: 16px 20px 120px;
+    max-width: 1600px;
+  }
+
+  /* ── Hero strip ──────────────────────────────────────── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 1100px) { .hero { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px)  { .hero { grid-template-columns: 1fr; } }
+
+  .hero-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .hero-card.is-hero { padding: 14px 16px; }
+  .hero-card.is-hero::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--navy);
+  }
+  .hero-label {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .hero-value {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .hero-card.is-hero .hero-value {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .hero-sub {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hero-dot {
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+  .hero-dot.green { background: var(--green); }
+  .hero-dot.amber { background: var(--amber-dot); }
+  .hero-dot.navy  { background: var(--navy); }
+
+  /* ── Panel (reskinned as Executive card) ──────────────── */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    box-shadow: none;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    gap: 10px;
+  }
+  .panel-title {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .panel-subtitle {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+
+  /* ── Tables (all) ─────────────────────────────────────── */
+  table {
+    font-family: var(--font-sans);
+    font-size: 12px;
+  }
+  th {
+    background: var(--card-subtle);
+    padding: 8px 10px;
+    color: var(--ink-3);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--rule);
+  }
+  td {
+    padding: 10px;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+  }
+  td:first-child { color: var(--ink); font-weight: 500; }
+  td.col-notes {
+    color: var(--ink-3);
+    font-size: 11px;
+  }
+  td.amount,
+  .tax-table td.amount {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  /* Profit First data cells should use mono */
+  #pfTable td:not(:first-child):not(.col-notes) {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  tr:hover td { background: #f9f7f1; }
+  tr.row-error td { background: var(--red-bg) !important; }
+  tr.row-error:hover td { background: #ecd0c7 !important; }
+
+  .total-pct {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+  }
+  .total-pct.ok  { background: var(--green-bg); color: var(--green); }
+  .total-pct.bad { background: var(--red-bg);   color: var(--red); }
+
+  .editable {
+    border-radius: 5px;
+    padding: 3px 5px;
+    min-width: 40px;
+  }
+  .editable:hover { background: rgba(29,53,87,0.08); }
+  .editable:focus {
+    outline: 2px solid var(--navy);
+    background: rgba(29,53,87,0.06);
+  }
+
+  .delete-btn {
+    color: var(--red);
+    font-size: 13px;
+    padding: 3px 6px;
+    border-radius: 5px;
+  }
+  .delete-btn:hover { background: rgba(154,58,44,0.1); }
+
+  .totals-row td {
+    font-weight: 700;
+    border-top: 2px solid var(--rule-2);
+    background: var(--card-subtle) !important;
+    color: var(--ink);
+  }
+
+  /* ── Show-all toggle bar ──────────────────────────────── */
+  .pf-show-toggle {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--card-subtle);
+  }
+  .pf-show-toggle .btn-toggle {
+    padding: 5px 12px;
+    background: transparent;
+    color: var(--navy);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    letter-spacing: 0.01em;
+  }
+  .pf-show-toggle .btn-toggle:hover { background: rgba(29,53,87,0.06); }
+  .pf-show-toggle .toggle-info {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  /* ── Footer (PF) ──────────────────────────────────────── */
+  .pf-footer {
+    background: rgba(253,252,247,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--rule);
+    padding: 10px 20px;
+  }
+  .footer-note {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--ink-3);
+    padding: 3px 8px;
+    background: var(--chip-bg);
+    border-radius: 999px;
+  }
+  .footer-note strong {
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .footer-note.warn {
+    background: var(--amber-bg);
+    color: var(--amber);
+  }
+
+  /* ── Modal ────────────────────────────────────────────── */
+  .modal, .et-modal {
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(20,18,12,.06), 0 10px 30px rgba(20,18,12,.08);
+  }
+  .modal-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .modal-title {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .modal-close {
+    background: transparent;
+    color: var(--ink-3);
+    font-size: 18px;
+    width: 24px; height: 24px;
+  }
+  .modal-close:hover { background: var(--chip-bg); color: var(--ink-2); }
+  .modal-body { padding: 18px; }
+  .modal-footer {
+    padding: 12px 18px;
+    background: var(--card-subtle);
+    border-top: 1px solid var(--rule);
+  }
+
+  .form-label {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .form-input,
+  .et-add-row select, .et-add-row input,
+  .qbo-url-row input, .w2-src-sel {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    color: var(--ink);
+    font-family: var(--font-sans);
+  }
+  .form-input {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .form-input:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(29,53,87,0.12);
+  }
+  .pct-sum-preview {
+    background: var(--card-subtle);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .pct-sum-preview .sum {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+  }
+  .pct-sum-preview .sum.ok  { color: var(--green); }
+  .pct-sum-preview .sum.bad { color: var(--red); }
+
+  /* ── Taxes tab polish ─────────────────────────────────── */
+  .taxes-grid { gap: 14px; }
+  .tax-id-badge {
+    background: #f0e8d8;
+    border: 1px solid #e0d4bb;
+    color: var(--bronze-dark);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border-radius: 6px;
+    padding: 6px 12px;
+  }
+  .tax-id-badge span {
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .tax-note {
+    background: var(--card-subtle);
+    color: var(--ink-3);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    border-top: 1px solid var(--rule);
+  }
+  .tax-note a { color: var(--navy); }
+  .tax-note strong { color: var(--ink); }
+
+  /* ── Badges → Executive chips ─────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.4;
+  }
+  .badge-blue   { background: #e3e8f0;          color: var(--navy); }
+  .badge-green  { background: var(--green-bg);  color: var(--green); }
+  .badge-orange { background: var(--amber-bg);  color: var(--amber); }
+  .badge-red    { background: var(--red-bg);    color: var(--red); }
+
+  .auto-badge {
+    background: #f0e8d8;
+    color: var(--bronze-dark);
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .due-badge {
+    background: var(--red-bg);
+    color: var(--red);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Checkbox (Executive) ─────────────────────────────── */
+  .checkbox-custom {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--rule-2);
+    border-radius: 4px;
+    background: var(--card);
+  }
+  .checkbox-custom:hover { border-color: var(--ink-3); }
+  .checkbox-custom.checked {
+    background: var(--navy);
+    border-color: var(--navy);
+  }
+  .checkbox-custom.checked:hover {
+    background: var(--navy-dark);
+    border-color: var(--navy-dark);
+  }
+  .checkbox-custom.checked::after {
+    border-left-color: #fff;
+    border-bottom-color: #fff;
+  }
+
+  /* ── W2 panel polish ──────────────────────────────────── */
+  .w2-panel-toggle, .qbo-panel-toggle {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+  .w2-panel-toggle:hover, .qbo-panel-toggle:hover { background: var(--card-subtle); }
+  .w2-arrow, .qbo-arrow { color: var(--ink-4); }
+
+  .w2-tbl th, .qbo-tbl th {
+    background: var(--card-subtle);
+    color: var(--ink-3);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  .w2-tbl td, .qbo-tbl td { border-bottom: 1px solid var(--rule); }
+  .w2-tbl tr:hover td, .qbo-tbl tr:hover td { background: #f9f7f1; }
+  .qbo-tbl td.amt {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  /* W2 badges (on-oc / on-opex / off) */
+  .w2-badge.on-oc   { background: var(--green-bg); color: var(--green); border-color: rgba(59,122,78,0.25); }
+  .w2-badge.on-opex { background: #f0e8d8;          color: var(--bronze-dark); border-color: rgba(184,149,106,0.3); }
+  .w2-badge.off     { background: var(--chip-bg);   color: var(--ink-4); border-color: var(--rule); }
+
+  /* Source toggle in W2 */
+  .src-toggle { border: 1px solid var(--rule); border-radius: 6px; }
+  .src-toggle button { font-family: var(--font-sans); color: var(--ink-3); }
+  .src-toggle .st-oc.active   { background: var(--green);     color: #fff; }
+  .src-toggle .st-opex.active { background: var(--bronze);    color: #fff; }
+
+  /* Adj lines */
+  .adj-line.pos  { color: var(--green); }
+  .adj-line.neg  { color: var(--red); }
+  .adj-line.zero { color: var(--ink-4); }
+
+  /* Early Transfer button */
+  .et-btn {
+    background: var(--amber-bg);
+    border: 1px solid #e3d3a8;
+    color: var(--amber);
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+  .et-btn:hover { background: #eadfbd; }
+
+  .et-item { background: var(--card-subtle); border: 1px solid var(--rule); }
+  .et-acct.acct-opex   { background: var(--amber-bg);  color: var(--amber); }
+  .et-acct.acct-tax    { background: var(--red-bg);    color: var(--red); }
+  .et-acct.acct-oc     { background: var(--green-bg);  color: var(--green); }
+  .et-acct.acct-profit { background: #e3e8f0;          color: var(--navy); }
+
+  /* QBO styles */
+  .qbo-bucket-chip {
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .qbo-chip-profit  { background: #e3e8f0;           color: var(--navy); }
+  .qbo-chip-tax     { background: var(--green-bg);   color: var(--green); }
+  .qbo-chip-oc      { background: #f0e8d8;           color: var(--bronze-dark); }
+  .qbo-chip-opex    { background: var(--amber-bg);   color: var(--amber); }
+  .qbo-chip-unmap   { background: var(--chip-bg);    color: var(--ink-3); }
+  .qbo-chip-total   { background: var(--card-subtle); color: var(--ink); border: 1px solid var(--rule); }
+
+  .qbo-error {
+    background: var(--red-bg);
+    color: var(--red);
+    border-radius: 8px;
+  }
+  .qbo-approve-btn {
+    background: #e3e8f0;
+    color: var(--navy);
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+  }
+  .qbo-approve-btn:hover { background: #cfd7e3; }
+
+  /* Unmatched tax payments */
+  .tax-unmatched-panel {
+    background: #fdf7ea;
+    border: 1px solid var(--amber-bg);
+    border-radius: 10px;
+  }
+  .tax-unmatched-panel .title {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .tax-unmatched-item {
+    background: var(--card);
+    border: 1px solid var(--amber-bg);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tax-detected {
+    background: var(--green-bg);
+    color: var(--green);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 999px;
+  }
+
+  /* Scrollbar in Executive paper */
+  ::-webkit-scrollbar-thumb { background: var(--rule-2); }
+
+  /* Mono-only numeric helpers */
+  .num-mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+</style>
+</head>
+<body>
+
+<!-- Shell (Executive) -->
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="app-icon" aria-hidden="true">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6 H14 M9 6 V18" stroke="#b8956a" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M13 18 L17 6 L21 18 M14.4 14 H19.6" stroke="#fbfaf7" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="app-title">Anderson Ledger</div>
+      <div class="app-subtitle">Dr. Todd Anderson · Momentum Health · FY 2026</div>
+    </div>
+  </div>
+
+  <div class="shell-spacer"></div>
+
+  <div class="tab-bar">
+    <div class="segmented-control">
+      <button class="seg-btn active" onclick="switchTab('profitfirst', this)"><span class="seg-glyph">◆</span>Profit First</button>
+      <button class="seg-btn"        onclick="switchTab('taxes', this)"><span class="seg-glyph">▲</span>Taxes</button>
+      <button class="seg-btn"        onclick="switchTab('payroll', this)"><span class="seg-glyph">●</span>Payroll</button>
+    </div>
+  </div>
+
+  <div class="shell-spacer"></div>
+
+  <div class="toolbar-right">
+    <span class="badge badge-blue" id="syncBadge" style="font-size:11px">⟳ Connecting…</span>
+    <button class="btn btn-secondary" onclick="window.print()">Print</button>
+    <button class="btn btn-dark" id="addEntryBtn" onclick="openModal()">+ Add Entry</button>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Hero strip (persistent across tabs) -->
+  <div class="hero" id="hero"></div>
+
+  <!-- ══ Tab 1: Profit First ══ -->
+  <div id="tab-profitfirst" class="tab-content active">
+
+    <!-- QBO Live Balances Panel -->
+    <div class="panel" style="margin-bottom:16px" id="qboPanelWrap">
+      <div class="qbo-panel-toggle" onclick="toggleQBOPanel()">
+        <span class="qbo-arrow" id="qboArrow">▶</span>
+        <span>Live Bank Balances</span>
+        <span id="qboPanelSummary" style="font-size:12px;color:#86868b;font-weight:400;margin-left:6px"></span>
+      </div>
+      <div class="qbo-panel-body" id="qboPanelBody">
+        <div class="qbo-url-row">
+          <button class="btn btn-secondary btn-sm" onclick="fetchQBOBalances()">Refresh</button>
+          <button class="btn btn-primary btn-sm" onclick="useQBOBalances()">Use These Balances</button>
+        </div>
+        <div class="qbo-meta" id="qboMeta"></div>
+        <div id="qboContent">
+          <div class="qbo-loading">Loading balances…</div>
+        </div>
+        <div class="qbo-bucket-totals" id="qboBucketTotals"></div>
+        <div id="qboTaxStatus" style="font-size:12px;color:#86868b;margin-top:8px"></div>
+        <details class="qbo-url-advanced">
+          <summary>Change sheet URLs (advanced)</summary>
+          <div class="qbo-url-row" style="margin-top:10px">
+            <input
+              id="qboSheetUrl"
+              type="url"
+              placeholder="Balances CSV URL"
+              onchange="saveQBOUrl()"
+              onblur="saveQBOUrl()"
+            />
+          </div>
+          <div class="qbo-url-row" style="margin-top:6px">
+            <input
+              id="qboTaxUrl"
+              type="url"
+              placeholder="Tax Payments CSV URL"
+              onchange="saveQBOTaxUrl()"
+              onblur="saveQBOTaxUrl()"
+            />
+            <button class="btn btn-secondary btn-sm" onclick="fetchQBOTaxPayments()">Refresh Taxes</button>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Profit First Allocations</div>
+          <div class="panel-subtitle">Click any cell to edit · Rows highlighted red when % ≠ 100%</div>
+        </div>
+        <span class="badge badge-blue" id="entryCount">0 entries</span>
+      </div>
+      <div class="pf-show-toggle" id="pfToggleBar">
+        <button class="btn-toggle" id="pfToggleBtn" onclick="toggleShowAll()">Show All (<span id="pfTotalCount">0</span> rows)</button>
+        <span class="toggle-info" id="pfToggleInfo">Showing most recent 10 rows</span>
+      </div>
+      <div class="pf-table-wrap">
+        <table id="pfTable">
+          <thead>
+            <tr>
+              <th style="min-width:100px">Date</th>
+              <th style="min-width:90px">Total</th>
+              <th>Profit %</th>
+              <th>Profit $</th>
+              <th>Tax %</th>
+              <th>Tax $</th>
+              <th>OC %</th>
+              <th>OC $</th>
+              <th>OPEX %</th>
+              <th>OPEX $</th>
+              <th id="w2ColHeader" style="min-width:50px;text-align:center">W2</th>
+              <th class="col-notes" style="min-width:160px">Notes</th>
+              <th>100%</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="pfBody"></tbody>
+          <tfoot id="pfFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2: Taxes ══ -->
+  <div id="tab-taxes" class="tab-content">
+
+    <div class="tax-id-badge">
+      <span>Tax ID (EIN):</span>
+      87-2838444
+    </div>
+
+    <!-- Year sub-tabs -->
+    <div class="year-tab-bar">
+      <div class="segmented-control segmented-sm">
+        <button class="seg-btn" onclick="switchTaxYear('2024', this)">2024</button>
+        <button class="seg-btn" onclick="switchTaxYear('2025', this)">2025</button>
+        <button class="seg-btn active" onclick="switchTaxYear('2026', this)">2026</button>
+      </div>
+    </div>
+
+    <!-- ── Year 2024 ── -->
+    <div id="tax-year-2024" class="tax-year-content">
+      <div class="taxes-grid">
+
+        <!-- Federal Quarterly 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Federal Quarterly Estimates 2024</div>
+              <div class="panel-subtitle">IRS Form 1040-ES</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="amount">Estimated</th>
+                  <th class="amount">Quarter Amount</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Q1 — April 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2024 Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+        <!-- MN Quarterly 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Quarterly Estimates 2024</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="check-cell">Paid?</th>
+                  <th class="amount">Actually Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Q1 — April 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q1" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q2" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q3" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>Total Paid</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+        <!-- MN Care Tax 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Care Tax 2024</div>
+              <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+        <!-- MN S-Corp 2024 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN S-Corp Tax — 2024 Yearly Fee</div>
+              <div class="panel-subtitle">Minnesota S-Corporation Annual Fee</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2024" data-year="2024" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">—</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note placeholder-note">Add your 2024 data here</div>
+        </div>
+
+      </div><!-- end taxes-grid 2024 -->
+    </div><!-- end tax-year-2024 -->
+
+    <!-- ── Year 2025 ── -->
+    <div id="tax-year-2025" class="tax-year-content">
+      <div class="taxes-grid">
+
+        <!-- Federal Quarterly 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Federal Quarterly Estimates 2025</div>
+              <div class="panel-subtitle">IRS Form 1040-ES</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="amount">Estimated</th>
+                  <th class="amount">Quarter Amount</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Last Year @ 110%</td>
+                  <td class="amount">$65,431.30</td>
+                  <td class="amount">$16,357.83</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$16,332.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2025" data-amount="16332" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$16,332.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2025" data-amount="16332" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 16th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$16,332.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2025" data-amount="16332" data-due="2025-09-16" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$4,000.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q4" data-year="2025" data-amount="4000" data-due="2026-01-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2025 Total <span style="font-weight:400;font-size:11px;color:#86868b">(7285 rolled over)</span></td>
+                  <td class="amount">$52,996.00 → $45,711.00</td>
+                  <td class="amount">$52,996.00</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15 &nbsp;|&nbsp; $1,000 owed or less: not required &nbsp;|&nbsp; 110% of prior year tax bill<br>
+            <strong>Pay at:</strong> <a href="https://www.irs.gov/payments" target="_blank">irs.gov/payments</a> → "Make Payment: Balance Due or Estimate" &nbsp;|&nbsp;
+            Also registered: <a href="https://www.eftps.gov/eftps/login/loginInitial" target="_blank">eftps.gov</a><br>
+            ⚠️ Use <strong>Individual SSN</strong> (not EIN) · PIN arriving by mail
+          </div>
+        </div>
+
+        <!-- MN Quarterly 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Quarterly Estimates 2025</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+            </div>
+            <span class="badge badge-green">Autopay Set</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="check-cell">Paid?</th>
+                  <th class="amount">Actually Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Est. Income</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">—</td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2025" data-amount="3298" data-due="2025-04-18" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2025" data-amount="3298" data-due="2025-06-15" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2025" data-amount="3298" data-due="2025-09-15" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 16th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q4" data-year="2025" data-amount="3298" data-due="2026-01-16" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,298.00</td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>Total Paid</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">$13,192.00</td>
+                </tr>
+                <tr class="na-row">
+                  <td>Rolled to 2026</td>
+                  <td class="check-cell" style="color:#1d1d1f;font-weight:500">$1,884.00</td>
+                  <td class="amount">$11,308.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15<br>
+            🟢 <strong>AUTO PAY — April 18, 2025</strong>
+          </div>
+        </div>
+
+        <!-- MN Care Tax 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Care Tax 2024–2025</div>
+              <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$4,539.01</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2024" data-year="2025" data-amount="4539.01" data-due="2025-03-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>2025</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$4,459.44</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mncare_2025" data-year="2025" data-amount="4459.44" data-due="2026-03-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$8,998.45</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            ⚠️ 2025 amount includes underpayment on estimate penalty
+          </div>
+        </div>
+
+        <!-- End of Year Journal Entries 2025 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">End of Year Journal Entries 2025</div>
+              <div class="panel-subtitle">Year-end accounting entries</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="check-cell">Done?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sales Tax, Merchant Fees, Cash/Checks</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="eoy_journal" data-year="2025" onclick="toggleCheck(this)"></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            Year-end reconciliation entries for 2025
+          </div>
+        </div>
+
+      </div><!-- end taxes-grid 2025 -->
+    </div><!-- end tax-year-2025 -->
+
+    <!-- ── Year 2026 ── -->
+    <div id="tax-year-2026" class="tax-year-content active">
+      <div class="taxes-grid">
+
+        <!-- Federal Quarterly 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Federal Quarterly Estimates 2026</div>
+              <div class="panel-subtitle">IRS Form 1040-ES</div>
+            </div>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="amount">Estimated</th>
+                  <th class="amount">Quarter Amount</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Last Year at 110%</td>
+                  <td class="amount">$50,282.10</td>
+                  <td class="amount">$12,570.53</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$5,290.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q1" data-year="2026" data-amount="5290" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$12,580.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q2" data-year="2026" data-amount="12580" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 16th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$12,580.00</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="fed_q3" data-year="2026" data-amount="12580" data-due="2026-09-16" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 15th</td>
+                  <td class="amount"><span class="auto-badge">AUTO SET</span></td>
+                  <td class="amount">$12,580.00</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="fed_q4" data-year="2026" data-amount="12580" data-due="2027-01-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>2025 Total</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$50,315.00</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15 &nbsp;|&nbsp; $1,000 owed or less: not required &nbsp;|&nbsp; Use 110% of prior year tax bill<br>
+            <strong>Pay at:</strong> <a href="https://www.irs.gov/payments" target="_blank">irs.gov/payments</a> → "Make Payment: Balance Due or Estimate" &nbsp;|&nbsp;
+            Also registered: <a href="https://www.eftps.gov" target="_blank">eftps.gov</a><br>
+            ⚠️ Use <strong>Individual SSN</strong> (not EIN) · PIN arriving by mail
+          </div>
+        </div>
+
+        <!-- MN Quarterly 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Quarterly Estimates 2026</div>
+              <div class="panel-subtitle">Minnesota Dept of Revenue</div>
+            </div>
+            <span class="badge badge-green">Autopay Set</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Quarter</th>
+                  <th class="check-cell">Paid?</th>
+                  <th class="amount">Actually Paid</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="na-row">
+                  <td>Est. 110%</td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">$3,109.70</td>
+                </tr>
+                <tr>
+                  <td>Q1 — April 18th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q1" data-year="2026" data-amount="1226" data-due="2026-04-18" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$1,226.00</td>
+                </tr>
+                <tr>
+                  <td>Q2 — June 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q2" data-year="2026" data-amount="3110" data-due="2026-06-15" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,110.00</td>
+                </tr>
+                <tr>
+                  <td>Q3 — Sept 15th</td>
+                  <td class="check-cell"><div class="checkbox-custom checked" data-key="mn_q3" data-year="2026" data-amount="3110" data-due="2026-09-15" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,110.00</td>
+                </tr>
+                <tr>
+                  <td>Q4 — Jan 16th</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mn_q4" data-year="2026" data-amount="3110" data-due="2027-01-16" onclick="toggleCheck(this)"></div></td>
+                  <td class="amount">$3,110.00</td>
+                </tr>
+                <tr class="totals-row na-row">
+                  <td>AUTOPAY IS SET <span class="auto-badge">✓</span></td>
+                  <td class="check-cell"><span class="badge badge-blue">N/A</span></td>
+                  <td class="amount">$10,556.00</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            <strong>Deadlines:</strong> April 15 · June 15 · Sept 15 · Jan 15<br>
+            🟢 <strong>AUTOPAY SET — March 1, 2026</strong>
+          </div>
+        </div>
+
+        <!-- MN Care Tax 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN Care Tax 2024–2025</div>
+              <div class="panel-subtitle">Minnesota Care Provider Tax</div>
+            </div>
+            <span class="badge badge-orange">2 Outstanding</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2024</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$4,539.01</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2024" data-year="2026" data-amount="4539.01" data-due="2025-03-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr>
+                  <td>2025</td>
+                  <td class="amount">—</td>
+                  <td class="amount">$4,459.44</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="mncare_2025" data-year="2026" data-amount="4459.44" data-due="2026-03-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">$252,167.42</td>
+                  <td class="amount">$8,998.45</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            ⚠️ 2025 amount includes underpayment on estimate penalty
+          </div>
+        </div>
+
+        <!-- MN S-Corp Tax 2026 -->
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">MN S-Corp Tax — 2026 Yearly Fee</div>
+              <div class="panel-subtitle">Minnesota S-Corporation Annual Fee</div>
+            </div>
+            <span class="due-badge">Due April 15, 2027</span>
+          </div>
+          <div class="pf-table-wrap">
+            <table class="tax-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th class="amount">Service Amount</th>
+                  <th class="amount">Amount Due</th>
+                  <th class="check-cell">Paid?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026</td>
+                  <td class="amount">$200.00</td>
+                  <td class="amount">$200.00</td>
+                  <td class="check-cell"><div class="checkbox-custom" data-key="scorp_2026" data-year="2026" data-amount="200" data-due="2027-04-15" onclick="toggleCheck(this)"></div></td>
+                </tr>
+                <tr class="totals-row">
+                  <td>Total</td>
+                  <td class="amount">$200.00</td>
+                  <td class="amount">$200.00</td>
+                  <td class="check-cell">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tax-note">
+            ⚠️ 2025 includes underpayment on estimate penalty &nbsp;|&nbsp; <strong>DUE: April 15, 2027</strong>
+          </div>
+        </div>
+
+      </div><!-- end taxes-grid 2026 -->
+    </div><!-- end tax-year-2026 -->
+
+  </div><!-- end tab-taxes -->
+
+  <!-- ══ Tab 3: Payroll ══ -->
+  <div id="tab-payroll" class="tab-content">
+    <div class="panel">
+      <div class="w2-panel-toggle" onclick="toggleW2Panel()">
+        <span class="w2-arrow" id="w2Arrow">▶</span>
+        <span>Payroll / W2 Settings</span>
+        <span id="w2PanelSummary" style="font-family:var(--font-sans);font-size:11px;color:var(--ink-3);font-weight:400;margin-left:6px"></span>
+      </div>
+      <div class="w2-panel-body" id="w2PanelBody">
+        <div id="w2SettingsContent"></div>
+        <div style="margin-top:12px">
+          <button class="btn btn-secondary btn-sm" onclick="addW2Employee()">+ Add Employee</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<!-- Profit First Footer (dynamic) -->
+<div class="pf-footer visible" id="pfFooter">
+  <div class="footer-notes" id="footerNotes">
+    <!-- rendered by renderFooter() -->
+  </div>
+</div>
+
+<!-- Add Entry Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Entry</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Date</label>
+          <input class="form-input" id="m_date" type="text" placeholder="e.g. January 10" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Total ($)</label>
+          <input class="form-input" id="m_total" type="number" step="0.01" placeholder="0.00" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Profit %</label>
+          <input class="form-input" id="m_profit_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tax %</label>
+          <input class="form-input" id="m_tax_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner's Comp %</label>
+          <input class="form-input" id="m_oc_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">OPEX %</label>
+          <input class="form-input" id="m_opex_pct" type="number" step="1" placeholder="0" oninput="updateModalPreview()" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <input class="form-input" id="m_notes" type="text" placeholder="Optional notes..." />
+        </div>
+        <div class="form-group full">
+          <div class="pct-sum-preview" id="pctPreview">
+            Total %: <span class="sum" id="pctSum">0</span>% (must equal 100%)
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addEntry()">Add Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK (compat — works in plain HTML without a bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Early Transfers Modal -->
+<div class="et-overlay" id="etOverlay">
+  <div class="et-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="etModalTitle">Early Transfers</div>
+      <button class="modal-close" onclick="closeETModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#636366;margin-bottom:14px;line-height:1.6">
+        Document funds pulled from income <em>before</em> the regular allocation. Each entry reduces the net transfer needed for that account — so you don't double-move money.
+      </p>
+      <div id="etList"></div>
+      <div class="et-add-row">
+        <div>
+          <div class="form-label">Account</div>
+          <select id="et_account">
+            <option value="OPEX">OPEX</option>
+            <option value="Tax">Tax</option>
+            <option value="OC">OC</option>
+            <option value="Profit">Profit</option>
+          </select>
+        </div>
+        <div>
+          <div class="form-label">Amount ($)</div>
+          <input id="et_amount" type="number" step="0.01" placeholder="0.00" />
+        </div>
+        <div>
+          <div class="form-label">Reason / Note</div>
+          <input id="et_note" type="text" placeholder="e.g. Covered rent early" />
+        </div>
+        <div style="padding-top:20px">
+          <button class="btn btn-primary btn-sm" onclick="addEarlyTransfer()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeETModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// FIREBASE — CONFIG & SYNC
+// ─────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBq77puuoon1uTmEVOFhHP9x-sixa7PD5o",
+  authDomain:        "profit-first-dashboard.firebaseapp.com",
+  projectId:         "profit-first-dashboard",
+  storageBucket:     "profit-first-dashboard.firebasestorage.app",
+  messagingSenderId: "457012175633",
+  appId:             "1:457012175633:web:1ca50f59e38346e6ade2b0"
+};
+
+let _db = null;
+
+function initFirebase() {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    _db = firebase.firestore();
+    _db.enablePersistence().catch(() => {}); // offline cache
+  } catch(e) { console.warn('Firebase init:', e); }
+}
+
+function _fsDoc() {
+  return _db ? _db.collection('dashboard').doc('main') : null;
+}
+
+function setSyncBadge(state) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const states = {
+    syncing: { text: '⟳ Syncing…',  cls: 'badge-orange' },
+    synced:  { text: '☁ Synced',    cls: 'badge-green'  },
+    local:   { text: '⚡ Local',     cls: 'badge-blue'   },
+    error:   { text: '⚠ Sync error', cls: 'badge-red'   }
+  };
+  const s = states[state] || states.local;
+  el.textContent = s.text;
+  el.className   = 'badge ' + s.cls;
+}
+
+// Write all data to Firestore (fire-and-forget on every save)
+function saveToFirestore() {
+  const doc = _fsDoc();
+  if (!doc) return;
+  setSyncBadge('syncing');
+  try {
+    const entries        = JSON.parse(localStorage.getItem('profitfirst_data') || '[]');
+    const w2Employees    = JSON.parse(localStorage.getItem('w2_employees')     || '[]');
+    const taxCheckboxes  = {};
+    ['2024','2025','2026'].forEach(yr => {
+      const raw = localStorage.getItem('tax_checkboxes_' + yr);
+      if (raw) taxCheckboxes[yr] = JSON.parse(raw);
+    });
+    doc.set({ entries, w2Employees, taxCheckboxes })
+      .then(()  => setSyncBadge('synced'))
+      .catch(()  => setSyncBadge('error'));
+  } catch(e) { setSyncBadge('error'); }
+}
+
+// Pull latest from Firestore into localStorage, then re-render
+async function syncFromFirestore() {
+  const doc = _fsDoc();
+  if (!doc) { setSyncBadge('local'); return; }
+  setSyncBadge('syncing');
+  try {
+    const snap = await doc.get();
+    if (!snap.exists) { setSyncBadge('synced'); return; } // first open, nothing there yet
+    const d = snap.data();
+    if (d.entries)       localStorage.setItem('profitfirst_data', JSON.stringify(d.entries));
+    if (d.w2Employees)   localStorage.setItem('w2_employees',     JSON.stringify(d.w2Employees));
+    if (d.taxCheckboxes) {
+      Object.entries(d.taxCheckboxes).forEach(([yr, v]) =>
+        localStorage.setItem('tax_checkboxes_' + yr, JSON.stringify(v))
+      );
+    }
+    setSyncBadge('synced');
+    // Re-render with fresh cloud data
+    renderTable();
+    renderW2Panel();
+    renderFooter();
+    initCheckboxes('2024');
+    initCheckboxes('2025');
+    initCheckboxes('2026');
+  } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
+}
+
+// ─────────────────────────────────────────────
+// DEFAULT DATA
+// ─────────────────────────────────────────────
+const DEFAULT_DATA = [
+  { date: 'January 10',    total: 13879.33, profit: 4,  tax: 20, oc: 29, opex: 47, notes: 'Cut it close on OPEX balance.' },
+  { date: 'January 25',    total: 12760.97, profit: 0,  tax: 20, oc: 18, opex: 62, notes: 'Saving for employee' },
+  { date: 'Feb 10',        total: 14234.36, profit: 0,  tax: 20, oc: 18, opex: 62, notes: '' },
+  { date: 'Feb 25',        total: 14514.19, profit: 0,  tax: 25, oc: 15, opex: 60, notes: 'OPEX BAL is $17000 saving for W2' },
+  { date: 'March 10',      total: 12406.28, profit: 0,  tax: 25, oc: 15, opex: 60, notes: 'OPEX BAL is 13500 - 1 W2 paid' },
+  { date: 'March 25',      total: 12078.00, profit: 2,  tax: 25, oc: 24, opex: 49, notes: '15296' },
+  { date: 'April 10',      total: 17864.00, profit: 2,  tax: 25, oc: 24, opex: 49, notes: '' },
+  { date: 'April 25',      total: 12448.00, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '' },
+  { date: 'May 10',        total: 16079.00, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '' },
+  { date: 'May 25',        total: 11455.00, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '' },
+  { date: 'June 10',       total: 14590.48, profit: 2,  tax: 30, oc: 20, opex: 48, notes: '15400 OPEX $8400 before' },
+  { date: 'June 25',       total: 13945.00, profit: 2,  tax: 31, oc: 21, opex: 46, notes: 'Transf. OPEX 500 to Tax to cover drained profit account' },
+  { date: 'Jul 10 2025',   total: 15898.75, profit: 2,  tax: 31, oc: 25, opex: 42, notes: '17400 opex moved 3k opex to OC' },
+  { date: 'July 25',       total: 14407.00, profit: 2,  tax: 31, oc: 25, opex: 42, notes: '' },
+  { date: 'August 10',     total: 13769.00, profit: 2,  tax: 28, oc: 28, opex: 42, notes: '' },
+  { date: 'Aug 25',        total: 14933.00, profit: 2,  tax: 27, oc: 29, opex: 42, notes: '' },
+  { date: 'Sept 10',       total: 12252.00, profit: 2,  tax: 27, oc: 29, opex: 42, notes: '' },
+  { date: 'Sept 24',       total: 16777.00, profit: 2,  tax: 27, oc: 30, opex: 41, notes: 'OPEX BAL is 10k Oct 1 TRANSFER 1500 tax to personal $500 from OPEX to personal' },
+  { date: 'Oct 10',        total: 14223.27, profit: 2,  tax: 27, oc: 30, opex: 41, notes: '' },
+  { date: 'Oct 25',        total: 10330.00, profit: 2,  tax: 27, oc: 30, opex: 41, notes: 'Paid $719 out of income sales tax OPEX 11k' },
+  { date: 'Nov 10',        total: 12794.36, profit: 2,  tax: 27, oc: 33, opex: 38, notes: 'Overdrew moved 1k over to OC early OPEX 13k after' },
+  { date: 'Nov 25',        total: 17572.00, profit: 2,  tax: 27, oc: 35, opex: 36, notes: '' },
+  { date: 'Dec 10',        total: 13500.00, profit: 2,  tax: 27, oc: 35, opex: 36, notes: '' },
+  { date: 'Dec 25',        total: 14281.73, profit: 2,  tax: 27, oc: 35, opex: 36, notes: '' },
+  { date: 'Jan 10',        total: 5676.00,  profit: 4,  tax: 20, oc: 40, opex: 36, notes: '$1550.16 Sent to OPEX to compensate for Vacation $0 to tax and profit' },
+  { date: 'Jan 25',        total: 15150.00, profit: 4,  tax: 20, oc: 40, opex: 36, notes: '15150' },
+  { date: 'Feb 10',        total: 12337.00, profit: 2,  tax: 20, oc: 40, opex: 38, notes: 'OPEX low 1800 moved over early' },
+  { date: 'Feb 25',        total: 14383.96, profit: 2,  tax: 20, oc: 40, opex: 38, notes: '' },
+  { date: 'March 10',      total: 10223.00, profit: 1,  tax: 20, oc: 41, opex: 38, notes: 'Didnt make enough' },
+  { date: 'March 25',      total: 13300.00, profit: 1,  tax: 20, oc: 41, opex: 38, notes: '' },
+  { date: 'April 10',      total: 0,        profit: 1,  tax: 20, oc: 34, opex: 45, notes: '293+911.62 trans to OPEX' },
+];
+
+// ─────────────────────────────────────────────
+// STORAGE
+// ─────────────────────────────────────────────
+function loadData() {
+  try {
+    const raw = localStorage.getItem('profitfirst_data');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return DEFAULT_DATA.map((r,i) => ({...r, id: i}));
+}
+
+function saveData(data) {
+  localStorage.setItem('profitfirst_data', JSON.stringify(data));
+  saveToFirestore();
+}
+
+function loadCheckboxes(year) {
+  const storageKey = 'tax_checkboxes_' + (year || '2026');
+  try {
+    return JSON.parse(localStorage.getItem(storageKey) || '{}');
+  } catch(e) { return {}; }
+}
+
+function saveCheckboxes(year, obj) {
+  localStorage.setItem('tax_checkboxes_' + (year || '2026'), JSON.stringify(obj));
+  saveToFirestore();
+}
+
+// ─────────────────────────────────────────────
+// FORMAT
+// ─────────────────────────────────────────────
+function fmt$(n) {
+  if (n == null || isNaN(n)) return '$0.00';
+  return '$' + parseFloat(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function calcDollar(total, pct) {
+  return parseFloat(total) * parseFloat(pct) / 100;
+}
+
+// ─────────────────────────────────────────────
+// W2 EMPLOYEES — STORAGE & DEFAULTS
+// ─────────────────────────────────────────────
+// Amounts from the Gusto payroll journal, Jun 1–15 2026 run (semi-monthly).
+// salary = NET pay (the part deposited to the employee); withholding and
+// employer taxes are carried separately so the bucket math sees all three.
+const W2_DEFAULTS = [
+  { id: 'emp_1', name: 'Dr. Todd (W2)', source: 'OC',   salary: 3006.53, empTaxSource: 'Tax',  empTaxPct: 24.73, empTaxFixed: 743.47, erTaxSource: 'OPEX', erTaxPct: 11.75, erTaxFixed: 353.41 },
+  { id: 'emp_2', name: 'Anna Payne',    source: 'OPEX', salary: 2097.41, empTaxSource: 'Tax',  empTaxPct: 19.20, empTaxFixed: 402.59, erTaxSource: 'OPEX', erTaxPct: 11.95, erTaxFixed: 250.67 }
+];
+
+// Pre-Jun-2026 stored amounts, matched by value so the refresh is idempotent
+// even if an old copy comes back down from Firestore.
+const W2_STALE_SALARIES = { emp_1: 3004.56, emp_2: 2307.00 };
+
+function loadW2Employees() {
+  try {
+    const raw = localStorage.getItem('w2_employees');
+    if (raw) {
+      const emps = JSON.parse(raw);
+      // Migrate older records that lack empTaxSource / erTaxSource
+      emps.forEach(e => {
+        if (!e.empTaxSource) e.empTaxSource = 'Tax';
+        if (!e.erTaxSource)  e.erTaxSource  = e.source || 'OPEX';
+      });
+      // Refresh records still carrying pre-Jun-2026 payroll amounts
+      let refreshed = false;
+      emps.forEach(e => {
+        const stale = W2_STALE_SALARIES[e.id];
+        if (stale != null && Math.abs((e.salary || 0) - stale) < 0.01) {
+          const def = W2_DEFAULTS.find(d => d.id === e.id);
+          if (def) { Object.assign(e, def); refreshed = true; }
+        }
+      });
+      if (refreshed) localStorage.setItem('w2_employees', JSON.stringify(emps));
+      return emps;
+    }
+  } catch(e) {}
+  return W2_DEFAULTS.map(e => ({...e}));
+}
+
+function saveW2Employees(emps) {
+  localStorage.setItem('w2_employees', JSON.stringify(emps));
+  saveToFirestore();
+}
+
+// ─────────────────────────────────────────────
+// W2 PANEL — TOGGLE & RENDER
+// ─────────────────────────────────────────────
+function toggleW2Panel() {
+  document.getElementById('w2PanelBody').classList.toggle('open');
+  document.getElementById('w2Arrow').classList.toggle('open');
+}
+
+function renderW2Panel() {
+  const emps = loadW2Employees();
+  const content = document.getElementById('w2SettingsContent');
+  const summary = document.getElementById('w2PanelSummary');
+
+  // Helper: accumulate payroll totals by account
+  function w2Totals(empList) {
+    const t = { OC: 0, OPEX: 0, Tax: 0, Profit: 0 };
+    empList.forEach(emp => {
+      const eTax  = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+      const erTax = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
+      t[emp.source]                        = (t[emp.source]                        || 0) + emp.salary;
+      t[emp.empTaxSource || 'Tax']         = (t[emp.empTaxSource || 'Tax']         || 0) + eTax;
+      t[emp.erTaxSource  || emp.source]    = (t[emp.erTaxSource  || emp.source]    || 0) + erTax;
+    });
+    return t;
+  }
+
+  // Build summary for collapsed header
+  if (emps.length === 0) {
+    summary.textContent = '(no employees configured)';
+  } else {
+    const t = w2Totals(emps);
+    const parts = ['OC','Tax','OPEX','Profit'].filter(k => t[k] > 0).map(k => fmt$(t[k]) + ' ' + k);
+    summary.textContent = emps.length + ' employee' + (emps.length > 1 ? 's' : '') + ' · ' + parts.join(' · ');
+  }
+
+  if (emps.length === 0) {
+    content.innerHTML = '<div style="color:#86868b;font-size:13px;font-style:italic;padding:4px 0 8px">No employees configured. Click "+ Add Employee" to get started.</div>';
+    return;
+  }
+
+  function srcSel(empId, field, current, opts) {
+    return `<select class="w2-src-sel" data-empid="${empId}" data-field="${field}" onchange="setW2TaxSource(this)">`
+      + opts.map(o => `<option value="${o}"${current===o?' selected':''}>${o}</option>`).join('')
+      + `</select>`;
+  }
+
+  let html = `<table class="w2-tbl">
+    <thead><tr>
+      <th>Name</th>
+      <th>Salary Acct</th>
+      <th>Salary / Period</th>
+      <th>Emp Tax</th>
+      <th>Emp Tax $</th>
+      <th>Er Tax</th>
+      <th>Er Tax $</th>
+      <th></th>
+    </tr></thead>
+    <tbody>`;
+
+  const ACCTS = ['Tax','OC','OPEX','Profit'];
+  emps.forEach(emp => {
+    const empTaxAmt  = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+    const erTaxAmt   = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
+    const empTaxSrc  = emp.empTaxSource || 'Tax';
+    const erTaxSrc   = emp.erTaxSource  || emp.source;
+    html += `<tr>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="name" onblur="w2FieldEdit(this)">${escHtml(emp.name)}</span></td>
+      <td>
+        <div class="src-toggle">
+          <button class="st-oc${emp.source==='OC'?' active':''}" onclick="setW2Source('${emp.id}','OC')">OC</button>
+          <button class="st-opex${emp.source==='OPEX'?' active':''}" onclick="setW2Source('${emp.id}','OPEX')">OPEX</button>
+        </div>
+      </td>
+      <td><span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="salary" onblur="w2FieldEdit(this)">${emp.salary.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+      <td>${srcSel(emp.id,'empTaxSource',empTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="empTaxPct" onblur="w2FieldEdit(this)">${emp.empTaxPct}</span>%</td>
+      <td style="color:#FF3B30;font-weight:500">${fmt$(empTaxAmt)}</td>
+      <td>${srcSel(emp.id,'erTaxSource',erTaxSrc,ACCTS)} <span class="editable" contenteditable="true" data-empid="${emp.id}" data-field="erTaxPct" onblur="w2FieldEdit(this)">${emp.erTaxPct}</span>%</td>
+      <td style="color:#FF9500;font-weight:500">${fmt$(erTaxAmt)}</td>
+      <td><button class="delete-btn" style="opacity:1" onclick="deleteW2Employee('${emp.id}')" title="Remove">🗑</button></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  content.innerHTML = html;
+}
+
+function setW2TaxSource(el) {
+  const empId = el.dataset.empid;
+  const field  = el.dataset.field;
+  const emps   = loadW2Employees();
+  const emp    = emps.find(e => e.id === empId);
+  if (emp) {
+    emp[field] = el.value;
+    saveW2Employees(emps);
+    renderW2Panel();
+    renderTable();
+    renderFooter();
+  }
+}
+
+function addW2Employee() {
+  const emps = loadW2Employees();
+  emps.push({ id: 'emp_' + Date.now(), name: 'New Employee', source: 'OPEX', salary: 0, empTaxSource: 'Tax', empTaxPct: 0, erTaxSource: 'OPEX', erTaxPct: 0 });
+  saveW2Employees(emps);
+  renderW2Panel();
+  renderTable();
+  renderFooter();
+}
+
+function deleteW2Employee(id) {
+  if (!confirm('Remove this employee from payroll settings?')) return;
+  let emps = loadW2Employees();
+  emps = emps.filter(e => e.id !== id);
+  saveW2Employees(emps);
+  renderW2Panel();
+  renderTable();
+  renderFooter();
+}
+
+function w2FieldEdit(el) {
+  const empId = el.dataset.empid;
+  const field  = el.dataset.field;
+  let val = el.innerText.trim();
+  if (['salary','empTaxPct','erTaxPct'].includes(field)) val = parseFloat(val) || 0;
+  const emps = loadW2Employees();
+  const emp  = emps.find(e => e.id === empId);
+  if (emp) {
+    emp[field] = val;
+    // This view has no fixed-$ editor — editing a % here takes over from
+    // any exact amount carried in from the full dashboard
+    if (field === 'empTaxPct') delete emp.empTaxFixed;
+    if (field === 'erTaxPct')  delete emp.erTaxFixed;
+    saveW2Employees(emps);
+    renderW2Panel();
+    renderTable();
+    renderFooter();
+  }
+}
+
+function setW2Source(empId, source) {
+  const emps = loadW2Employees();
+  const emp  = emps.find(e => e.id === empId);
+  if (emp) {
+    emp.source = source;
+    saveW2Employees(emps);
+    renderW2Panel();
+    renderTable();
+    renderFooter();
+  }
+}
+
+function toggleW2Active(rowIdx, empId) {
+  const data = loadData();
+  const row  = data[rowIdx];
+  if (!row.w2Active) row.w2Active = {};
+  const current = row.w2Active[empId] !== false; // undefined = active by default
+  row.w2Active[empId] = !current;
+  saveData(data);
+  pfData = data;
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// FOOTER — DYNAMIC W2 SUMMARY
+// ─────────────────────────────────────────────
+function renderFooter() {
+  const emps  = loadW2Employees();
+  const el    = document.getElementById('footerNotes');
+  let html    = '<div class="footer-note">📧 <strong>Use:</strong> profit@drtoddanderson.com</div>';
+
+  if (emps.length === 0) {
+    html += '<div class="footer-note">💵 <strong>W2:</strong> No employees configured</div>';
+  } else {
+    const tot = { OC: 0, OPEX: 0, Tax: 0, Profit: 0 };
+    function addFoot(acct, amt) { if (acct in tot) tot[acct] += amt; }
+    emps.forEach(emp => {
+      const eTax  = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+      const erTax = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
+      addFoot(emp.source,                     emp.salary);
+      addFoot(emp.empTaxSource || 'Tax',      eTax);
+      addFoot(emp.erTaxSource  || emp.source, erTax);
+      const empSrc = emp.empTaxSource || 'Tax';
+      const erSrc  = emp.erTaxSource  || emp.source;
+      html += `<div class="footer-note">💵 <strong>${escHtml(emp.name)}:</strong> net ${fmt$(emp.salary)} → ${emp.source} · withholding ${fmt$(eTax)} → ${empSrc} · employer tax ${fmt$(erTax)} → ${erSrc}</div>`;
+    });
+    const grand = tot.OC + tot.OPEX + tot.Tax + tot.Profit;
+    const totalParts = ['OC','Tax','OPEX','Profit'].filter(k => tot[k] > 0).map(k => fmt$(tot[k]) + ' ' + k);
+    html += `<div class="footer-note warn">🏦 <strong>Payroll stays in Income — Gusto debits ${fmt$(grand)} / period.</strong> It counts toward: ${totalParts.join(' · ')}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ─────────────────────────────────────────────
+// EARLY TRANSFERS
+// ─────────────────────────────────────────────
+let etCurrentRowIdx = null;
+
+function openETModal(rowIdx) {
+  etCurrentRowIdx = rowIdx;
+  const data = loadData();
+  document.getElementById('etModalTitle').textContent = 'Early Transfers — ' + data[rowIdx].date;
+  renderETList();
+  document.getElementById('etOverlay').classList.add('open');
+}
+
+function closeETModal() {
+  document.getElementById('etOverlay').classList.remove('open');
+  etCurrentRowIdx = null;
+}
+
+function renderETList() {
+  const data = loadData();
+  const ets  = (data[etCurrentRowIdx].earlyTransfers) || [];
+  const el   = document.getElementById('etList');
+  if (ets.length === 0) {
+    el.innerHTML = '<div class="et-empty">No early transfers logged for this period.</div>';
+    return;
+  }
+  let html = '<div class="et-list">';
+  ets.forEach((et, i) => {
+    const acctCls = 'acct-' + et.account.toLowerCase();
+    html += `<div class="et-item">
+      <span class="et-acct ${acctCls}">${escHtml(et.account)}</span>
+      <span class="et-amt">${fmt$(et.amount)}</span>
+      <span class="et-note">${escHtml(et.note || '')}</span>
+      <button class="et-del-btn" onclick="deleteEarlyTransfer(${i})" title="Remove">🗑</button>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function addEarlyTransfer() {
+  const account = document.getElementById('et_account').value;
+  const amount  = parseFloat(document.getElementById('et_amount').value) || 0;
+  const note    = document.getElementById('et_note').value.trim();
+  if (!amount) { alert('Please enter an amount.'); return; }
+  const data = loadData();
+  const row  = data[etCurrentRowIdx];
+  if (!row.earlyTransfers) row.earlyTransfers = [];
+  row.earlyTransfers.push({ account, amount, note });
+  saveData(data);
+  pfData = data;
+  document.getElementById('et_amount').value = '';
+  document.getElementById('et_note').value   = '';
+  renderETList();
+  renderTable();
+}
+
+function deleteEarlyTransfer(etIdx) {
+  const data = loadData();
+  const row  = data[etCurrentRowIdx];
+  row.earlyTransfers.splice(etIdx, 1);
+  saveData(data);
+  pfData = data;
+  renderETList();
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// YEAR INFERENCE (handles mixed date formats)
+// ─────────────────────────────────────────────
+function inferYears(data) {
+  // Month abbreviation → 0-based index
+  const MA = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11,
+              sept:8};
+  function getM(s) {
+    for (const p of s.toLowerCase().split(/[^a-z]+/)) {
+      if (p.length >= 3 && p.substring(0,3) in MA) return MA[p.substring(0,3)];
+    }
+    return null;
+  }
+
+  const n = data.length;
+  const years = new Array(n).fill(null);
+
+  // Find first entry with an explicit year as anchor
+  let ai = -1, ay = new Date().getFullYear();
+  for (let i = 0; i < n; i++) {
+    const m = data[i].date.match(/\b(20\d\d)\b/);
+    if (m) { ai = i; ay = parseInt(m[1]); break; }
+  }
+  if (ai < 0) { // no explicit year in any entry — assume all current year
+    return new Array(n).fill(new Date().getFullYear());
+  }
+  years[ai] = ay;
+
+  // Forward pass: if month jumps backward by more than 1 (year wrap), increment year
+  let ry = ay, pm = getM(data[ai].date);
+  for (let i = ai + 1; i < n; i++) {
+    const em = data[i].date.match(/\b(20\d\d)\b/);
+    if (em) { ry = parseInt(em[1]); pm = getM(data[i].date); }
+    else {
+      const cm = getM(data[i].date);
+      if (cm !== null && pm !== null && cm < pm - 1) ry++; // month wrapped Jan after Dec
+      if (cm !== null) pm = cm;
+    }
+    years[i] = ry;
+  }
+
+  // Backward pass: if month jumps forward by more than 1 going backwards, decrement year
+  ry = ay; pm = getM(data[ai].date);
+  for (let i = ai - 1; i >= 0; i--) {
+    const em = data[i].date.match(/\b(20\d\d)\b/);
+    if (em) { ry = parseInt(em[1]); pm = getM(data[i].date); }
+    else {
+      const cm = getM(data[i].date);
+      if (cm !== null && pm !== null && cm > pm + 1) ry--; // going backwards past Jan→Dec boundary
+      if (cm !== null) pm = cm;
+    }
+    years[i] = ry;
+  }
+
+  return years.map(y => y !== null ? y : new Date().getFullYear());
+}
+
+// ─────────────────────────────────────────────
+// SHOW ALL TOGGLE
+// ─────────────────────────────────────────────
+let pfShowAll = false;
+
+function toggleShowAll() {
+  pfShowAll = !pfShowAll;
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// RENDER TABLE
+// ─────────────────────────────────────────────
+let pfData = [];
+
+function renderTable() {
+  pfData = loadData();
+  const w2Emps = loadW2Employees();
+  const tbody = document.getElementById('pfBody');
+  const tfoot = document.getElementById('pfFoot');
+  const toggleBtn = document.getElementById('pfToggleBtn');
+  const toggleInfo = document.getElementById('pfToggleInfo');
+  const totalCountEl = document.getElementById('pfTotalCount');
+
+  const totalRows = pfData.length;
+  const PREVIEW_COUNT = 5;
+
+  // Update toggle bar
+  totalCountEl.textContent = totalRows;
+  if (pfShowAll) {
+    toggleBtn.innerHTML = 'Show Less';
+    toggleInfo.textContent = 'Showing all ' + totalRows + ' rows';
+  } else {
+    toggleBtn.innerHTML = 'Show All (<span id="pfTotalCount">' + totalRows + '</span> rows)';
+    const showing = Math.min(PREVIEW_COUNT, totalRows);
+    toggleInfo.textContent = totalRows > PREVIEW_COUNT
+      ? 'Showing most recent ' + PREVIEW_COUNT + ' rows'
+      : 'Showing all ' + totalRows + ' rows';
+  }
+
+  // Determine which rows to display
+  let displayData;
+  let displayOffset; // index offset in pfData for the displayed rows
+  if (!pfShowAll && totalRows > PREVIEW_COUNT) {
+    displayData = pfData.slice(totalRows - PREVIEW_COUNT);
+    displayOffset = totalRows - PREVIEW_COUNT;
+  } else {
+    displayData = pfData;
+    displayOffset = 0;
+  }
+
+  tbody.innerHTML = '';
+
+  // YTD totals — current calendar year only
+  const currentYear  = new Date().getFullYear();
+  const entryYears   = inferYears(pfData);
+  let sumTotal = 0, sumProfit = 0, sumTax = 0, sumOC = 0, sumOPEX = 0;
+
+  pfData.forEach((row, i) => {
+    if (entryYears[i] !== currentYear) return;
+    const total = parseFloat(row.total) || 0;
+    sumTotal  += total;
+    sumProfit += calcDollar(total, row.profit);
+    sumTax    += calcDollar(total, row.tax);
+    sumOC     += calcDollar(total, row.oc);
+    sumOPEX   += calcDollar(total, row.opex);
+  });
+
+  displayData.forEach((row, localIdx) => {
+    const idx = displayOffset + localIdx; // actual index in pfData
+    const pSum = (parseFloat(row.profit)||0) + (parseFloat(row.tax)||0) + (parseFloat(row.oc)||0) + (parseFloat(row.opex)||0);
+    const isError = pSum !== 100;
+
+    const total  = parseFloat(row.total) || 0;
+    const profitD = calcDollar(total, row.profit);
+    const taxD    = calcDollar(total, row.tax);
+    const ocD     = calcDollar(total, row.oc);
+    const opexD   = calcDollar(total, row.opex);
+
+    // ── Payroll deductions for this row ──────────────────
+    const w2Active      = row.w2Active      || {};
+    const earlyTransfers = row.earlyTransfers || [];
+
+    let payrollOC = 0, payrollOPEX = 0, payrollTax = 0;
+    function addPayroll(account, amt) {
+      if      (account === 'OC')   payrollOC   += amt;
+      else if (account === 'OPEX') payrollOPEX += amt;
+      else if (account === 'Tax')  payrollTax  += amt;
+    }
+    w2Emps.forEach(emp => {
+      if (w2Active[emp.id] === false) return; // disabled for this row
+      const empTaxAmt = emp.empTaxFixed != null ? emp.empTaxFixed : (emp.salary * emp.empTaxPct / 100);
+      const erTaxAmt  = emp.erTaxFixed  != null ? emp.erTaxFixed  : (emp.salary * emp.erTaxPct  / 100);
+      addPayroll(emp.source,                      emp.salary);  // net salary
+      addPayroll(emp.empTaxSource || 'Tax',        empTaxAmt);  // employee tax
+      addPayroll(emp.erTaxSource  || emp.source,   erTaxAmt);   // employer tax
+    });
+    // Captured before early transfers fold in below — hold is payroll only
+    const payrollHold = payrollOC + payrollOPEX + payrollTax;
+    earlyTransfers.forEach(et => {
+      const amt = parseFloat(et.amount) || 0;
+      if      (et.account === 'Tax')    payrollTax  += amt;
+      else if (et.account === 'OC')     payrollOC   += amt;
+      else if (et.account === 'OPEX')   payrollOPEX += amt;
+    });
+
+    const hasPayroll = payrollOC > 0.005 || payrollOPEX > 0.005 || payrollTax > 0.005;
+    const adjTax  = taxD  - payrollTax;
+    const adjOC   = ocD   - payrollOC;
+    const adjOPEX = opexD - payrollOPEX;
+
+    // The base number is the full category amount (payroll counts toward
+    // OC/OPEX even though the cash stays in Income for the Gusto debit).
+    // This line shows what must physically move from Income to the bucket.
+    function adjLine(adj) {
+      if (!hasPayroll) return '';
+      const cls = adj > 0.005 ? 'pos' : (adj < -0.005 ? 'neg' : 'zero');
+      const txt = adj < -0.005 ? `⚠ short ${fmt$(-adj)}` : (adj > 0.005 ? `→ move ${fmt$(adj)}` : '✓ covered');
+      return `<span class="adj-line ${cls}" title="Transfer from Income — payroll stays behind for the Gusto debit">${txt}</span>`;
+    }
+
+    // Payroll never leaves Income by hand — Gusto debits it.
+    const holdLine = payrollHold > 0.005
+      ? `<span class="adj-line zero" title="Payroll stays in Income — Gusto debits it directly">🏦 hold ${fmt$(payrollHold)}</span>`
+      : '';
+
+    // ── W2 badge toggles ─────────────────────────────────
+    let w2Html = '<div class="w2-cell">';
+    if (w2Emps.length === 0) {
+      w2Html += '<span style="color:#c7c7cc;font-size:11px">—</span>';
+    } else {
+      w2Emps.forEach(emp => {
+        const isOn = w2Active[emp.id] !== false;
+        const initials = emp.name.trim().split(/\s+/).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+        const cls = isOn ? (emp.source === 'OC' ? 'on-oc' : 'on-opex') : 'off';
+        w2Html += `<span class="w2-badge ${cls}" title="${escHtml(emp.name)} — click to toggle" onclick="toggleW2Active(${idx},'${emp.id}')">${initials}</span>`;
+      });
+    }
+    w2Html += '</div>';
+
+    const hasET   = earlyTransfers.length > 0;
+    const etLabel = hasET ? `ET (${earlyTransfers.length})` : 'ET';
+
+    const tr = document.createElement('tr');
+    if (isError) tr.classList.add('row-error');
+
+    tr.innerHTML = `
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="date" onblur="cellEdit(this)">${escHtml(row.date)}</span></td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="total" onblur="cellEdit(this)">${total > 0 ? total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00'}</span>${holdLine}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="profit" onblur="cellEdit(this)">${row.profit}</span>%</td>
+      <td>${fmt$(profitD)}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="tax" onblur="cellEdit(this)">${row.tax}</span>%</td>
+      <td>${fmt$(taxD)}${adjLine(adjTax)}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="oc" onblur="cellEdit(this)">${row.oc}</span>%</td>
+      <td>${fmt$(ocD)}${adjLine(adjOC)}</td>
+      <td><span class="editable" contenteditable="true" data-idx="${idx}" data-field="opex" onblur="cellEdit(this)">${row.opex}</span>%</td>
+      <td>${fmt$(opexD)}${adjLine(adjOPEX)}</td>
+      <td>${w2Html}</td>
+      <td class="col-notes"><span class="editable" contenteditable="true" data-idx="${idx}" data-field="notes" onblur="cellEdit(this)" style="min-width:80px;white-space:normal;display:inline-block;width:100%">${escHtml(row.notes || '')}</span></td>
+      <td><span class="total-pct ${isError ? 'bad' : 'ok'}">${pSum}%</span></td>
+      <td>
+        <button class="et-btn${hasET ? ' has-et' : ''}" onclick="openETModal(${idx})" title="Log early transfer">${etLabel}</button>
+        <button class="delete-btn" onclick="deleteRow(${idx})" title="Delete row">🗑</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Totals row (colspan updated for new W2 column)
+  tfoot.innerHTML = `
+    <tr class="totals-row">
+      <td><strong>YTD ${currentYear}</strong></td>
+      <td style="text-align:right"><strong>${fmt$(sumTotal)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumProfit)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumTax)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumOC)}</strong></td>
+      <td>—</td>
+      <td style="text-align:right"><strong>${fmt$(sumOPEX)}</strong></td>
+      <td colspan="4"></td>
+    </tr>
+  `;
+
+  document.getElementById('entryCount').textContent = pfData.length + ' entries';
+  if (typeof renderHero === 'function') renderHero();
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// CELL EDIT
+// ─────────────────────────────────────────────
+function cellEdit(el) {
+  const idx = parseInt(el.dataset.idx);
+  const field = el.dataset.field;
+  let val = el.innerText.trim();
+
+  if (['profit','tax','oc','opex','total'].includes(field)) {
+    val = parseFloat(val) || 0;
+  }
+
+  pfData[idx][field] = val;
+  saveData(pfData);
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// DELETE ROW
+// ─────────────────────────────────────────────
+function deleteRow(idx) {
+  if (!confirm('Delete this entry?')) return;
+  pfData.splice(idx, 1);
+  saveData(pfData);
+  renderTable();
+}
+
+// ─────────────────────────────────────────────
+// QBO LIVE BALANCES PANEL
+// ─────────────────────────────────────────────
+
+function toggleQBOPanel() {
+  const body  = document.getElementById('qboPanelBody');
+  const arrow = document.getElementById('qboArrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+  if (body.classList.contains('open')) {
+    const url = localStorage.getItem('qbo_sheet_url') || DEFAULT_QBO_BALANCES_URL || '';
+    document.getElementById('qboSheetUrl').value = url;
+    renderQBOFromCache();
+  }
+}
+
+// ─── Built-in QBO CSV URLs ──────────────────────────────────────────────────
+// Private single-user dashboard — URLs are baked in so the page "just works".
+// Users can still override by pasting a different URL into the input fields,
+// which is saved in localStorage and takes precedence.
+const DEFAULT_QBO_BALANCES_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=1270621260&single=true&output=csv';
+const DEFAULT_QBO_TAX_PAYMENTS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkGXup1uN3xeJKYfK4AqoWc5m8Py8ucj94Xujv3fLEvy3O3vwfv_JpGIlkyjswi4E5UcAV8OlNUblb/pub?gid=2087166635&single=true&output=csv';
+
+function saveQBOUrl() {
+  const url = (document.getElementById('qboSheetUrl').value || '').trim();
+  if (url) localStorage.setItem('qbo_sheet_url', url);
+}
+
+function loadQBOMapping() {
+  try { return JSON.parse(localStorage.getItem('qboAccountMapping') || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveQBOMapping(mapping) {
+  localStorage.setItem('qboAccountMapping', JSON.stringify(mapping));
+}
+
+function loadQBOHidden() {
+  try { return JSON.parse(localStorage.getItem('qbo_hidden_accounts') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveQBOHidden(list) {
+  localStorage.setItem('qbo_hidden_accounts', JSON.stringify(list));
+}
+
+function hideQBOAccount(name) {
+  const hidden = loadQBOHidden();
+  if (hidden.indexOf(name) < 0) hidden.push(name);
+  saveQBOHidden(hidden);
+  renderQBOFromCache();
+}
+
+function unhideQBOAccount(name) {
+  saveQBOHidden(loadQBOHidden().filter(function(n) { return n !== name; }));
+  renderQBOFromCache();
+}
+
+function showAllQBOAccounts() {
+  saveQBOHidden([]);
+  renderQBOFromCache();
+}
+
+async function fetchQBOBalances() {
+  const urlInput = document.getElementById('qboSheetUrl');
+  const url = (urlInput.value || localStorage.getItem('qbo_sheet_url') || DEFAULT_QBO_BALANCES_URL || '').trim();
+
+  if (!url) {
+    document.getElementById('qboContent').innerHTML =
+      '<div class="qbo-error">Please enter a Google Sheet CSV URL first.<br>' +
+      '<small>See SETUP.md Step 11 for instructions on publishing your sheet.</small></div>';
+    return;
+  }
+
+  // Save in case it was just typed
+  localStorage.setItem('qbo_sheet_url', url);
+
+  document.getElementById('qboContent').innerHTML = '<div class="qbo-loading">Loading balances from Google Sheet…</div>';
+  document.getElementById('qboMeta').textContent = '';
+  document.getElementById('qboBucketTotals').innerHTML = '';
+
+  try {
+    // Cache-bust so we always get fresh data (Google caches published CSVs for ~5 min)
+    const fetchUrl = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    const resp = await fetch(fetchUrl);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' — check that the sheet is published to the web.');
+    const csvText = await resp.text();
+
+    const accounts = parseQBOCSV(csvText);
+    if (!accounts.length) throw new Error('No account data found in the sheet. Make sure the "Balances" sheet has data rows.');
+
+    localStorage.setItem('qbo_last_fetched', JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      accounts
+    }));
+
+    renderQBOAccounts(accounts, new Date().toISOString());
+  } catch(err) {
+    document.getElementById('qboContent').innerHTML =
+      '<div class="qbo-error">Could not load balances: ' + escHtml(err.message) + '<br>' +
+      '<small>Check that the Sheet URL is correct and published as CSV (see SETUP.md Step 11).</small></div>';
+  }
+}
+
+function parseQBOCSV(csvText) {
+  // Minimal RFC-4180 CSV parser — handles quoted fields with embedded commas
+  function parseRow(line) {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        result.push(cur); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  const headers  = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+  const dateIdx  = headers.indexOf('date');
+  const nameIdx  = headers.indexOf('account name');
+  const balIdx   = headers.indexOf('balance');
+  const typeIdx  = headers.indexOf('account type');
+
+  if (dateIdx < 0 || nameIdx < 0 || balIdx < 0) return [];
+
+  // Keep only the latest row per account name (max date string — ISO yyyy-MM-dd sorts correctly)
+  const byAccount = {};
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseRow(lines[i]);
+    if (cols.length < 3) continue;
+    const date    = (cols[dateIdx]  || '').trim();
+    const name    = (cols[nameIdx]  || '').trim();
+    const balance = parseFloat((cols[balIdx] || '').replace(/[^0-9.\-]/g, '')) || 0;
+    const acctType = typeIdx >= 0 ? (cols[typeIdx] || '').trim() : 'Bank';
+    if (!name || !date) continue;
+    if (!byAccount[name] || date > byAccount[name].date) {
+      byAccount[name] = { date, balance, accountType: acctType };
+    }
+  }
+
+  return Object.entries(byAccount).map(([name, v]) => ({
+    name,
+    balance:     v.balance,
+    accountType: v.accountType,
+    latestDate:  v.date
+  }));
+}
+
+function renderQBOFromCache() {
+  try {
+    const raw = localStorage.getItem('qbo_last_fetched');
+    if (!raw) return;
+    const { fetchedAt, accounts } = JSON.parse(raw);
+    renderQBOAccounts(accounts, fetchedAt);
+  } catch(e) {}
+}
+
+function renderQBOAccounts(accounts, fetchedAt) {
+  const mapping = loadQBOMapping();
+  const hidden  = loadQBOHidden();
+  const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+  const CHIP_CLASS = { Profit: 'qbo-chip-profit', Tax: 'qbo-chip-tax', OC: 'qbo-chip-oc', OPEX: 'qbo-chip-opex' };
+
+  // Split visible / hidden
+  const visible      = accounts.filter(function(a) { return hidden.indexOf(a.name) < 0; });
+  const hiddenAccts  = accounts.filter(function(a) { return hidden.indexOf(a.name) >= 0; });
+
+  // Meta line — show when data was from and when it was fetched
+  const latestDataDate = accounts.reduce((max, a) => (a.latestDate > max ? a.latestDate : max), '');
+  const fetchStr = fetchedAt
+    ? ' · Fetched ' + new Date(fetchedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : '';
+  document.getElementById('qboMeta').innerHTML =
+    '<span>Bank data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>';
+
+  // Account mapping table
+  let html = '<table class="qbo-tbl"><thead><tr>' +
+    '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th><th></th><th></th>' +
+    '</tr></thead><tbody>';
+
+  visible.forEach(function(a) {
+    const safeName = a.name.replace(/'/g, "\\'");
+    const opts = BUCKETS.map(function(b) {
+      return '<option value="' + b + '"' + (mapping[a.name] === b ? ' selected' : '') + '>' + b + '</option>';
+    }).join('');
+    html += '<tr>' +
+      '<td>' + escHtml(a.name) + '</td>' +
+      '<td><select class="w2-src-sel" style="font-size:12px" ' +
+        'onchange="setQBOMapping(\'' + escHtml(safeName) + '\', this.value)">' +
+        '<option value=""' + (!mapping[a.name] ? ' selected' : '') + '>(unassigned)</option>' +
+        opts +
+      '</select></td>' +
+      '<td class="amt">' + fmt$(a.balance) + '</td>' +
+      '<td class="amt"><button class="qbo-approve-btn" title="Approve this balance as a new Profit First entry" ' +
+        'onclick="approveBalance(\'' + escHtml(safeName) + '\', ' + a.balance + ')">→ Income</button></td>' +
+      '<td class="amt"><button class="qbo-hide-btn" title="Hide this account from the dashboard" ' +
+        'onclick="hideQBOAccount(\'' + escHtml(safeName) + '\')">✕</button></td>' +
+    '</tr>';
+  });
+
+  html += '</tbody></table>';
+
+  // Hidden accounts footer — shown when any are hidden
+  if (hiddenAccts.length) {
+    html += '<div class="qbo-hidden-row">' +
+      '<span>Hidden (' + hiddenAccts.length + '): </span>' +
+      hiddenAccts.map(function(a) {
+        const safeName = a.name.replace(/'/g, "\\'");
+        return '<button class="qbo-unhide-chip" onclick="unhideQBOAccount(\'' + escHtml(safeName) + '\')">' +
+          escHtml(a.name) + ' +</button>';
+      }).join(' ') +
+      ' <button class="qbo-unhide-chip" onclick="showAllQBOAccounts()">Show all</button>' +
+    '</div>';
+  }
+
+  document.getElementById('qboContent').innerHTML = html;
+
+  // Bucket totals — only count visible accounts
+  const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0, _unassigned: 0 };
+  visible.forEach(function(a) {
+    const bucket = mapping[a.name];
+    if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
+    else totals._unassigned += a.balance;
+  });
+
+  const grandTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0) + totals._unassigned;
+
+  let chips = BUCKETS.filter(function(b) { return totals[b] > 0; }).map(function(b) {
+    return '<span class="qbo-bucket-chip ' + CHIP_CLASS[b] + '">' + b + ': ' + fmt$(totals[b]) + '</span>';
+  });
+  if (totals._unassigned > 0) {
+    chips.push('<span class="qbo-bucket-chip qbo-chip-unmap">Unassigned: ' + fmt$(totals._unassigned) + '</span>');
+  }
+  chips.push('<span class="qbo-bucket-chip qbo-chip-total">Total: ' + fmt$(grandTotal) + '</span>');
+
+  document.getElementById('qboBucketTotals').innerHTML = chips.join('');
+
+  // Update summary badge in panel header
+  const assignedTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
+  document.getElementById('qboPanelSummary').textContent =
+    visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
+    (hiddenAccts.length ? ' · ' + hiddenAccts.length + ' hidden' : '');
+
+  if (typeof renderHero === 'function') renderHero();
+}
+
+function setQBOMapping(accountName, bucket) {
+  const mapping = loadQBOMapping();
+  if (bucket) mapping[accountName] = bucket;
+  else delete mapping[accountName];
+  saveQBOMapping(mapping);
+  renderQBOFromCache();
+}
+
+function useQBOBalances() {
+  const raw = localStorage.getItem('qbo_last_fetched');
+  if (!raw) {
+    alert('No QBO balance data loaded yet. Click Refresh first.');
+    return;
+  }
+
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e) { return; }
+  const accounts = parsed.accounts || [];
+  const mapping  = loadQBOMapping();
+  const BUCKETS  = ['Profit', 'Tax', 'OC', 'OPEX'];
+
+  const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0 };
+  accounts.forEach(function(a) {
+    const bucket = mapping[a.name];
+    if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
+  });
+
+  const grandTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
+  if (grandTotal <= 0) {
+    alert('The total of assigned balances is $0.\nPlease assign your accounts to Profit First buckets first.');
+    return;
+  }
+
+  // Open the existing Add Entry modal
+  openModal();
+
+  // Pre-fill date as "Month Day" format (e.g. "April 25")
+  const MONTH_NAMES = ['January','February','March','April','May','June',
+                       'July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('m_date').value = MONTH_NAMES[now.getMonth()] + ' ' + now.getDate();
+
+  // Pre-fill total
+  document.getElementById('m_total').value = grandTotal.toFixed(2);
+
+  // Calculate percentages — round to whole %, let OPEX absorb rounding so sum = 100%
+  let pctSum = 0;
+  const pcts = {};
+  ['Profit', 'Tax', 'OC'].forEach(function(b) {
+    pcts[b] = Math.round(totals[b] / grandTotal * 100);
+    pctSum += pcts[b];
+  });
+  pcts['OPEX'] = 100 - pctSum;
+
+  document.getElementById('m_profit_pct').value = pcts['Profit'];
+  document.getElementById('m_tax_pct').value    = pcts['Tax'];
+  document.getElementById('m_oc_pct').value     = pcts['OC'];
+  document.getElementById('m_opex_pct').value   = pcts['OPEX'];
+  document.getElementById('m_notes').value      = 'QBO balance snapshot';
+
+  if (typeof updateModalPreview === 'function') updateModalPreview();
+}
+
+function approveBalance(accountName, balance) {
+  // Use the most recent PF entry's percentages as the starting point
+  const data = loadData();
+  const last = data.length ? data[data.length - 1] : null;
+  const defaults = last
+    ? { profit: last.profit, tax: last.tax, oc: last.oc, opex: last.opex }
+    : { profit: 0, tax: 20, oc: 30, opex: 50 };
+
+  openModal();
+
+  const MONTH_NAMES = ['January','February','March','April','May','June',
+                       'July','August','September','October','November','December'];
+  const now = new Date();
+  document.getElementById('m_date').value = MONTH_NAMES[now.getMonth()] + ' ' + now.getDate();
+  document.getElementById('m_total').value = Number(balance).toFixed(2);
+  document.getElementById('m_profit_pct').value = defaults.profit;
+  document.getElementById('m_tax_pct').value    = defaults.tax;
+  document.getElementById('m_oc_pct').value     = defaults.oc;
+  document.getElementById('m_opex_pct').value   = defaults.opex;
+  document.getElementById('m_notes').value      = 'QBO: ' + accountName;
+
+  if (typeof updateModalPreview === 'function') updateModalPreview();
+}
+
+// ─────────────────────────────────────────────
+// QBO TAX PAYMENT DETECTION
+// ─────────────────────────────────────────────
+
+function saveQBOTaxUrl() {
+  const url = (document.getElementById('qboTaxUrl').value || '').trim();
+  if (url) localStorage.setItem('qbo_tax_payments_url', url);
+}
+
+async function fetchQBOTaxPayments() {
+  const url = (document.getElementById('qboTaxUrl').value
+    || localStorage.getItem('qbo_tax_payments_url')
+    || DEFAULT_QBO_TAX_PAYMENTS_URL
+    || '').trim();
+
+  const status = document.getElementById('qboTaxStatus');
+  if (!url) {
+    status.innerHTML = '<span style="color:#FF3B30">Enter your Tax Payments CSV URL first.</span>';
+    return;
+  }
+
+  localStorage.setItem('qbo_tax_payments_url', url);
+  status.textContent = 'Loading tax payments…';
+
+  try {
+    const fetchUrl = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
+    const resp = await fetch(fetchUrl);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const csvText = await resp.text();
+    const payments = parseTaxPaymentsCSV(csvText);
+
+    localStorage.setItem('qbo_tax_payments_cache', JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      payments
+    }));
+
+    status.innerHTML = '<span style="color:#34c759">✓ Loaded ' + payments.length +
+      ' tax payment(s). Switch to the Taxes tab to see detected badges.</span>';
+
+    detectTaxPayments();
+  } catch(err) {
+    status.innerHTML = '<span style="color:#FF3B30">Could not load: ' + escHtml(err.message) + '</span>';
+  }
+}
+
+function parseTaxPaymentsCSV(csvText) {
+  function parseRow(line) {
+    const result = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (ch === ',' && !inQ) {
+        result.push(cur); cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+
+  const headers  = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+  const dateIdx  = headers.indexOf('date');
+  const payeeIdx = headers.indexOf('payee');
+  const amtIdx   = headers.indexOf('amount');
+  const memoIdx  = headers.indexOf('memo');
+  const catIdx   = headers.indexOf('category');
+  const typeIdx  = headers.indexOf('type');
+
+  if (dateIdx < 0 || amtIdx < 0) return [];
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseRow(lines[i]);
+    if (cols.length < 2) continue;
+    const date   = (cols[dateIdx] || '').trim();
+    const payee  = payeeIdx >= 0 ? (cols[payeeIdx] || '').trim() : '';
+    const amount = parseFloat((cols[amtIdx] || '').replace(/[^0-9.\-]/g, '')) || 0;
+    const memo   = memoIdx >= 0 ? (cols[memoIdx] || '').trim() : '';
+    const cat    = catIdx  >= 0 ? (cols[catIdx]  || '').trim() : '';
+    const type   = typeIdx >= 0 ? (cols[typeIdx] || '').trim() : '';
+    if (!date || !amount) continue;
+    rows.push({ date, payee, amount: Math.abs(amount), memo, category: cat, type });
+  }
+  return rows;
+}
+
+function clearTaxBadges() {
+  document.querySelectorAll('.tax-detected, .tax-unmatched-panel').forEach(n => n.remove());
+}
+
+function detectTaxPayments() {
+  clearTaxBadges();
+
+  let cache;
+  try { cache = JSON.parse(localStorage.getItem('qbo_tax_payments_cache') || 'null'); }
+  catch(e) { return; }
+  if (!cache || !cache.payments || !cache.payments.length) return;
+
+  const AMOUNT_TOL   = 5.00;           // match within ±$5
+  const DAY_WINDOW   = 60;             // match within ±60 days of due date
+  const MS_PER_DAY   = 86400000;
+
+  // Every tax row with a data-amount is a match candidate
+  const rows = Array.from(document.querySelectorAll('.checkbox-custom[data-amount]'));
+
+  // Track which payments were matched (to identify unmatched ones)
+  const matchedPayments = new Set();
+  // Track which rows already got a badge (avoid double-matching)
+  const matchedRowKeys = new Set();
+
+  // Sort payments by date (oldest first) so earliest payment wins for each row
+  const payments = cache.payments.slice().sort((a, b) => a.date.localeCompare(b.date));
+
+  rows.forEach(rowEl => {
+    const rowKey = rowEl.dataset.key + '|' + rowEl.dataset.year;
+    if (matchedRowKeys.has(rowKey)) return;
+
+    const expectedAmt = parseFloat(rowEl.dataset.amount);
+    const dueStr = rowEl.dataset.due;
+    if (!expectedAmt || !dueStr) return;
+
+    const dueMs = new Date(dueStr + 'T12:00:00').getTime();
+
+    // Find the best payment match for this row
+    let bestIdx = -1;
+    let bestDeltaAmt = Infinity;
+    payments.forEach((p, idx) => {
+      if (matchedPayments.has(idx)) return;
+      const deltaAmt = Math.abs(p.amount - expectedAmt);
+      if (deltaAmt > AMOUNT_TOL) return;
+      const pMs = new Date(p.date + 'T12:00:00').getTime();
+      const deltaDays = Math.abs(pMs - dueMs) / MS_PER_DAY;
+      if (deltaDays > DAY_WINDOW) return;
+      if (deltaAmt < bestDeltaAmt) {
+        bestDeltaAmt = deltaAmt;
+        bestIdx = idx;
+      }
+    });
+
+    if (bestIdx < 0) return;
+
+    const p = payments[bestIdx];
+    matchedPayments.add(bestIdx);
+    matchedRowKeys.add(rowKey);
+
+    // Inject badge into the row's label cell (first <td> of the parent <tr>)
+    const tr = rowEl.closest('tr');
+    if (!tr) return;
+    const labelCell = tr.querySelector('td');
+    if (!labelCell) return;
+
+    // Format payment date as "Apr 10"
+    const pDate = new Date(p.date + 'T12:00:00');
+    const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][pDate.getMonth()];
+    const dateStr = mName + ' ' + pDate.getDate();
+
+    const badge = document.createElement('span');
+    badge.className = 'tax-detected';
+    badge.textContent = '✓ Detected ' + fmt$(p.amount) + ' on ' + dateStr;
+    if (p.payee) badge.title = 'From QBO: ' + p.payee + (p.memo ? ' — ' + p.memo : '');
+    labelCell.appendChild(badge);
+  });
+
+  // Unmatched payments → small panel at the top of the currently-visible tax year
+  const unmatched = payments.filter((_, i) => !matchedPayments.has(i));
+  if (!unmatched.length) return;
+
+  const activeYearEl = document.querySelector('.tax-year-content.active');
+  if (!activeYearEl) return;
+
+  const panel = document.createElement('div');
+  panel.className = 'tax-unmatched-panel';
+  const items = unmatched.map(p => {
+    const d = new Date(p.date + 'T12:00:00');
+    const mName = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+    return '<span class="tax-unmatched-item" title="' + escHtml(p.payee || '') + '">' +
+      fmt$(p.amount) + ' · ' + mName + ' ' + d.getDate() +
+      (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
+  }).join('');
+  panel.innerHTML =
+    '<div class="title">⚠ ' + unmatched.length + ' QBO tax payment(s) didn\'t match a row</div>' +
+    '<div class="items">' + items + '</div>';
+  activeYearEl.insertBefore(panel, activeYearEl.firstChild);
+}
+
+// ─────────────────────────────────────────────
+// SMART NEXT DATE
+// ─────────────────────────────────────────────
+function getNextDate() {
+  const data = loadData();
+  if (!data.length) return '';
+
+  const lastDate = data[data.length - 1].date;
+
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTH_MAP = {};
+  MONTH_NAMES.forEach((m, i) => {
+    MONTH_MAP[m.toLowerCase()] = i;
+    MONTH_MAP[m.toLowerCase().substring(0, 3)] = i;
+  });
+  // Extra common variants
+  MONTH_MAP['sept'] = 8;
+
+  const parts = lastDate.trim().split(/[\s,]+/);
+  let monthIdx = -1;
+  let day = null;
+
+  for (const part of parts) {
+    const p = part.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (p in MONTH_MAP) {
+      monthIdx = MONTH_MAP[p];
+      continue;
+    }
+    const num = parseInt(p);
+    if (!isNaN(num) && num >= 1 && num <= 31) {
+      day = num;
+    }
+  }
+
+  if (monthIdx === -1 || day === null) return '';
+
+  // Pattern: 10th → 25th of same month; 25th (or anything >10) → 10th of next month
+  if (day <= 17) {
+    // next is 25th of same month
+    return MONTH_NAMES[monthIdx] + ' 25';
+  } else {
+    // next is 10th of next month
+    const nextMonthIdx = (monthIdx + 1) % 12;
+    return MONTH_NAMES[nextMonthIdx] + ' 10';
+  }
+}
+
+// ─────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────
+function openModal() {
+  // Auto-populate smart date
+  const nextDate = getNextDate();
+  document.getElementById('m_date').value = nextDate;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  // Focus total instead of date (date is pre-filled)
+  document.getElementById('m_total').focus();
+  updateModalPreview();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  ['m_date','m_total','m_profit_pct','m_tax_pct','m_oc_pct','m_opex_pct','m_notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function updateModalPreview() {
+  const p = parseFloat(document.getElementById('m_profit_pct').value) || 0;
+  const t = parseFloat(document.getElementById('m_tax_pct').value) || 0;
+  const o = parseFloat(document.getElementById('m_oc_pct').value) || 0;
+  const x = parseFloat(document.getElementById('m_opex_pct').value) || 0;
+  const sum = p + t + o + x;
+  const el = document.getElementById('pctSum');
+  el.textContent = sum;
+  el.className = 'sum ' + (sum === 100 ? 'ok' : 'bad');
+}
+
+function addEntry() {
+  const date  = document.getElementById('m_date').value.trim();
+  const total = parseFloat(document.getElementById('m_total').value) || 0;
+  const profit= parseFloat(document.getElementById('m_profit_pct').value) || 0;
+  const tax   = parseFloat(document.getElementById('m_tax_pct').value) || 0;
+  const oc    = parseFloat(document.getElementById('m_oc_pct').value) || 0;
+  const opex  = parseFloat(document.getElementById('m_opex_pct').value) || 0;
+  const notes = document.getElementById('m_notes').value.trim();
+
+  if (!date) { alert('Please enter a date.'); return; }
+
+  pfData.push({ date, total, profit, tax, oc, opex, notes });
+  saveData(pfData);
+  renderTable();
+  closeModal();
+}
+
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  // Only deactivate the top-level shell tabs (not year sub-tabs inside the Taxes panel)
+  document.querySelectorAll('.tab-bar .seg-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+
+  const footer = document.getElementById('pfFooter');
+  const addBtn = document.getElementById('addEntryBtn');
+  if (tab === 'profitfirst') {
+    footer.classList.add('visible');
+    addBtn.style.display = '';
+  } else {
+    footer.classList.remove('visible');
+    addBtn.style.display = 'none';
+  }
+
+  if (tab === 'payroll' && typeof renderW2Panel === 'function') renderW2Panel();
+}
+
+// ─────────────────────────────────────────────
+// TAX YEAR TABS
+// ─────────────────────────────────────────────
+function switchTaxYear(year, btn) {
+  document.querySelectorAll('.tax-year-content').forEach(el => el.classList.remove('active'));
+  // Only deactivate seg-btns inside the year-tab-bar
+  btn.closest('.segmented-control').querySelectorAll('.seg-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tax-year-' + year).classList.add('active');
+  btn.classList.add('active');
+  initCheckboxes(year);
+  if (typeof detectTaxPayments === 'function') detectTaxPayments();
+}
+
+// ─────────────────────────────────────────────
+// CHECKBOXES (Tax tab) — year-aware
+// ─────────────────────────────────────────────
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const key = el.dataset.key;
+  const year = el.dataset.year || '2026';
+  const checks = loadCheckboxes(year);
+  checks[key] = el.classList.contains('checked');
+  saveCheckboxes(year, checks);
+  if (typeof renderHero === 'function') renderHero();
+}
+
+function initCheckboxes(year) {
+  const checks = loadCheckboxes(year);
+  document.querySelectorAll('.checkbox-custom[data-year="' + year + '"]').forEach(el => {
+    const key = el.dataset.key;
+    if (key in checks) {
+      if (checks[key]) el.classList.add('checked');
+      else el.classList.remove('checked');
+    }
+    // If not in storage, keep the HTML default (checked/unchecked as written)
+  });
+}
+
+// ─────────────────────────────────────────────
+// MODAL CLOSE ON BACKDROP
+// ─────────────────────────────────────────────
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('etOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeETModal();
+});
+
+// ─────────────────────────────────────────────
+// HERO STRIP (Executive)
+// Live-computed from QBO cache, allocations, and tax checkboxes
+// ─────────────────────────────────────────────
+function renderHero() {
+  const host = document.getElementById('hero');
+  if (!host) return;
+
+  // Total Cash + unassigned from QBO cache
+  let totalCash = 0, unassignedTotal = 0, accountCount = 0, unassignedCount = 0;
+  try {
+    const raw = localStorage.getItem('qbo_last_fetched');
+    if (raw) {
+      const { accounts } = JSON.parse(raw);
+      const mapping = loadQBOMapping();
+      const hidden  = loadQBOHidden();
+      const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+      const visible = accounts.filter(a => hidden.indexOf(a.name) < 0);
+      accountCount = visible.length;
+      visible.forEach(a => {
+        totalCash += a.balance;
+        if (!BUCKETS.includes(mapping[a.name])) {
+          unassignedTotal += a.balance;
+          unassignedCount += 1;
+        }
+      });
+    }
+  } catch(e) {}
+
+  // Allocation health — % of rows that sum to 100%
+  let compliance = 100, allocRows = 0;
+  try {
+    const data = loadData();
+    const rows = (data && data.rows) || [];
+    allocRows = rows.length;
+    if (allocRows > 0) {
+      const compliant = rows.filter(r => {
+        const sum = (+r.profit_pct || 0) + (+r.tax_pct || 0) + (+r.oc_pct || 0) + (+r.opex_pct || 0);
+        return sum === 100;
+      }).length;
+      compliance = Math.round((compliant / allocRows) * 100);
+    }
+  } catch(e) {}
+
+  // Federal quarterly 2026 — paidCount / totalCount
+  const fedYear = '2026';
+  const fedChecks = loadCheckboxes(fedYear);
+  const fedKeys = ['fed_q1', 'fed_q2', 'fed_q3', 'fed_q4'];
+  let fedPaid = 0, fedTotal = 0;
+  fedKeys.forEach(k => {
+    const row = document.querySelector('#tax-year-' + fedYear + ' .checkbox-custom[data-key="' + k + '"]');
+    if (row) {
+      fedTotal += 1;
+      const stored = (k in fedChecks) ? fedChecks[k] : row.classList.contains('checked');
+      if (stored) fedPaid += 1;
+    }
+  });
+  if (fedTotal === 0) fedTotal = 4; // default quarter count
+
+  const cards = [
+    {
+      label: 'Total Cash',
+      value: totalCash ? '$' + Math.round(totalCash).toLocaleString('en-US') : '—',
+      sub: accountCount ? (accountCount + ' accounts · 4 PF buckets') : 'Awaiting QBO sync',
+      hero: true,
+    },
+    {
+      label: 'Allocation Health',
+      value: compliance + '%',
+      sub: allocRows ? (allocRows + ' monthly rows') : 'No rows yet',
+      tone: compliance === 100 ? 'green' : 'amber',
+    },
+    {
+      label: 'Unassigned',
+      value: unassignedTotal ? '$' + Math.round(unassignedTotal).toLocaleString('en-US') : '$0',
+      sub: unassignedCount
+        ? (unassignedCount + ' account' + (unassignedCount === 1 ? '' : 's') + ' need a bucket')
+        : 'All accounts mapped',
+      tone: unassignedTotal > 0 ? 'amber' : 'green',
+    },
+    {
+      label: 'Fed Quarterly',
+      value: fedPaid + '/' + fedTotal,
+      sub: 'FY ' + fedYear + ' estimates',
+      tone: fedPaid === fedTotal ? 'green' : 'navy',
+    },
+  ];
+
+  host.innerHTML = '';
+  cards.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'hero-card' + (c.hero ? ' is-hero' : '');
+
+    const label = document.createElement('div');
+    label.className = 'hero-label';
+    label.textContent = c.label;
+    card.appendChild(label);
+
+    const value = document.createElement('div');
+    value.className = 'hero-value';
+    value.textContent = c.value;
+    card.appendChild(value);
+
+    const sub = document.createElement('div');
+    sub.className = 'hero-sub';
+    if (c.tone) {
+      const dot = document.createElement('span');
+      dot.className = 'hero-dot ' + c.tone;
+      sub.appendChild(dot);
+    }
+    sub.appendChild(document.createTextNode(c.sub));
+    card.appendChild(sub);
+
+    host.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+initFirebase();
+renderTable();       // instant render from localStorage
+renderW2Panel();
+renderFooter();
+initCheckboxes('2024');
+initCheckboxes('2025');
+initCheckboxes('2026');
+renderHero();
+syncFromFirestore(); // then pull latest from cloud in background
+
+// QBO — restore URL fields, populate summary badge, run tax detection from cache
+(function initQBO() {
+  const url = localStorage.getItem('qbo_sheet_url') || DEFAULT_QBO_BALANCES_URL || '';
+  const urlInput = document.getElementById('qboSheetUrl');
+  if (urlInput) urlInput.value = url;
+
+  const taxUrl = localStorage.getItem('qbo_tax_payments_url') || DEFAULT_QBO_TAX_PAYMENTS_URL || '';
+  const taxInput = document.getElementById('qboTaxUrl');
+  if (taxInput) taxInput.value = taxUrl;
+
+  let hasCache = false;
+  try {
+    const raw = localStorage.getItem('qbo_last_fetched');
+    if (raw) {
+      hasCache = true;
+      const { accounts } = JSON.parse(raw);
+      const mapping = loadQBOMapping();
+      const hidden  = loadQBOHidden();
+      const BUCKETS = ['Profit', 'Tax', 'OC', 'OPEX'];
+      const visible = accounts.filter(function(a) { return hidden.indexOf(a.name) < 0; });
+      const assignedTotal = visible.reduce(function(s, a) {
+        const b = mapping[a.name];
+        return s + (BUCKETS.includes(b) ? a.balance : 0);
+      }, 0);
+      document.getElementById('qboPanelSummary').textContent =
+        visible.length + ' accounts · ' + fmt$(assignedTotal) + ' assigned' +
+        (hidden.length ? ' · ' + hidden.length + ' hidden' : '');
+    }
+  } catch(e) {}
+
+  // Auto-fetch fresh balances on page load so the dashboard always shows current data.
+  // Runs in the background — renderQBOAccounts() updates the panel when it completes.
+  if (url) {
+    setTimeout(function() { fetchQBOBalances().catch(function() {}); }, 200);
+  }
+  if (taxUrl) {
+    setTimeout(function() {
+      if (typeof fetchQBOTaxPayments === 'function') fetchQBOTaxPayments().catch(function() {});
+    }, 400);
+  }
+
+  // Run tax payment detection against current cached payments (if any)
+  try {
+    const taxRaw = localStorage.getItem('qbo_tax_payments_cache');
+    if (taxRaw) {
+      const { payments, fetchedAt } = JSON.parse(taxRaw);
+      const statusEl = document.getElementById('qboTaxStatus');
+      if (statusEl && payments) {
+        statusEl.textContent = payments.length + ' tax payment(s) cached · fetched ' +
+          new Date(fetchedAt).toLocaleDateString();
+      }
+      detectTaxPayments();
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
