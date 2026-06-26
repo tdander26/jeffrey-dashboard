@@ -12,7 +12,7 @@
 //   3. Paste it into claimSimpleFinSetupToken() once, Run — it swaps the
 //      one-time token for a long-lived Access URL and saves it to Script
 //      Properties
-//   4. Run fetchAll() to test, then setupTriggers() for the 10th + 25th
+//   4. Run fetchAll() to test, then setupTriggers() for automatic twice-daily syncs
 //
 // Script Properties:
 //   QBO_SHEET_ID            — Google Sheet ID (same one the dashboard reads)
@@ -162,7 +162,7 @@ function claimSimpleFinSetupToken(setupToken) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN SYNC — called by triggers on 10th + 25th
+// MAIN SYNC — called automatically by the twice-daily triggers
 // ─────────────────────────────────────────────────────────────────────────────
 
 function fetchAll() {
@@ -253,10 +253,21 @@ function shapeAccount_(a) {
   var bankName = (a.org && (a.org.name || a.org.domain)) || 'Unknown';
   // Friendly bank names: strip TLD off domain fallback (chase.com → chase)
   if (a.org && !a.org.name && a.org.domain) bankName = a.org.domain.replace(/\..*$/, '');
+  // SimpleFIN ships 'balance-date' (unix seconds) = when the BANK last updated
+  // this balance. That's the TRUE as-of date. Stamp it instead of the script's
+  // run date, so a balance pulled on the 27th that the bank last posted on the
+  // 25th is dated the 25th — never mislabeled as fresher than it really is.
+  var asOfStr = '';
+  var asOfTs = a['balance-date'];
+  if (asOfTs != null && asOfTs !== '') {
+    var bd = new Date(Number(asOfTs) * 1000);
+    if (!isNaN(bd.getTime())) asOfStr = Utilities.formatDate(bd, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  }
   return {
     id:          a.id || '',
     name:        a.name || 'Unknown',
     balance:     bal,
+    balanceDate: asOfStr,      // '' when SimpleFIN omits balance-date
     accountType: 'depository', // SimpleFIN doesn't expose a structured type field
     currency:    a.currency || 'USD',
     bankName:    bankName,
@@ -290,31 +301,53 @@ function shapeTransaction_(t) {
 // SHEET WRITES
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Append a row per account to the Balances sheet. */
+/**
+ * Append a row per account to the Balances sheet.
+ *
+ * The "Date" column carries each account's TRUE as-of date (SimpleFIN's
+ * balance-date), NOT the script's run date — so the dashboard never shows a
+ * balance as fresher than the bank actually reported. A separate "Fetched At"
+ * column records when this sync ran, so you can see both: what day the balance
+ * is good for, and when we last checked. The dashboard parser keys on the
+ * exact header 'Date', so that header text must stay 'Date'.
+ */
 function writeBalances_(accounts) {
   var ss = getTargetSpreadsheet_();
   var sheet = ss.getSheetByName(SHEET_NAME);
+  var headers = ['Date', 'Account Name', 'Balance', 'Account Type', 'Fetched At'];
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    var hdr = sheet.getRange(1, 1, 1, 4);
-    hdr.setValues([['Date', 'Account Name', 'Balance', 'Account Type']]);
+    var hdr = sheet.getRange(1, 1, 1, headers.length);
+    hdr.setValues([headers]);
     hdr.setFontWeight('bold').setBackground('#f5f5f7');
     sheet.setFrozenRows(1);
     sheet.setColumnWidth(1, 110);
     sheet.setColumnWidth(2, 240);
     sheet.setColumnWidth(3, 110);
     sheet.setColumnWidth(4, 120);
+    sheet.setColumnWidth(5, 160);
+  } else {
+    // Upgrade legacy 4-column sheets in place so the new column is labeled.
+    var existingHdr = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
+    if ((existingHdr[4] || '') !== 'Fetched At') {
+      sheet.getRange(1, 1, 1, headers.length)
+        .setValues([headers])
+        .setFontWeight('bold').setBackground('#f5f5f7');
+    }
   }
-  var dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var todayStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  var fetchedStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
   accounts.forEach(function(a) {
     var displayName = a.bankName ? (a.bankName + ' · ' + a.name) : a.name;
-    sheet.appendRow([dateStr, displayName, a.balance, a.accountType]);
+    // Use the bank's as-of date; only fall back to today if SimpleFIN omitted it.
+    var asOf = a.balanceDate || todayStr;
+    sheet.appendRow([asOf, displayName, a.balance, a.accountType, fetchedStr]);
   });
   var lastRow = sheet.getLastRow();
   if (lastRow >= 2) {
     sheet.getRange(2, 3, lastRow - 1, 1).setNumberFormat('$#,##0.00');
   }
-  Logger.log('✓ Balances saved (' + accounts.length + ' rows).');
+  Logger.log('✓ Balances saved (' + accounts.length + ' rows). As-of dates from bank, fetched ' + fetchedStr + '.');
 }
 
 /** Pull all tax-flagged transactions out of every account. */
@@ -467,10 +500,16 @@ function setupTriggers() {
     .filter(function(t) { return t.getHandlerFunction() === 'fetchAll'; })
     .forEach(function(t) { ScriptApp.deleteTrigger(t); });
 
-  ScriptApp.newTrigger('fetchAll').timeBased().onMonthDay(10).atHour(8).create();
-  ScriptApp.newTrigger('fetchAll').timeBased().onMonthDay(25).atHour(8).create();
+  // Run TWICE DAILY so balances and transactions stay fresh automatically —
+  // no manual Refresh needed. SimpleFIN only re-polls each bank a few times a
+  // day, so a morning + evening run catches same-day bank updates without
+  // hammering the API for cache hits. Because the Balances sheet is dated by
+  // each account's true as-of date (not the run time), repeated runs on one
+  // day just refresh the same dated row — no misleading "newer" timestamps.
+  ScriptApp.newTrigger('fetchAll').timeBased().everyDays(1).atHour(7).create();
+  ScriptApp.newTrigger('fetchAll').timeBased().everyDays(1).atHour(19).create();
 
-  Logger.log('✓ Two triggers created: 10th and 25th of each month at 8 AM.');
+  Logger.log('✓ Two daily triggers created (~7 AM and ~7 PM). Balances now refresh automatically.');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

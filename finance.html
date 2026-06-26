@@ -4067,22 +4067,61 @@ function renderETList() {
   const data = loadData();
   const ets  = (data[etCurrentRowIdx].earlyTransfers) || [];
   const el   = document.getElementById('etList');
+  let html = '';
   if (ets.length === 0) {
-    el.innerHTML = '<div class="et-empty">No early transfers logged for this period.</div>';
-    return;
+    html += '<div class="et-empty">No early transfers logged for this period.</div>';
+  } else {
+    html += '<div class="et-list">';
+    ets.forEach((et, i) => {
+      const acctCls = 'acct-' + (et.account || '').toLowerCase();
+      const srcTag = et.source === 'spend' ? ' <span style="font-size:9px;color:#86868b" title="Added from bank sync">⟲ bank</span>' : '';
+      html += `<div class="et-item">
+        <span class="et-acct ${acctCls}">${escHtml(et.account)}</span>
+        <span class="et-amt">${fmt$(et.amount)}</span>
+        <span class="et-note">${escHtml(et.note || '')}${srcTag}</span>
+        <button class="et-del-btn" onclick="deleteEarlyTransfer(${i})" title="Remove">🗑</button>
+      </div>`;
+    });
+    html += '</div>';
   }
-  let html = '<div class="et-list">';
-  ets.forEach((et, i) => {
-    const acctCls = 'acct-' + et.account.toLowerCase();
-    html += `<div class="et-item">
-      <span class="et-acct ${acctCls}">${escHtml(et.account)}</span>
-      <span class="et-amt">${fmt$(et.amount)}</span>
-      <span class="et-note">${escHtml(et.note || '')}</span>
-      <button class="et-del-btn" onclick="deleteEarlyTransfer(${i})" title="Remove">🗑</button>
-    </div>`;
-  });
-  html += '</div>';
+  html += renderETCandidatesHtml();
   el.innerHTML = html;
+}
+
+// Renders the "Detected from bank sync" reconciliation block for the ET modal:
+// Income→bucket transfers SimpleFIN saw for this row's period that aren't logged
+// yet, each with one-click Add — plus an honest diagnostic when none appear.
+function renderETCandidatesHtml() {
+  const { candidates, reason } = getETCandidatesForRow(etCurrentRowIdx);
+  let h = '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)">';
+  h += '<div style="font-size:11px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px">Detected from bank sync</div>';
+  if (candidates && candidates.length) {
+    const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    h += '<div class="et-list">';
+    candidates.forEach((c, i) => {
+      const acctCls = 'acct-' + c.account.toLowerCase();
+      const d = new Date(c.date + 'T12:00:00');
+      const dateStr = isNaN(d.getTime()) ? c.date : (M[d.getMonth()] + ' ' + d.getDate());
+      const tagStr = c.tag === 'allocation' ? 'allocation' : 'early';
+      h += `<div class="et-item">
+        <span class="et-acct ${acctCls}">${escHtml(c.account)}</span>
+        <span class="et-amt">${fmt$(c.amount)}</span>
+        <span class="et-note">${escHtml(dateStr)} · ${tagStr}${c.payee ? ' · ' + escHtml(c.payee) : ''}</span>
+        <button class="btn btn-primary btn-sm" style="padding:2px 10px" onclick="addEarlyTransferFromSpendByIndex(${i})">Add</button>
+      </div>`;
+    });
+    h += '</div>';
+    h += '<div style="font-size:10.5px;color:var(--ink-3);margin-top:6px;line-height:1.5">Income→bucket transfers your bank shows for this period that aren\'t logged yet. Add only ones that already left Income <em>before</em> the balance entered above. <strong>early</strong> = moved ahead of your allocation; <strong>allocation</strong> = your regular 10th/25th transfer.</div>';
+  } else {
+    let msg;
+    if (reason === 'no-spend-data') msg = 'No bank-sync data loaded yet. Open the Spend tab, or click “Refresh Taxes” on the Taxes tab, to pull transactions.';
+    else if (reason === 'no-income-mapping') msg = 'No account is mapped to “Income” in Spend settings, so transfers can\'t be detected. Map your income account on the Spend tab.';
+    else if (reason === 'none-in-window') msg = 'No unlogged Income→bucket transfers found in the bank data for this period.';
+    else msg = 'No Income→bucket transfers detected in the bank data.';
+    h += '<div style="font-size:11px;color:var(--ink-3);font-style:italic">' + escHtml(msg) + '</div>';
+  }
+  h += '</div>';
+  return h;
 }
 
 function addEarlyTransfer() {
@@ -4106,6 +4145,143 @@ function deleteEarlyTransfer(etIdx) {
   const data = loadData();
   const row  = data[etCurrentRowIdx];
   row.earlyTransfers.splice(etIdx, 1);
+  saveData(data);
+  pfData = data;
+  renderETList();
+  renderTable();
+}
+
+// ─── Bank-sync → Early-Transfer reconciliation ───────────────────────────────
+// Maps a Spend bucket id to the canonical ET account label. ET aggregation in
+// renderTable matches these EXACT case-sensitive strings, so this mapping is the
+// contract — never push a raw bucketId into earlyTransfers.
+const SPEND_BUCKET_TO_ET = { profit: 'Profit', tax: 'Tax', oc: 'OC', opex: 'OPEX' };
+
+// Make sure spendState.classified is populated even if the user never opened the
+// Spend tab this session — hydrate txns from the cache, then classify.
+function ensureSpendClassified() {
+  if (typeof spendState === 'undefined') return;
+  if ((!spendState.txns || !spendState.txns.length) && typeof loadSpendTxnsCache === 'function') {
+    const cached = loadSpendTxnsCache();
+    if (cached && cached.txns && cached.txns.length) {
+      spendState.txns = cached.txns;
+      spendState.accounts = (typeof collectSpendAccounts === 'function') ? collectSpendAccounts(cached.txns) : (spendState.accounts || []);
+      spendState.fetchedAt = cached.fetchedAt;
+    }
+  }
+  if (spendState.txns && spendState.txns.length &&
+      (!spendState.classified || !spendState.classified.length) &&
+      typeof classifySpendTransactions === 'function') {
+    classifySpendTransactions();
+  }
+}
+
+// Every Income→bucket transfer the classifier found, one row per transfer
+// (the OUT leg is canonical — it alone carries both bucketId==='income' AND
+// destBucketId). Deduped by txnId so two genuine same-day/same-amount transfers
+// to one bucket BOTH survive; pending excluded.
+function getSpendIncomeToBucketTransfers() {
+  if (typeof spendState === 'undefined' || !spendState.classified) return [];
+  const seen = {};
+  const out = [];
+  spendState.classified.forEach(t => {
+    if (t.direction !== 'out') return;
+    if (t.bucketId !== 'income') return;
+    if (!t.destBucketId || t.destBucketId === 'income') return;
+    if (t.tag !== 'early' && t.tag !== 'allocation') return;
+    if (t.pending) return;
+    const account = SPEND_BUCKET_TO_ET[t.destBucketId];
+    if (!account) return;
+    const amount = Math.abs(parseFloat(t.amount) || 0);
+    if (!amount) return;
+    // Dedup on txnId (always present — parseSpendCSV falls back to a composite
+    // id). Using the id, not date|amount, keeps distinct same-amount transfers.
+    const key = t.txnId || (t.date + '|' + account + '|' + amount.toFixed(2) + '|' + (t.payee || ''));
+    if (seen[key]) return;
+    seen[key] = true;
+    out.push({ date: t.date, account: account, amount: amount, payee: t.payee || '', txnId: t.txnId, tag: t.tag });
+  });
+  return out;
+}
+
+// Candidates for one PF row: detected transfers dated within the row's window
+// (plus the prior window, where pre-allocation early moves live) that aren't
+// already logged on this row. Returns { candidates, reason } — reason explains
+// an empty list so the modal can show an honest diagnostic.
+function getETCandidatesForRow(rowIdx) {
+  ensureSpendClassified();
+  const data = loadData();
+  const row = data[rowIdx];
+  if (!row) return { candidates: [], reason: 'none' };
+
+  const all = getSpendIncomeToBucketTransfers();
+  if (!all.length) {
+    let reason = 'none';
+    if (typeof spendState === 'undefined' || !spendState.txns || !spendState.txns.length) reason = 'no-spend-data';
+    else if (typeof getIncomeAccountId === 'function' && !getIncomeAccountId()) reason = 'no-income-mapping';
+    return { candidates: [], reason: reason };
+  }
+
+  // Date span: prior-window start through this row's window end.
+  let lo = null, hi = null;
+  const years = (typeof inferYears === 'function') ? inferYears(data) : [];
+  const rowDate = (typeof parseRowDate === 'function') ? parseRowDate(row.date, years[rowIdx]) : null;
+  if (rowDate && typeof getSpendWindowForDate === 'function' && typeof isoDate === 'function') {
+    const win = getSpendWindowForDate(isoDate(rowDate));
+    if (win) {
+      const priorDay = new Date(win.start); priorDay.setDate(priorDay.getDate() - 1);
+      const prior = getSpendWindowForDate(isoDate(priorDay));
+      lo = (prior ? prior.start : win.start);
+      hi = new Date(win.end.getFullYear(), win.end.getMonth(), win.end.getDate(), 23, 59, 59);
+    }
+  }
+
+  const cents = (v) => Math.round((parseFloat(v) || 0) * 100);
+  // Exclude any transfer already logged on ANY row (by txnId) — prevents the
+  // same bank transfer being added to two adjacent rows whose candidate windows
+  // overlap on the shared prior/current window boundary.
+  const loggedTxn = new Set();
+  data.forEach(r => (r.earlyTransfers || []).forEach(e => { if (e.txnId) loggedTxn.add(e.txnId); }));
+  // Consume-once suppression for MANUAL entries on THIS row (those without a
+  // txnId): each hand-entered ET hides at most ONE same-account/amount candidate,
+  // so a genuine second transfer of the same amount can still be reconciled.
+  const manualSig = {};
+  (row.earlyTransfers || []).forEach(e => {
+    if (e.txnId) return;
+    const sig = (e.account || '') + '|' + cents(e.amount);
+    manualSig[sig] = (manualSig[sig] || 0) + 1;
+  });
+
+  const candidates = all.filter(c => {
+    if (lo && hi) {
+      const d = new Date(c.date + 'T12:00:00');
+      if (isNaN(d.getTime()) || d < lo || d > hi) return false;
+    }
+    if (c.txnId && loggedTxn.has(c.txnId)) return false;           // already logged on some row
+    const sig = c.account + '|' + cents(c.amount);
+    if (manualSig[sig] > 0) { manualSig[sig]--; return false; }     // matched a hand-entered ET
+    return true;
+  });
+
+  return { candidates: candidates, reason: candidates.length ? null : 'none-in-window' };
+}
+
+// One-click add from the candidate list. Re-derives candidates fresh (indices
+// stay valid because added items drop out of the next derivation) and appends a
+// canonical ET tagged with the txnId so it's never double-added.
+function addEarlyTransferFromSpendByIndex(i) {
+  const { candidates } = getETCandidatesForRow(etCurrentRowIdx);
+  const c = candidates[i];
+  if (!c) { renderETList(); return; }
+  const data = loadData();
+  const row = data[etCurrentRowIdx];
+  if (!row.earlyTransfers) row.earlyTransfers = [];
+  if (c.txnId && row.earlyTransfers.some(e => e.txnId === c.txnId)) { renderETList(); return; }
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const d = new Date(c.date + 'T12:00:00');
+  const dateStr = isNaN(d.getTime()) ? c.date : (M[d.getMonth()] + ' ' + d.getDate());
+  const note = 'Bank sync · ' + (c.payee ? c.payee + ' · ' : '') + dateStr;
+  row.earlyTransfers.push({ account: c.account, amount: c.amount, note: note, txnId: c.txnId, source: 'spend' });
   saveData(data);
   pfData = data;
   renderETList();
@@ -5263,7 +5439,9 @@ function parseQBOCSV(csvText) {
     const balance = parseFloat((cols[balIdx] || '').replace(/[^0-9.\-]/g, '')) || 0;
     const acctType = typeIdx >= 0 ? (cols[typeIdx] || '').trim() : 'Bank';
     if (!name || !date) continue;
-    if (!byAccount[name] || date > byAccount[name].date) {
+    // >= (not >) so that when the bank as-of date repeats across the twice-daily
+    // syncs, the LAST-appended (freshest-fetched) row for that date wins.
+    if (!byAccount[name] || date >= byAccount[name].date) {
       byAccount[name] = { date, balance, accountType: acctType };
     }
   }
@@ -5307,6 +5485,14 @@ function renderQBOAccounts(accounts, fetchedAt) {
   document.getElementById('qboMeta').innerHTML =
     '<span>Bank data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>';
 
+  // Short "Jun 25" formatter for each account's bank as-of date.
+  const fmtAsOf = function(iso) {
+    if (!iso) return '';
+    const d = new Date(iso + 'T12:00:00');
+    if (isNaN(d.getTime())) return iso;
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getDate();
+  };
+
   // Account mapping table
   let html = '<table class="qbo-tbl"><thead><tr>' +
     '<th>Account Name</th><th>PF Bucket</th><th class="amt">Balance</th><th></th><th></th>' +
@@ -5324,7 +5510,9 @@ function renderQBOAccounts(accounts, fetchedAt) {
         '<option value=""' + (!mapping[a.name] ? ' selected' : '') + '>(unassigned)</option>' +
         opts +
       '</select></td>' +
-      '<td class="amt">' + fmt$(a.balance) + '</td>' +
+      '<td class="amt">' + fmt$(a.balance) +
+        (a.latestDate ? '<div style="font-size:10px;color:#86868b;font-weight:400;margin-top:2px">as of ' + escHtml(fmtAsOf(a.latestDate)) + '</div>' : '') +
+      '</td>' +
       '<td class="amt"><button class="qbo-approve-btn" title="Approve this balance as a new Profit First entry" ' +
         'onclick="approveBalance(\'' + escHtml(safeName) + '\', ' + a.balance + ')">→ Income</button></td>' +
       '<td class="amt"><button class="qbo-hide-btn" title="Hide this account from the dashboard" ' +
@@ -5391,7 +5579,7 @@ function setQBOMapping(accountName, bucket) {
 function useQBOBalances() {
   const raw = localStorage.getItem('qbo_last_fetched');
   if (!raw) {
-    alert('No QBO balance data loaded yet. Click Refresh first.');
+    alert('No balance data loaded yet. Click Refresh first.');
     return;
   }
 
@@ -5483,33 +5671,39 @@ async function fetchQBOTaxPayments() {
     || '').trim();
 
   const status = document.getElementById('qboTaxStatus');
-  if (!url) {
-    status.innerHTML = '<span style="color:#FF3B30">Enter your Tax Payments CSV URL first.</span>';
-    return;
-  }
+  status.textContent = 'Refreshing…';
 
-  localStorage.setItem('qbo_tax_payments_url', url);
-  status.textContent = 'Loading tax payments…';
-
-  try {
+  // Refresh both sources in parallel: the curated Tax Payments CSV (if a URL is
+  // set) and the bank-sync Spend transactions. Either can succeed independently.
+  const csvPromise = (async () => {
+    if (!url) return { source: 'csv', skipped: true };
+    localStorage.setItem('qbo_tax_payments_url', url);
     const fetchUrl = url + (url.includes('?') ? '&' : '?') + '_cb=' + Date.now();
     const resp = await fetch(fetchUrl);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const csvText = await resp.text();
-    const payments = parseTaxPaymentsCSV(csvText);
-
+    if (!resp.ok) throw new Error('CSV HTTP ' + resp.status);
+    const payments = parseTaxPaymentsCSV(await resp.text());
     localStorage.setItem('qbo_tax_payments_cache', JSON.stringify({
       fetchedAt: new Date().toISOString(),
       payments
     }));
+    return { source: 'csv', count: payments.length };
+  })();
 
-    status.innerHTML = '<span style="color:#34c759">✓ Loaded ' + payments.length +
-      ' tax payment(s). Switch to the Taxes tab to see detected badges.</span>';
+  const spendPromise = (typeof fetchSpendTransactions === 'function')
+    ? fetchSpendTransactions().then(() => ({ source: 'spend', count: (spendState && spendState.txns) ? spendState.txns.length : 0 }))
+    : Promise.resolve({ source: 'spend', skipped: true });
 
-    detectTaxPayments();
-  } catch(err) {
-    status.innerHTML = '<span style="color:#FF3B30">Could not load: ' + escHtml(err.message) + '</span>';
-  }
+  const [csvRes, spendRes] = await Promise.allSettled([csvPromise, spendPromise]);
+
+  const msgs = [];
+  if (csvRes.status === 'fulfilled' && !csvRes.value.skipped) msgs.push('CSV: ' + csvRes.value.count + ' payment(s)');
+  else if (csvRes.status === 'rejected')                      msgs.push('<span style="color:#FF3B30">CSV failed: ' + escHtml(csvRes.reason.message) + '</span>');
+  if (spendRes.status === 'fulfilled' && !spendRes.value.skipped) msgs.push('Bank sync: ' + spendRes.value.count + ' txn(s)');
+  else if (spendRes.status === 'rejected')                        msgs.push('<span style="color:#FF3B30">Bank sync failed: ' + escHtml(spendRes.reason.message) + '</span>');
+
+  status.innerHTML = '<span style="color:#34c759">✓ Refreshed</span> · ' + (msgs.join(' · ') || 'no sources configured');
+
+  detectTaxPayments();
 }
 
 function parseTaxPaymentsCSV(csvText) {
@@ -5630,10 +5824,9 @@ function _pickerOutside(e) {
 
 function openPaymentPicker(payId, anchorEl) {
   closePaymentPicker();
-  let cache;
-  try { cache = JSON.parse(localStorage.getItem('qbo_tax_payments_cache') || 'null'); }
-  catch(e) { return; }
-  if (!cache || !cache.payments) return;
+  const allPayments = getAllTaxPayments();
+  if (!allPayments.length) return;
+  const cache = { payments: allPayments };
 
   const payment = cache.payments.find(p => paymentId(p) === payId);
   if (!payment) return;
@@ -5915,13 +6108,66 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// Returns the set of Spend account IDs that should feed the Taxes tab:
+// either explicitly mapped to the 'tax' bucket, or named like a tax account
+// (e.g. "Ally — Tax"). Inclusive on purpose — users can exclude false positives.
+function getSpendTaxAccountIds() {
+  const ids = new Set();
+  try {
+    if (typeof spendState === 'undefined' || !spendState.accounts) return ids;
+    const mapping = (typeof loadSpendMapping === 'function') ? loadSpendMapping() : {};
+    spendState.accounts.forEach(a => {
+      if (mapping[a.id] === 'tax') { ids.add(a.id); return; }
+      if (/tax/i.test(a.name || '')) ids.add(a.id);
+    });
+  } catch(e) { /* spendState not initialized yet */ }
+  return ids;
+}
+
+// Outgoing, non-pending transactions from designated tax accounts,
+// shaped to match the Tax Payments CSV format.
+function getSpendTaxPayments() {
+  try {
+    if (typeof spendState === 'undefined' || !spendState.txns || !spendState.txns.length) return [];
+    const ids = getSpendTaxAccountIds();
+    if (!ids.size) return [];
+    return spendState.txns
+      .filter(t => t.direction === 'out' && !t.pending && ids.has(t.accountId))
+      .map(t => ({
+        date:     t.date,
+        payee:    t.payee || t.description || '',
+        amount:   Math.abs(t.amount),
+        memo:     t.memo  || t.description || '',
+        category: '',
+        type:    '',
+        _source: 'spend',
+      }));
+  } catch(e) { return []; }
+}
+
+// Merge the curated Tax Payments CSV with Spend-derived payments,
+// deduped by (date|amount|payee).
+function getAllTaxPayments() {
+  let cache;
+  try { cache = JSON.parse(localStorage.getItem('qbo_tax_payments_cache') || 'null'); }
+  catch(e) { /* ignore */ }
+  const csv = (cache && Array.isArray(cache.payments)) ? cache.payments.slice() : [];
+  const spend = getSpendTaxPayments();
+  if (!spend.length) return csv;
+  const seen = new Set(csv.map(paymentId));
+  spend.forEach(p => {
+    const pid = paymentId(p);
+    if (!seen.has(pid)) { csv.push(p); seen.add(pid); }
+  });
+  return csv;
+}
+
 function detectTaxPayments() {
   clearTaxBadges();
 
-  let cache;
-  try { cache = JSON.parse(localStorage.getItem('qbo_tax_payments_cache') || 'null'); }
-  catch(e) { return; }
-  if (!cache || !cache.payments || !cache.payments.length) return;
+  const allPayments = getAllTaxPayments();
+  if (!allPayments.length) return;
+  const cache = { payments: allPayments };
 
   const AMOUNT_TOL   = 5.00;           // match within ±$5
   const DAY_WINDOW   = 60;             // match within ±60 days of due date
@@ -5955,7 +6201,10 @@ function detectTaxPayments() {
     const badge = document.createElement('span');
     badge.className = 'tax-detected' + (manual ? ' manual' : '');
     badge.textContent = (manual ? '✓ Assigned ' : '✓ Detected ') + fmt$(p.amount) + ' on ' + dateStr;
-    badge.title = (manual ? 'Manually assigned' : 'From QBO') +
+    const sourceLabel = manual
+      ? 'Manually assigned'
+      : (p._source === 'spend' ? 'Auto-matched (bank sync)' : 'Auto-matched (CSV)');
+    badge.title = sourceLabel +
       (p.payee ? ': ' + p.payee : '') + (p.memo ? ' — ' + p.memo : '') +
       ' — click to reassign or remove';
     badge.dataset.pid = paymentId(p);
@@ -6097,7 +6346,7 @@ function detectTaxPayments() {
       (p.payee ? ' · ' + escHtml(p.payee) : '') + '</span>';
   }).join('');
   panel.innerHTML =
-    '<div class="title">⚠ ' + unmatched.length + ' QBO tax payment(s) didn\'t match a row · click to assign</div>' +
+    '<div class="title">⚠ ' + unmatched.length + ' tax payment(s) didn\'t match a row · click to assign</div>' +
     '<div class="items">' + items + '</div>';
   activeYearEl.insertBefore(panel, activeYearEl.firstChild);
 }
@@ -6647,7 +6896,12 @@ function saveSpendCsvUrl(url) {
 
 // ─── Module state ───────────────────────────────────────────────────────────
 
-const spendState = {
+// NOTE: declared with `var` (not `const`) on purpose. initQBO() runs near the
+// bottom of the script BEFORE this line and calls detectTaxPayments(), which
+// reaches getSpendTaxPayments()'s `typeof spendState` guard. A `const` in its
+// temporal-dead-zone makes `typeof` THROW (not return 'undefined'); `var` is
+// hoisted so the guard sees 'undefined' and bails gracefully until init fills it.
+var spendState = {
   txns: [],             // array of normalized transactions
   accounts: [],         // distinct {id, name} pairs from txns
   fetchedAt: null,
@@ -6751,6 +7005,7 @@ async function fetchSpendTransactions() {
     spendState.fetchedAt = Date.now();
     saveSpendTxnsCache({ txns, fetchedAt: spendState.fetchedAt });
     classifySpendTransactions();
+    if (typeof detectTaxPayments === 'function') detectTaxPayments();
   } catch(err) {
     spendState.error = err.message;
   } finally {
@@ -7753,6 +8008,7 @@ function initSpend() {
     spendState.accounts = collectSpendAccounts(cached.txns);
     spendState.fetchedAt = cached.fetchedAt;
     classifySpendTransactions();
+    if (typeof detectTaxPayments === 'function') detectTaxPayments();
   }
   // Always re-fetch so the user sees fresh data on tab open
   fetchSpendTransactions();
