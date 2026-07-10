@@ -2358,9 +2358,9 @@
           <div class="panel-title">Bucket Planner</div>
           <div class="panel-subtitle">Fund the fixed targets first · OC is the residual · capital fills the gap</div>
         </div>
-        <span class="badge badge-blue" id="bpRevBadge">—</span>
+        <span class="badge badge-blue bp-badge" id="bpRevBadge">—</span>
       </div>
-      <div id="bucketPlannerBody" style="padding:8px 16px 16px">
+      <div id="bucketPlannerBody" class="bp-body" style="padding:8px 16px 16px">
         <div style="color:#86868b;font-size:13px;padding:8px 0">Loading planner…</div>
       </div>
     </div>
@@ -2402,6 +2402,20 @@
           <tbody id="pfBody"></tbody>
           <tfoot id="pfFoot"></tfoot>
         </table>
+      </div>
+    </div>
+
+    <!-- Bucket Planner — bottom copy (mirrors the panel above so it's here after the table too) -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Bucket Planner</div>
+          <div class="panel-subtitle">Fund the fixed targets first · OC is the residual · capital fills the gap</div>
+        </div>
+        <span class="badge badge-blue bp-badge">—</span>
+      </div>
+      <div class="bp-body" style="padding:8px 16px 16px">
+        <div style="color:#86868b;font-size:13px;padding:8px 0">Loading planner…</div>
       </div>
     </div>
   </div>
@@ -5339,8 +5353,8 @@ function bpNextTaxDue() {
 }
 
 function renderBucketPlanner(force) {
-  var body = document.getElementById('bucketPlannerBody');
-  if (!body) return;
+  var bodies = document.querySelectorAll('.bp-body');
+  if (!bodies.length) return;
   // Don't wipe an edit in progress on a background refresh (balance sync, etc.).
   if (!force) { var ae = document.activeElement; if (ae && ae.id && ae.id.indexOf('bp') === 0) return; }
 
@@ -5356,8 +5370,10 @@ function renderBucketPlanner(force) {
   // With no revenue there is NO meaningful OC/capital number — showing one (the
   // bare sum of the fixed targets) is misleading, so we prompt instead.
   var haveRev = rev > 0;
-  var badge = document.getElementById('bpRevBadge');
-  if (badge) badge.textContent = haveRev ? (bpMoney(rev) + '/mo') : 'revenue not loaded';
+  var badgeText = haveRev ? (bpMoney(rev) + '/mo') : 'revenue not loaded';
+  var badges = document.querySelectorAll('.bp-badge');
+  for (var bk = 0; bk < badges.length; bk++) badges[bk].textContent = badgeText;
+
   var ocBorder = !haveRev ? '#d2d2d7' : (ocResidual < 0 ? '#e8674a' : '#34c759');
   var ocColor  = !haveRev ? '#86868b' : (ocResidual < 0 ? '#e8674a' : '#1d7a33');
   var ocDisplay = haveRev ? bpMoney(ocResidual) : '—';
@@ -5367,14 +5383,6 @@ function renderBucketPlanner(force) {
         ? '<div style="background:#fdeee9;border-radius:8px;padding:10px 13px;margin-top:6px;font-size:12.5px;line-height:1.5;color:#b23c17"><strong>Capital transfer to break even: ' + bpMoney(capital) + '</strong> — move this in from personal/outside funds so Profit, Tax &amp; OPEX still fund in full.</div>'
         : '<div style="background:#eaf7ee;border-radius:8px;padding:10px 13px;margin-top:6px;font-size:12.5px;line-height:1.5;color:#1d7a33">Revenue covers every bucket with ' + bpMoney(ocResidual) + ' left toward your draw — no capital needed.</div>');
 
-  function inp(id, val, w) {
-    return '<input id="' + id + '" value="' + val + '" style="width:' + (w || 70) + 'px;padding:5px 7px;border:1px solid var(--rule,#e2e2e6);border-radius:6px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums" onchange="bpOnTargetChange()">';
-  }
-  function row(label, val, sub) {
-    return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--rule,#ededed)">'
-      + '<span style="font-size:13px;color:var(--ink,#1d1d1f)">' + label + (sub ? ' <span style="color:var(--ink-3,#a1a1a6);font-size:11px">' + sub + '</span>' : '') + '</span>'
-      + '<span style="font-size:14px;font-weight:600;color:var(--ink,#1d1d1f);font-variant-numeric:tabular-nums;white-space:nowrap">' + bpMoney(val) + '</span></div>';
-  }
   var revNote = (bpRevenueOverride != null) ? 'your projection'
     : (liveRev != null ? 'trailing 30-day actual' : 'no bank data yet — type it in');
   var due = bpNextTaxDue();
@@ -5382,54 +5390,65 @@ function renderBucketPlanner(force) {
   var daysToDue = Math.max(0, Math.round((due - new Date()) / 864e5));
   var taxBal = bpTaxBucketBalance();
   var projByDue = (taxBal != null) ? taxBal + taxMo * (daysToDue / 30) : null;
-
   var lbl = 'font-size:12px;color:var(--ink-3,#6e6e73);display:inline-flex;align-items:center;gap:6px';
-  body.innerHTML =
-    // Editable targets
-    '<div style="display:flex;flex-wrap:wrap;gap:12px 20px;padding:0 0 14px;border-bottom:1px solid var(--rule,#ededed)">'
-    + '<label style="' + lbl + '">Profit % ' + inp('bpProfitPct', t.profitPct, 46) + '</label>'
-    + '<label style="' + lbl + '">Quarterly est. ' + inp('bpQuarterly', t.quarterlyEst, 78) + '</label>'
-    + '<label style="' + lbl + '">Sales tax/mo ' + inp('bpSales', t.salesMo, 60) + '</label>'
-    + '<label style="' + lbl + '">OPEX/mo ' + inp('bpOpex', t.opexMo, 78) + '</label>'
-    + '<label style="' + lbl + '">Payroll/mo ' + inp('bpPayroll', t.payrollMo, 78) + '</label>'
-    + '</div>'
-    // Revenue
-    + '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f5f5f7;border-radius:9px;padding:11px 14px;margin:14px 0 4px">'
-    +   '<div><div style="font-size:13px;font-weight:600;color:var(--ink,#1d1d1f)">Monthly revenue</div><div style="font-size:11px;color:var(--ink-3,#a1a1a6);margin-top:1px">' + revNote + '</div></div>'
-    +   '<div style="display:flex;align-items:center;gap:8px">'
-    +     '<input id="bpRevenue" value="' + Math.round(rev) + '" style="width:112px;padding:7px 9px;border:1px solid var(--rule,#ddd);border-radius:7px;font-size:15px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums" onchange="bpOnRevenueChange()">'
-    +     (bpRevenueOverride != null ? '<button class="btn btn-secondary btn-sm" onclick="bpResetRevenue()" title="Back to live actual">↺ live</button>' : '')
-    +   '</div>'
-    + '</div>'
-    // Allocation breakdown
-    + row('Profit', profit, t.profitPct + '% of revenue')
-    + row('Tax reserve', taxMo, 'est. ' + bpMoney(t.quarterlyEst) + '/qtr ÷ 3 + sales')
-    + row('OPEX', t.opexMo, 'business bills')
-    + row('Payroll', t.payrollMo, 'held in Income for Gusto')
-    + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0 11px;border-top:2px solid ' + ocBorder + ';margin-top:3px">'
-    +   '<span style="font-size:15px;font-weight:700;color:var(--ink,#1d1d1f)">OC (residual)</span>'
-    +   '<span style="font-size:19px;font-weight:700;color:' + ocColor + ';font-variant-numeric:tabular-nums;white-space:nowrap">' + ocDisplay + '</span></div>'
-    + ocFollowup
-    // Tax reserve tracker
-    + '<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--rule,#ededed);font-size:12px;color:var(--ink-3,#6e6e73);line-height:1.6">'
-    +   '<strong style="color:var(--ink,#1d1d1f)">Tax reserve tracker</strong> — next estimate ' + bpMoney(t.quarterlyEst) + ' due ' + dueStr + ' (' + daysToDue + ' days). '
-    +   (taxBal != null
-        ? 'Bucket holds ' + bpMoney(taxBal) + '; at ' + bpMoney(taxMo) + '/mo → ~' + bpMoney(projByDue) + ' by then — ' + (projByDue >= t.quarterlyEst ? '<span style="color:#1d7a33;font-weight:600">on track ✓</span>' : '<span style="color:#b23c17;font-weight:600">short ' + bpMoney(t.quarterlyEst - projByDue) + '</span>')
-        : 'connect balances to track the reserve.')
-    +   '</div>';
+
+  // field = target key; sfx = per-copy suffix so input IDs stay unique across
+  // the top and bottom planners. Handlers read this.value, not a fixed ID.
+  function inp(field, val, w, sfx) {
+    return '<input id="bp_' + field + '_' + sfx + '" value="' + val + '" style="width:' + (w || 70) + 'px;padding:5px 7px;border:1px solid var(--rule,#e2e2e6);border-radius:6px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums" onchange="bpSetTarget(\'' + field + '\', this.value)">';
+  }
+  function row(label, val, sub) {
+    return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-top:1px solid var(--rule,#ededed)">'
+      + '<span style="font-size:13px;color:var(--ink,#1d1d1f)">' + label + (sub ? ' <span style="color:var(--ink-3,#a1a1a6);font-size:11px">' + sub + '</span>' : '') + '</span>'
+      + '<span style="font-size:14px;font-weight:600;color:var(--ink,#1d1d1f);font-variant-numeric:tabular-nums;white-space:nowrap">' + bpMoney(val) + '</span></div>';
+  }
+  function buildHTML(sfx) {
+    return ''
+      // Editable targets
+      + '<div style="display:flex;flex-wrap:wrap;gap:12px 20px;padding:0 0 14px;border-bottom:1px solid var(--rule,#ededed)">'
+      + '<label style="' + lbl + '">Profit % ' + inp('profitPct', t.profitPct, 46, sfx) + '</label>'
+      + '<label style="' + lbl + '">Quarterly est. ' + inp('quarterlyEst', t.quarterlyEst, 78, sfx) + '</label>'
+      + '<label style="' + lbl + '">Sales tax/mo ' + inp('salesMo', t.salesMo, 60, sfx) + '</label>'
+      + '<label style="' + lbl + '">OPEX/mo ' + inp('opexMo', t.opexMo, 78, sfx) + '</label>'
+      + '<label style="' + lbl + '">Payroll/mo ' + inp('payrollMo', t.payrollMo, 78, sfx) + '</label>'
+      + '</div>'
+      // Revenue
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f5f5f7;border-radius:9px;padding:11px 14px;margin:14px 0 4px">'
+      +   '<div><div style="font-size:13px;font-weight:600;color:var(--ink,#1d1d1f)">Monthly revenue</div><div style="font-size:11px;color:var(--ink-3,#a1a1a6);margin-top:1px">' + revNote + '</div></div>'
+      +   '<div style="display:flex;align-items:center;gap:8px">'
+      +     '<input id="bp_revenue_' + sfx + '" value="' + Math.round(rev) + '" style="width:112px;padding:7px 9px;border:1px solid var(--rule,#ddd);border-radius:7px;font-size:15px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums" onchange="bpSetRevenue(this.value)">'
+      +     (bpRevenueOverride != null ? '<button class="btn btn-secondary btn-sm" onclick="bpResetRevenue()" title="Back to live actual">↺ live</button>' : '')
+      +   '</div>'
+      + '</div>'
+      // Allocation breakdown
+      + row('Profit', profit, t.profitPct + '% of revenue')
+      + row('Tax reserve', taxMo, 'est. ' + bpMoney(t.quarterlyEst) + '/qtr ÷ 3 + sales')
+      + row('OPEX', t.opexMo, 'business bills')
+      + row('Payroll', t.payrollMo, 'held in Income for Gusto')
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0 11px;border-top:2px solid ' + ocBorder + ';margin-top:3px">'
+      +   '<span style="font-size:15px;font-weight:700;color:var(--ink,#1d1d1f)">OC (residual)</span>'
+      +   '<span style="font-size:19px;font-weight:700;color:' + ocColor + ';font-variant-numeric:tabular-nums;white-space:nowrap">' + ocDisplay + '</span></div>'
+      + ocFollowup
+      // Tax reserve tracker
+      + '<div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--rule,#ededed);font-size:12px;color:var(--ink-3,#6e6e73);line-height:1.6">'
+      +   '<strong style="color:var(--ink,#1d1d1f)">Tax reserve tracker</strong> — next estimate ' + bpMoney(t.quarterlyEst) + ' due ' + dueStr + ' (' + daysToDue + ' days). '
+      +   (taxBal != null
+          ? 'Bucket holds ' + bpMoney(taxBal) + '; at ' + bpMoney(taxMo) + '/mo → ~' + bpMoney(projByDue) + ' by then — ' + (projByDue >= t.quarterlyEst ? '<span style="color:#1d7a33;font-weight:600">on track ✓</span>' : '<span style="color:#b23c17;font-weight:600">short ' + bpMoney(t.quarterlyEst - projByDue) + '</span>')
+          : 'connect balances to track the reserve.')
+      +   '</div>';
+  }
+
+  for (var bi = 0; bi < bodies.length; bi++) bodies[bi].innerHTML = buildHTML(bi);
 }
 
-function bpOnTargetChange() {
+// Element-based handlers so the top and bottom copies both work without ID clashes.
+function bpSetTarget(field, value) {
   var t = loadBucketTargets();
-  t.profitPct    = bpNum((document.getElementById('bpProfitPct') || {}).value, t.profitPct);
-  t.quarterlyEst = bpNum((document.getElementById('bpQuarterly') || {}).value, t.quarterlyEst);
-  t.salesMo      = bpNum((document.getElementById('bpSales') || {}).value, t.salesMo);
-  t.opexMo       = bpNum((document.getElementById('bpOpex') || {}).value, t.opexMo);
-  t.payrollMo    = bpNum((document.getElementById('bpPayroll') || {}).value, t.payrollMo);
+  t[field] = bpNum(value, t[field]);
   saveBucketTargets(t);
   renderBucketPlanner(true);
 }
-function bpOnRevenueChange() { bpRevenueOverride = bpNum((document.getElementById('bpRevenue') || {}).value, 0); renderBucketPlanner(true); }
+function bpSetRevenue(value) { bpRevenueOverride = bpNum(value, 0); renderBucketPlanner(true); }
 function bpResetRevenue() { bpRevenueOverride = null; renderBucketPlanner(true); }
 
 function escHtml(str) {
