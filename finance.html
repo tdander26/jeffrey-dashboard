@@ -5352,8 +5352,20 @@ function renderBucketPlanner(force) {
   var ocResidual = rev - profit - taxMo - t.opexMo - t.payrollMo;
   var capital = ocResidual < 0 ? -ocResidual : 0;
 
+  // Revenue is "known" only when it came from the live feed or the user typed it.
+  // With no revenue there is NO meaningful OC/capital number — showing one (the
+  // bare sum of the fixed targets) is misleading, so we prompt instead.
+  var haveRev = rev > 0;
   var badge = document.getElementById('bpRevBadge');
-  if (badge) badge.textContent = bpMoney(rev) + '/mo';
+  if (badge) badge.textContent = haveRev ? (bpMoney(rev) + '/mo') : 'revenue not loaded';
+  var ocBorder = !haveRev ? '#d2d2d7' : (ocResidual < 0 ? '#e8674a' : '#34c759');
+  var ocColor  = !haveRev ? '#86868b' : (ocResidual < 0 ? '#e8674a' : '#1d7a33');
+  var ocDisplay = haveRev ? bpMoney(ocResidual) : '—';
+  var ocFollowup = !haveRev
+    ? '<div style="background:#f5f5f7;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#6e6e73">Revenue hasn’t loaded yet — it pulls your trailing-30-day income from the bank feed automatically. If it stays blank, open the <strong>Spend</strong> tab once, or just type your monthly revenue above.</div>'
+    : (capital > 0
+        ? '<div style="background:#fdeee9;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#b23c17"><strong>Capital transfer to break even: ' + bpMoney(capital) + '</strong> — move this in from personal/outside funds so Profit, Tax &amp; OPEX still fund in full.</div>'
+        : '<div style="background:#eaf7ee;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#1d7a33">Revenue covers every bucket with ' + bpMoney(ocResidual) + ' left toward your draw — no capital needed.</div>');
 
   function inp(id, val, w) {
     return '<input id="' + id + '" value="' + val + '" style="width:' + (w || 70) + 'px;padding:4px 6px;border:1px solid #e2e2e6;border-radius:6px;font-size:13px;text-align:right" onchange="bpOnTargetChange()">';
@@ -5390,12 +5402,10 @@ function renderBucketPlanner(force) {
     + row('Tax reserve', taxMo, 'est. ' + bpMoney(t.quarterlyEst) + '/qtr ÷ 3 + sales')
     + row('OPEX', t.opexMo, 'business bills')
     + row('Payroll', t.payrollMo, 'held in Income for Gusto')
-    + '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:2px solid ' + (ocResidual < 0 ? '#e8674a' : '#34c759') + ';margin-top:2px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:2px solid ' + ocBorder + ';margin-top:2px">'
     +   '<span style="font-size:14px;font-weight:700">OC (residual)</span>'
-    +   '<span style="font-size:17px;font-weight:700;color:' + (ocResidual < 0 ? '#e8674a' : '#1d7a33') + '">' + bpMoney(ocResidual) + '</span></div>'
-    + (capital > 0
-        ? '<div style="background:#fdeee9;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#b23c17"><strong>Capital transfer to break even: ' + bpMoney(capital) + '</strong> — move this in from personal/outside funds so Profit, Tax &amp; OPEX still fund in full.</div>'
-        : '<div style="background:#eaf7ee;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#1d7a33">Revenue covers every bucket with ' + bpMoney(ocResidual) + ' left toward your draw — no capital needed.</div>')
+    +   '<span style="font-size:17px;font-weight:700;color:' + ocColor + '">' + ocDisplay + '</span></div>'
+    + ocFollowup
     + '<div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;font-size:12px;color:#6e6e73;line-height:1.55">'
     +   '<strong style="color:#1d1d1f">Tax reserve tracker</strong> — next estimate ' + bpMoney(t.quarterlyEst) + ' due ' + dueStr + ' (' + daysToDue + ' days). '
     +   (taxBal != null
@@ -7421,6 +7431,8 @@ async function fetchSpendTransactions() {
   } finally {
     spendState.loading = false;
     renderSpend();
+    // Keep the Bucket Planner's live revenue in sync whenever transactions load.
+    if (typeof renderBucketPlanner === 'function') renderBucketPlanner();
   }
 }
 
@@ -8423,6 +8435,18 @@ function initSpend() {
   // Always re-fetch so the user sees fresh data on tab open
   fetchSpendTransactions();
 }
+
+// Bootstrap live revenue for the Bucket Planner on page load, so the Profit First
+// tab shows real trailing-30-day income WITHOUT the user first opening the Spend
+// tab. Loads the cache instantly, renders, then refreshes from the feed in the
+// background (its finally-hook re-renders the planner when it lands).
+(function bootstrapPlannerRevenue() {
+  try { if (typeof ensureSpendClassified === 'function') ensureSpendClassified(); } catch(e) {}
+  if (typeof renderBucketPlanner === 'function') renderBucketPlanner();
+  if (typeof fetchSpendTransactions === 'function') {
+    setTimeout(function() { fetchSpendTransactions().catch(function() {}); }, 350);
+  }
+})();
 </script>
 </body>
 </html>
