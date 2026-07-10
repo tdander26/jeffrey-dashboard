@@ -2317,6 +2317,7 @@
       <div class="qbo-panel-body" id="qboPanelBody">
         <div class="qbo-url-row">
           <button class="btn btn-secondary btn-sm" onclick="fetchQBOBalances()">Refresh</button>
+          <button class="btn btn-secondary btn-sm" id="qboSyncNowBtn" onclick="syncNowFromBank()">Sync now</button>
           <button class="btn btn-primary btn-sm" onclick="useQBOBalances()">Use These Balances</button>
         </div>
         <div class="qbo-meta" id="qboMeta"></div>
@@ -4767,6 +4768,20 @@ function fmtMoney0(n) {
   return sign + '$' + Math.abs(Math.round(n)).toLocaleString('en-US');
 }
 
+// "just now" / "5 min ago" / "3 hr ago" / "2 days ago" from an epoch-ms timestamp.
+function relTimeShort(ms) {
+  if (ms == null || isNaN(ms)) return '';
+  const diff = Date.now() - ms;
+  if (diff < 0) return 'just now';
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)  return 'just now';
+  if (mins < 60) return mins + ' min ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return hrs + ' hr ago';
+  const days = Math.floor(hrs / 24);
+  return days + (days === 1 ? ' day ago' : ' days ago');
+}
+
 function collectUpcomingDue(windowDays) {
   const today = new Date(); today.setHours(0,0,0,0);
   const todayMs = today.getTime();
@@ -5105,8 +5120,9 @@ function renderHeroStrip() {
   const el = document.getElementById('heroStrip');
   if (!el) return;
 
-  // ── 1. Total Cash — sum of QBO balances (visible accounts only) ──
+  // ── 1. Total Cash — sum of QBO CLEARED balances (visible accounts only) ──
   let totalCash = 0;
+  let totalPending = 0;
   let acctCount = 0;
   let unassigned = 0;
   let unassignedAcctCount = 0;
@@ -5123,6 +5139,7 @@ function renderHeroStrip() {
       acctCount = visible.length;
       visible.forEach(a => {
         totalCash += (parseFloat(a.balance) || 0);
+        if (a.pending != null && !isNaN(a.pending)) totalPending += (parseFloat(a.pending) || 0);
         const bucket = mapping[a.name];
         if (!ASSIGNED.includes(bucket)) {
           unassigned += (parseFloat(a.balance) || 0);
@@ -5159,7 +5176,10 @@ function renderHeroStrip() {
       label: 'Total Cash',
       value: totalCash > 0 ? fmtMoney0(totalCash) : '—',
       sub:   totalCash > 0
-              ? acctCount + ' accounts · 4 PF buckets'
+              ? acctCount + ' accounts · 4 PF buckets' +
+                (Math.abs(totalPending) > 0.005
+                  ? ' · ' + (totalPending > 0 ? '+' : '−') + fmtMoney0(Math.abs(totalPending)) + ' pending'
+                  : '')
               : 'Awaiting bank sync',
     },
     {
@@ -5385,6 +5405,31 @@ async function fetchQBOBalances() {
     const accounts = parseQBOCSV(csvText);
     if (!accounts.length) throw new Error('No account data found in the sheet. Make sure the "Balances" sheet has data rows.');
 
+    // Freshness guard: Google publishes the CSV with a ~5-min lag, so a fresh
+    // "Sync now" can land in localStorage BEFORE the sheet's CSV reflects it.
+    // If the newly-parsed CSV is STRICTLY older than what we already cached
+    // (both fetch times known), keep the cache — still refresh the meta line.
+    // Null on either side → overwrite as before.
+    const csvMaxMs = accounts.reduce(function(mx, a) {
+      return (a.fetchedAtMs != null && (mx == null || a.fetchedAtMs > mx)) ? a.fetchedAtMs : mx;
+    }, null);
+    let cacheMaxMs = null;
+    try {
+      const prevRaw = localStorage.getItem('qbo_last_fetched');
+      if (prevRaw) {
+        const prevAccts = (JSON.parse(prevRaw).accounts) || [];
+        cacheMaxMs = prevAccts.reduce(function(mx, a) {
+          return (a && a.fetchedAtMs != null && (mx == null || a.fetchedAtMs > mx)) ? a.fetchedAtMs : mx;
+        }, null);
+      }
+    } catch(e) {}
+
+    if (csvMaxMs != null && cacheMaxMs != null && csvMaxMs < cacheMaxMs) {
+      // Stale CSV — keep fresher cached data but re-render (updates meta/staleness).
+      renderQBOFromCache();
+      return;
+    }
+
     localStorage.setItem('qbo_last_fetched', JSON.stringify({
       fetchedAt: new Date().toISOString(),
       accounts
@@ -5395,6 +5440,114 @@ async function fetchQBOBalances() {
     document.getElementById('qboContent').innerHTML =
       '<div class="qbo-error">Could not load balances: ' + escHtml(err.message) + '<br>' +
       '<small>Check that the Sheet URL is correct and published as CSV (see SETUP.md Step 11).</small></div>';
+  }
+}
+
+// ─── "Sync now" — trigger a live SimpleFIN pull via the GAS web app ─────────
+// Hits the deployed SimpleFin.gs doGet (?action=sync). The endpoint is throttled
+// server-side (won't re-sync if <10 min since last), so this is safe to spam.
+// Endpoint URL (full /exec?token=…) is stored in localStorage 'gas_sync_endpoint';
+// prompts for it on first use.
+async function syncNowFromBank() {
+  const btn = document.getElementById('qboSyncNowBtn');
+  let endpoint = (localStorage.getItem('gas_sync_endpoint') || '').trim();
+  if (!endpoint) {
+    endpoint = (prompt(
+      'Paste your SimpleFin.gs web-app Sync URL.\n' +
+      'It should look like:\n' +
+      'https://script.google.com/macros/s/…/exec?token=YOUR_TOKEN'
+    ) || '').trim();
+    if (!endpoint) {
+      alert('Sync not set up yet.\n\nDeploy SimpleFin.gs as a Web App (Deploy → New deployment → Web app), ' +
+        'set the SYNC_TOKEN Script Property, then paste the /exec URL with ?token=… here.');
+      return;
+    }
+    localStorage.setItem('gas_sync_endpoint', endpoint);
+    if (typeof saveToFirestore === 'function') saveToFirestore();
+  }
+
+  const origLabel = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Syncing…'; }
+
+  try {
+    const sep = endpoint.includes('?') ? '&' : '?';
+    const resp = await fetch(endpoint + sep + 'action=sync');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+
+    if (!data || data.ok !== true) {
+      throw new Error((data && data.error) || 'Sync endpoint returned an error.');
+    }
+
+    if (data.throttled) {
+      const lastAt = data.lastSyncAt || data.syncedAt;
+      alert('Already synced recently' +
+        (lastAt ? ' (last synced ' + lastAt + ').' : '.') +
+        '\nThe bank sync runs at most once every 10 minutes.');
+      // Still refresh the panel from cache so the meta line is current.
+      renderQBOFromCache();
+      return;
+    }
+
+    const served = Array.isArray(data.accounts) ? data.accounts : [];
+    if (!served.length) throw new Error('Sync returned no accounts.');
+
+    // syncedAt ('yyyy-MM-dd HH:mm') → epoch ms via the same robust regex.
+    const parseSyncedMs = function(raw) {
+      if (!raw) return null;
+      const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/.exec(String(raw).trim());
+      if (!m) return null;
+      const t = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]).getTime();
+      return isNaN(t) ? null : t;
+    };
+    // Fall back to "now" if syncedAt is missing/unparseable — we DID just
+    // sync, and a null fetchedAtMs here would trip the stale-data warning
+    // on data that is seconds old.
+    const syncedMsParsed = parseSyncedMs(data.syncedAt);
+    const syncedMs = syncedMsParsed != null ? syncedMsParsed : Date.now();
+
+    const accounts = served.map(function(s) {
+      // The endpoint's buildAccountPayload_ already serves name as the
+      // composed 'bankName · name' displayName (the same string writeBalances_
+      // puts in the Account Name column). Do NOT re-join with s.bankName here —
+      // that double-prefixes ('chase · chase · …') and silently unmaps every
+      // account, because the bucket mapping is keyed on the CSV display name.
+      const displayName = s.name;
+      const balance = (s.balance != null && !isNaN(s.balance)) ? Number(s.balance) : 0;
+      const pending = (s.pending != null && !isNaN(s.pending)) ? Number(s.pending) : null;
+      let curBal = (s.currentBalance != null && !isNaN(s.currentBalance)) ? Number(s.currentBalance) : null;
+      if (curBal == null) curBal = (pending != null) ? balance + pending : balance;
+      const availBal = (s.availableBalance != null && !isNaN(s.availableBalance)) ? Number(s.availableBalance) : null;
+      return {
+        name:             displayName,
+        balance:          balance,
+        accountType:      'Bank',
+        latestDate:       s.balanceDate || '',
+        fetchedAt:        data.syncedAt || null,
+        fetchedAtMs:      syncedMs,
+        pending:          pending,
+        currentBalance:   curBal,
+        availableBalance: availBal
+      };
+    });
+
+    localStorage.setItem('qbo_last_fetched', JSON.stringify({
+      fetchedAt: new Date().toISOString(),
+      accounts
+    }));
+    // NO saveToFirestore() here: balances are deliberately local-only (not in
+    // the Firestore payload), and a full doc.set on a fresh browser before the
+    // initial pull lands would clobber cloud data for nothing.
+
+    renderQBOAccounts(accounts, new Date().toISOString());
+    renderHeroStrip();
+  } catch(err) {
+    alert('Could not reach the bank sync.\n\n' + (err && err.message ? err.message : err) +
+      '\n\nCheck that:\n• SimpleFin.gs is deployed as a Web App with access "Anyone"\n' +
+      '• the ?token= in your Sync URL matches the SYNC_TOKEN Script Property\n' +
+      '• you\'re online.\n\nTo re-enter the URL, clear it: localStorage.removeItem(\'gas_sync_endpoint\')');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origLabel || 'Sync now'; }
   }
 }
 
@@ -5426,10 +5579,39 @@ function parseQBOCSV(csvText) {
   const nameIdx  = headers.indexOf('account name');
   const balIdx   = headers.indexOf('balance');
   const typeIdx  = headers.indexOf('account type');
+  // New optional columns (older rows / legacy sheets won't have these).
+  const fetchedIdx = headers.indexOf('fetched at');
+  const pendIdx    = headers.indexOf('pending');
+  const curIdx     = headers.indexOf('current balance');
+  const availIdx   = headers.indexOf('available balance');
 
   if (dateIdx < 0 || nameIdx < 0 || balIdx < 0) return [];
 
-  // Keep only the latest row per account name (max date string — ISO yyyy-MM-dd sorts correctly)
+  // Parse a "Fetched At" cell into epoch ms. Google Sheets renders these per
+  // locale with a possibly-unpadded hour (e.g. "2026-07-10 7:51"), so match 1-2
+  // digit hours and accept a space or T separator. Unparseable → null.
+  function parseFetchedMs(raw) {
+    if (!raw) return null;
+    const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2})/.exec(raw.trim());
+    if (!m) return null;
+    const t = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]).getTime();
+    return isNaN(t) ? null : t;
+  }
+  // Plain-number parse for the pending/current/available cells. Blank → null.
+  function parseNumOrNull(raw) {
+    if (raw == null) return null;
+    const s = String(raw).trim();
+    if (s === '') return null;
+    const n = parseFloat(s.replace(/[^0-9.\-]/g, ''));
+    return isNaN(n) ? null : n;
+  }
+
+  // Winner-per-account: max by tuple (fetchedAtMs ?? -1, latestDate string, row index).
+  // Rows WITHOUT Fetched At tie at -1 and fall through to date-string then row
+  // order — the old ">= date" semantics (last-appended row for a repeated date
+  // wins). Rows WITH Fetched At are ranked by fetch time FIRST, deliberately:
+  // the freshest fetch carries the bank's latest view even when the bank
+  // back-dates balance-date (Chase stamps yesterday on a morning fetch).
   const byAccount = {};
   for (let i = 1; i < lines.length; i++) {
     const cols = parseRow(lines[i]);
@@ -5439,18 +5621,44 @@ function parseQBOCSV(csvText) {
     const balance = parseFloat((cols[balIdx] || '').replace(/[^0-9.\-]/g, '')) || 0;
     const acctType = typeIdx >= 0 ? (cols[typeIdx] || '').trim() : 'Bank';
     if (!name || !date) continue;
-    // >= (not >) so that when the bank as-of date repeats across the twice-daily
-    // syncs, the LAST-appended (freshest-fetched) row for that date wins.
-    if (!byAccount[name] || date >= byAccount[name].date) {
-      byAccount[name] = { date, balance, accountType: acctType };
-    }
+
+    const fetchedAt   = fetchedIdx >= 0 ? ((cols[fetchedIdx] || '').trim() || null) : null;
+    const fetchedAtMs = parseFetchedMs(fetchedAt);
+    const pending     = pendIdx  >= 0 ? parseNumOrNull(cols[pendIdx])  : null;
+    const availBal    = availIdx >= 0 ? parseNumOrNull(cols[availIdx]) : null;
+    let curBal        = curIdx   >= 0 ? parseNumOrNull(cols[curIdx])   : null;
+    // Current Balance defaults to cleared balance when its column is missing/blank.
+    if (curBal == null) curBal = (pending != null) ? balance + pending : balance;
+
+    const cand = {
+      date, balance, accountType: acctType,
+      fetchedAt, fetchedAtMs, pending,
+      currentBalance: curBal, availableBalance: availBal,
+      _rowIdx: i
+    };
+    const prev = byAccount[name];
+    if (!prev) { byAccount[name] = cand; continue; }
+    const a = [cand.fetchedAtMs != null ? cand.fetchedAtMs : -1, cand.date, cand._rowIdx];
+    const b = [prev.fetchedAtMs != null ? prev.fetchedAtMs : -1, prev.date, prev._rowIdx];
+    // Compare tuple lexicographically; cand wins on ties (>=) to preserve
+    // last-appended-wins behavior for legacy repeated dates.
+    let candWins;
+    if (a[0] !== b[0]) candWins = a[0] > b[0];
+    else if (a[1] !== b[1]) candWins = a[1] > b[1];
+    else candWins = a[2] >= b[2];
+    if (candWins) byAccount[name] = cand;
   }
 
   return Object.entries(byAccount).map(([name, v]) => ({
     name,
-    balance:     v.balance,
-    accountType: v.accountType,
-    latestDate:  v.date
+    balance:          v.balance,
+    accountType:      v.accountType,
+    latestDate:       v.date,
+    fetchedAt:        v.fetchedAt,
+    fetchedAtMs:      v.fetchedAtMs,
+    pending:          v.pending,
+    currentBalance:   v.currentBalance,
+    availableBalance: v.availableBalance
   }));
 }
 
@@ -5482,8 +5690,26 @@ function renderQBOAccounts(accounts, fetchedAt) {
   const fetchStr = fetchedAt
     ? ' · Fetched ' + new Date(fetchedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
     : '';
+
+  // Staleness: newest per-account Fetched At across accounts. If older than 26h
+  // (or all null while some rows exist), warn that the bank sync may be stale.
+  const newestFetchedMs = accounts.reduce(function(mx, a) {
+    return (a.fetchedAtMs != null && (mx == null || a.fetchedAtMs > mx)) ? a.fetchedAtMs : mx;
+  }, null);
+  const anySynced = accounts.some(function(a) { return a.fetchedAt || a.fetchedAtMs != null; });
+  const STALE_MS = 26 * 60 * 60 * 1000;
+  let staleWarn = '';
+  const isStale = (newestFetchedMs != null && (Date.now() - newestFetchedMs) > STALE_MS)
+    || (newestFetchedMs == null && anySynced);
+  if (isStale) {
+    const relWhen = newestFetchedMs != null ? relTimeShort(newestFetchedMs) : 'a while ago';
+    staleWarn = '<span style="color:var(--amber);font-weight:600">⚠ Bank sync may be stale — last synced ' +
+      escHtml(relWhen) + '</span>';
+  }
+
   document.getElementById('qboMeta').innerHTML =
-    '<span>Bank data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>';
+    '<span>Bank data as of <strong>' + escHtml(latestDataDate) + '</strong>' + escHtml(fetchStr) + '</span>' +
+    staleWarn;
 
   // Short "Jun 25" formatter for each account's bank as-of date.
   const fmtAsOf = function(iso) {
@@ -5503,6 +5729,15 @@ function renderQBOAccounts(accounts, fetchedAt) {
     const opts = ALL_OPTIONS.map(function(b) {
       return '<option value="' + b + '"' + (mapping[a.name] === b ? ' selected' : '') + '>' + b + '</option>';
     }).join('');
+    // Primary number = current (cleared + pending) balance; defaults to cleared
+    // balance when no pending column. Show a pending sub-label when it's non-zero.
+    const primaryAmt = (a.currentBalance != null && !isNaN(a.currentBalance)) ? a.currentBalance : a.balance;
+    let pendSub = '';
+    if (a.pending != null && a.pending !== 0) {
+      const sign = a.pending > 0 ? '+' : '−';
+      pendSub = '<div style="font-size:10px;color:#86868b;font-weight:400;margin-top:2px">' +
+        sign + escHtml(fmt$(Math.abs(a.pending))) + ' pending · cleared ' + escHtml(fmt$(a.balance)) + '</div>';
+    }
     html += '<tr>' +
       '<td>' + escHtml(a.name) + '</td>' +
       '<td><select class="w2-src-sel" style="font-size:12px" ' +
@@ -5510,7 +5745,8 @@ function renderQBOAccounts(accounts, fetchedAt) {
         '<option value=""' + (!mapping[a.name] ? ' selected' : '') + '>(unassigned)</option>' +
         opts +
       '</select></td>' +
-      '<td class="amt">' + fmt$(a.balance) +
+      '<td class="amt">' + fmt$(primaryAmt) +
+        pendSub +
         (a.latestDate ? '<div style="font-size:10px;color:#86868b;font-weight:400;margin-top:2px">as of ' + escHtml(fmtAsOf(a.latestDate)) + '</div>' : '') +
       '</td>' +
       '<td class="amt"><button class="qbo-approve-btn" title="Approve this balance as a new Profit First entry" ' +
@@ -5590,9 +5826,13 @@ function useQBOBalances() {
   const BUCKETS  = ['Profit', 'Tax', 'OC', 'OPEX'];
 
   const totals = { Profit: 0, Tax: 0, OC: 0, OPEX: 0 };
+  let hasPending = false;
   accounts.forEach(function(a) {
     const bucket = mapping[a.name];
-    if (bucket && totals[bucket] !== undefined) totals[bucket] += a.balance;
+    if (bucket && totals[bucket] !== undefined) {
+      totals[bucket] += a.balance;  // cleared balance drives the split
+      if (a.pending != null && a.pending !== 0) hasPending = true;
+    }
   });
 
   const grandTotal = BUCKETS.reduce(function(s, b) { return s + totals[b]; }, 0);
@@ -5626,7 +5866,8 @@ function useQBOBalances() {
   document.getElementById('m_tax_pct').value    = pcts['Tax'];
   document.getElementById('m_oc_pct').value     = pcts['OC'];
   document.getElementById('m_opex_pct').value   = pcts['OPEX'];
-  document.getElementById('m_notes').value      = 'Balance snapshot';
+  document.getElementById('m_notes').value      =
+    'Balance snapshot' + (hasPending ? ' (pending transactions excluded — cleared balances only)' : '');
 
   if (typeof updateModalPreview === 'function') updateModalPreview();
 }

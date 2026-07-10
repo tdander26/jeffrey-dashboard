@@ -11,9 +11,14 @@ SimpleFIN's site).
 
 ## What you'll end up with
 
-- Live Chase + Ally balances written to the **Balances** sheet on the 10th + 25th
+- Live Chase + Ally balances written to the **Balances** sheet automatically
+  every 2 hours
 - Tax payments (IRS / Treasury / MN Revenue) detected from the live transaction
   feed and written to the **Tax Payments** sheet
+- A **Sync now** button on the dashboard that triggers an on-demand pull
+  instead of waiting for the next scheduled run
+- An email to you if a scheduled sync fails, so a broken bank connection
+  doesn't go silent for weeks
 - Same Google Sheet, same dashboard — just `SimpleFin.gs` powering it instead of
   `Plaid.gs`
 
@@ -140,13 +145,80 @@ If either fails, run **`checkSimpleFinStatus`** and share the log.
 
 ---
 
-## Step 8 — Set up automatic monthly pulls
+## Step 8 — Set up automatic every-2-hour pulls
 
 1. Function dropdown → **`setupTriggers`** → **Run** ▶
-2. Run **`checkSimpleFinStatus`** to confirm `Active triggers: 2`
+2. Run **`checkSimpleFinStatus`** to confirm `Active triggers: 1`
 
-Done. The script runs automatically on the 10th and 25th at 8 AM, hits a single
-`/accounts` endpoint, and writes balances + tax payments to the sheet.
+Done. The script now runs automatically every 2 hours (12x/day), hits a single
+`/accounts` endpoint, and writes balances + tax payments to the sheet. Rows are
+upserted, not appended — repeated runs on the same day refresh the existing
+row instead of piling up duplicates.
+
+If a scheduled run fails (bad access URL, bank re-auth needed, etc.), you'll
+get an email at your Google account address — throttled to at most one every
+6 hours so a stuck bank doesn't spam your inbox.
+
+---
+
+## Step 8b — Deploy the Sync-now web app
+
+This gives the dashboard's **Sync now** button a live endpoint to call,
+instead of waiting for the next scheduled run.
+
+1. In the Apps Script editor, top right → **Deploy** → **New deployment**
+2. Click the gear icon next to "Select type" → choose **Web app**
+3. Set **Execute as**: `Me`
+4. Set **Who has access**: `Anyone` (the endpoint is still gated by the token
+   below — this setting just controls who can *reach* the URL, not who can use
+   it without the token)
+5. Click **Deploy** → authorize if prompted
+6. Copy the **Web app URL** shown (ends in `/exec`)
+7. Back in Project Settings → **Script Properties** → **Add script property**:
+
+   | Property | Value |
+   |---|---|
+   | `SYNC_TOKEN` | any random string (e.g. generate one at [1password.com/password-generator](https://1password.com/password-generator/) or just mash the keyboard — 20+ characters) |
+
+8. **Save**
+9. Build the full endpoint URL: `<web app URL>?token=<your SYNC_TOKEN>`
+10. On the dashboard, click **Sync now** next to Refresh in the QBO panel —
+    it'll prompt for this URL the first time. Paste it in. The dashboard
+    stores it in `localStorage` and reuses it from then on.
+
+Run **`checkSimpleFinStatus`** again — it should now report `Sync token: ✓ set
+(web-app Sync-now enabled)`.
+
+If you ever redeploy (code changes require a **new** deployment version, not
+just saving), the `/exec` URL usually stays the same as long as you choose
+**Manage deployments → Edit → same deployment** rather than creating a
+brand-new one. If it does change, paste the new URL into the dashboard's
+Sync now prompt again (clear the old value from `localStorage` first, or just
+overwrite it when prompted).
+
+---
+
+## How fresh is the data?
+
+A few things worth understanding so a number that looks "off" doesn't cause
+alarm:
+
+- **SimpleFIN Bridge itself only refreshes each bank about once a day**, at a
+  time you don't control (it polls your bank via MX behind the scenes). No
+  amount of clicking Sync now makes Chase or Ally hand over a *newer* balance
+  than what SimpleFIN last pulled from them.
+- **The script polls SimpleFIN every 2 hours** (12x/day) so that whenever
+  SimpleFIN's own daily refresh lands, we pick it up within 2 hours — while
+  staying well under SimpleFIN's ~24 requests/day budget, leaving headroom for
+  manual Sync-now calls.
+- **Chase's balance is the CLEARED (ledger) balance.** The dashboard's
+  **Current Balance** adds pending transactions on top of that, so it can
+  differ from what you see in Chase's own app if you're comparing cleared vs.
+  pending views.
+- **The published CSV can lag the live sheet by ~5 minutes** (Google's publish
+  cache). The regular Refresh button reads that CSV, so it can show slightly
+  stale numbers right after a sync. **Sync now bypasses the CSV entirely** —
+  it hits the script directly and gets the freshest possible data.
 
 ---
 

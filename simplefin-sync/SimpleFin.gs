@@ -12,14 +12,20 @@
 //   3. Paste it into claimSimpleFinSetupToken() once, Run — it swaps the
 //      one-time token for a long-lived Access URL and saves it to Script
 //      Properties
-//   4. Run fetchAll() to test, then setupTriggers() for automatic twice-daily syncs
+//   4. Run fetchAll() to test, then setupTriggers() for automatic every-2h syncs
 //
 // Script Properties:
 //   QBO_SHEET_ID            — Google Sheet ID (same one the dashboard reads)
+//   SYNC_TOKEN              — (optional) shared secret for the doGet web app.
+//                             Set to a random string to enable the dashboard's
+//                             "Sync now" button. Unset = endpoint refuses.
 //
-// Auto-populated by claimSimpleFinSetupToken (don't set manually):
+// Auto-populated by the script (don't set these manually):
 //   SIMPLEFIN_ACCESS_URL    — full URL with embedded basic-auth credentials,
 //                             looks like https://user:pass@beta-bridge.simplefin.org/simplefin
+//   LAST_SYNC_AT            — epoch millis of the last successful fetchAll,
+//                             used for the web-app throttle + dashboard freshness
+//   LAST_FAILURE_EMAIL_AT   — epoch millis of the last failure email (6h throttle)
 // ═══════════════════════════════════════════════════════════════════════════
 
 var SHEET_NAME     = 'Balances';
@@ -162,20 +168,95 @@ function claimSimpleFinSetupToken(setupToken) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAIN SYNC — called automatically by the twice-daily triggers
+// MAIN SYNC — called automatically by the every-2h trigger
 // ─────────────────────────────────────────────────────────────────────────────
 
 function fetchAll() {
-  // Single SimpleFIN /accounts call returns BOTH balances and transactions —
-  // we just shape it three different ways into the three sheets.
   try {
-    var data = fetchAccountsWithTransactions_(TAX_LOOKBACK_DAYS);
-    writeBalances_(data.accounts);
-    writeTaxPayments_(extractTaxPayments_(data.accounts));
-    writeAllTransactions_(data.accounts);
+    var data = syncAllToSheets_();
+    // Record a successful full sync so the web-app throttle and the dashboard's
+    // "last synced" indicator can key off it. Epoch millis as a String — Script
+    // Properties only store strings.
+    PropertiesService.getScriptProperties()
+      .setProperty('LAST_SYNC_AT', String(new Date().getTime()));
+    return data;
   } catch(err) {
     Logger.log('✗ fetchAll failed: ' + err.message);
+    notifyFailure_(err);   // best-effort, throttled, never masks the real error
     throw err;
+  }
+}
+
+/**
+ * Shared fetch+write path used by BOTH fetchAll() and the doGet web app.
+ * Returns { accounts } so callers can build a response payload.
+ *
+ * A single SimpleFIN /accounts call returns BOTH balances and transactions —
+ * we shape it three ways into the three sheets. The three writes are ISOLATED:
+ * we write balances FIRST (the dashboard's most important data) and don't let a
+ * tax/transaction write failure prevent balances from landing. Errors are
+ * collected, logged individually, and rethrown as one combined error at the end
+ * so trigger-failure notifications still fire.
+ */
+function syncAllToSheets_() {
+  var data = fetchAccountsWithTransactions_(TAX_LOOKBACK_DAYS);
+  var errs = [];
+  try {
+    writeBalances_(data.accounts);
+  } catch(e) {
+    Logger.log('✗ writeBalances_ failed: ' + e.message);
+    errs.push('balances: ' + e.message);
+  }
+  try {
+    writeTaxPayments_(extractTaxPayments_(data.accounts));
+  } catch(e) {
+    Logger.log('✗ writeTaxPayments_ failed: ' + e.message);
+    errs.push('tax: ' + e.message);
+  }
+  try {
+    writeAllTransactions_(data.accounts);
+  } catch(e) {
+    Logger.log('✗ writeAllTransactions_ failed: ' + e.message);
+    errs.push('transactions: ' + e.message);
+  }
+  if (errs.length) {
+    throw new Error('sync completed with ' + errs.length + ' write error(s): ' + errs.join(' ; '));
+  }
+  return data;
+}
+
+/**
+ * Email the script owner when a sync fails. Throttled to at most 1 email per
+ * 6 hours (via Script Property LAST_FAILURE_EMAIL_AT) so a stuck bank doesn't
+ * inbox-bomb every 2h. Wrapped so an email failure can NEVER mask the original
+ * sync error — the caller still rethrows that.
+ */
+function notifyFailure_(err) {
+  try {
+    var props = PropertiesService.getScriptProperties();
+    var now = new Date().getTime();
+    var lastStr = props.getProperty('LAST_FAILURE_EMAIL_AT');
+    var last = lastStr ? Number(lastStr) : 0;
+    var SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+    if (last && (now - last) < SIX_HOURS_MS) {
+      Logger.log('⚠ Failure email throttled (last sent ' + Math.round((now - last) / 60000) + ' min ago).');
+      return;
+    }
+    var to = Session.getEffectiveUser().getEmail();
+    if (!to) { Logger.log('⚠ Cannot send failure email — no effective user email.'); return; }
+    var when = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+    MailApp.sendEmail(
+      to,
+      'SimpleFIN sync failed',
+      'The SimpleFIN → Google Sheet sync failed.\n\n' +
+      'When: ' + when + '\n' +
+      'Error: ' + (err && err.message ? err.message : String(err)) + '\n\n' +
+      'Check the Apps Script execution log for details.'
+    );
+    props.setProperty('LAST_FAILURE_EMAIL_AT', String(now));
+    Logger.log('✓ Failure email sent to ' + to + '.');
+  } catch(mailErr) {
+    Logger.log('⚠ Failure email itself failed: ' + mailErr.message);
   }
 }
 
@@ -263,15 +344,39 @@ function shapeAccount_(a) {
     var bd = new Date(Number(asOfTs) * 1000);
     if (!isNaN(bd.getTime())) asOfStr = Utilities.formatDate(bd, Session.getScriptTimeZone(), 'yyyy-MM-dd');
   }
+  // SimpleFIN's 'available-balance' is the bank's available (post-hold) figure.
+  // Keep it raw and null when absent/unparseable — the dashboard treats a blank
+  // Available Balance cell as "unknown" (see the shared column contract).
+  var avail = null;
+  if (a['available-balance'] != null && a['available-balance'] !== '') {
+    var av = parseFloat(a['available-balance']);
+    if (!isNaN(av)) avail = av;
+  }
+  var txns = (a.transactions || []).map(shapeTransaction_);
+  // pendingTotal is the SIGNED sum of this account's pending transactions
+  // (SimpleFIN convention: outflows negative). We must distinguish "no pending
+  // transactions" (0) from "transactions weren't fetched at all" (null). The
+  // balances-only path omits a.transactions entirely, so leave pendingTotal null
+  // there; when transactions ARE present (fetchAccountsWithTransactions_), a
+  // lack of pending ones legitimately means 0.
+  var pendingTotal = null;
+  if (a.transactions != null) {
+    pendingTotal = 0;
+    for (var pi = 0; pi < txns.length; pi++) {
+      if (txns[pi].pending === true) pendingTotal += txns[pi].amount;
+    }
+  }
   return {
-    id:          a.id || '',
-    name:        a.name || 'Unknown',
-    balance:     bal,
-    balanceDate: asOfStr,      // '' when SimpleFIN omits balance-date
-    accountType: 'depository', // SimpleFIN doesn't expose a structured type field
-    currency:    a.currency || 'USD',
-    bankName:    bankName,
-    transactions: (a.transactions || []).map(shapeTransaction_)
+    id:               a.id || '',
+    name:             a.name || 'Unknown',
+    balance:          bal,
+    balanceDate:      asOfStr,      // '' when SimpleFIN omits balance-date
+    accountType:      'depository', // SimpleFIN doesn't expose a structured type field
+    currency:         a.currency || 'USD',
+    bankName:         bankName,
+    availableBalance: avail,        // null when SimpleFIN omits available-balance
+    pendingTotal:     pendingTotal, // null on the balances-only path, else signed sum (0 if none)
+    transactions:     txns
   };
 }
 
@@ -302,7 +407,7 @@ function shapeTransaction_(t) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Append a row per account to the Balances sheet.
+ * Append (or upsert) a row per account to the Balances sheet.
  *
  * The "Date" column carries each account's TRUE as-of date (SimpleFIN's
  * balance-date), NOT the script's run date — so the dashboard never shows a
@@ -310,11 +415,25 @@ function shapeTransaction_(t) {
  * column records when this sync ran, so you can see both: what day the balance
  * is good for, and when we last checked. The dashboard parser keys on the
  * exact header 'Date', so that header text must stay 'Date'.
+ *
+ * Columns (shared contract — order and header text must not change):
+ *   Date | Account Name | Balance | Account Type | Fetched At |
+ *   Pending | Current Balance | Available Balance
+ * Balance is SimpleFIN's cleared/ledger balance. Pending is the signed sum of
+ * that account's pending transactions (blank when transactions weren't fetched).
+ * Current Balance = Balance + Pending when Pending is known (blank otherwise).
+ * Available Balance is SimpleFIN's raw 'available-balance' (blank when absent).
+ *
+ * At higher sync cadence (every 2h) a naive append bloats the sheet, so we
+ * dedupe-upsert: if this account already has a recent row with the same Date,
+ * Balance, and Pending, we just refresh its Fetched At / Current / Available
+ * cells in place instead of appending a duplicate.
  */
 function writeBalances_(accounts) {
   var ss = getTargetSpreadsheet_();
   var sheet = ss.getSheetByName(SHEET_NAME);
-  var headers = ['Date', 'Account Name', 'Balance', 'Account Type', 'Fetched At'];
+  var headers = ['Date', 'Account Name', 'Balance', 'Account Type', 'Fetched At',
+                 'Pending', 'Current Balance', 'Available Balance'];
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
     var hdr = sheet.getRange(1, 1, 1, headers.length);
@@ -326,10 +445,16 @@ function writeBalances_(accounts) {
     sheet.setColumnWidth(3, 110);
     sheet.setColumnWidth(4, 120);
     sheet.setColumnWidth(5, 160);
+    sheet.setColumnWidth(6, 110);
+    sheet.setColumnWidth(7, 130);
+    sheet.setColumnWidth(8, 140);
   } else {
-    // Upgrade legacy 4-column sheets in place so the new column is labeled.
+    // Upgrade legacy sheets in place so the new columns are labeled. Older
+    // sheets have 4 or 5 columns; check the newest column (Available Balance)
+    // and re-stamp the full header row if it's missing.
     var existingHdr = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
-    if ((existingHdr[4] || '') !== 'Fetched At') {
+    if ((existingHdr[7] || '') !== 'Available Balance' ||
+        (existingHdr[4] || '') !== 'Fetched At') {
       sheet.getRange(1, 1, 1, headers.length)
         .setValues([headers])
         .setFontWeight('bold').setBackground('#f5f5f7');
@@ -337,17 +462,74 @@ function writeBalances_(accounts) {
   }
   var todayStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   var fetchedStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+
+  // Pull the tail of the sheet once for dedupe lookups. Bound the scan so a
+  // years-long sheet doesn't force us to read every row — the most recent row
+  // for any account is always near the bottom.
+  var lastRowBefore = sheet.getLastRow();
+  var SCAN_LIMIT = 400;
+  var scanStart = Math.max(2, lastRowBefore - SCAN_LIMIT + 1);
+  var scanCount = (lastRowBefore >= 2) ? (lastRowBefore - scanStart + 1) : 0;
+  var recent = scanCount > 0
+    ? sheet.getRange(scanStart, 1, scanCount, headers.length).getValues()
+    : [];
+
   accounts.forEach(function(a) {
     var displayName = a.bankName ? (a.bankName + ' · ' + a.name) : a.name;
     // Use the bank's as-of date; only fall back to today if SimpleFIN omitted it.
     var asOf = a.balanceDate || todayStr;
-    sheet.appendRow([asOf, displayName, a.balance, a.accountType, fetchedStr]);
+    var pending = a.pendingTotal;          // number or null
+    var current = (pending != null) ? (a.balance + pending) : null;
+    var avail   = a.availableBalance;      // number or null
+    var pendingCell = (pending != null) ? pending : '';
+    var currentCell = (current != null) ? current : '';
+    var availCell   = (avail   != null) ? avail   : '';
+
+    // Find this account's most recent existing row (bottom-up within the scan
+    // window). If it matches Date + Balance + Pending, upsert instead of append.
+    // Treat a blank Pending cell as null so a re-run of the balances-only path
+    // (pending null) doesn't churn a row that legitimately had blank pending.
+    var upsertRow = -1;
+    for (var ri = recent.length - 1; ri >= 0; ri--) {
+      if (String(recent[ri][1]) !== String(displayName)) continue;
+      // Sheets coerces 'yyyy-MM-dd' strings into Date cells, so a stored Date
+      // must be reformatted back to a bare date string before comparing.
+      var rowDate = (Object.prototype.toString.call(recent[ri][0]) === '[object Date]')
+        ? Utilities.formatDate(recent[ri][0], Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : String(recent[ri][0]);
+      var rowBalance = parseFloat(recent[ri][2]);
+      var rowPendingRaw = recent[ri][5];
+      var rowPending = (rowPendingRaw === '' || rowPendingRaw == null) ? null : parseFloat(rowPendingRaw);
+      var sameDate    = (rowDate === asOf);
+      var sameBalance = (!isNaN(rowBalance) && Math.abs(rowBalance - a.balance) < 0.005);
+      var samePending = (rowPending == null && pending == null) ||
+                        (rowPending != null && pending != null && Math.abs(rowPending - pending) < 0.005);
+      if (sameDate && sameBalance && samePending) {
+        upsertRow = scanStart + ri; // absolute sheet row of the matched entry
+      }
+      break; // only the account's most-recent row matters
+    }
+
+    if (upsertRow > 0) {
+      // Refresh Fetched At + Current + Available in place (Pending already matched).
+      sheet.getRange(upsertRow, 5).setValue(fetchedStr);
+      sheet.getRange(upsertRow, 7).setValue(currentCell);
+      sheet.getRange(upsertRow, 8).setValue(availCell);
+    } else {
+      sheet.appendRow([asOf, displayName, a.balance, a.accountType, fetchedStr,
+                       pendingCell, currentCell, availCell]);
+    }
   });
+
   var lastRow = sheet.getLastRow();
   if (lastRow >= 2) {
     sheet.getRange(2, 3, lastRow - 1, 1).setNumberFormat('$#,##0.00');
+    // Plain '0.00' (NOT currency) on Pending / Current / Available — Google's
+    // CSV publish exports the FORMATTED string, and '$1,620.00' broke
+    // parseFloat downstream (see the note in writeAllTransactions_).
+    sheet.getRange(2, 6, lastRow - 1, 3).setNumberFormat('0.00');
   }
-  Logger.log('✓ Balances saved (' + accounts.length + ' rows). As-of dates from bank, fetched ' + fetchedStr + '.');
+  Logger.log('✓ Balances saved (' + accounts.length + ' accounts). As-of dates from bank, fetched ' + fetchedStr + '.');
 }
 
 /** Pull all tax-flagged transactions out of every account. */
@@ -492,6 +674,113 @@ function writeTaxPayments_(payments) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// WEB APP — on-demand sync endpoint for the dashboard
+//
+// Lets the finance.html "Sync now" button trigger a fresh SimpleFIN pull without
+// waiting for the every-2h trigger. Deployment:
+//   Deploy → New deployment → Web app, Execute as: Me, Who has access: Anyone.
+//   Then set Script Property SYNC_TOKEN to a random string.
+//   The dashboard stores the full /exec?token=… URL in localStorage
+//   ('gas_sync_endpoint') and calls it with &action=sync (or &action=status).
+// The token is a shared secret — the endpoint refuses any request whose token
+// doesn't match SYNC_TOKEN, and refuses entirely if SYNC_TOKEN is unset.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function doGet(e) {
+  var params = (e && e.parameter) || {};
+  try {
+    var expected = (PropertiesService.getScriptProperties().getProperty('SYNC_TOKEN') || '').trim();
+    if (!expected) {
+      return jsonOut_({ ok: false, error: 'sync endpoint not configured' });
+    }
+    if ((params.token || '') !== expected) {
+      return jsonOut_({ ok: false, error: 'unauthorized' });
+    }
+
+    var action = params.action || 'sync';
+    var props = PropertiesService.getScriptProperties();
+
+    if (action === 'status') {
+      // Lightweight: just report when we last synced. No account data.
+      var lastMs = props.getProperty('LAST_SYNC_AT');
+      return jsonOut_({ ok: true, lastSyncAt: msToStamp_(lastMs) });
+    }
+
+    if (action === 'sync') {
+      // Throttle: if a successful full sync ran < 10 min ago, don't re-hit
+      // SimpleFIN (protects our ~24 requests/day budget). Return the throttle
+      // flag so the dashboard can show a brief "just synced" message instead.
+      var lastSyncStr = props.getProperty('LAST_SYNC_AT');
+      var lastSync = lastSyncStr ? Number(lastSyncStr) : 0;
+      var TEN_MIN_MS = 10 * 60 * 1000;
+      if (lastSync && (new Date().getTime() - lastSync) < TEN_MIN_MS) {
+        // Serve the timestamp under BOTH keys: the dashboard's throttle alert
+        // reads lastSyncAt (matching action=status); syncedAt kept for symmetry
+        // with the non-throttled response.
+        var stamp = msToStamp_(lastSyncStr);
+        return jsonOut_({ ok: true, throttled: true, lastSyncAt: stamp, syncedAt: stamp, accounts: [] });
+      }
+      // Same internal fetch+write path as fetchAll(), then stamp LAST_SYNC_AT.
+      var data = syncAllToSheets_();
+      props.setProperty('LAST_SYNC_AT', String(new Date().getTime()));
+      var syncedAt = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+      return jsonOut_({
+        ok: true,
+        throttled: false,
+        syncedAt: syncedAt,
+        accounts: buildAccountPayload_(data.accounts)
+      });
+    }
+
+    return jsonOut_({ ok: false, error: 'unknown action: ' + action });
+  } catch(err) {
+    // Scrub any embedded user:pass@ credentials (a malformed
+    // SIMPLEFIN_ACCESS_URL error quotes part of the URL) before the message
+    // leaves the script — this response goes to an external HTTP client.
+    var msg = (err && err.message) ? err.message : String(err);
+    msg = msg.replace(/\/\/[^@\s]+@/g, '//****@');
+    return jsonOut_({ ok: false, error: msg });
+  }
+}
+
+/**
+ * Shape the internal accounts into the web-app response array. name/bankName
+ * join into 'bankName · name' exactly like writeBalances_ does. Numeric fields
+ * are numbers or null (never blank strings) so the dashboard can test for null.
+ */
+function buildAccountPayload_(accounts) {
+  return (accounts || []).map(function(a) {
+    var displayName = a.bankName ? (a.bankName + ' · ' + a.name) : a.name;
+    var pending = (a.pendingTotal != null) ? a.pendingTotal : null;
+    var current = (pending != null) ? (a.balance + pending) : null;
+    return {
+      name:             displayName,
+      bankName:         a.bankName,
+      balance:          a.balance,
+      pending:          pending,
+      currentBalance:   current,
+      availableBalance: (a.availableBalance != null) ? a.availableBalance : null,
+      balanceDate:      a.balanceDate
+    };
+  });
+}
+
+/** Format an epoch-millis String (or null) as 'yyyy-MM-dd HH:mm', or null. */
+function msToStamp_(ms) {
+  if (!ms) return null;
+  var n = Number(ms);
+  if (isNaN(n) || n <= 0) return null;
+  return Utilities.formatDate(new Date(n), Session.getScriptTimeZone(), 'yyyy-MM-dd HH:mm');
+}
+
+/** Wrap an object as a JSON ContentService response. */
+function jsonOut_(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // TRIGGERS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -500,16 +789,18 @@ function setupTriggers() {
     .filter(function(t) { return t.getHandlerFunction() === 'fetchAll'; })
     .forEach(function(t) { ScriptApp.deleteTrigger(t); });
 
-  // Run TWICE DAILY so balances and transactions stay fresh automatically —
-  // no manual Refresh needed. SimpleFIN only re-polls each bank a few times a
-  // day, so a morning + evening run catches same-day bank updates without
-  // hammering the API for cache hits. Because the Balances sheet is dated by
-  // each account's true as-of date (not the run time), repeated runs on one
-  // day just refresh the same dated row — no misleading "newer" timestamps.
-  ScriptApp.newTrigger('fetchAll').timeBased().everyDays(1).atHour(7).create();
-  ScriptApp.newTrigger('fetchAll').timeBased().everyDays(1).atHour(19).create();
+  // Run EVERY 2 HOURS so balances and transactions stay fresh automatically —
+  // no manual Refresh needed. SimpleFIN Bridge refreshes each bank's data only
+  // ~once/day at unpredictable times and allows ~24 client requests/day. A
+  // single every-2h trigger fires 12x/day, which catches that daily refresh
+  // within ≤2h while leaving ~12 requests/day of headroom for manual Sync-now
+  // calls from the dashboard. Because the Balances sheet is dated by each
+  // account's true as-of date (not the run time) and upserts same-day rows,
+  // repeated runs just refresh the existing row — no sheet bloat, no misleading
+  // "newer" timestamps.
+  ScriptApp.newTrigger('fetchAll').timeBased().everyHours(2).create();
 
-  Logger.log('✓ Two daily triggers created (~7 AM and ~7 PM). Balances now refresh automatically.');
+  Logger.log('✓ One every-2h trigger created (12 runs/day). Balances now refresh automatically.');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -522,6 +813,10 @@ function checkSimpleFinStatus() {
   var url = props.getProperty('SIMPLEFIN_ACCESS_URL');
   Logger.log('Access URL: ' + (url ? '✓ set (' + url.replace(/\/\/[^@]+@/, '//****@').slice(0, 60) + '…)' : '✗ MISSING — run claimSimpleFinSetupToken'));
   Logger.log('Sheet ID:   ' + (props.getProperty('QBO_SHEET_ID') || '✗ MISSING'));
+  var lastSync = props.getProperty('LAST_SYNC_AT');
+  Logger.log('Last sync:  ' + (msToStamp_(lastSync) || '✗ never (no successful fetchAll yet)'));
+  var syncToken = (props.getProperty('SYNC_TOKEN') || '').trim();
+  Logger.log('Sync token: ' + (syncToken ? '✓ set (web-app Sync-now enabled)' : '✗ MISSING — set SYNC_TOKEN to enable the dashboard Sync-now button'));
 
   if (url) {
     try {
@@ -544,7 +839,7 @@ function checkSimpleFinStatus() {
 
   var triggers = ScriptApp.getProjectTriggers()
     .filter(function(t) { return t.getHandlerFunction() === 'fetchAll'; });
-  Logger.log('Active triggers: ' + triggers.length + ' (should be 2 after setupTriggers())');
+  Logger.log('Active triggers: ' + triggers.length + ' (should be 1 after setupTriggers())');
 }
 
 /** Clears the access URL and triggers. Does NOT cancel your bridge.simplefin.org subscription. */
