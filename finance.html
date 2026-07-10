@@ -2351,6 +2351,20 @@
       </div>
     </div>
 
+    <!-- Bucket Planner -->
+    <div class="panel" style="margin-bottom:16px" id="bucketPlannerWrap">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Bucket Planner</div>
+          <div class="panel-subtitle">Fund the fixed targets first · OC is the residual · capital fills the gap</div>
+        </div>
+        <span class="badge badge-blue" id="bpRevBadge">—</span>
+      </div>
+      <div id="bucketPlannerBody">
+        <div style="color:#86868b;font-size:13px;padding:8px 0">Loading planner…</div>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="panel-header">
         <div>
@@ -3633,8 +3647,9 @@ function saveToFirestore() {
     const spendMapping   = JSON.parse(localStorage.getItem('spend_account_mapping') || '{}');
     const spendOverrides = JSON.parse(localStorage.getItem('spend_txn_overrides')   || '{}');
     const spendCsvUrl    = localStorage.getItem('spend_csv_url') || '';
+    const bucketTargets  = JSON.parse(localStorage.getItem('bucket_targets') || '{}');
     doc.set({ entries, w2Employees, taxCheckboxes, mnSalesTax, fedRollover, fedFinalType, qboManualMatch,
-              qboMapping, qboHidden, qboSheetUrl, spendMapping, spendOverrides, spendCsvUrl })
+              qboMapping, qboHidden, qboSheetUrl, spendMapping, spendOverrides, spendCsvUrl, bucketTargets })
       .then(()  => setSyncBadge('synced'))
       .catch(()  => setSyncBadge('error'));
   } catch(e) { setSyncBadge('error'); }
@@ -3668,6 +3683,7 @@ async function syncFromFirestore() {
     if (d.spendMapping)   localStorage.setItem('spend_account_mapping', JSON.stringify(d.spendMapping));
     if (d.spendOverrides) localStorage.setItem('spend_txn_overrides',   JSON.stringify(d.spendOverrides));
     if (d.spendCsvUrl)    localStorage.setItem('spend_csv_url',         d.spendCsvUrl);
+    if (d.bucketTargets)  localStorage.setItem('bucket_targets',        JSON.stringify(d.bucketTargets));
     setSyncBadge('synced');
     // Re-render with fresh cloud data
     renderTable();
@@ -3683,6 +3699,7 @@ async function syncFromFirestore() {
     initFedRollovers();
     if (typeof detectTaxPayments === 'function') detectTaxPayments();
     updateOutstandingBadges();
+    if (typeof renderBucketPlanner === 'function') renderBucketPlanner(true);
   } catch(e) { setSyncBadge('error'); console.warn('Firestore sync:', e); }
 }
 
@@ -5246,7 +5263,159 @@ function renderHeroStrip() {
       +    '<div class="hero-sub">' + dot + escHtml(c.sub) + '</div>'
       +  '</div>';
   }).join('');
+  if (typeof renderBucketPlanner === 'function') renderBucketPlanner();
 }
+
+// ─────────────────────────────────────────────
+// BUCKET PLANNER — fund fixed targets first, OC is the residual, capital fills the gap
+// Todd's model (2026-07): Tax + OPEX + Payroll are FIXED dollar reserves (real
+// obligations, not a share of a moving revenue); Profit is a percentage; OC takes
+// whatever is left and may go negative — a capital transfer fills that gap so the
+// other buckets stay whole. Targets persist to localStorage + Firestore.
+// ─────────────────────────────────────────────
+var BP_DEFAULTS = { profitPct: 1, quarterlyEst: 15690, salesMo: 700, opexMo: 12700, payrollMo: 13708 };
+var bpRevenueOverride = null;   // null = use live trailing-30-day revenue; number = manual projection
+
+function loadBucketTargets() {
+  try {
+    var r = JSON.parse(localStorage.getItem('bucket_targets') || 'null');
+    if (r && typeof r === 'object') return Object.assign({}, BP_DEFAULTS, r);
+  } catch(e) {}
+  return Object.assign({}, BP_DEFAULTS);
+}
+function saveBucketTargets(t) {
+  localStorage.setItem('bucket_targets', JSON.stringify(t));
+  if (typeof saveToFirestore === 'function') saveToFirestore();
+}
+function bpNum(v, fallback) {
+  var n = parseFloat(String(v == null ? '' : v).replace(/[^0-9.\-]/g, ''));
+  return isNaN(n) ? fallback : n;
+}
+function bpMoney(n) {
+  var v = Math.round(n);
+  return (v < 0 ? '-$' : '$') + Math.abs(v).toLocaleString('en-US');
+}
+
+// Live monthly revenue = external inflows to the Income-mapped account over the
+// trailing 30 days (internal transfers/Zelle excluded). null when no txn cache exists.
+function bpTrailingRevenue() {
+  var txns = (typeof spendState !== 'undefined' && spendState && spendState.txns && spendState.txns.length) ? spendState.txns : null;
+  if (!txns) { var c = (typeof loadSpendTxnsCache === 'function') ? loadSpendTxnsCache() : null; txns = (c && c.txns) ? c.txns : null; }
+  if (!txns || !txns.length) return null;
+  var map = (typeof loadSpendMapping === 'function') ? loadSpendMapping() : {};
+  var cut = new Date(Date.now() - 30 * 864e5);
+  var cutStr = cut.getFullYear() + '-' + ('0' + (cut.getMonth() + 1)).slice(-2) + '-' + ('0' + cut.getDate()).slice(-2);
+  var sum = 0, any = false;
+  txns.forEach(function(t) {
+    if (t.direction !== 'in' || t.pending) return;
+    var bucket = map[t.accountId] || (/income/i.test(t.accountName || '') ? 'Income' : null);
+    if (bucket !== 'Income') return;
+    if (/transfer|zelle/i.test(t.payee || '')) return;   // exclude internal money movement
+    if ((t.date || '') < cutStr) return;
+    sum += (parseFloat(t.amount) || 0); any = true;
+  });
+  return any ? sum : null;
+}
+
+// Current Tax-bucket balance from the cached balances (accounts mapped to 'Tax').
+function bpTaxBucketBalance() {
+  try {
+    var raw = localStorage.getItem('qbo_last_fetched');
+    if (!raw) return null;
+    var accounts = JSON.parse(raw).accounts || [];
+    var map = (typeof loadQBOMapping === 'function') ? loadQBOMapping() : {};
+    var bal = null;
+    accounts.forEach(function(a) { if (map[a.name] === 'Tax') bal = (bal || 0) + (parseFloat(a.balance) || 0); });
+    return bal;
+  } catch(e) { return null; }
+}
+
+// Next quarterly estimated-tax due date (IRS & MN align: Jan 15, Apr 15, Jun 15, Sep 15).
+function bpNextTaxDue() {
+  var now = new Date(); var y = now.getFullYear();
+  var dues = [ new Date(y,0,15), new Date(y,3,15), new Date(y,5,15), new Date(y,8,15), new Date(y+1,0,15) ];
+  for (var i = 0; i < dues.length; i++) { if (dues[i] >= now) return dues[i]; }
+  return dues[dues.length - 1];
+}
+
+function renderBucketPlanner(force) {
+  var body = document.getElementById('bucketPlannerBody');
+  if (!body) return;
+  // Don't wipe an edit in progress on a background refresh (balance sync, etc.).
+  if (!force) { var ae = document.activeElement; if (ae && ae.id && ae.id.indexOf('bp') === 0) return; }
+
+  var t = loadBucketTargets();
+  var taxMo = t.quarterlyEst / 3 + t.salesMo;   // (4·Q + 12·sales) ÷ 12
+  var liveRev = bpTrailingRevenue();
+  var rev = (bpRevenueOverride != null) ? bpRevenueOverride : (liveRev != null ? liveRev : 0);
+  var profit = rev * (t.profitPct / 100);
+  var ocResidual = rev - profit - taxMo - t.opexMo - t.payrollMo;
+  var capital = ocResidual < 0 ? -ocResidual : 0;
+
+  var badge = document.getElementById('bpRevBadge');
+  if (badge) badge.textContent = bpMoney(rev) + '/mo';
+
+  function inp(id, val, w) {
+    return '<input id="' + id + '" value="' + val + '" style="width:' + (w || 70) + 'px;padding:4px 6px;border:1px solid #e2e2e6;border-radius:6px;font-size:13px;text-align:right" onchange="bpOnTargetChange()">';
+  }
+  function row(label, val, sub) {
+    return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-top:1px solid #eee">'
+      + '<span style="font-size:13px;color:#1d1d1f">' + label + (sub ? ' <span style="color:#a1a1a6;font-size:11px">' + sub + '</span>' : '') + '</span>'
+      + '<span style="font-size:14px;font-weight:600">' + bpMoney(val) + '</span></div>';
+  }
+  var revNote = (bpRevenueOverride != null) ? 'your projection'
+    : (liveRev != null ? 'trailing 30-day actual' : 'no bank data yet — type it in');
+  var due = bpNextTaxDue();
+  var dueStr = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  var daysToDue = Math.max(0, Math.round((due - new Date()) / 864e5));
+  var taxBal = bpTaxBucketBalance();
+  var projByDue = (taxBal != null) ? taxBal + taxMo * (daysToDue / 30) : null;
+
+  body.innerHTML =
+    '<div style="display:flex;flex-wrap:wrap;gap:10px 18px;padding:2px 0 12px">'
+    + '<label style="font-size:12px;color:#6e6e73">Profit % ' + inp('bpProfitPct', t.profitPct, 46) + '</label>'
+    + '<label style="font-size:12px;color:#6e6e73">Quarterly est. ' + inp('bpQuarterly', t.quarterlyEst, 78) + '</label>'
+    + '<label style="font-size:12px;color:#6e6e73">Sales tax/mo ' + inp('bpSales', t.salesMo, 60) + '</label>'
+    + '<label style="font-size:12px;color:#6e6e73">OPEX/mo ' + inp('bpOpex', t.opexMo, 78) + '</label>'
+    + '<label style="font-size:12px;color:#6e6e73">Payroll/mo ' + inp('bpPayroll', t.payrollMo, 78) + '</label>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;background:#f5f5f7;border-radius:8px;padding:10px 12px;margin-bottom:6px">'
+    +   '<div><div style="font-size:13px;font-weight:600">Monthly revenue</div><div style="font-size:11px;color:#a1a1a6">' + revNote + '</div></div>'
+    +   '<div style="display:flex;align-items:center;gap:8px">'
+    +     '<input id="bpRevenue" value="' + Math.round(rev) + '" style="width:104px;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:15px;font-weight:600;text-align:right" onchange="bpOnRevenueChange()">'
+    +     (bpRevenueOverride != null ? '<button class="btn btn-secondary btn-sm" onclick="bpResetRevenue()" title="Back to live actual">↺ live</button>' : '')
+    +   '</div>'
+    + '</div>'
+    + row('Profit', profit, t.profitPct + '% of revenue')
+    + row('Tax reserve', taxMo, 'est. ' + bpMoney(t.quarterlyEst) + '/qtr ÷ 3 + sales')
+    + row('OPEX', t.opexMo, 'business bills')
+    + row('Payroll', t.payrollMo, 'held in Income for Gusto')
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-top:2px solid ' + (ocResidual < 0 ? '#e8674a' : '#34c759') + ';margin-top:2px">'
+    +   '<span style="font-size:14px;font-weight:700">OC (residual)</span>'
+    +   '<span style="font-size:17px;font-weight:700;color:' + (ocResidual < 0 ? '#e8674a' : '#1d7a33') + '">' + bpMoney(ocResidual) + '</span></div>'
+    + (capital > 0
+        ? '<div style="background:#fdeee9;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#b23c17"><strong>Capital transfer to break even: ' + bpMoney(capital) + '</strong> — move this in from personal/outside funds so Profit, Tax &amp; OPEX still fund in full.</div>'
+        : '<div style="background:#eaf7ee;border-radius:8px;padding:9px 12px;margin-top:4px;font-size:13px;color:#1d7a33">Revenue covers every bucket with ' + bpMoney(ocResidual) + ' left toward your draw — no capital needed.</div>')
+    + '<div style="margin-top:12px;padding-top:10px;border-top:1px solid #eee;font-size:12px;color:#6e6e73;line-height:1.55">'
+    +   '<strong style="color:#1d1d1f">Tax reserve tracker</strong> — next estimate ' + bpMoney(t.quarterlyEst) + ' due ' + dueStr + ' (' + daysToDue + ' days). '
+    +   (taxBal != null
+        ? 'Bucket holds ' + bpMoney(taxBal) + '; at ' + bpMoney(taxMo) + '/mo → ~' + bpMoney(projByDue) + ' by then — ' + (projByDue >= t.quarterlyEst ? '<span style="color:#1d7a33">on track ✓</span>' : '<span style="color:#b23c17">short ' + bpMoney(t.quarterlyEst - projByDue) + '</span>')
+        : 'connect balances to track the reserve.')
+    +   '</div>';
+}
+
+function bpOnTargetChange() {
+  var t = loadBucketTargets();
+  t.profitPct    = bpNum((document.getElementById('bpProfitPct') || {}).value, t.profitPct);
+  t.quarterlyEst = bpNum((document.getElementById('bpQuarterly') || {}).value, t.quarterlyEst);
+  t.salesMo      = bpNum((document.getElementById('bpSales') || {}).value, t.salesMo);
+  t.opexMo       = bpNum((document.getElementById('bpOpex') || {}).value, t.opexMo);
+  t.payrollMo    = bpNum((document.getElementById('bpPayroll') || {}).value, t.payrollMo);
+  saveBucketTargets(t);
+  renderBucketPlanner(true);
+}
+function bpOnRevenueChange() { bpRevenueOverride = bpNum((document.getElementById('bpRevenue') || {}).value, 0); renderBucketPlanner(true); }
+function bpResetRevenue() { bpRevenueOverride = null; renderBucketPlanner(true); }
 
 function escHtml(str) {
   return String(str)
