@@ -6,20 +6,20 @@
 // Plaid gives LIVE bank balances and transactions, not QBO's book balance.
 //
 // SETUP — see SETUP.md. High level:
-//   1. Create a free Plaid developer account → dashboard.plaid.com
-//   2. Copy CLIENT_ID and SECRET from the Keys page
+//   1. Create a Plaid developer account → dashboard.plaid.com
+//   2. Copy CLIENT_ID and Production SECRET from Developers → Keys
 //   3. Paste into Script Properties (see list below)
-//   4. Deploy this script as a Web App ("Execute as: Me", "Anyone with link")
+//   4. Deploy this script as a Web App ("Execute as: Me", "Only myself")
 //   5. Open the Web App URL — click Connect for each bank
 //   6. Run fetchAll() to test, then setupTriggers() for the 10th + 25th
 //
 // Script Properties required (Project Settings → Script Properties):
-//   PLAID_CLIENT_ID        — from dashboard.plaid.com → Team settings → Keys
-//   PLAID_SECRET           — from dashboard.plaid.com → Team settings → Keys
-//   PLAID_ENVIRONMENT      — "sandbox", "development", or "production"
-//                             For a personal tool, "development" is correct
-//                             (free, real bank data, limited to 100 Items).
-//   QBO_SHEET_ID           — Google Sheet ID (same one used by QuickBooks sync)
+//   PLAID_CLIENT_ID        — from dashboard.plaid.com → Developers → Keys
+//   PLAID_SECRET           — the PRODUCTION secret from Developers → Keys
+//   PLAID_ENVIRONMENT      — "sandbox" or "production"
+//                             (Plaid deprecated the Development env in 2024 —
+//                             Production is Pay-As-You-Go, ~$1/mo at 2 banks.)
+//   QBO_SHEET_ID           — Google Sheet ID (same one used by the dashboard)
 //
 // Auto-populated by the Link flow (don't set manually):
 //   PLAID_ACCESS_TOKENS    — JSON array of { bankName, accessToken, itemId }
@@ -70,11 +70,10 @@ function doGet(e) {
 
 /** Base URL for Plaid's API, based on the current environment setting. */
 function plaidBaseUrl_() {
-  var env = (PropertiesService.getScriptProperties().getProperty('PLAID_ENVIRONMENT') || 'development')
+  var env = (PropertiesService.getScriptProperties().getProperty('PLAID_ENVIRONMENT') || 'production')
     .toLowerCase().trim();
-  if (env === 'production') return 'https://production.plaid.com';
   if (env === 'sandbox')    return 'https://sandbox.plaid.com';
-  return 'https://development.plaid.com';
+  return 'https://production.plaid.com';
 }
 
 /** Returns { clientId, secret } from Script Properties, trimmed. */
@@ -144,7 +143,7 @@ function getTargetSpreadsheet_() {
 function createLinkToken(bankName) {
   var label = (bankName || 'Bank').toString().slice(0, 40);
   var data = plaidPost_('/link/token/create', {
-    user: { client_user_id: 'momentum-' + Session.getActiveUser().getEmail() },
+    user: { client_user_id: 'momentum-owner' },
     client_name: PLAID_LINK_CLIENT_NAME,
     products: PLAID_PRODUCTS,
     country_codes: PLAID_COUNTRY_CODES,

@@ -14,22 +14,23 @@ Total setup time: **~10 minutes**. You only do this once.
 
 ---
 
-## Step 1 — Create a free Plaid developer account
+## Step 1 — Create a Plaid developer account
 
 1. Go to https://dashboard.plaid.com/signup
-2. Sign up with your email (no credit card required)
-3. Verify your email
+2. Sign up with your email, verify, complete the security questionnaire
+3. Pick the **Pay As You Go** plan and enter a card
 
-When Plaid asks what you're building: pick **Personal finance** → **Budgeting tool** → purpose is "Personal use." You're not submitting for production approval — the **Development** environment we'll use is free and pre-approved for up to 100 bank connections.
+**Note:** Plaid deprecated their free Development tier in 2024 — everyone is on Production now. For your usage (2 banks, twice-monthly sync) you'll pay roughly **$1/month**. No subscription minimum; you only pay for actual API calls.
+
+When Plaid asks what you're building: pick **Personal finance** → **Budgeting tool** → purpose is "Personal use."
 
 ---
 
 ## Step 2 — Get your API credentials
 
-1. In Plaid dashboard → **Team settings** (bottom left) → **Keys**
-2. You'll see three environments: Sandbox, **Development**, Production
-3. Copy the `client_id` (same across all environments)
-4. Copy the **Development** `secret` key (starts with `development_...`)
+1. In Plaid dashboard sidebar → **Developers** → **Keys**
+2. Copy the `client_id` (shown at the top)
+3. Under the **Production** section, click **Reveal** next to the secret → copy it
 
 Leave this tab open — you'll paste these into Apps Script in a minute.
 
@@ -55,7 +56,7 @@ Project Settings (gear icon, left sidebar) → **Script Properties** → **Add s
 |---|---|
 | `PLAID_CLIENT_ID` | (paste from Step 2) |
 | `PLAID_SECRET` | (paste the **development** secret from Step 2) |
-| `PLAID_ENVIRONMENT` | `development` |
+| `PLAID_ENVIRONMENT` | `production` |
 | `QBO_SHEET_ID` | `1uCViOHMNMyT9VyI_ivyyszpv5S0eIDwMsEWpDdyi1_Q` |
 
 **Save**.
@@ -125,7 +126,7 @@ Done. The script will now run automatically on the 10th and 25th of each month a
 
 **"Missing PLAID_CLIENT_ID or PLAID_SECRET"** — re-check Script Properties. Make sure there are no stray spaces.
 
-**"INVALID_CREDENTIALS" or "INVALID_API_KEYS"** — you might have pasted the Sandbox secret instead of Development. Go back to Step 2.
+**"INVALID_CREDENTIALS" or "INVALID_API_KEYS"** — you might have pasted the Sandbox secret instead of Production. Go back to Step 2.
 
 **"ITEM_LOGIN_REQUIRED"** — Plaid occasionally requires you to re-authenticate with your bank (every ~90 days for some banks). Re-open the Web App URL, click Disconnect on that bank, then Connect again.
 
@@ -135,9 +136,8 @@ Done. The script will now run automatically on the 10th and 25th of each month a
 
 ## Cost
 
-**Zero** for this use case. Plaid's Development environment is free with:
-- Up to 100 Items (bank connections) — you'll use 2
-- Unlimited API calls
-- Real bank data
+**~$1/month** for your usage. Plaid's Pay-As-You-Go pricing:
+- Balance: ~$0.10/call × 2 banks × 2 syncs/month = **~$0.40/mo**
+- Transactions: ~$0.30/Item/month × 2 = **~$0.60/mo**
 
-Production pricing only matters if you ever open this to other users, which you aren't.
+No subscription minimum. You only pay for actual API calls — if the script doesn't run, you're not billed.
